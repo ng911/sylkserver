@@ -146,6 +146,10 @@ class Room(object):
         return len(self.sessions) == 0
 
     @property
+    def length(self):
+        return len(self.sessions)
+
+    @property
     def started(self):
         return self.state == 'started'
 
@@ -456,11 +460,19 @@ class Room(object):
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
 
-    def terminate_sessions(self, uri):
+    def terminate_sessions(self, uri=None):
+        log.info('inside terminating sessions %r', self.started)
         if not self.started:
             return
-        for session in (session for session in self.sessions if session.remote_identity.uri == uri):
-            session.end()
+        # we terminate all sessions if uri is none
+        if uri is None:
+            for session in self.sessions:
+                log.info('terminating session %r', session)
+                session.end()
+        else:
+            for session in (session for session in self.sessions if session.remote_identity.uri == uri):
+                session.end()
+
 
     def handle_incoming_subscription(self, subscribe_request, data):
         log.info('Room %s - subscription from %s' % (self.uri, data.headers['From'].uri))
