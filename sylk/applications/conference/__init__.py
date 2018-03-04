@@ -20,11 +20,11 @@ from sylk.applications import SylkApplication
 from sylk.applications.conference.configuration import get_room_config, ConferenceConfig
 from sylk.applications.conference.logger import log
 from sylk.applications.conference.room import Room
-from sylk.applications.conference.web import ConferenceWeb
+#from sylk.applications.conference.web import ConferenceWeb
 from sylk.bonjour import BonjourService
 from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.session import Session, IllegalStateError
-from sylk.web import server as web_server
+#from sylk.web import server as web_server
 
 
 class ACLValidationError(Exception): pass
@@ -40,11 +40,11 @@ class ConferenceApplication(SylkApplication):
         self.invited_participants_map = {}
         self.bonjour_focus_service = Null
         self.bonjour_room_service = Null
-        self.web = Null
+        #self.web = Null
 
     def start(self):
-        self.web = ConferenceWeb(self)
-        web_server.register_resource('conference', self.web.resource)
+        #self.web = ConferenceWeb(self)
+        #web_server.register_resource('conference', self.web.resource)
 
         # cleanup old files
         for path in (ConferenceConfig.file_transfer_dir, ConferenceConfig.screensharing_images_dir):
@@ -65,6 +65,9 @@ class ConferenceApplication(SylkApplication):
     def stop(self):
         self.bonjour_focus_service.stop()
         self.bonjour_room_service.stop()
+
+    def get_rooms(self):
+        return list(self._rooms.keys())
 
     def get_room(self, uri=None, create=False, room_number=None):
         room_uri = self.get_room_uri_str(uri, room_number)

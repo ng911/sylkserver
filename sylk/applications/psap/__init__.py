@@ -1,13 +1,11 @@
 
-from application.notification import IObserver, NotificationCenter
+from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from sipsimple.account.bonjour import BonjourPresenceState
 from twisted.internet import reactor
 from zope.interface import implements
 
 from sylk.applications import SylkApplication, ApplicationLogger
-from sylk.bonjour import BonjourService
-from sylk.configuration import ServerConfig
 from sipsimple.streams import MediaStreamRegistry
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader
 from sipsimple.lookup import DNSLookup
@@ -18,6 +16,12 @@ from sipsimple.account import Account
 from sylk.applications import ApplicationRegistry
 from uuid import uuid4
 
+from sylk.db.authenticate import authenticate_call
+from sylk.db.queue import get_queue_details, get_queue_members
+from acd import get_calltakers
+from sylk.data.call import CallData
+#from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
+
 log = ApplicationLogger(__package__)
 
 
@@ -27,21 +31,27 @@ def format_identity(identity):
     else:
         return u'sip:%s@%s' % (identity.uri.user, identity.uri.host)
 
+def get_conference_application():
+    application_registry = ApplicationRegistry()
+    return application_registry.get('conference')
 
-class ACDApplication(SylkApplication):
+class PSAPApplication(SylkApplication):
     implements(IObserver)
 
     def __init__(self):
-        log.info(u'ACDApplication init')
+        log.info(u'PSAPApplication init')
+        CallData()
 
     def start(self):
-        log.info(u'ACDApplication start')
+        log.info(u'PSAPApplication start')
 
     def stop(self):
-        log.info(u'ACDApplication stop')
+        log.info(u'PSAPApplication stop')
 
     def incoming_session(self, session):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
+        #dump_object_member_vars(log, session)
+        #dump_object_member_funcs(log, session)
 
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
@@ -52,9 +62,45 @@ class ACDApplication(SylkApplication):
         if audio_streams:
             session.send_ring_indication()
 
-        # create an outbound session here for calls to calltakers
-        self.outgoingCallInitializer = OutgoingCallInitializer(incomingSession=session, target="sip:4153054541@127.0.0.1:5090", audio=True)
-        self.outgoingCallInitializer.start()
+        remote_identity = session.remote_identity
+        local_identity = session.local_identity
+        peer_address = session.peer_address
+
+        conference_application = get_conference_application()
+        rooms = conference_application.get_rooms()
+        log.info
+        # first verify the session
+        (authenticated, call_type, data) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
+
+        notification_center = NotificationCenter()
+        notification_center.post_notification('DataCallUpdate', self, NotificationData(session=session, status='init'))
+
+        if not authenticated:
+            log.info("call not authenticated, reject it")
+            session.reject(403)
+            notification_center.post_notification('DataCallUpdate', self,
+                                                  NotificationData(session=session, status='reject'))
+            return
+
+
+        if call_type == 'sos':
+            inoming_link = data
+            queue_details = get_queue_details(inoming_link.queue_id)
+            queue_members = get_queue_members(inoming_link.queue_id)
+            calltakers = get_calltakers(queue_details, queue_members)
+
+            for sip_uri in calltakers:
+                # create an outbound session here for calls to calltakers
+                self.outgoingCallInitializer = OutgoingCallInitializer(incoming_session=session,
+                                                                       target=sip_uri,
+                                                                       audio=True)
+                self.outgoingCallInitializer.start()
+        elif call_type == 'sos_room':
+            pass
+        elif call_type == 'outgoing':
+            pass
+        elif call_type == 'admin':
+            pass
 
     def incoming_subscription(self, request, data):
         request.reject(405)
@@ -69,12 +115,12 @@ class ACDApplication(SylkApplication):
 class OutgoingCallInitializer(object):
     implements(IObserver)
 
-    def __init__(self, incomingSession, target, audio=False, chat=False):
+    def __init__(self, incoming_session, target, audio=False, chat=False):
         self.account = DefaultAccount()
 
         self.target = target
         self.streams = []
-        self.incomingSession = incomingSession
+        self.incoming_session = incoming_session
         if audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
         if chat:
@@ -104,10 +150,6 @@ class OutgoingCallInitializer(object):
             else:
                 uri = self.target
             lookup.lookup_sip_proxy(uri, settings.sip.transport_list)
-
-    def getConferenceApplication(self):
-        application_registry = ApplicationRegistry()
-        return application_registry.get('conference')
 
     def handle_notification(self, notification):
         handler = getattr(self, '_NH_%s' % notification.name, Null)
@@ -170,14 +212,14 @@ class OutgoingCallInitializer(object):
         room_number = uuid4().hex
         log.info('startConference for room %s' % (room_number))
         session.room_number = room_number
-        self.incomingSession.room_number = room_number
+        self.incoming_session.room_number = room_number
 
-        conferenceApplication = self.getConferenceApplication()
+        conference_application = get_conference_application()
 
-        conferenceApplication.incoming_session(self.incomingSession)
+        conference_application.incoming_session(self.incoming_session)
 
         log.info(u'_NH_SIPSessionDidStart for session.room_number %s' % session.room_number)
-        conferenceApplication.add_outgoing_session(session)
+        conference_application.add_outgoing_session(session)
 
         '''
         ui.status = 'Connected'

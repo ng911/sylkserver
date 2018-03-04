@@ -38,7 +38,7 @@ from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.configuration.datatypes import URL
 from sylk.resources import Resources
 from sylk.session import Session, IllegalStateError
-from sylk.web import server as web_server
+#from sylk.web import server as web_server
 
 
 def format_identity(identity):
@@ -55,8 +55,8 @@ class ScreenImage(object):
         self.room_uri = room.uri
         self.sender = sender
         self.filename = os.path.join(ConferenceConfig.screensharing_images_dir, room.uri, '%s@%s_%s.jpg' % (sender.uri.user, sender.uri.host, ''.join(random.sample(string.letters+string.digits, 10))))
-        self.url = URL(web_server.url + '/conference/' + room.uri + '/screensharing')
-        self.url.query_items['image'] = os.path.basename(self.filename)
+        #self.url = URL(web_server.url + '/conference/' + room.uri + '/screensharing')
+        #self.url.query_items['image'] = os.path.basename(self.filename)
         self.state = None
         self.timer = None
 
@@ -95,9 +95,9 @@ class ScreenImage(object):
             self.timer = reactor.callLater(10, self.stop_advertising)
             room = self.room() or Null
             room.dispatch_conference_info()
-            txt = 'Room %s - %s is sharing the screen at %s' % (self.room_uri, format_identity(self.sender), self.url)
-            room.dispatch_server_message(txt)
-            log.info(txt)
+            #txt = 'Room %s - %s is sharing the screen at %s' % (self.room_uri, format_identity(self.sender), self.url)
+            #room.dispatch_server_message(txt)
+            #log.info(txt)
 
     @run_in_twisted_thread
     def stop_advertising(self):

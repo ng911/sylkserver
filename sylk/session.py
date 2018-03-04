@@ -28,6 +28,7 @@ from zope.interface import implements
 from sylk.accounts import DefaultAccount
 from sylk.configuration import SIPConfig
 
+from sylk.utils import dump_object_member_vars
 
 class InvitationDisconnectedError(Exception):
     def __init__(self, invitation, data):
@@ -382,6 +383,8 @@ class Session(object):
         self._lock = RLock()
 
     def init_incoming(self, invitation, data):
+        log.info("init_incoming with invitation")
+        dump_object_member_vars(log, invitation)
         remote_sdp = invitation.sdp.proposed_remote
         if not remote_sdp:
             invitation.send_response(488)

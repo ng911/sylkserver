@@ -31,14 +31,14 @@ from sylk.configuration import ServerConfig, SIPConfig, ThorNodeConfig
 from sylk.configuration.settings import AccountExtension, BonjourAccountExtension, SylkServerSettingsExtension
 from sylk.log import TraceLogManager
 from sylk.session import SessionManager
-from sylk.web import WebServer
+#from sylk.web import WebServer
 
 
 class SylkServer(SIPApplication):
     def __init__(self):
         self.request_handler = Null
         self.thor_interface = Null
-        self.web_server = Null
+        #self.web_server = Null
 
         self.options = Null
 
@@ -164,8 +164,8 @@ class SylkServer(SIPApplication):
         notification_center.post_notification('SIPApplicationDidStart', sender=self)
 
         # start SylkServer components
-        self.web_server = WebServer()
-        self.web_server.start()
+        #self.web_server = WebServer()
+        #self.web_server.start()
         self.request_handler = IncomingRequestHandler()
         self.request_handler.start()
         if ThorNodeConfig.enabled:
@@ -191,7 +191,8 @@ class SylkServer(SIPApplication):
         p.wait()
 
         # shutdown SylkServer components
-        procs = [proc.spawn(self.web_server.stop), proc.spawn(self.request_handler.stop), proc.spawn(self.thor_interface.stop)]
+        #procs = [proc.spawn(self.web_server.stop), proc.spawn(self.request_handler.stop), proc.spawn(self.thor_interface.stop)]
+        procs = [proc.spawn(self.request_handler.stop), proc.spawn(self.thor_interface.stop)]
         proc.waitall(procs)
 
         # shutdown other middleware components

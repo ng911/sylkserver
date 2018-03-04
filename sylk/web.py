@@ -89,4 +89,4 @@ class WebServer(object):
         if self.listener is not None:
             self.listener.stopListening()
 
-server = WebServer()
+#server = WebServer()

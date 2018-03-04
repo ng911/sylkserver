@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <title>Emergent PSAP - Calltaker Login</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png">
+  <!-- Bootstrap 3.3.6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/login.css">
+
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+   <!--<script src="plugins/plupload-2.3.1/js/plupload.full.min.js"></script>-->
+
+  <!-- Bootstrap 3.3.6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+   <body class="hold-transition skin-blue-light sidebar-mini" style="height: 100%">
+     <section id="loginApp">
+      <div class="container">
+          <div class="card card-container">
+              <!-- <img class="profile-img-card" src="//lh3.googleusercontent.com/-6V8xOA6M7BA/AAAAAAAAAAI/AAAAAAAAAAA/rzlHcD0KYwo/photo.jpg?sz=120" alt="" /> -->
+              <img id="profile-img" class="profile-img-card" src="/static/emergent-logo.gif" />
+              <h3 style="width:100%; text-align: center">PSAP CallTaker Login</h3>
+              <p id="profile-name" class="profile-name-card"></p>
+               {% for message in form.username.errors %}
+                  <div class="login_error_msg">{{ message }}</div>
+               {% endfor %}
+
+               {% for message in form.password.errors %}
+                  <div class="login_error_msg">{{ message }}</div>
+               {% endfor %}
+              <form class="form-signin" action = "/auth/login" method = post>
+               <fieldset>
+                 <span id="reauth-username" class="reauth-username"></span>
+                  {{ form.hidden_tag() }}
+                  {{ form.username(class_="form-control", id="input-username", placeholder="User Name" ) }}
+                  {{ form.password(class_="form-control", id="input-password", placeholder="Password", autocomplete = "off" ) }}
+                  <div id="remember" class="checkbox">
+                      <label>
+                          {{ form.rememberMe() }} Remember Me
+                          <!--
+                          <input type="checkbox" id="remember-me" value="1"> Remember me</input>
+                          -->
+                      </label>
+                  </div>
+               {{ form.submit(class_="btn btn-lg btn-primary btn-block btn-signin") }}
+               </fieldset>
+              </form><!-- /form -->
+              <!--
+              <a href="#forgot-password" class="forgot-password">
+                  Forgot the password?
+              </a>
+              -->
+          </div><!-- /card-container -->
+      </div><!-- /container -->
+     </section>
+   </body>
+</html>
+

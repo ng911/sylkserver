@@ -11,6 +11,7 @@ from optparse import OptionParser
 import sipsimple
 import sylk
 
+import sylk.api
 
 # noinspection PyUnusedLocal
 def stop_server(signum, frame):
@@ -84,6 +85,10 @@ if __name__ == '__main__':
     process.signals.add_handler(signal.SIGTERM, stop_server)
     process.signals.add_handler(signal.SIGINT, stop_server)
     process.signals.add_handler(signal.SIGUSR1, toggle_debugging)
+
+    log.info('starting api server')
+    sylk.api.start_server()
+    log.info('starting api server done')
 
     server = SylkServer()
     try:
