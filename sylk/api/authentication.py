@@ -128,7 +128,10 @@ def session_info():
     # client-side form data. For example, WTForms is a library that will
     # handle this for us, and we use a custom LoginForm to validate.
     log.info("session_info")
-    return render_template('session-info.js', initial_data={'user-id' : session['user_id']})
+    user_id = ''
+    if 'user_id' in session:
+        user_id = session['user_id']
+    return render_template('session-info.js', initial_data={'user-id' : user_id})
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
