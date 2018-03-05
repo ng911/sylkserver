@@ -131,7 +131,7 @@ def session_info():
     user_id = ''
     if 'user_id' in session:
         user_id = session['user_id']
-    return render_template('session-info.js', initial_data={'user-id' : user_id})
+    return render_template('session-info.js', initial_data={'user_id' : user_id})
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
