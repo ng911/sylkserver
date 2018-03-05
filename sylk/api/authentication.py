@@ -119,7 +119,7 @@ def login():
 
             # we create an oauth access tokem and store it in the session to be used by the client
             # the client can access it using the session cookie
-            return redirect(next or url_for(''))
+            return redirect(next or url_for('/'))
     return render_template('login.html', form=form)
 
 @authentication.route('/session-info.js', methods=['GET'])
