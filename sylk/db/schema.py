@@ -325,10 +325,10 @@ class MessageDefaultText(Document):
     desc = StringField(required=True)
     group = StringField()
 
-def create_test_data():
-    ip_address = "192.168.1.3"
-    asterisk_ip_address = ip_address
-    asterisk_port = "5090"
+def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
+    #ip_address = "192.168.1.3"
+    #asterisk_ip_address = ip_address
+    #asterisk_port = "5090"
     psap_obj = Psap()
     psap_obj.name = "SF Psap"
     psap_obj.ip_address = ip_address
