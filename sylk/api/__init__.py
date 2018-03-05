@@ -39,8 +39,10 @@ oauth = OAuth2Provider(app)
 
 
 from authentication import authentication
+from calltaker import calltaker
 
 app.register_blueprint(authentication, url_prefix='/auth')
+app.register_blueprint(calltaker, url_prefix='/calltaker')
 
 
 log = ApplicationLogger(__package__)
