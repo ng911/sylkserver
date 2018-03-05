@@ -55,3 +55,9 @@ def register(user_id):
     calltaker_data = CalltakerData()
     calltaker_data.update_status(user_id, 'online')
 
+    response = {
+        'success' : True
+    }
+
+    return jsonify(response)
+
