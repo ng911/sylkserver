@@ -46,7 +46,7 @@ class LoginForm(Form):
     def __init__(self, *args, **kwargs):
         Form.__init__(self, *args, **kwargs)
         if not self.next.data:
-            self.next.data = get_redirect_target() or ''
+            self.next.data = get_redirect_target() or '/'
 
     def validate_on_submit(self):
         log.info("inside Form.validate")
@@ -111,7 +111,7 @@ def login():
                 #return abort(400)
 
             try:
-                log.info("Logged in redirecting to %r", url_for('index'))
+                log.info("Logged in redirecting to %r", url_for('/'))
             except Exception as e:
                 log.error("error in login redirecting debug %r", e)
 
