@@ -18,13 +18,14 @@ def all():
     calltaker_data = CalltakerData()
     calltakers = []
     for user in User.objects(is_active=True):
-        status = calltaker_data.status(user.user_id)
+        user_id = str(user.user_id)
+        status = calltaker_data.status(user_id)
         if status is None:
             status = 'offline'
         calltaker = {}
         calltaker['username'] = user.username
         calltaker['status'] = status
-        calltaker['user_id'] = user.user_id
+        calltaker['user_id'] = user_id
         calltakers.append(calltaker)
     response = {
         'success' : True,
@@ -44,7 +45,7 @@ def get(user_id):
     response = {'success' : True}
     response['username'] = user_obj.username
     response['status'] = status
-    response['user_id'] = user_obj.user_id
+    response['user_id'] = user_id
     response.append(calltaker)
     return jsonify(response)
 
