@@ -4,6 +4,7 @@ import os
 import traceback
 from flask import Flask, send_from_directory, url_for, blueprints, request, jsonify, \
     render_template, flash, abort, session, redirect
+from flask_cors import CORS, cross_origin
 from flask_oauthlib.provider import OAuth2Provider
 from flask_login import LoginManager, login_user
 from flask_session import Session
@@ -31,6 +32,8 @@ mongo_client = MongoClient(mongo_uri)
 app.config['SESSION_MONGODB'] = mongo_client
 app.config['SESSION_MONGODB_DB'] = 'ng911'
 app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
+
+CORS(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
