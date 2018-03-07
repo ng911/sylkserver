@@ -1,5 +1,6 @@
 import traceback
 from flask import Blueprint, jsonify
+from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import User
 from sylk.data.calltaker import CalltakerData
@@ -7,7 +8,7 @@ from sylk.data.calltaker import CalltakerData
 calltaker = Blueprint('calltaker', __name__,
                         template_folder='templates')
 
-
+CORS(calltaker)
 log = ApplicationLogger(__package__)
 
 '''
