@@ -32,12 +32,10 @@ def joined(session, details):
             notification_data = NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
             notification_center.post_notification('CalltakerStatus', session, notification_data)
-            '''
             out = {
                 'command' : 'status_updated'
             }
-            yield session.publish(u'com.emergent.calltakers', out)
-            '''
+            session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
 
     def on_session_leave(data):
@@ -57,10 +55,12 @@ def joined(session, details):
         }
 
         yield session.publish(u'com.emergent.calltakers', data)
+        '''
         out = {
             'command': 'status_updated'
         }
         yield session.publish(u'com.emergent.calltakers', out)
+        '''
 
     except Exception as e:
         log.info("exception in subscribe to topic: %r" % e)
