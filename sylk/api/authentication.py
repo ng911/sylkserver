@@ -131,7 +131,8 @@ def session_info():
     user_id = ''
     if 'user_id' in session:
         user_id = session['user_id']
-        username = session['username']
+        user_obj = User.objects.get(user_id=user_id)
+        username = user_obj.username
     return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username})
 
 
