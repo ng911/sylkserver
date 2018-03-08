@@ -35,10 +35,6 @@ def joined(session, details):
             yield session.publish(u'com.emergent.calltakers', data)
             log.info("sent status_updated")
 
-    def on_register(data):
-        log.info("on_subscribe event received")
-        log.info("on_subscribe event received: %r", data)
-
     def on_session_leave(data):
         log.info("on_session_leave event received")
         log.info("on_session_leave event received: %r", data)
@@ -47,7 +43,7 @@ def joined(session, details):
 
     try:
         yield session.subscribe(on_session_leave, u'wamp.session.on_leave')
-        log.info("subscribed to wamp.subscription.on_unsubscribe")
+        log.info("subscribed to wamp.session.on_leave")
 
         res = yield session.subscribe(on_calltaker_status, u'com.emergent.calltakers')
         log.info("subscribed to topic %r, id %r", res, res.id)
