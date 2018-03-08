@@ -90,11 +90,10 @@ if __name__ == '__main__':
     sylk.api.start_server()
     log.info('starting api server done')
 
-    sylk.wamp.start()
-    log.info('wamp.start done')
-
     server = SylkServer()
     try:
+        sylk.wamp.start()
+        log.info('wamp.start done')
         server.run(options)
     except Exception as e:
         log.fatal('Failed to start {name}: {exception!s}'.format(name=fullname, exception=e))
