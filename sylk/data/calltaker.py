@@ -76,4 +76,7 @@ class CalltakerData(object):
             calltakers.append({'user_id' : user_id, 'username' : calltaker.username, 'status' : calltaker.status })
         return calltakers
 
+    @property
+    def available_calltakers(self):
+        return {user_id: user for user_id, user in self._calltakers.iteritems() if user.status == 'online'}
 

@@ -17,19 +17,6 @@ Note - for now we ignore the psap_id
 @calltaker.route('/', methods=['GET'])
 def all():
     calltaker_data = CalltakerData()
-    '''
-    calltakers = []
-    for user in User.objects(is_active=True):
-        user_id = str(user.user_id)
-        status = calltaker_data.status(user_id)
-        if status is None:
-            status = 'offline'
-        calltaker = {}
-        calltaker['username'] = user.username
-        calltaker['status'] = status
-        calltaker['user_id'] = user_id
-        calltakers.append(calltaker)
-    '''
     response = {
         'success' : True,
         'calltakers' : calltaker_data.calltakers
@@ -37,6 +24,15 @@ def all():
 
     return jsonify(response)
 
+@calltaker.route('/online', methods=['GET'])
+def online():
+    calltaker_data = CalltakerData()
+    response = {
+        'success' : True,
+        'calltakers' : calltaker_data.available_calltakers
+    }
+
+    return jsonify(response)
 
 @calltaker.route('/<user_id>', methods=['GET'])
 def get(user_id):
