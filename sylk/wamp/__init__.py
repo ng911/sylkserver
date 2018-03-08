@@ -23,7 +23,8 @@ def joined(session, details):
         log.info("event on_calltaker_status received")
         log.info("event on_calltaker_status received: %r", data)
         notification_center = NotificationCenter()
-        notification_center.post_notification('CalltakerStatus', session, NotificationData(session=session, data=data))
+        notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data.username, \
+                                              status=data.status, wamp_session_id=data.wamp_session_id, user_id=data.user_id))
 
     def on_register(data):
         log.info("on_subscribe event received")
@@ -33,7 +34,7 @@ def joined(session, details):
         log.info("on_session_leave event received")
         log.info("on_session_leave event received: %r", data)
         notification_center = NotificationCenter()
-        notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(session=session, data=data))
+        notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
 
     try:
         yield session.subscribe(on_session_leave, u'wamp.session.on_leave')
