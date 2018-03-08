@@ -34,7 +34,6 @@ class CalltakerData(object):
 
     def handle_notification(self, notification):
         log.info("CallData got notification ")
-        log.info("CallData got notification %r" % notification.name)
         handler = getattr(self, '_NH_%s' % notification.name, Null)
         handler(notification)
 
@@ -42,7 +41,6 @@ class CalltakerData(object):
         log.info("incoming _NH_CalltakerStatus")
         user_id = notification.data.user_id
         wamp_session_id = str(notification.data.wamp_session_id)
-        log.info("incoming _NH_CalltakerStatus wamp_session_id %r", wamp_session_id)
         if wamp_session_id not in self._wamp_sessions:
             self._wamp_sessions[wamp_session_id] = user_id
         status = notification.data.status
@@ -52,13 +50,8 @@ class CalltakerData(object):
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
         wamp_session_id = str(notification.data.wamp_session_id)
-        log.info("incoming _NH_CalltakerSessionLeave %r", wamp_session_id)
-        log.info("_wamp_sessions length is %r", len(self._wamp_sessions))
-        log.info("_wamp_sessions is %r", self._wamp_sessions)
         if wamp_session_id in self._wamp_sessions:
-            log.info("found wamp_session")
             user_id = self._wamp_sessions[wamp_session_id]
-            log.info("found wamp_session, user_id %r", user_id)
             if user_id in self._calltakers:
                 user = self._calltakers[user_id]
                 if user.wamp_session_id == wamp_session_id:
