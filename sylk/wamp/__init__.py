@@ -29,9 +29,10 @@ def joined(session, details):
         if data['command'] == 'status':
             log.info("process status command")
             notification_center = NotificationCenter()
+            notification_data = NotificationData(username=data['username'], \
+                                                  status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
             '''
-            notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data['username'], \
-                                                  status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id']))
+            notification_center.post_notification('CalltakerStatus', session, notification_data)
             data = {
                 'command' : 'status_updated'
             }
