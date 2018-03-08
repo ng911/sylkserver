@@ -43,6 +43,10 @@ def joined(session, details):
         log.info("on_session_leave event received: %r", data)
         notification_center = NotificationCenter()
         notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
+        out = {
+            'command': 'status_updated'
+        }
+        session.publish(u'com.emergent.calltakers', out)
 
     try:
         yield session.subscribe(on_session_leave, u'wamp.session.on_leave')
