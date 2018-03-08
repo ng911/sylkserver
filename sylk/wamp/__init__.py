@@ -32,12 +32,10 @@ def joined(session, details):
             notification_data = NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
             notification_center.post_notification('CalltakerStatus', session, notification_data)
-            '''
             data = {
                 'command' : 'status_updated'
             }
             yield session.publish(u'com.emergent.calltakers', data)
-            '''
             log.info("sent status_updated")
 
     def on_session_leave(data):
