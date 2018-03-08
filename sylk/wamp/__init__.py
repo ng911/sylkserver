@@ -28,16 +28,16 @@ def joined(session, details):
         log.info("event on_calltaker_status received: %r", data['command'])
         if data['command'] == 'status':
             log.info("process status command")
-            '''
             notification_center = NotificationCenter()
+            '''
             notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id']))
             data = {
                 'command' : 'status_updated'
             }
             yield session.publish(u'com.emergent.calltakers', data)
+            '''
             log.info("sent status_updated")
-        '''
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
