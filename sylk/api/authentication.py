@@ -131,7 +131,8 @@ def session_info():
     user_id = ''
     if 'user_id' in session:
         user_id = session['user_id']
-    return render_template('session-info.js', initial_data={'user_id' : user_id})
+        username = session['username']
+    return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username})
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
@@ -141,6 +142,7 @@ def logout():
         redirect_uri = get_argument('redirect_uri', '')
         if 'user_id' in session:
             del session['user_id']
+            del session['username']
             log.info("inside logout session cleared")
         if redirect_uri == '':
             redirect_uri = url_for('login')

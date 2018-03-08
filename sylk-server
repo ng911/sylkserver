@@ -10,7 +10,7 @@ from optparse import OptionParser
 
 import sipsimple
 import sylk
-
+import sylk.wamp
 import sylk.api
 
 # noinspection PyUnusedLocal
@@ -89,6 +89,9 @@ if __name__ == '__main__':
     log.info('starting api server')
     sylk.api.start_server()
     log.info('starting api server done')
+
+    sylk.wamp.start()
+    log.info('wamp.start done')
 
     server = SylkServer()
     try:

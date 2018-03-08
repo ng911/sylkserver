@@ -17,6 +17,7 @@ Note - for now we ignore the psap_id
 @calltaker.route('/', methods=['GET'])
 def all():
     calltaker_data = CalltakerData()
+    '''
     calltakers = []
     for user in User.objects(is_active=True):
         user_id = str(user.user_id)
@@ -28,9 +29,10 @@ def all():
         calltaker['status'] = status
         calltaker['user_id'] = user_id
         calltakers.append(calltaker)
+    '''
     response = {
         'success' : True,
-        'calltakers' : calltakers
+        'calltakers' : calltaker_data.calltakers
     }
 
     return jsonify(response)

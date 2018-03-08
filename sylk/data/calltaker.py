@@ -1,4 +1,5 @@
 import datetime
+from collections import namedtuple
 
 from application.python import Null
 from application.python.types import Singleton
@@ -10,6 +11,8 @@ from sylk.db.schema import Call
 
 log = ApplicationLogger(__package__)
 
+User = namedtuple('User', 'wamp_session_id username status')
+
 '''
 Store Calltaker status in memory
 '''
@@ -20,12 +23,14 @@ class CalltakerData(object):
 
     def __init__(self):
         self.init_observers()
-        self.active_calltakers = {}
+        self._calltakers = {}
+        self._wamp_sessions = {}
 
     def init_observers(self):
         log.info("CallData init_observers")
         notification_center = NotificationCenter()
-        notification_center.add_observer(self, name='CalltakerUpdate')
+        notification_center.add_observer(self, name='CalltakerStatus')
+        notification_center.add_observer(self, name='CalltakerSessionLeave')
 
     def handle_notification(self, notification):
         log.info("CallData got notification ")
@@ -33,20 +38,37 @@ class CalltakerData(object):
         handler = getattr(self, '_NH_%s' % notification.name, Null)
         handler(notification)
 
-    def _NH_CalltakerUpdate(self, notification):
-        log.info("incoming _NH_CalltakerUpdate")
+    def _NH_CalltakerStatus(self, notification):
+        log.info("incoming _NH_CalltakerStatus")
         user_id = notification.data.user_id
+        wamp_session_id = notification.data.wamp_session_id
+        if wamp_session_id not in self._wamp_sessions:
+            self._wamp_sessions[wamp_session_id] = user_id
         status = notification.data.status
-        self.update_status(user_id, status)
+        username = notification.data.username
+        self._calltakers[user_id] = User(wamp_session_id=wamp_session_id, status=status, username=username)
+
+    def _NH_CalltakerSessionLeave(self, notification):
+        log.info("incoming _NH_CalltakerSessionLeave")
+        wamp_session_id = notification.data.wamp_session_id
+        if wamp_session_id in self._wamp_sessions:
+            user_id = self._wamp_sessions[wamp_session_id]
+            if user_id in self._calltakers:
+                user = self._calltakers[user_id]
+                if user._wamp_session_id == wamp_session_id:
+                    user.status = "offline"
+                    user.wamp_session_id = None
 
     def status(self, user_id):
-        if user_id in self.active_calltakers:
-            return self.active_calltakers[user_id]
-        return None
+        if user_id in self._calltakers:
+            return self._calltakers[user_id].status
+        return "offline"
 
-    def update_status(self, user_id, status):
-        self.active_calltakers[user_id] = status
-
-
+    @property
+    def calltakers(self):
+        calltakers = []
+        for user_id, calltaker in self._calltakers.iteritems():
+            calltakers.append({'user_id' : user_id, 'username' : calltaker.username, 'status' : calltaker.status })
+        return calltakers
 
 
