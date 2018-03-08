@@ -51,11 +51,14 @@ class CalltakerData(object):
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
         wamp_session_id = notification.data
+        log.info("incoming _NH_CalltakerSessionLeave %r", wamp_session_id)
         if wamp_session_id in self._wamp_sessions:
+            log.info("found wamp_session")
             user_id = self._wamp_sessions[wamp_session_id]
+            log.info("found wamp_session, user_id %r", user_id)
             if user_id in self._calltakers:
                 user = self._calltakers[user_id]
-                if user._wamp_session_id == wamp_session_id:
+                if user.wamp_session_id == wamp_session_id:
                     user.status = "offline"
                     user.wamp_session_id = None
 
