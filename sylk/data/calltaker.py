@@ -50,7 +50,7 @@ class CalltakerData(object):
 
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
-        wamp_session_id = notification.data
+        wamp_session_id = notification.data.wamp_session_id
         log.info("incoming _NH_CalltakerSessionLeave %r", wamp_session_id)
         if wamp_session_id in self._wamp_sessions:
             log.info("found wamp_session")
