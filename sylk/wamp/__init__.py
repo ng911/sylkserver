@@ -25,6 +25,8 @@ def joined(session, details):
     def on_calltaker_status(data):
         log.info("event on_calltaker_status received")
         log.info("event on_calltaker_status received: %r", data)
+        log.info("event on_calltaker_status received: %r", data['command'])
+        '''
         if data['command'] == 'status':
             notification_center = NotificationCenter()
             notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data['username'], \
@@ -34,6 +36,7 @@ def joined(session, details):
             }
             yield session.publish(u'com.emergent.calltakers', data)
             log.info("sent status_updated")
+        '''
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
