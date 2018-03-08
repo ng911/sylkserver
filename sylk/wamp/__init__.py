@@ -25,9 +25,15 @@ def joined(session, details):
     def on_calltaker_status(data):
         log.info("event on_calltaker_status received")
         log.info("event on_calltaker_status received: %r", data)
-        notification_center = NotificationCenter()
-        notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data['username'], \
-                                              status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id']))
+        if data.command == 'status':
+            notification_center = NotificationCenter()
+            notification_center.post_notification('CalltakerStatus', session, NotificationData(username=data['username'], \
+                                                  status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id']))
+            data = {
+                'command' : 'status_updated'
+            }
+            yield session.publish(u'com.emergent.calltakers', data)
+            log.info("sent status_updated")
 
     def on_register(data):
         log.info("on_subscribe event received")
@@ -46,7 +52,7 @@ def joined(session, details):
         res = yield session.subscribe(on_calltaker_status, u'com.emergent.calltakers')
         log.info("subscribed to topic %r, id %r", res, res.id)
         data = {
-            'command' : 'update_status'
+            'command' : 'send_status_update'
         }
         yield session.publish(u'com.emergent.calltakers', data)
 
