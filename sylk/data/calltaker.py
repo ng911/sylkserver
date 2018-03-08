@@ -62,8 +62,7 @@ class CalltakerData(object):
             if user_id in self._calltakers:
                 user = self._calltakers[user_id]
                 if user.wamp_session_id == wamp_session_id:
-                    user.status = "offline"
-                    user.wamp_session_id = None
+                    self._calltakers[user_id] = User(wamp_session_id=None, status="offline", username=user.username)
 
     def status(self, user_id):
         if user_id in self._calltakers:
