@@ -20,6 +20,7 @@ from sylk.db.authenticate import authenticate_call
 from sylk.db.queue import get_queue_details, get_queue_members
 from acd import get_calltakers
 from sylk.data.call import CallData
+from sylk.configuration import ServerConfig
 #from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 
 log = ApplicationLogger(__package__)
@@ -68,7 +69,7 @@ class PSAPApplication(SylkApplication):
 
         conference_application = get_conference_application()
         rooms = conference_application.get_rooms()
-        log.info
+
         # first verify the session
         (authenticated, call_type, data) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
@@ -88,8 +89,11 @@ class PSAPApplication(SylkApplication):
             queue_details = get_queue_details(inoming_link.queue_id)
             queue_members = get_queue_members(inoming_link.queue_id)
             calltakers = get_calltakers(queue_details, queue_members)
-
-            for sip_uri in calltakers:
+            server = ServerConfig.asterisk_server
+            sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
+            log.info("sip_uris is %r", sip_uris)
+            for sip_uri in sip_uris:
+                log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
                 self.outgoingCallInitializer = OutgoingCallInitializer(incoming_session=session,
                                                                        target=sip_uri,
