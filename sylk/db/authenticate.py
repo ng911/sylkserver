@@ -54,7 +54,9 @@ def get_incoming_link(ip_address, port, called_number):
         log.info("get_incoming_link found ip address but not authenticated")
         return None
 
-    for incoming_link in IncomingLink.objects(ip_address__exists = False, called_no__exists = True):
+    for incoming_link in IncomingLink.objects(called_no__exists = True):
+        if ('ip_address' in incoming_link) and (incoming_link.ip_address is not None) and (incoming_link.ip_address != '') :
+            continue
         log.info("get_incoming_link check non ip incoming_link.regex %r, incoming_link.called_no %r", incoming_link.regex, incoming_link.called_no)
         if (not incoming_link.regex):
             if (incoming_link.called_no == called_number):
