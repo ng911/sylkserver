@@ -4,6 +4,7 @@ Authenticate a call
 
 import re
 from schema import IncomingLink, Queue, User
+from sylk.applications import ApplicationLogger
 
 '''
 Authenticate a call
@@ -25,10 +26,11 @@ Returns:
     }.
 
 '''
-
+log = ApplicationLogger(__package__)
 
 def get_incoming_link(ip_address, port, called_number):
     # we first try to match ip address
+    log.info("get_incoming_link ip_address %r, port %r, called_number %r", ip_address, port, called_number)
     found_ip_address = False
     for incoming_link in IncomingLink.objects(ip_address=ip_address):
         found_ip_address = True
@@ -49,9 +51,11 @@ def get_incoming_link(ip_address, port, called_number):
                     return incoming_link
 
     if found_ip_address or (called_number is None) or (called_number == ''):
+        log.info("get_incoming_link found ip address but not authenticated")
         return None
 
     for incoming_link in IncomingLink.objects(ip_address__exists = False, called_no__exists = True):
+        log.info("get_incoming_link check non ip incoming_link.regex %r, incoming_link.called_no %r", incoming_link.regex, incoming_link.called_no)
         if (not incoming_link.regex):
             if (incoming_link.called_no == called_number):
                 return incoming_link
