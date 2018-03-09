@@ -92,12 +92,15 @@ class PSAPApplication(SylkApplication):
             server = ServerConfig.asterisk_server
             sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
             log.info("sip_uris is %r", sip_uris)
+            room_number = uuid4().hex
+
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
                 self.outgoingCallInitializer = OutgoingCallInitializer(incoming_session=session,
                                                                        target=sip_uri,
-                                                                       audio=True)
+                                                                       audio=True,
+                                                                       room_number=room_number)
                 self.outgoingCallInitializer.start()
         elif call_type == 'sos_room':
             pass
@@ -119,7 +122,7 @@ class PSAPApplication(SylkApplication):
 class OutgoingCallInitializer(object):
     implements(IObserver)
 
-    def __init__(self, incoming_session, target, audio=False, chat=False):
+    def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None):
         self.account = DefaultAccount()
 
         self.target = target
@@ -130,6 +133,7 @@ class OutgoingCallInitializer(object):
         if chat:
             self.streams.append(MediaStreamRegistry.ChatStream())
         self.wave_ringtone = None
+        self.room_number = room_number
 
     def start(self):
         if '@' not in self.target:
@@ -176,9 +180,12 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionNewOutgoing(self, notification):
         session = notification.sender
-        local_identity = str(session.local_identity.uri)
-        if session.local_identity.display_name:
-            local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
+        if self.room_number is None:
+            local_identity = str(session.local_identity.uri)
+            if session.local_identity.display_name:
+                local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
+        else:
+            local_identity = "sip:%r@159.65.73.31"
         remote_identity = str(session.remote_identity.uri)
         if session.remote_identity.display_name:
             remote_identity = '"%s" <%s>' % (session.remote_identity.display_name, remote_identity)
@@ -213,10 +220,9 @@ class OutgoingCallInitializer(object):
         remote_identity = str(session.remote_identity.uri)
         log.info("Session sarted %s, %s" % (remote_identity, session.route))
 
-        room_number = uuid4().hex
-        log.info('startConference for room %s' % (room_number))
-        session.room_number = room_number
-        self.incoming_session.room_number = room_number
+        log.info('startConference for room %s' % (self.room_number))
+        session.room_number = self.room_number
+        self.incoming_session.room_number = self.room_number
 
         conference_application = get_conference_application()
 
