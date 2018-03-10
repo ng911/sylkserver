@@ -128,6 +128,9 @@ class OutgoingCallInitializer(object):
         self.account = DefaultAccount()
         self.account.user = user
 
+        self.account2 = DefaultAccount()
+        self.account2.user = "testme"
+
         self.target = target
         self.streams = []
         self.incoming_session = incoming_session
