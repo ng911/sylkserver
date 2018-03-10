@@ -88,7 +88,7 @@ def new_account_func(cls):
 
 def get_user_account_class(username):
     def constructor(self):
-        Account.__init__(self.sip_address)
+        Account.__init__(self, self.sip_address)
         self.contact = DefaultContactURIFactory()
 
     def _activate(self):
