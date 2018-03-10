@@ -76,11 +76,6 @@ class DefaultAccount(Account):
         pass
 
 
-
-
-def some_func(self, arg1):
-    print(arg1)
-
 @classmethod
 def new_account_func(cls, test):
     log.info("new_account_func test is %r", test)
