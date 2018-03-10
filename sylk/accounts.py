@@ -59,13 +59,14 @@ class DefaultAccount(Account):
                 raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
             return SettingsObject.__new__(cls)
 
-    def __init__(self):
+    def __init__(self, user='sylkserver'):
         super(DefaultAccount, self).__init__('default@sylkserver')
+        self.user = user
         self.contact = DefaultContactURIFactory()
 
     @property
     def uri(self):
-        return SIPURI(user='sylkserver', host=SIPConfig.local_ip.normalized)
+        return SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)
 
     def _activate(self):
         pass
