@@ -124,7 +124,8 @@ class OutgoingCallInitializer(object):
     implements(IObserver)
 
     def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
-        self.account = UserAccount()
+        log.info("OutgoingCallInitializer user is %r", user)
+        self.account = DefaultAccount()
         self.account.user = user
 
         self.target = target
