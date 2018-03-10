@@ -124,7 +124,8 @@ class OutgoingCallInitializer(object):
     implements(IObserver)
 
     def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
-        self.account = UserAccount(user=user)
+        self.account = UserAccount()
+        self.account.user = user
 
         self.target = target
         self.streams = []
