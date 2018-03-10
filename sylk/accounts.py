@@ -50,7 +50,7 @@ class DefaultAccount(Account):
 
     __id__ = SIPAddress('default@sylkserver')
 
-    #id = property(lambda self: self.__id__)
+    id = property(lambda self: self.__id__)
     enabled = True
 
     def __new__(cls):
@@ -74,34 +74,42 @@ class DefaultAccount(Account):
         pass
 
 
-class UserAccount(Account):
-    """
-    Subclass of Account which doesn't start any subsystem. SylkServer just
-    uses it as the default account for all applications as a settings object.
-    """
 
-    __id__ = SIPAddress('default@sylkserver')
 
-    id = property(lambda self: self.__id__)
-    enabled = True
+def some_func(self, arg1):
+    print(arg1)
 
-    def __new__(cls):
-        with AccountManager.load.lock:
-            if not AccountManager.load.called:
-                raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
-            return SettingsObject.__new__(cls)
+@classmethod
+def new_account_func(cls):
+    with AccountManager.load.lock:
+        if not AccountManager.load.called:
+            raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
+        return SettingsObject.__new__(cls)
 
-    def __init__(self):
-        super(UserAccount, self).__init__('default@sylkserver')
-        self.user = 'sylkserver'
+def get_user_account_class(username):
+    def constructor(self):
+        Account.__init__(self.sip_address)
         self.contact = DefaultContactURIFactory()
-
-    @property
-    def uri(self):
-        return SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)
 
     def _activate(self):
         pass
 
     def _deactivate(self):
         pass
+
+    sip_address = "%r@sylkserver" % username
+    return type(username + "UserAccountClass", (Account,), {
+        "sip_address" : sip_address,
+        "__id__": SIPAddress(sip_address),
+        "id": property(lambda self: self.__id__),
+        "__init__": constructor,
+        "uri":property(lambda self: SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)),
+        "_activate": _activate,
+        "_deactivate": _deactivate,
+        "__new__": new_account_func
+    })
+
+def get_user_account(username):
+    UserAccountClass = get_user_account_class(username)
+    return UserAccountClass()
+
