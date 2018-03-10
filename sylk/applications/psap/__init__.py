@@ -126,6 +126,7 @@ class OutgoingCallInitializer(object):
     def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
         log.info("OutgoingCallInitializer user is %r", user)
         self.account = get_user_account(user)
+        self.account2 = get_user_account("6509668077")
 
         #self.account2 = DefaultAccount()
         #self.account2.user = "testme"
