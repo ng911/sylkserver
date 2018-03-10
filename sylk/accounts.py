@@ -4,9 +4,11 @@ from sipsimple.account import Account, AccountManager
 from sipsimple.configuration import SettingsObject
 from sipsimple.configuration.datatypes import SIPAddress
 from sipsimple.core import Engine, Route, SIPURI
+from sylk.applications import ApplicationLogger
 
 from sylk.configuration import SIPConfig
 
+log = ApplicationLogger(__package__)
 
 __all__ = 'DefaultAccount',
 
@@ -80,7 +82,8 @@ def some_func(self, arg1):
     print(arg1)
 
 @classmethod
-def new_account_func(cls):
+def new_account_func(cls, test):
+    log.info("new_account_func test is %r", test)
     with AccountManager.load.lock:
         if not AccountManager.load.called:
             raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
