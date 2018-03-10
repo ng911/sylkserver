@@ -107,6 +107,7 @@ def get_user_account_class(username):
         "id": property(lambda self: self.__id__),
         "__init__": constructor,
         "uri":property(lambda self: SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)),
+        "enabled": True,
         "_activate": _activate,
         "_deactivate": _deactivate,
         "__new__": new_account_func
