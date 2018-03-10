@@ -88,9 +88,9 @@ class UserAccount(Account):
                 raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
             return SettingsObject.__new__(cls)
 
-    def __init__(self, user='sylkserver'):
+    def __init__(self):
         super(UserAccount, self).__init__('default@sylkserver')
-        self.user = user
+        self.user = 'sylkserver'
         self.contact = DefaultContactURIFactory()
 
     @property
