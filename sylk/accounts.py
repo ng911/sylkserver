@@ -59,9 +59,8 @@ class DefaultAccount(Account):
                 raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
             return SettingsObject.__new__(cls)
 
-    def __init__(self, user='sylkserver'):
+    def __init__(self):
         super(DefaultAccount, self).__init__('default@sylkserver')
-        self.user = user
         self.contact = DefaultContactURIFactory()
 
     @property
@@ -74,3 +73,32 @@ class DefaultAccount(Account):
     def _deactivate(self):
         pass
 
+
+class UserAccount(Account):
+    """
+    Subclass of Account which doesn't start any subsystem. SylkServer just
+    uses it as the default account for all applications as a settings object.
+    """
+
+    enabled = True
+
+    def __new__(cls):
+        with AccountManager.load.lock:
+            if not AccountManager.load.called:
+                raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
+            return SettingsObject.__new__(cls)
+
+    def __init__(self, user='sylkserver'):
+        super(UserAccount, self).__init__('default@sylkserver')
+        self.user = user
+        self.contact = DefaultContactURIFactory()
+
+    @property
+    def uri(self):
+        return SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)
+
+    def _activate(self):
+        pass
+
+    def _deactivate(self):
+        pass
