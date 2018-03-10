@@ -103,6 +103,7 @@ def get_user_account_class(username):
     sip_address = "%r@sylkserver" % username
     return type(username + "UserAccountClass", (Account,), {
         "sip_address" : sip_address,
+        'user' : username,
         "__id__": SIPAddress(sip_address),
         "id": property(lambda self: self.__id__),
         "__init__": constructor,
