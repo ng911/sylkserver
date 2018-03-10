@@ -11,7 +11,7 @@ from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.session import IllegalStateError, Session
-from sylk.accounts import DefaultAccount, UserAccount
+from sylk.accounts import DefaultAccount, get_user_account
 from sipsimple.account import Account
 from sylk.applications import ApplicationRegistry
 from uuid import uuid4
@@ -125,11 +125,10 @@ class OutgoingCallInitializer(object):
 
     def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
         log.info("OutgoingCallInitializer user is %r", user)
-        self.account = DefaultAccount()
-        self.account.user = user
+        self.account = get_user_account(user)
 
-        self.account2 = DefaultAccount()
-        self.account2.user = "testme"
+        #self.account2 = DefaultAccount()
+        #self.account2.user = "testme"
 
         self.target = target
         self.streams = []
