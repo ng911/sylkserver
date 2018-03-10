@@ -183,12 +183,9 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionNewOutgoing(self, notification):
         session = notification.sender
-        if self.room_number is None:
-            local_identity = str(session.local_identity.uri)
-            if session.local_identity.display_name:
-                local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
-        else:
-            local_identity = "sip:%r@159.65.73.31" % self.room_number
+        local_identity = str(session.local_identity.uri)
+        if session.local_identity.display_name:
+            local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
         remote_identity = str(session.remote_identity.uri)
         if session.remote_identity.display_name:
             remote_identity = '"%s" <%s>' % (session.remote_identity.display_name, remote_identity)
