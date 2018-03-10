@@ -100,7 +100,8 @@ class PSAPApplication(SylkApplication):
                 self.outgoingCallInitializer = OutgoingCallInitializer(incoming_session=session,
                                                                        target=sip_uri,
                                                                        audio=True,
-                                                                       room_number=room_number)
+                                                                       room_number=room_number,
+                                                                       user=remote_identity.uri.user)
                 self.outgoingCallInitializer.start()
         elif call_type == 'sos_room':
             pass
@@ -122,8 +123,8 @@ class PSAPApplication(SylkApplication):
 class OutgoingCallInitializer(object):
     implements(IObserver)
 
-    def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None):
-        self.account = DefaultAccount()
+    def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
+        self.account = DefaultAccount(user=user)
 
         self.target = target
         self.streams = []
@@ -185,7 +186,7 @@ class OutgoingCallInitializer(object):
             if session.local_identity.display_name:
                 local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
         else:
-            local_identity = "sip:%r@159.65.73.31"
+            local_identity = "sip:%r@159.65.73.31" % self.room_number
         remote_identity = str(session.remote_identity.uri)
         if session.remote_identity.display_name:
             remote_identity = '"%s" <%s>' % (session.remote_identity.display_name, remote_identity)
