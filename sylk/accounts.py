@@ -80,6 +80,9 @@ class UserAccount(Account):
     uses it as the default account for all applications as a settings object.
     """
 
+    __id__ = SIPAddress('default@sylkserver')
+
+    id = property(lambda self: self.__id__)
     enabled = True
 
     def __new__(cls):
