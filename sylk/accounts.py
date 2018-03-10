@@ -50,7 +50,7 @@ class DefaultAccount(Account):
 
     __id__ = SIPAddress('default@sylkserver')
 
-    id = property(lambda self: self.__id__)
+    #id = property(lambda self: self.__id__)
     enabled = True
 
     def __new__(cls):
