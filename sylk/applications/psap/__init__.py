@@ -42,6 +42,7 @@ class PSAPApplication(SylkApplication):
     def __init__(self):
         log.info(u'PSAPApplication init')
         CallData()
+        self.invited_parties = {}
 
     def start(self):
         log.info(u'PSAPApplication start')
@@ -97,12 +98,14 @@ class PSAPApplication(SylkApplication):
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
-                self.outgoingCallInitializer = OutgoingCallInitializer(incoming_session=session,
+                outgoing_call_initializer = OutgoingCallInitializer(incoming_session=session,
                                                                        target=sip_uri,
                                                                        audio=True,
                                                                        room_number=room_number,
-                                                                       user=remote_identity.uri.user)
-                self.outgoingCallInitializer.start()
+                                                                       user=remote_identity.uri.user,
+                                                                        app=self)
+                outgoing_call_initializer.start()
+                self.invited_parties[sip_uri] = outgoing_call_initializer
         elif call_type == 'sos_room':
             pass
         elif call_type == 'outgoing':
@@ -119,11 +122,17 @@ class PSAPApplication(SylkApplication):
     def incoming_message(self, request, data):
         request.reject(405)
 
+    def outgoing_session_will_start(self, sip_uri):
+        for target,outgoing_call_initializer in self.invited_parties.iteritems():
+            if target != sip_uri:
+                if outgoing_call_initializer.outgoing_session != None:
+                    outgoing_call_initializer.outgoing_session.end()
+
 
 class OutgoingCallInitializer(object):
     implements(IObserver)
 
-    def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None):
+    def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None, app=None):
         log.info("OutgoingCallInitializer user is %r", user)
         self.account = get_user_account(user)
         self.account2 = get_user_account("6509668077")
@@ -140,6 +149,7 @@ class OutgoingCallInitializer(object):
             self.streams.append(MediaStreamRegistry.ChatStream())
         self.wave_ringtone = None
         self.room_number = room_number
+        self.outgoing_session = None
 
     def start(self):
         if '@' not in self.target:
@@ -178,6 +188,7 @@ class OutgoingCallInitializer(object):
         #application = SIPSessionApplication()
         #application.outgoing_session = session
         #self.app.outgoing_session = session
+        self.outgoing_session = session
 
     def _NH_DNSLookupDidFail(self, notification):
         log.info('Call to %s failed: DNS lookup error: %s' % (self.target, notification.data.error))
@@ -214,6 +225,10 @@ class OutgoingCallInitializer(object):
             self.wave_ringtone = None
         ui.status = 'Connecting...'
     '''
+    def _NH_SIPSessionWillStart(self, notification):
+        # cancel other invited parties
+        if self.app:
+            self.app.outgoing_session_will_start(self.target)
 
     def _NH_SIPSessionDidStart(self, notification):
         notification_center = NotificationCenter()
