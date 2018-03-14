@@ -17,6 +17,7 @@ returns currently active calls
 '''
 @calls.route('/', methods=['GET'])
 def current():
+    log.info("get current calls")
     calls = [
         {
             'conf-id' : '1123',
@@ -99,6 +100,7 @@ returns recent call history
 '''
 @calls.route('/recent', methods=['GET'])
 def recent():
+    log.info("get recent calls")
     calls = [
         {
             'conf-id' : '2123',
