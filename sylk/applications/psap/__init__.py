@@ -43,6 +43,7 @@ class PSAPApplication(SylkApplication):
         log.info(u'PSAPApplication init')
         CallData()
         self.invited_parties = {}
+        self.ringing_timer = None
 
     def start(self):
         log.info(u'PSAPApplication start')
@@ -106,7 +107,11 @@ class PSAPApplication(SylkApplication):
             # start call timer
             ring_time = queue_details.ring_time
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
-            self.ringing_timer = reactor.callLater(ring_time, self, self.on_ringing_timeout, room_number, None)
+            try:
+                self.ringing_timer = reactor.callLater(ring_time, self, self.on_ringing_timeout, room_number, None)
+                log.info("ringing_timer set ")
+            except Exception as e:
+                log.error("exception in setting ringing_timer %r", e)
 
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
