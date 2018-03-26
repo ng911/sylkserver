@@ -53,8 +53,6 @@ class PSAPApplication(SylkApplication):
 
     def incoming_session(self, session):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
-        dump_object_member_vars(log, session)
-        dump_object_member_funcs(log, session)
 
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
@@ -68,12 +66,6 @@ class PSAPApplication(SylkApplication):
         remote_identity = session.remote_identity
         local_identity = session.local_identity
         peer_address = session.peer_address
-
-        dump_object_member_vars(log, remote_identity)
-        dump_object_member_funcs(log, remote_identity)
-
-        dump_object_member_vars(log, local_identity)
-        dump_object_member_funcs(log, local_identity)
 
         conference_application = get_conference_application()
         rooms = conference_application.get_rooms()
@@ -107,8 +99,9 @@ class PSAPApplication(SylkApplication):
             # start call timer
             ring_time = queue_details.ring_time
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
+
             try:
-                self.ringing_timer = reactor.callLater(ring_time, self, self.on_ringing_timeout, room_number, None)
+                self.ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, room_number, None)
                 log.info("ringing_timer set ")
             except Exception as e:
                 log.error("exception in setting ringing_timer %r", e)
