@@ -125,6 +125,7 @@ class PSAPApplication(SylkApplication):
             pass
 
     def on_ringing_timeout(self, room_number):
+        log.info("on_ringing_timeout")
         log.info("timed out ringing for conf room %r is %r", room_number)
         self.ringing_timer = None
 
