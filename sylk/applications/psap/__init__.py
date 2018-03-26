@@ -21,7 +21,7 @@ from sylk.db.queue import get_queue_details, get_queue_members
 from acd import get_calltakers
 from sylk.data.call import CallData
 from sylk.configuration import ServerConfig
-#from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
+from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 
 log = ApplicationLogger(__package__)
 
@@ -52,8 +52,8 @@ class PSAPApplication(SylkApplication):
 
     def incoming_session(self, session):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
-        #dump_object_member_vars(log, session)
-        #dump_object_member_funcs(log, session)
+        dump_object_member_vars(log, session)
+        dump_object_member_funcs(log, session)
 
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
@@ -67,6 +67,12 @@ class PSAPApplication(SylkApplication):
         remote_identity = session.remote_identity
         local_identity = session.local_identity
         peer_address = session.peer_address
+
+        dump_object_member_vars(log, remote_identity)
+        dump_object_member_funcs(log, remote_identity)
+
+        dump_object_member_vars(log, local_identity)
+        dump_object_member_funcs(log, local_identity)
 
         conference_application = get_conference_application()
         rooms = conference_application.get_rooms()
