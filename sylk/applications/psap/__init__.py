@@ -101,7 +101,7 @@ class PSAPApplication(SylkApplication):
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
 
             try:
-                self.ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, room_number, None)
+                self.ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, room_number)
                 log.info("ringing_timer set ")
             except Exception as e:
                 log.error("exception in setting ringing_timer %r", e)
