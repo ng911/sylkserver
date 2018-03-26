@@ -71,6 +71,8 @@ class PSAPApplication(SylkApplication):
         conference_application = get_conference_application()
         rooms = conference_application.get_rooms()
 
+        log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, from_uri %r, rooms %r",
+            peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
         # first verify the session
         (authenticated, call_type, data) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
@@ -95,6 +97,11 @@ class PSAPApplication(SylkApplication):
             log.info("sip_uris is %r", sip_uris)
             room_number = uuid4().hex
 
+            # start call timer
+            ring_time = queue_details.ring_time
+            log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
+            self.ringing_timer = reactor.callLater(ring_time, self, self.on_ringing_timeout, room_number, None)
+
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
@@ -112,6 +119,10 @@ class PSAPApplication(SylkApplication):
             pass
         elif call_type == 'admin':
             pass
+
+    def on_ringing_timeout(self, room_number):
+        log.info("timed out ringing for conf room %r is %r", room_number)
+        self.ringing_timer = None
 
     def incoming_subscription(self, request, data):
         request.reject(405)
