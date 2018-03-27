@@ -8,6 +8,7 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.db.schema import Call
 #from sylk.utils import dump_object_member_vars, dump_object_member_funcs
+from sylk.wamp import publish_update_calltaker_status
 
 log = ApplicationLogger(__package__)
 
@@ -61,6 +62,12 @@ class CalltakerData(object):
         if user_id in self._calltakers:
             return self._calltakers[user_id].status
         return "offline"
+
+    def update_status(self, user_id, status):
+        if user_id in self._calltakers:
+            user = self._calltakers[user_id]
+            user.status = status
+            publish_update_calltaker_status(user_id, user.username, status)
 
     @property
     def calltakers(self):
