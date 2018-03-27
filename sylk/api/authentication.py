@@ -140,13 +140,12 @@ def session_info():
 def logout():
     try:
         log.info("inside logout for user")
-        redirect_uri = get_argument('redirect_uri', '')
+        next = get_argument('next', '')
         if 'user_id' in session:
             del session['user_id']
             del session['username']
             log.info("inside logout session cleared")
-        if redirect_uri == '':
-            redirect_uri = url_for('login')
+        redirect_uri = url_for('login', next=next)
         log.info("inside logout done , redirect to %r", redirect_uri)
         return redirect(redirect_uri)
     except Exception as e:
