@@ -145,7 +145,8 @@ def logout():
             del session['user_id']
             del session['username']
             log.info("inside logout session cleared")
-        redirect_uri = url_for('/auth/login', next=next)
+        #redirect_uri = url_for('/auth/login', next=next)
+        redirect_uri = url_for('/login')
         log.info("inside logout done , redirect to %r", redirect_uri)
         return redirect(redirect_uri)
     except Exception as e:
