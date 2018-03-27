@@ -143,8 +143,8 @@ def logout():
         next = get_argument('next', '')
         if 'user_id' in session:
             del session['user_id']
+        if 'username' in session:
             del session['username']
-            log.info("inside logout session cleared")
         redirect_uri = url_for('.login', next=next)
         log.info("inside logout done , redirect to %r", redirect_uri)
         return redirect(redirect_uri)
