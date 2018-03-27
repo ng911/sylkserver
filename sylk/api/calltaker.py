@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import User
 from sylk.data.calltaker import CalltakerData
+from utils import get_argument
 
 calltaker = Blueprint('calltaker', __name__,
                         template_folder='templates')
@@ -60,3 +61,27 @@ def register(user_id):
 
     return jsonify(response)
 
+
+@calltaker.route('/status/<user_id>', methods=['GET'])
+def getStatus(user_id):
+    calltaker_data = CalltakerData()
+    status = calltaker_data.status(user_id)
+
+    response = {
+        'success' : True,
+        'status' : status
+    }
+
+    return jsonify(response)
+
+@calltaker.route('/status/<user_id>', methods=['POST', 'PUT'])
+def updateStatus(user_id):
+    status = get_argument('status')
+    calltaker_data = CalltakerData()
+    calltaker_data.update_status(user_id, status)
+
+    response = {
+        'success' : True
+    }
+
+    return jsonify(response)

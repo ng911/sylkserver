@@ -14,13 +14,37 @@ comp = Component(
      extra="tarun"
  )
 
+wamp_session=None
+
+def publish_update_calltaker_status(user_id, username, status):
+    if wamp_session is not None:
+        json_data = {
+            'username': username,
+            'user_id': user_id,
+            'status': status
+        }
+        wamp_session.publish(u'com.emergent.calltaker', json_data)
+
+def publish_update_calltakers(json_data):
+    if wamp_session is not None:
+        wamp_session.publish(u'com.emergent.calltakers', json_data)
+
+def publish_update_call(conf_id):
+    if wamp_session is not None:
+        wamp_session.publish(u'com.emergent.calls', conf_id)
+
+def publish_update_calls():
+    if wamp_session is not None:
+        wamp_session.publish(u'com.emergent.calls')
 
 @comp.on_join
 @inlineCallbacks
 def joined(session, details):
+    global wamp_session
     log.info("wamp session ready %r, id %r", session, session._session_id)
     # make sure calltaker is initialized
     CalltakerData()
+    wamp_session = session
 
     def on_calltaker_status(data):
         log.info("event on_calltaker_status received")
@@ -77,6 +101,15 @@ def joined(session, details):
     dump_object_member_funcs(log, session.config)
     log.info("wamp config extra %r" % session.config.extra)
     '''
+
+@comp.on_leave()
+@inlineCallbacks
+def left(session, details):
+    global wamp_session
+    log.info("session left")
+    wamp_session = None
+    # todo - try to reconnect here
+
 
 def start():
      comp.start()
