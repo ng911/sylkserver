@@ -102,7 +102,7 @@ def joined(session, details):
     log.info("wamp config extra %r" % session.config.extra)
     '''
 
-@comp.on_leave()
+@comp.on_leave
 @inlineCallbacks
 def left(session, details):
     global wamp_session
