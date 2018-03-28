@@ -22,6 +22,7 @@ from acd import get_calltakers
 from sylk.data.call import CallData
 from sylk.configuration import ServerConfig
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
+from sylk.notifications.call import send_call_update_notification
 
 log = ApplicationLogger(__package__)
 
@@ -75,14 +76,12 @@ class PSAPApplication(SylkApplication):
         # first verify the session
         (authenticated, call_type, data) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
-        notification_center = NotificationCenter()
-        notification_center.post_notification('DataCallUpdate', self, NotificationData(session=session, status='init'))
+        send_call_update_notification(self, session, 'init')
 
         if not authenticated:
             log.info("call not authenticated, reject it")
             session.reject(403)
-            notification_center.post_notification('DataCallUpdate', self,
-                                                  NotificationData(session=session, status='reject'))
+            send_call_update_notification(self, session, 'reject')
             return
 
 
@@ -151,7 +150,6 @@ class OutgoingCallInitializer(object):
     def __init__(self, incoming_session, target, audio=False, chat=False, room_number=None, user=None, app=None):
         log.info("OutgoingCallInitializer user is %r", user)
         self.account = get_user_account(user)
-        self.account2 = get_user_account("6509668077")
 
         #self.account2 = DefaultAccount()
         #self.account2.user = "testme"
