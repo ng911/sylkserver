@@ -88,6 +88,7 @@ class ConferenceApplication(SylkApplication):
         if room_number is None:
             room_uri = '%s@%s' % (uri.user, uri.host)
         else:
+            #todo fix this
             room_uri = '%s@%s' % (room_number, "192.168.1.2")
         return room_uri
 
