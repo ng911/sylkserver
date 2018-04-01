@@ -24,6 +24,7 @@ from sylk.applications.conference.room import Room
 from sylk.bonjour import BonjourService
 from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.session import Session, IllegalStateError
+from sylk.configuration import SIPConfig
 #from sylk.web import server as web_server
 
 
@@ -89,7 +90,8 @@ class ConferenceApplication(SylkApplication):
             room_uri = '%s@%s' % (uri.user, uri.host)
         else:
             #todo fix this
-            room_uri = '%s@%s' % (room_number, "192.168.1.2")
+            local_ip = SIPConfig.local_ip.normalized
+            room_uri = '%s@%s' % (room_number, local_ip)
         return room_uri
 
     def get_room_uri(self, uri=None, room_number=None):
@@ -127,7 +129,7 @@ class ConferenceApplication(SylkApplication):
         room_uri = self.get_room_uri(uri=None, room_number=room_number)
         self.add_participant(session, room_uri)
 
-    def incoming_session(self, session):
+    def incoming_session(self, session, room_number=None):
         log.info('New session from %s to %s' % (session.remote_identity.uri, session.local_identity.uri))
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
@@ -149,7 +151,7 @@ class ConferenceApplication(SylkApplication):
 
         if transfer_stream is not None:
             try:
-                room = self.get_room(session.request_uri, room_number=None)
+                room = self.get_room(session.request_uri, room_number=room_number)
             except RoomNotFoundError:
                 log.info(u'Session rejected: room not found')
                 session.reject(404)
@@ -174,9 +176,9 @@ class ConferenceApplication(SylkApplication):
         NotificationCenter().add_observer(self, sender=session)
         if audio_stream:
             session.send_ring_indication()
-        streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
+            #streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
         #reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
-        reactor.callLater(0, self.accept_session, session, streams)
+        #reactor.callLater(0, self.accept_session, session, streams)
 
     def incoming_subscription(self, subscribe_request, data):
         from_header = data.headers.get('From', Null)

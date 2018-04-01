@@ -38,6 +38,7 @@ from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.configuration.datatypes import URL
 from sylk.resources import Resources
 from sylk.session import Session, IllegalStateError
+from sylk.configuration import SIPConfig
 #from sylk.web import server as web_server
 
 
@@ -48,7 +49,7 @@ def format_identity(identity):
     else:
         return u'%s@%s' % (uri.user, uri.host)
 
-
+'''
 class ScreenImage(object):
     def __init__(self, room, sender):
         self.room = weakref.ref(room)
@@ -111,7 +112,7 @@ class ScreenImage(object):
             txt = '%s stopped sharing the screen' % format_identity(self.sender)
             room.dispatch_server_message(txt)
             log.info(txt)
-
+'''
 
 class Room(object):
     """
@@ -120,9 +121,15 @@ class Room(object):
     """
     implements(IObserver)
 
-    def __init__(self, uri):
-        self.config = get_room_config(uri)
-        self.uri = uri
+    def __init__(self, room_number=None):
+        if room_number is None:
+            pass
+        else:
+            self.room_number = room_number
+        local_ip = SIPConfig.local_ip.normalized
+        room_uri = '%s@%s' % (room_number, local_ip)
+        self.config = get_room_config(room_uri)
+        self.uri = room_uri
         self.identity = ChatIdentity(SIPURI.parse('sip:%s' % self.uri), display_name='Conference Room')
         self.files = []
         self.screen_images = {}
@@ -135,7 +142,7 @@ class Room(object):
         self.moh_player = None
         self.conference_info_payload = None
         self.conference_info_version = count(1)
-        self.bonjour_services = Null
+        #self.bonjour_services = Null
         self.session_nickname_map = {}
         self.last_nicknames_map = {}
         self.participants_counter = Counter()
@@ -210,10 +217,12 @@ class Room(object):
     def start(self):
         if self.started:
             return
+        '''
         if ServerConfig.enable_bonjour and self.identity.uri.user != 'conference':
             room_user = self.identity.uri.user
             self.bonjour_services = BonjourService(service='sipuri', name='Conference Room %s' % room_user, uri_user=room_user)
             self.bonjour_services.start()
+        '''
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
@@ -225,8 +234,10 @@ class Room(object):
         if not self.started:
             return
         self.state = 'stopping'
+        '''
         self.bonjour_services.stop()
         self.bonjour_services = None
+        '''
         self.incoming_message_queue.send_exception(api.GreenletExit)
         self.incoming_message_queue = None
         self.message_dispatcher.kill(proc.ProcExit)
@@ -341,12 +352,13 @@ class Room(object):
                 subscription.push_content(conference.ConferenceDocument.content_type, data)
             except (SIPCoreError, SIPCoreInvalidStateError):
                 pass
-
+    '''
     def dispatch_file(self, file):
         sender_uri = file.sender.uri
         for uri in set(session.remote_identity.uri for session in self.sessions if str(session.remote_identity.uri) != str(sender_uri)):
             handler = FileTransferHandler(self)
             handler.init_outgoing(uri, file)
+    '''
 
     def add_session(self, session):
         notification_center = NotificationCenter()
@@ -378,6 +390,7 @@ class Room(object):
                 else:
                     log.info(u'Room %s - %s audio stream did not enable encryption' % (self.uri,
                                                                                       format_identity(session.remote_identity)))
+        '''
         try:
             transfer_stream = next(stream for stream in session.streams if stream.type == 'file-transfer')
         except StopIteration:
@@ -395,6 +408,7 @@ class Room(object):
             self.dispatch_server_message(txt)
             if len(session.streams) == 1:
                 return
+        '''
 
         welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
         welcome_handler.run()
@@ -407,8 +421,10 @@ class Room(object):
         if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
             self.dispatch_server_message('%s has joined the room %s' % (format_identity(session.remote_identity), self.format_stream_types(session.streams)), exclude=session)
 
+        '''
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
+        '''
 
     def remove_session(self, session):
         notification_center = NotificationCenter()
@@ -457,8 +473,10 @@ class Room(object):
         if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
             self.dispatch_server_message('%s has left the room after %s' % (format_identity(session.remote_identity), self.format_session_duration(session)))
 
+        '''
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
+        '''
 
     def terminate_sessions(self, uri=None):
         log.info('inside terminating sessions %r', self.started)
@@ -494,14 +512,14 @@ class Room(object):
         except IllegalStateError:
             pass
         session.proposal_timer = None
-
+    '''
     def add_file(self, file):
         self.dispatch_server_message('%s has uploaded file %s (%s)' % (format_identity(file.sender), os.path.basename(file.name), self.format_file_size(file.size)))
         self.files.append(file)
         self.dispatch_conference_info()
         if ConferenceConfig.push_file_transfer:
             self.dispatch_file(file)
-
+    
     def add_screen_image(self, sender, image):
         sender_uri = '%s@%s' % (sender.uri.user, sender.uri.host)
         screen_image = self.screen_images.setdefault(sender_uri, ScreenImage(self, sender))
@@ -525,6 +543,7 @@ class Room(object):
             ConferenceApplication().bonjour_room_service.presence_state = presence_state
         else:
             self.bonjour_services.presence_state = presence_state
+    '''
 
     @run_in_twisted_thread
     def handle_notification(self, notification):
@@ -993,7 +1012,7 @@ class RoomFile(object):
     def file_selector(self):
         return FileSelector.for_file(self.name, hash=self.hash)
 
-
+'''
 class FileTransferHandler(object):
     implements(IObserver)
 
@@ -1087,4 +1106,5 @@ class FileTransferHandler(object):
         else:
             self.session.end()
         self._terminate(failure_reason=notification.data.reason)
+'''
 
