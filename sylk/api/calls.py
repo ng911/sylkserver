@@ -101,7 +101,7 @@ def conference_participants(room_number):
     return jsonify(response)
 
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
-def conference_participants(room_number):
+def conference_event_log(room_number):
     event_log_json = get_conference_event_log_json(room_number)
 
     response = {
