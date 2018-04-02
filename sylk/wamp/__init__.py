@@ -57,12 +57,16 @@ def joined(session, details):
         if data['command'] == 'status':
             log.info("process status command")
             notification_center = NotificationCenter()
+            log.info("process status command 1")
             notification_data = NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
+            log.info("process status command 2")
             notification_center.post_notification('CalltakerStatus', session, notification_data)
+            log.info("process status command 3")
             out = {
                 'command' : 'status_updated'
             }
+            log.info("process status command 4")
             session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
 
