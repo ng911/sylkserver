@@ -182,12 +182,14 @@ class Call(Document):
     sip_call_id = StringField()
     from_uri = StringField()
     to_uri = StringField()
-    direction = StringField(required=True, choices=('incoming', 'outgoing'), default='in')
+    direction = StringField(required=True, choices=('in', 'out'), default='in')
     start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     answer_time = ComplexDateTimeField(required=False)
     end_time = ComplexDateTimeField(required=False)
-    conf_id = ObjectIdField()
-    status = StringField(required=True, choices=('init', 'reject', 'ringing', 'queued', 'abandoned', 'active', 'closed'), default='init')
+    room_number = StringField(required=False)
+    failure_code = StringField(required=False)
+    failure_reason = StringField(required=False)
+    status = StringField(required=True, choices=('init', 'reject', 'failed', 'ringing', 'queued', 'abandoned', 'active', 'closed'), default='init')
 
 
 class Agency(EmbeddedDocument):
@@ -197,15 +199,17 @@ class Agency(EmbeddedDocument):
 
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
-    conf_id = ObjectIdField(required=True, default=bson.ObjectId)
+    room_number = StringField(required=True)
     start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     answer_time = ComplexDateTimeField(required=False)
     end_time = ComplexDateTimeField(required=False)
+    updated_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
     has_text = BooleanField(default=False)
     has_tty = BooleanField(default=False)
-    direction = StringField(required=True, choices=('incoming', 'outgoing'), default='in')
+    has_audio = BooleanField(default=True)
+    has_video = BooleanField(default=False)
+    direction = StringField(required=True, choices=('in', 'out'), default='in')
     duration = IntField(default=0)
-    callbackTime = ComplexDateTimeField()
     type1 = StringField()   # not sure what this is, copied from old schema
     type2 = StringField()   # not sure what this is, copied from old schema
     pictures = ListField(field=StringField)
@@ -213,25 +217,31 @@ class Conference(Document):
     partial_mute = BooleanField(default=False)
     hold = BooleanField(default=False)
     full_mute = BooleanField(default=False)
-    status = StringField(required=True, choices=('init', 'active', 'closed', 'abandon'))
-    note =  StringField()
+    status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned'))
     callback = BooleanField(default=False)
+    callback_time = ComplexDateTimeField()
     hold_start = ComplexDateTimeField()
     primary_queue_id = ObjectIdField()
     secondary_queue_id = ObjectIdField()
     link_id = ObjectIdField(required=True)
-    agencies = EmbeddedDocumentListField(document_type=Agency)
+    #todo this should be moved to location?
+    #agencies = EmbeddedDocumentListField(document_type=Agency)
     caller_ani = StringField()
     caller_uri = StringField()
     caller_name = StringField()
+    recording =  StringField()
+    note =  StringField()
+    emergency_type = StringField(default='')
+    secondary_type = StringField(default='')
 
-
-class ConferenceParticipants:
-    conf_id = ObjectIdField(required=True)
+class ConferenceParticipant:
+    room_number = StringField(required=True)
     sip_uri = StringField()
     name = StringField()
-    type = StringField(required=True, choices=('caller', 'calltaker'))
+    is_caller = BooleanField(default=False)
+    is_calltaker = BooleanField(default=False)
     is_primary = BooleanField(default=False)
+    direction = StringField(required=True, choices=('in', 'out'), default='in')
     hold = BooleanField(default=False)
     mute = BooleanField(default=False)
     is_send = BooleanField(default=True)
@@ -243,20 +253,20 @@ class ConferenceParticipants:
 
 
 class ConferenceEvent(Document):
-    conf_id = ObjectIdField(required=True)
-    event = StringField(required=True, choices=('join', 'leave', 'init', 'start', 'end', 'start_hold', 'end_hold', 'mute', 'end_mute'))
+    room_number = StringField(required=True)
+    event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', 'queued', 'start', 'end', 'start_hold', 'end_hold', 'mute', 'end_mute'))
     event_details = StringField()
     event_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
 
 
 class ConferenceMessage(Document):
-    conf_id = ObjectIdField(required=True)
+    room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
 
 
 class Location(Document):
-    conference_id = ObjectIdField()
+    room_number = StringField(required=True)
     location_id = ObjectIdField(required=True, default=bson.ObjectId)
     time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     raw_format = StringField()

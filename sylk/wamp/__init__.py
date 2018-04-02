@@ -29,9 +29,13 @@ def publish_update_calltakers(json_data):
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.calltakers', json_data)
 
-def publish_update_call(conf_id):
+def publish_create_call(json_data):
     if wamp_session is not None:
-        wamp_session.publish(u'com.emergent.calls', conf_id)
+        wamp_session.publish(u'com.emergent.call.created', json_data)
+
+def publish_update_call(room_number, json_data):
+    if wamp_session is not None:
+        wamp_session.publish(u'com.emergent.call.%s' % room_number, json_data)
 
 def publish_update_calls():
     if wamp_session is not None:
@@ -52,7 +56,6 @@ def joined(session, details):
         log.info("event on_calltaker_status received: %r", data['command'])
         if data['command'] == 'status':
             log.info("process status command")
-            notification_update_calltaker_status()
             notification_center = NotificationCenter()
             notification_data = NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])

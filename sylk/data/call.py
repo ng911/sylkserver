@@ -37,23 +37,59 @@ class CallData(object):
         session = notification.data.session
         status = notification.data.status
         log.info("incoming _NH_DataCallUpdate call_id %r, status %r" % (session.call_id, status))
-        from_uri = str(session.remote_identity.uri)
-        log.info("from_uri is %r" % str(from_uri))
-        to_uri = str(session.request_uri)
-        log.info("to_uri is %r" % str(to_uri))
 
         if status == 'init':
+            from_uri = str(session.remote_identity.uri)
+            log.info("from_uri is %r" % str(from_uri))
+            to_uri = str(session.request_uri)
+            log.info("to_uri is %r" % str(to_uri))
             call_obj = Call()
             call_obj.sip_call_id = session.call_id
             call_obj.from_uri = from_uri
             call_obj.to_uri = to_uri
             call_obj.direction = session.direction
+            call_obj.start_time = datetime.datetime.utcnow()
             call_obj.save()
         elif status == 'reject':
             call_obj = Call.objects.get(sip_call_id = session.call_id)
             call_obj.status = 'reject'
             call_obj.end_time = datetime.datetime.utcnow()
             call_obj.save()
+        elif (status == 'closed') or (status == 'abandoned'):
+            call_obj = Call.objects.get(sip_call_id = session.call_id)
+            call_obj.status = status
+            call_obj.end_time = datetime.datetime.utcnow()
+            call_obj.save()
+        else:
+            call_obj = Call.objects.get(sip_call_id = session.call_id)
+            call_obj.status = status
+            call_obj.save()
+
+    def _NH_DataCallActive(self, notification):
+        log.info("incoming _NH_DataCallActive")
+        session = notification.data.session
+        room_number = notification.data.room_number
+
+        call_obj = Call.objects.get(sip_call_id=session.call_id)
+        call_obj.status = 'active'
+        call_obj.room_number = room_number
+        call_obj.answer_time = datetime.datetime.utcnow()
+        call_obj.save()
+
+    def _NH_DataCallFailed(self, notification):
+        log.info("incoming _NH_DataCallFailed")
+        session = notification.data.session
+        failure_code = notification.data.failure_code
+        failure_reason = notification.data.failure_reason
+
+        call_obj = Call.objects.get(sip_call_id=session.call_id)
+        call_obj.status = 'failed'
+        call_obj.failure_code = failure_code
+        call_obj.failure_reason = failure_reason
+        call_obj.end_time = datetime.datetime.utcnow()
+        call_obj.save()
+
+
 
 
 
