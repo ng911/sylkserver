@@ -66,8 +66,7 @@ class CalltakerData(object):
     def update_status(self, user_id, status):
         if user_id in self._calltakers:
             user = self._calltakers[user_id]
-            log.info('user is %r', user)
-            user.status = status
+            self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=status, username=user.username)
             sylk.wamp.publish_update_calltaker_status(user_id, user.username, status)
 
     @property
