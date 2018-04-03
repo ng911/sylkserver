@@ -621,10 +621,13 @@ class OutgoingCallInitializer(object):
         '''
         self.outgoing_session = session
         log.info("remote_identity is %r", session.remote_identity)
-        dump_object_member_vars(session.remote_identity)
-        dump_object_member_funcs(session.remote_identity)
 
-        send_call_update_notification(self, session, 'init')
+
+    def _NH_SIPSessionNewOutgoing(self, notification):
+        log.info('got _NH_SIPSessionNewOutgoing')
+        dump_object_member_vars(self.outgoing_session.remote_identity)
+        dump_object_member_funcs(self.outgoing_session.remote_identity)
+        send_call_update_notification(self, self.outgoing_session, 'init')
 
     def _NH_DNSLookupDidFail(self, notification):
         log.info('Call to %s failed: DNS lookup error: %s' % (self.target, notification.data.error))
