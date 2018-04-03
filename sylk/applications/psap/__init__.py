@@ -605,10 +605,8 @@ class OutgoingCallInitializer(object):
         notification_center.add_observer(self, sender=session)
 
         route = notification.data.result[0]
-        local_ip = SIPConfig.local_ip.normalized
-        from_uri = '%s@%s' % (self.user, local_ip)
 
-        from_header = FromHeader(SIPURI.new(from_uri), self.user)
+        from_header = FromHeader(SIPURI.new(self.account.uri), self.user)
         to_header = ToHeader(SIPURI.new(self.target))
         extra_headers = []
 
