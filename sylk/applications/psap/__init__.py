@@ -307,6 +307,9 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def outgoing_session_will_start(self, sip_uri, session):
+        pass
+
+    def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
@@ -331,10 +334,6 @@ class PSAPApplication(SylkApplication):
             self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=self.is_calltaker)
         else:
             session.end()
-
-
-    def outgoing_session_did_start(self, sip_uri, session):
-        pass
 
     '''
     def add_outgoing_session(self, session):
