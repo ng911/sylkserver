@@ -29,8 +29,19 @@ log = ApplicationLogger(__package__)
 
 class RoomNotFoundError(Exception): pass
 
-RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
-ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
+class RoomData(object):
+    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'participants']
+    def __init__(self):
+        pass
+
+class ParticipantData(object):
+    __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute_audio', 'recv_audio', 'recv_video',
+                 'recv_chat', 'is_caller', 'is_active']
+    def __init__(self):
+        pass
+
+#RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
+#ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
 
 def format_identity(identity):
     if identity.display_name:
@@ -61,8 +72,13 @@ class PSAPApplication(SylkApplication):
     def create_room(self, incoming_session, call_type, direction):
         room_number = uuid4().hex
         room = Room(room_number)
-        room_data = RoomData(room = room, call_type = call_type, incoming_session = incoming_session,
-                            outgoing_calls = {}, participants = {}, direction = direction)
+        room_data = RoomData()
+        room_data.room = room
+        room_data.call_type = call_type
+        room_data.incoming_session = incoming_session
+        room_data.outgoing_calls = {}
+        room_data.participants = {}
+        room_data.direction = direction
 
         return (room_number, room_data)
 
