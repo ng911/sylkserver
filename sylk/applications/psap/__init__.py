@@ -288,15 +288,19 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason):
-        log.info('outgoing_session_did_fail session %r, sip_uri %r', session, sip_uri)
+        log.info('outgoing_session_did_fail session %r, sip_uri %r, failure_code %r, reason %r', session, sip_uri, failure_code, reason)
         room_number = session.room_number
         log.info('outgoing_session_did_fail room_number %r', room_number)
         room_data = self.get_room_data(room_number)
         if room_data is not None:
-            if sip_uri in room_data.outgoing_calls:
+            if str(sip_uri) in room_data.outgoing_calls:
+                log.info('found room_data.outgoing_calls ')
                 # todo send event that the call failed
                 #outgoing_call_initializer = room_data.outgoing_calls[sip_uri]
-                del room_data.outgoing_calls[sip_uri]
+                del room_data.outgoing_calls[str(sip_uri)]
+            else:
+                log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
+
 
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
