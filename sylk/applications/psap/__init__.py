@@ -319,9 +319,12 @@ class PSAPApplication(SylkApplication):
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
                 room_data.invitation_timer = None
-
+            log.info('room_data.outgoing_calls %r', room_data.outgoing_calls)
             for target, outgoing_call_initializer in room_data.outgoing_calls.iteritems():
-                if target != sip_uri:
+                log.info('target %r', target)
+                log.info('outgoing_call_initializer %r', outgoing_call_initializer)
+
+                if target != str(sip_uri):
                     outgoing_call_initializer.cancel()
             room_data.outgoing_calls = {}
             self.add_session_to_room(session)
