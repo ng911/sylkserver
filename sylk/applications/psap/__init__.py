@@ -411,7 +411,8 @@ class PSAPApplication(SylkApplication):
 
         log.info('remove_session room.length %r', room.length)
         # 2 because the other participant is the music server
-        if room.length == 2:
+        # todo - check why we had to change this to 1 here
+        if room.length == 1:
             # we need to stop the remaining session
             log.info('terminate all sessions')
             room.terminate_sessions()
