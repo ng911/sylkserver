@@ -80,6 +80,8 @@ class PSAPApplication(SylkApplication):
         room_data.participants = {}
         room_data.direction = direction
 
+        self._rooms[room_number] = room_data
+
         return (room_number, room_data)
 
     def get_room(self, room_number):
