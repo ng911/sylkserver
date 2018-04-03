@@ -455,6 +455,7 @@ class PSAPApplication(SylkApplication):
         log.info('room_data is %r', room_data)
         log.info('room_data.participants is %r', room_data.participants)
         for participant_data in room_data.participants.itervalues():
+            log.info('participant_data is %r', participant_data)
             if participant_data.session == session:
                 participant_data.is_active = False
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
