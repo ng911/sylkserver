@@ -620,6 +620,10 @@ class OutgoingCallInitializer(object):
         #self.app.outgoing_session = session
         '''
         self.outgoing_session = session
+        log.info("remote_identity is %r", session.remote_identity)
+        dump_object_member_vars(session.remote_identity)
+        dump_object_member_funcs(session.remote_identity)
+
         send_call_update_notification(self, session, 'init')
 
     def _NH_DNSLookupDidFail(self, notification):
