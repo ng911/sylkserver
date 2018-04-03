@@ -47,7 +47,11 @@ class CallData(object):
             call_obj.sip_call_id = session.call_id
             call_obj.from_uri = from_uri
             call_obj.to_uri = to_uri
-            call_obj.direction = session.direction
+            if session.direction == 'incoming':
+                call_obj.direction = 'in'
+            else:
+                call_obj.direction = 'out'
+
             call_obj.start_time = datetime.datetime.utcnow()
             call_obj.save()
         elif status == 'reject':
