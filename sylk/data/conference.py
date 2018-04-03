@@ -176,7 +176,13 @@ class ConferenceData(object):
 
     def _NH_ConferenceParticipantAdded(self, notification):
         log.info("incoming _NH_ConferenceUpdated")
-        self.add_participant(**notification.data.__dict__)
+        try:
+            self.add_participant(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantAdded %r", e)
+            log.error(stackTrace)
+
 
     def _NH_ConferenceParticipantRemoved(self, notification):
         log.info("incoming _NH_ConferenceUpdated")
