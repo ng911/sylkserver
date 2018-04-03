@@ -434,6 +434,7 @@ class PSAPApplication(SylkApplication):
         participants = room_data.participants
         participant_data = ParticipantData()
         participant_data.uri = str(sip_uri)
+        participant_data.display_name = display_name
         participant_data.session = session
         participant_data.direction = direction
         participant_data.mute_audio = mute_audio
