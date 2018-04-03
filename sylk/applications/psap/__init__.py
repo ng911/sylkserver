@@ -288,6 +288,7 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def outgoing_session_did_fail(self, room_number, sip_uri, failure_code, reason):
+        log.info('outgoing_session_did_fail room_number %r, sip_uri %r', room_number, sip_uri)
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             if sip_uri in room_data.outgoing_calls:
