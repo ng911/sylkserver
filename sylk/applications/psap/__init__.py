@@ -367,7 +367,7 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def remove_session(self, session):
-        log.info('remove_session for session %r, room_number %r', session, room_number)
+        log.info('remove_session for session %r, room_number %r', session, session.room_number)
         room_number = session.room_number
         try:
             room = self.get_room(room_number)
