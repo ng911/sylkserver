@@ -48,7 +48,7 @@ def get_json_from_db_obj(db_obj, ignore_fields=None, include_fields=None):
             if '_id' not in ignore_fields:
                 ignore_fields.append('_id')
         include_fields = list(set(all_fields)-set(ignore_fields))
-    json_data = {x:format_db_obj_field(x, db_obj_dict) for x in include_fields}
+    json_data = {x:format_db_obj_field(x, db_obj) for x in include_fields}
     return json_data
 
 
