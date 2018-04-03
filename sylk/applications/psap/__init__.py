@@ -42,6 +42,10 @@ class ParticipantData(object):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return "display_name %r, uri %r, session %r, direction %r, mute_audio %r, recv_audio %r, recv_video %r, recv_chat %r, is_caller %r, is_active %r" % \
+               (self.display_name, self.uri, self.session, self.direction, self.mute_audio, self.recv_audio, self.recv_video, self.recv_chat, self.is_caller, self.is_active)
+
 #RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
 #ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
 
