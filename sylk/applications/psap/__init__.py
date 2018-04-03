@@ -367,6 +367,7 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def remove_session(self, session):
+        log.info('remove_session for session %r, room_number %r', session, room_number)
         room_number = session.room_number
         try:
             room = self.get_room(room_number)
@@ -402,9 +403,13 @@ class PSAPApplication(SylkApplication):
         '''
         self.remove_participant(session)
 
+        log.info('remove_session before remove room.length %r', room.length)
+        log.info('remove_session for room.sessions %r', room.sessions)
         if session in room.sessions:
+            log.info('remove_session room.remove_session ')
             room.remove_session(session)
 
+        log.info('remove_session room.length %r', room.length)
         # 2 because the other participant is the music server
         if room.length == 2:
             # we need to stop the remaining session
