@@ -195,7 +195,7 @@ class PSAPApplication(SylkApplication):
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
 
-            self.add_incoming_participant(self, display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
+            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status='ringing',
