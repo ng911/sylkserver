@@ -623,12 +623,6 @@ class OutgoingCallInitializer(object):
         log.info("remote_identity is %r", session.remote_identity)
 
 
-    def _NH_SIPSessionNewOutgoing(self, notification):
-        log.info('got _NH_SIPSessionNewOutgoing')
-        dump_object_member_vars(self.outgoing_session.remote_identity)
-        dump_object_member_funcs(self.outgoing_session.remote_identity)
-        send_call_update_notification(self, self.outgoing_session, 'init')
-
     def _NH_DNSLookupDidFail(self, notification):
         log.info('Call to %s failed: DNS lookup error: %s' % (self.target, notification.data.error))
         notification_center = NotificationCenter()
@@ -636,7 +630,9 @@ class OutgoingCallInitializer(object):
         self.app.outgoing_session_lookup_failed(self.room_number, self.target)
 
     def _NH_SIPSessionNewOutgoing(self, notification):
+        log.info('OutgoingCallInitializer got _NH_SIPSessionNewOutgoing')
         session = notification.sender
+        '''
         local_identity = str(session.local_identity.uri)
         if session.local_identity.display_name:
             local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
@@ -644,6 +640,21 @@ class OutgoingCallInitializer(object):
         if session.remote_identity.display_name:
             remote_identity = '"%s" <%s>' % (session.remote_identity.display_name, remote_identity)
         log.info("Initiating SIP session from '%s' to '%s' via %s..." % (local_identity, remote_identity, session.route))
+        '''
+        send_call_update_notification(self, session, 'init')
+
+    def _NH_SIPSessionGotRingIndication(self, notification):
+        log.info('OutgoingCallInitializer got _NH_SIPSessionGotRingIndication')
+        session = notification.sender
+        '''
+        local_identity = str(session.local_identity.uri)
+        if session.local_identity.display_name:
+            local_identity = '"%s" <%s>' % (session.local_identity.display_name, local_identity)
+        remote_identity = str(session.remote_identity.uri)
+        if session.remote_identity.display_name:
+            remote_identity = '"%s" <%s>' % (session.remote_identity.display_name, remote_identity)
+        log.info("Initiating SIP session from '%s' to '%s' via %s..." % (local_identity, remote_identity, session.route))
+        '''
         send_call_update_notification(self, session, 'ringing')
 
     '''

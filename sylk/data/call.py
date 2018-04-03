@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 from application.python import Null
 from application.python.types import Singleton
@@ -40,36 +41,45 @@ class CallData(object):
         log.info("incoming _NH_DataCallUpdate session %r" % session)
         log.info("incoming _NH_DataCallUpdate call_id %r" % session.call_id)
 
-        if status == 'init':
-            from_uri = str(session.remote_identity.uri)
-            log.info("from_uri is %r" % str(from_uri))
-            to_uri = str(session.request_uri)
-            log.info("to_uri is %r" % str(to_uri))
-            call_obj = Call()
-            call_obj.sip_call_id = session.call_id
-            call_obj.from_uri = from_uri
-            call_obj.to_uri = to_uri
-            if session.direction == 'incoming':
-                call_obj.direction = 'in'
-            else:
-                call_obj.direction = 'out'
+        if session.call_id == None:
+            log.info("incoming _NH_DataCallUpdate no further processing, missing call_id")
+            return
 
-            call_obj.start_time = datetime.datetime.utcnow()
-            call_obj.save()
-        elif status == 'reject':
-            call_obj = Call.objects.get(sip_call_id = session.call_id)
-            call_obj.status = 'reject'
-            call_obj.end_time = datetime.datetime.utcnow()
-            call_obj.save()
-        elif (status == 'closed') or (status == 'abandoned'):
-            call_obj = Call.objects.get(sip_call_id = session.call_id)
-            call_obj.status = status
-            call_obj.end_time = datetime.datetime.utcnow()
-            call_obj.save()
-        else:
-            call_obj = Call.objects.get(sip_call_id = session.call_id)
-            call_obj.status = status
-            call_obj.save()
+        try:
+            if status == 'init':
+                from_uri = str(session.remote_identity.uri)
+                log.info("from_uri is %r" % str(from_uri))
+                to_uri = str(session.request_uri)
+                log.info("to_uri is %r" % str(to_uri))
+                call_obj = Call()
+                call_obj.sip_call_id = session.call_id
+                call_obj.from_uri = from_uri
+                call_obj.to_uri = to_uri
+                if session.direction == 'incoming':
+                    call_obj.direction = 'in'
+                else:
+                    call_obj.direction = 'out'
+
+                call_obj.start_time = datetime.datetime.utcnow()
+                call_obj.save()
+            elif status == 'reject':
+                call_obj = Call.objects.get(sip_call_id = session.call_id)
+                call_obj.status = 'reject'
+                call_obj.end_time = datetime.datetime.utcnow()
+                call_obj.save()
+            elif (status == 'closed') or (status == 'abandoned'):
+                call_obj = Call.objects.get(sip_call_id = session.call_id)
+                call_obj.status = status
+                call_obj.end_time = datetime.datetime.utcnow()
+                call_obj.save()
+            else:
+                call_obj = Call.objects.get(sip_call_id = session.call_id)
+                call_obj.status = status
+                call_obj.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_DataCallUpdate %r", e)
+            log.error(stackTrace)
 
     def _NH_DataCallActive(self, notification):
         log.info("incoming _NH_DataCallActive")
