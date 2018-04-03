@@ -36,7 +36,9 @@ class CallData(object):
         log.info("incoming _NH_DataCallUpdate")
         session = notification.data.session
         status = notification.data.status
-        log.info("incoming _NH_DataCallUpdate call_id %r, status %r" % (session.call_id, status))
+        log.info("incoming _NH_DataCallUpdate status %r" % status)
+        log.info("incoming _NH_DataCallUpdate session %r" % session)
+        log.info("incoming _NH_DataCallUpdate call_id %r" % session.call_id)
 
         if status == 'init':
             from_uri = str(session.remote_identity.uri)
