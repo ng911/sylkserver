@@ -193,6 +193,7 @@ class ConferenceHandler(object):
             lookup = DNSLookup()
             try:
                 routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
+                routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
             except DNSLookupError as e:
                 timeout = random.uniform(15, 30)
                 raise SubscriptionError(error='DNS lookup failed: %s' % e, timeout=timeout)

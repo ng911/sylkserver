@@ -7,7 +7,7 @@ from zope.interface import implements
 from sipsimple.threading.green import run_in_green_thread
 from sylk.applications import SylkApplication, ApplicationLogger
 from sipsimple.streams import MediaStreamRegistry
-from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader
+from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
 #from sipsimple.session import IllegalStateError, Session
@@ -22,7 +22,7 @@ from sylk.db.authenticate import authenticate_call
 from sylk.db.queue import get_queue_details, get_queue_members
 from acd import get_calltakers
 from sylk.data.call import CallData
-from sylk.configuration import ServerConfig
+from sylk.configuration import ServerConfig, SIPConfig
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
@@ -545,6 +545,7 @@ class OutgoingCallInitializer(object):
         log.info("OutgoingCallInitializer user is %r", user)
         self.app = app
         self.account = get_user_account(user)
+        self.user = user
         self.target = target
         self.streams = []
         if audio:
@@ -602,10 +603,24 @@ class OutgoingCallInitializer(object):
         session = Session(self.account)
         session.room_number = self.room_number
         notification_center.add_observer(self, sender=session)
+
+        route = notification.data.result[0]
+        local_ip = SIPConfig.local_ip.normalized
+        from_uri = '%s@%s' % (self.user, local_ip)
+
+        from_header = FromHeader(SIPURI.new(from_uri), self.user)
+        to_header = ToHeader(SIPURI.new(self.target))
+        extra_headers = []
+
+        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True,
+                             extra_headers=extra_headers)
+
+        '''
         session.connect(ToHeader(self.target), routes=notification.data.result, streams=self.streams)
         #application = SIPSessionApplication()
         #application.outgoing_session = session
         #self.app.outgoing_session = session
+        '''
         self.outgoing_session = session
         send_call_update_notification(self, session, 'init')
 
