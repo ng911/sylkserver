@@ -194,6 +194,7 @@ class PSAPApplication(SylkApplication):
                 is_calltaker = False
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
+            session.room_number = room_number
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
             NotificationCenter().post_notification('ConferenceCreated', self,
@@ -210,7 +211,6 @@ class PSAPApplication(SylkApplication):
 
             try:
                 ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, room_number)
-                session.room_number = room_number
                 room_data.invitation_timer = ringing_timer
                 log.info("ringing_timer set ")
             except Exception as e:
