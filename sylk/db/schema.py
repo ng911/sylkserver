@@ -220,6 +220,7 @@ class Conference(Document):
     status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned'))
     callback = BooleanField(default=False)
     callback_time = ComplexDateTimeField()
+    callback_number = StringField()
     hold_start = ComplexDateTimeField()
     primary_queue_id = ObjectIdField()
     secondary_queue_id = ObjectIdField()

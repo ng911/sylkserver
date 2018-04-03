@@ -47,6 +47,7 @@ class CalltakerData(object):
         status = notification.data.status
         username = notification.data.username
         self._calltakers[user_id] = User(wamp_session_id=wamp_session_id, status=status, username=username)
+        sylk.wamp.publish_update_calltaker_status(user_id, username, status)
 
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
