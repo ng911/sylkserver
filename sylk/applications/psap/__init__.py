@@ -331,7 +331,8 @@ class PSAPApplication(SylkApplication):
                     outgoing_call_initializer.cancel()
             room_data.outgoing_calls = {}
             self.add_session_to_room(session)
-            self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=self.is_calltaker)
+            #todo - add proper value of is_calltaker
+            self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
         else:
             session.end()
 
