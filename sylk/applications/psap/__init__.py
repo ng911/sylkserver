@@ -10,20 +10,19 @@ from sipsimple.streams import MediaStreamRegistry
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
-#from sipsimple.session import IllegalStateError, Session
 from sipsimple.session import IllegalStateError
 from sylk.session import Session
-from sylk.accounts import DefaultAccount, get_user_account
+from sylk.accounts import get_user_account
 from sipsimple.account import Account
 from uuid import uuid4
-from collections import namedtuple
 
 from sylk.db.authenticate import authenticate_call
 from sylk.db.queue import get_queue_details, get_queue_members
 from acd import get_calltakers
 from sylk.data.call import CallData
-from sylk.configuration import ServerConfig, SIPConfig
-from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
+from sylk.data.conference import ConferenceData
+from sylk.configuration import ServerConfig
+# from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 
@@ -62,6 +61,7 @@ class PSAPApplication(SylkApplication):
     def __init__(self):
         log.info(u'PSAPApplication init')
         CallData()
+        ConferenceData()
         #self.invited_parties = {}
         #self.ringing_timer = None
         self._rooms = {}
