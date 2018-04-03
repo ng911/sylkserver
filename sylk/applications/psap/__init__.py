@@ -287,8 +287,10 @@ class PSAPApplication(SylkApplication):
                 # todo add handling here, put the call in queue?
                 pass
 
-    def outgoing_session_did_fail(self, room_number, sip_uri, failure_code, reason):
-        log.info('outgoing_session_did_fail room_number %r, sip_uri %r', room_number, sip_uri)
+    def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason):
+        log.info('outgoing_session_did_fail session %r, sip_uri %r', session, sip_uri)
+        room_number = session.room_number
+        log.info('outgoing_session_did_fail room_number %r', room_number)
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             if sip_uri in room_data.outgoing_calls:
@@ -731,7 +733,7 @@ class OutgoingCallInitializer(object):
         notification_center.remove_observer(self, sender=session)
         remote_identity = str(session.remote_identity.uri)
         log.info("Session failed %s, %s" % (remote_identity, session.route))
-        self.app.outgoing_session_did_fail(self.target, session, notification.data.code, notification.data.reason)
+        self.app.outgoing_session_did_fail(session, self.target, notification.data.code, notification.data.reason)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
         '''
