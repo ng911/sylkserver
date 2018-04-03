@@ -606,7 +606,7 @@ class OutgoingCallInitializer(object):
 
         route = notification.data.result[0]
 
-        from_header = FromHeader(SIPURI.new(self.account.uri), self.user)
+        from_header = FromHeader(SIPURI.new(self.account.uri))
         to_header = ToHeader(SIPURI.new(self.target))
         extra_headers = []
 
