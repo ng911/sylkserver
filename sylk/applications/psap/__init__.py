@@ -61,13 +61,8 @@ class PSAPApplication(SylkApplication):
     def create_room(self, incoming_session, call_type, direction):
         room_number = uuid4().hex
         room = Room(room_number)
-        room_data = RoomData()
-        room_data.room = room
-        room_data.call_type = call_type
-        room_data.incoming_session = incoming_session
-        room_data.outgoing_calls = {}
-        room_data.participants = {}
-        room_data.direction = direction
+        room_data = RoomData(room = room, call_type = call_type, incoming_session = incoming_session,
+                            outgoing_calls = {}, participants = {}, direction = direction)
 
         return (room_number, room_data)
 
