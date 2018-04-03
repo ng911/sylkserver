@@ -610,7 +610,7 @@ class OutgoingCallInitializer(object):
         to_header = ToHeader(SIPURI.new(self.target))
         extra_headers = []
 
-        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True,
+        session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True,
                              extra_headers=extra_headers)
 
         '''
