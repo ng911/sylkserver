@@ -7,6 +7,7 @@ from application.notification import IObserver, NotificationCenter
 from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.db.schema import Call
+from sylk.configuration import ServerConfig
 #from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
@@ -52,6 +53,7 @@ class CallData(object):
                 to_uri = str(session.request_uri)
                 log.info("to_uri is %r" % str(to_uri))
                 call_obj = Call()
+                call_obj.psap_id = ServerConfig.psap_id
                 call_obj.sip_call_id = session.call_id
                 call_obj.from_uri = from_uri
                 call_obj.to_uri = to_uri
@@ -77,6 +79,7 @@ class CallData(object):
                     call_obj = Call.objects.get(sip_call_id = session.call_id)
                 except:
                     call_obj = Call()
+                    call_obj.psap_id = ServerConfig.psap_id
                     call_obj.sip_call_id = session.call_id
                 call_obj.status = status
                 call_obj.save()

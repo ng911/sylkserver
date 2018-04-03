@@ -178,6 +178,7 @@ class QueueMember(Document):
 
 
 class Call(Document):
+    psap_id = ObjectIdField(required=True)
     call_id = ObjectIdField(required=True, default=bson.ObjectId)
     sip_call_id = StringField()
     from_uri = StringField()
