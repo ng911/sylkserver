@@ -429,7 +429,7 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         participants = room_data.participants
         participant_data = ParticipantData()
-        participant_data.uri = sip_uri
+        participant_data.uri = str(sip_uri)
         participant_data.session = session
         participant_data.direction = direction
         participant_data.mute_audio = mute_audio
@@ -438,7 +438,7 @@ class PSAPApplication(SylkApplication):
         participant_data.recv_chat = False
         participant_data.is_caller = is_caller
         participant_data.is_active = True
-        participants[sip_uri] = participant_data
+        participants[str(sip_uri)] = participant_data
 
         NotificationCenter().post_notification('ConferenceParticipantAdded', self,
                                                NotificationData(room_number=room_number,
@@ -452,6 +452,8 @@ class PSAPApplication(SylkApplication):
     def remove_participant(self, session):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
+        log.info('room_data is %r', room_data)
+        log.info('room_data.participants is %r', room_data.participants)
         for sip_uri, participant_data in room_data.participants.itervalues():
             if participant_data.session == session:
                 participant_data.is_active = False
