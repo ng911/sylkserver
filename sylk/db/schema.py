@@ -236,7 +236,7 @@ class Conference(Document):
     emergency_type = StringField(default='')
     secondary_type = StringField(default='')
 
-class ConferenceParticipant:
+class ConferenceParticipant(Document):
     room_number = StringField(required=True)
     sip_uri = StringField()
     name = StringField()
