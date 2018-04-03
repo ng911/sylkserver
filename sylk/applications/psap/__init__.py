@@ -10,7 +10,9 @@ from sipsimple.streams import MediaStreamRegistry
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
-from sipsimple.session import IllegalStateError, Session
+#from sipsimple.session import IllegalStateError, Session
+from sipsimple.session import IllegalStateError
+from sylk.session import Session
 from sylk.accounts import DefaultAccount, get_user_account
 from sipsimple.account import Account
 from uuid import uuid4
