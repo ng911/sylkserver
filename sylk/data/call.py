@@ -73,7 +73,11 @@ class CallData(object):
                 call_obj.end_time = datetime.datetime.utcnow()
                 call_obj.save()
             else:
-                call_obj = Call.objects.get(sip_call_id = session.call_id)
+                try:
+                    call_obj = Call.objects.get(sip_call_id = session.call_id)
+                except:
+                    call_obj = Call()
+                    call_obj.sip_call_id = session.call_id
                 call_obj.status = status
                 call_obj.save()
         except Exception as e:
