@@ -235,7 +235,7 @@ class PSAPApplication(SylkApplication):
                                                                     app=self,
                                                                     is_calltaker=not is_calltaker)
                 outgoing_call_initializer.start()
-                room_data.outgoing_calls[sip_uri] = outgoing_call_initializer
+                room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
                 #self.invited_parties[sip_uri] = outgoing_call_initializer
         elif call_type == 'sos_room':
             room_number = local_identity.uri.user
@@ -286,7 +286,7 @@ class PSAPApplication(SylkApplication):
             if sip_uri in room_data.outgoing_calls:
                 # todo send event that the call failed
                 #outgoing_call_initializer = room_data.outgoing_calls[sip_uri]
-                del room_data.outgoing_calls[sip_uri]
+                del room_data.outgoing_calls[str(sip_uri)]
 
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
