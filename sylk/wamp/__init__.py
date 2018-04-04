@@ -31,14 +31,17 @@ def publish_update_calltakers(json_data):
 
 def publish_create_call(json_data):
     if wamp_session is not None:
+        log.info("publish com.emergent.call.created with json %r", json_data)
         wamp_session.publish(u'com.emergent.call.created', json_data)
 
 def publish_update_call(room_number, json_data):
     if wamp_session is not None:
+        log.info("publish com.emergent.call.%r with json %r", room_number, json_data)
         wamp_session.publish(u'com.emergent.call.%s' % room_number, json_data)
 
 def publish_update_calls():
     if wamp_session is not None:
+        log.info("publish com.emergent.calls")
         wamp_session.publish(u'com.emergent.calls')
 
 @comp.on_join
