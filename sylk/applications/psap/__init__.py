@@ -265,7 +265,7 @@ class PSAPApplication(SylkApplication):
         if not room.started:
             room_data = self.get_room_data(room_number)
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
-                outgoing_call_initializer.cancel()
+                outgoing_call_initializer.cancelCall()
             room_data.incoming_session.end()
             self.remove_room(room_number)
             # todo add more acd handling here
@@ -333,7 +333,7 @@ class PSAPApplication(SylkApplication):
                 log.info('outgoing_call_initializer %r', outgoing_call_initializer)
 
                 if target != str(sip_uri):
-                    outgoing_call_initializer.cancel()
+                    outgoing_call_initializer.cancelCall()
             room_data.outgoing_calls = {}
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number, status='active'))
@@ -611,7 +611,7 @@ class OutgoingCallInitializer(object):
                 uri = self.target
             lookup.lookup_sip_proxy(uri, settings.sip.transport_list)
 
-    def cancel(self):
+    def cancelCall(self):
         self.cancel = True
         if self.outgoing_session is not None:
             # todo add event sending here
