@@ -256,7 +256,7 @@ class ConferenceParticipant(Document):
 
 class ConferenceEvent(Document):
     room_number = StringField(required=True)
-    event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', 'queued', 'start', 'end', 'start_hold', 'end_hold', 'mute', 'end_mute'))
+    event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute'))
     event_details = StringField()
     event_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
 
