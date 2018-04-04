@@ -26,7 +26,7 @@ class ConferenceData(object):
     def __init__(self):
         self.init_observers()
 
-    def create_conference(self, room_number, direction='incoming', call_type='sos',
+    def create_conference(self, room_number, direction='in', call_type='sos',
                           status='init', primary_queue_id=None, link_id=None, caller_ani='', caller_uri='', caller_name='',
                           has_audio=True, has_text=False, has_video=False, has_tty=False):
         try:
@@ -66,6 +66,17 @@ class ConferenceData(object):
             conference_event.event_details = 'send call ringing '.format()
             conference_event.room_number = room_number
             conference_event.save()
+
+            '''
+            participant = ConferenceParticipant()
+            participant.room_number = room_number
+            participant.name = caller_name
+            participant.direction = direction
+            participant.is_caller = True
+            participant.is_calltaker = is_calltaker
+            participant.sip_uri = caller_uri
+            participant.save()
+            '''
 
             json_data = get_json_from_db_obj(conference)
             publish_create_call(json_data)
@@ -127,7 +138,8 @@ class ConferenceData(object):
 
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
-            publish_update_call(room_number, json_data)
+            # todo - change this to publish call details event
+            #publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in add_participant %r", e)
@@ -153,7 +165,8 @@ class ConferenceData(object):
             '''
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
-            publish_update_call(room_number, json_data)
+            # todo - change this to publish call details event
+            #publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_participant_active_status %r", e)
