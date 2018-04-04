@@ -375,6 +375,10 @@ class PSAPApplication(SylkApplication):
         room_number = session.room_number
         try:
             room = self.get_room(room_number)
+            if room is None:
+                # todo check more here
+                log.info('room is none for %r', room_number)
+                return
         except RoomNotFoundError:
             log.info('in _NH_SIPSessionDidEnd RoomNotFoundError')
             return
