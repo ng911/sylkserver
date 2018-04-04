@@ -218,7 +218,7 @@ class Conference(Document):
     partial_mute = BooleanField(default=False)
     hold = BooleanField(default=False)
     full_mute = BooleanField(default=False)
-    status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned'))
+    status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned', 'cancel'))
     callback = BooleanField(default=False)
     callback_time = ComplexDateTimeField()
     callback_number = StringField()
@@ -256,7 +256,8 @@ class ConferenceParticipant(Document):
 
 class ConferenceEvent(Document):
     room_number = StringField(required=True)
-    event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute'))
+    event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', \
+                                                'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', 'abandoned'))
     event_details = StringField()
     event_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
 
