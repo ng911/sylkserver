@@ -109,6 +109,7 @@ class ConferenceData(object):
 
     def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker):
         try:
+            log.info('add_participant %r for room %r, display_name %r', sip_uri, room_number, display_name)
             participant = ConferenceParticipant()
             participant.room_number = room_number
             participant.name = display_name
@@ -169,14 +170,24 @@ class ConferenceData(object):
 
     def _NH_ConferenceCreated(self, notification):
         log.info("incoming _NH_ConferenceCreated")
-        self.create_conference(**notification.data.__dict__)
+        try:
+            self.create_conference(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceCreated %r", e)
+            log.error(stackTrace)
 
     def _NH_ConferenceUpdated(self, notification):
         log.info("incoming _NH_ConferenceUpdated")
-        self.update_conference_status(notification.data.room_number, notification.data.status)
+        try:
+            self.update_conference_status(notification.data.room_number, notification.data.status)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceUpdated %r", e)
+            log.error(stackTrace)
 
     def _NH_ConferenceParticipantAdded(self, notification):
-        log.info("incoming _NH_ConferenceUpdated")
+        log.info("incoming _NH_ConferenceParticipantAdded")
         try:
             self.add_participant(**notification.data.__dict__)
         except Exception as e:
@@ -186,5 +197,10 @@ class ConferenceData(object):
 
 
     def _NH_ConferenceParticipantRemoved(self, notification):
-        log.info("incoming _NH_ConferenceUpdated")
-        self.update_participant_active_status(notification.data.room_number, notification.data.display_name, notification.data.sip_uri, False)
+        log.info("incoming _NH_ConferenceParticipantRemoved")
+        try:
+            self.update_participant_active_status(notification.data.room_number, notification.data.display_name, notification.data.sip_uri, False)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantRemoved %r", e)
+            log.error(stackTrace)
