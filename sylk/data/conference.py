@@ -98,8 +98,7 @@ class ConferenceData(object):
                 conference_event.event_details = 'update call status to  {}'.format(status)
             conference_event.save()
 
-            json_data = get_json_from_db_obj(conference, include_fields=['status'])
-            json_data['command'] = 'update_status'
+            json_data = get_json_from_db_obj(conference)
             publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -126,8 +125,8 @@ class ConferenceData(object):
             conference_event.event_details = 'participant {} joined'.format(display_name)
             conference_event.save()
 
-            json_data = get_json_from_db_obj(participant)
-            json_data['command'] = 'add_participant'
+            conference = Conference.objects.get(room_number=room_number)
+            json_data = get_json_from_db_obj(conference)
             publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -147,8 +146,13 @@ class ConferenceData(object):
             conference_event.event_details = 'participant {} left'.format(display_name)
             conference_event.save()
 
+            '''
             json_data = get_json_from_db_obj(participant, include_fields=['is_active'])
             json_data['command'] = 'update_participant_status'
+            publish_update_call(room_number, json_data)
+            '''
+            conference = Conference.objects.get(room_number=room_number)
+            json_data = get_json_from_db_obj(conference)
             publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
