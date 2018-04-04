@@ -62,8 +62,6 @@ class PSAPApplication(SylkApplication):
         log.info(u'PSAPApplication init')
         CallData()
         ConferenceData()
-        #self.invited_parties = {}
-        #self.ringing_timer = None
         self._rooms = {}
 
     def start(self):
@@ -218,7 +216,7 @@ class PSAPApplication(SylkApplication):
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
 
             try:
-                ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, room_number)
+                ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, session, room_number)
                 room_data.invitation_timer = ringing_timer
                 log.info("ringing_timer set ")
             except Exception as e:
@@ -251,11 +249,14 @@ class PSAPApplication(SylkApplication):
     def on_ringing_timeout(self, incoming_session, room_number):
         log.info("on_ringing_timeout")
         log.info("timed out ringing for conf room %r", room_number)
-        self.end_ringing_call(room_number)
-        self.ringing_timer = None
-        send_call_update_notification(self, incoming_session, 'abandoned')
-        NotificationCenter().post_notification('ConferenceUpdated', self,
-                                               NotificationData(room_number=room_number, status='abandoned'))
+        room = self.get_room(room_number)
+        if room and (not room.started):
+            self.end_ringing_call(room_number)
+            send_call_update_notification(self, incoming_session, 'abandoned')
+            NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                   NotificationData(room_number=room_number, status='abandoned'))
+        else:
+            log.error("Error on_ringing_timeout recvd for active call %r", room_number)
 
     def end_ringing_call(self, room_number):
         room = self.get_room(room_number)
