@@ -202,7 +202,6 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
 
-            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status='ringing',
@@ -211,6 +210,7 @@ class PSAPApplication(SylkApplication):
                                                                     caller_name=remote_identity.uri.user,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
+            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
             # start call timer
             ring_time = queue_details.ring_time
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
