@@ -334,6 +334,9 @@ class PSAPApplication(SylkApplication):
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel()
             room_data.outgoing_calls = {}
+            NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                   NotificationData(room_number=room_number, status='active'))
+
             self.add_session_to_room(session)
             #todo - add proper value of is_calltaker
             self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
