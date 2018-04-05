@@ -106,7 +106,7 @@ class PSAPApplication(SylkApplication):
             room_data = self._rooms[room_number]
             for participant_data in room_data.participants.itervalues():
                 if participant_data.is_calltaker:
-                    calltakers.append(participant_data.name)
+                    calltakers.append(participant_data.display_name)
         return calltakers
 
     '''
