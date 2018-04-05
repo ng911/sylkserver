@@ -37,7 +37,7 @@ class RoomData(object):
 
 class ParticipantData(object):
     __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute_audio', 'recv_audio', 'recv_video',
-                 'recv_chat', 'is_caller', 'is_active']
+                 'recv_chat', 'is_caller', 'is_active', 'is_calltaker']
     def __init__(self):
         pass
 
@@ -99,6 +99,15 @@ class PSAPApplication(SylkApplication):
         if room_number in self._rooms:
             return self._rooms[room_number]
         return None
+
+    def get_calltakers_in_room(self, room_number):
+        calltakers = []
+        if room_number in self._rooms:
+            room_data = self._rooms[room_number]
+            for participant_data in room_data.participants.itervalues():
+                if participant_data.is_calltaker:
+                    calltakers.append(participant_data.name)
+        return calltakers
 
     '''
     def get_room(self, uri=None, create=False, room_number=None):
@@ -336,12 +345,13 @@ class PSAPApplication(SylkApplication):
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancelCall()
             room_data.outgoing_calls = {}
-            NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                   NotificationData(room_number=room_number, status='active'))
 
             self.add_session_to_room(session)
             #todo - add proper value of is_calltaker
             self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
+            calltakers = self.get_calltakers_in_room(room_number)
+            NotificationCenter().post_notification('ConferenceActive', self,
+                                                   NotificationData(room_number=room_number, calltakers=calltakers))
         else:
             session.end()
 
@@ -433,10 +443,6 @@ class PSAPApplication(SylkApplication):
             self.remove_room(room_number)
             room.stop()
 
-    '''
-    ParticipantData = namedtuple('ParticipantData',
-                                 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
-    '''
     def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker):
         self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker)
 
@@ -458,6 +464,7 @@ class PSAPApplication(SylkApplication):
         participant_data.recv_chat = False
         participant_data.is_caller = is_caller
         participant_data.is_active = True
+        participant_data.is_calltaker = is_calltaker
         participants[str(sip_uri)] = participant_data
 
         NotificationCenter().post_notification('ConferenceParticipantAdded', self,
