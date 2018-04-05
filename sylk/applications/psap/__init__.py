@@ -266,6 +266,7 @@ class PSAPApplication(SylkApplication):
             room_data = self.get_room_data(room_number)
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
                 outgoing_call_initializer.cancelCall()
+            log.info('room_data.incoming_session %r end', room_data.incoming_session)
             room_data.incoming_session.end()
             self.remove_room(room_number)
             # todo add more acd handling here

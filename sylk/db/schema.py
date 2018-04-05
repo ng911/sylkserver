@@ -190,7 +190,7 @@ class Call(Document):
     room_number = StringField(required=False)
     failure_code = StringField(required=False)
     failure_reason = StringField(required=False)
-    status = StringField(required=True, choices=('init', 'reject', 'failed', 'ringing', 'queued', 'abandoned', 'active', 'closed'), default='init')
+    status = StringField(required=True, choices=('init', 'reject', 'failed', 'ringing', 'queued', 'abandoned', 'active', 'closed', 'cancel'), default='init')
 
 
 class Agency(EmbeddedDocument):
