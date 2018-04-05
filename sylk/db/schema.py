@@ -490,7 +490,7 @@ class Grant(Document):
     }
 
     def delete(self):
-        logger.debug("inside grant delete")
+        log.debug("inside grant delete")
         return Document.delete(self)
 
     @property

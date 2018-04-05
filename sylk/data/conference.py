@@ -9,7 +9,7 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
-from sylk.wamp import publish_create_call, publish_update_call
+from sylk.wamp import publish_create_call, publish_update_call, publish_active_call
 from sylk.utils import get_json_from_db_obj
 import sylk.wamp
 
@@ -85,15 +85,39 @@ class ConferenceData(object):
             log.error("exception in create_conference %r", e)
             log.error(stackTrace)
 
+    def set_conference_active(self, room_number, calltakers):
+        try:
+            conference = Conference.objects.get(room_number=room_number)
+            conference.status = 'active'
+            utcnow = datetime.datetime.utcnow()
+            conference.updated_at = utcnow
+            conference.answer_time = utcnow
+            conference.save()
+
+            conference_event = ConferenceEvent()
+            conference_event.event = 'active'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'update call status to active'
+            conference_event.save()
+
+            json_data = get_json_from_db_obj(conference)
+            publish_update_call(room_number, json_data)
+
+            for calltaker in calltakers:
+                publish_active_call(calltaker, room_number)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_conference_status %r", e)
+            log.error(stackTrace)
+
     def update_conference_status(self, room_number, status):
         try:
             conference = Conference.objects.get(room_number=room_number)
             conference.status = status
             utcnow = datetime.datetime.utcnow()
             conference.updated_at = utcnow
-            if status == 'active':
-                conference.answer_time = utcnow
-            elif (status == 'closed') or (status == 'abandoned'):
+            if (status == 'closed') or (status == 'abandoned'):
                 conference.end_time = utcnow
             conference.save()
 
@@ -176,6 +200,7 @@ class ConferenceData(object):
         log.info("ConferenceData init_observers")
         notification_center = NotificationCenter()
         notification_center.add_observer(self, name='ConferenceCreated')
+        notification_center.add_observer(self, name='ConferenceActive')
         notification_center.add_observer(self, name='ConferenceUpdated')
         notification_center.add_observer(self, name='ConferenceParticipantAdded')
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
@@ -192,6 +217,15 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceCreated %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceActive(self, notification):
+        log.info("incoming _NH_ConferenceActive")
+        try:
+            self.set_conference_active(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceActive %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceUpdated(self, notification):
