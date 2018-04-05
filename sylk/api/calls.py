@@ -2,9 +2,10 @@ import traceback
 from flask import Blueprint, jsonify
 from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant
+from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call
 from sylk.data.calltaker import CalltakerData
 from sylk.utils import get_json_from_db_obj
+from utils import get_argument
 from mongoengine import Q
 calls = Blueprint('calls', __name__,
                         template_folder='templates')
@@ -60,6 +61,26 @@ def recent():
     }
 
     return jsonify(response)
+
+'''
+Get conference room for call id
+'''
+@calls.route('/get_room', methods=['GET'])
+def get_room():
+    try:
+        call_id = get_argument('call_id')
+        call_obj = Call.objects.get(sip_call_id=call_id)
+        response = {
+            'success': False,
+            'room_number' : call_obj.room_number
+        }
+        return jsonify(response)
+    except:
+        response = {
+            'success': False
+        }
+        return jsonify(response)
+
 
 def get_conference_participants_json(room_number):
     participants = []

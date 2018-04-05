@@ -47,12 +47,13 @@ class CallData(object):
             return
 
         try:
-            if status == 'init':
+            try:
+                call_obj = Call.objects.get(sip_call_id = session.call_id)
+            except:
+                call_obj = Call()
                 from_uri = str(session.remote_identity.uri)
                 log.info("from_uri is %r" % str(from_uri))
                 to_uri = str(session.request_uri)
-                log.info("to_uri is %r" % str(to_uri))
-                call_obj = Call()
                 call_obj.psap_id = ServerConfig.psap_id
                 call_obj.sip_call_id = session.call_id
                 call_obj.from_uri = from_uri
@@ -62,27 +63,18 @@ class CallData(object):
                 else:
                     call_obj.direction = 'out'
 
+            if hasattr(session, 'room_number'):
+                call_obj.room_number = session.room_number
+            if status == 'init':
                 call_obj.start_time = datetime.datetime.utcnow()
-                call_obj.save()
-            elif status == 'reject':
-                call_obj = Call.objects.get(sip_call_id = session.call_id)
-                call_obj.status = 'reject'
-                call_obj.end_time = datetime.datetime.utcnow()
-                call_obj.save()
-            elif (status == 'closed') or (status == 'abandoned'):
-                call_obj = Call.objects.get(sip_call_id = session.call_id)
+            elif (status == 'closed') or (status == 'abandoned') or (status == 'reject') or (status == 'cancel'):
                 call_obj.status = status
                 call_obj.end_time = datetime.datetime.utcnow()
-                call_obj.save()
+            elif (status == 'active'):
+                call_obj.answer_time = datetime.datetime.utcnow()
             else:
-                try:
-                    call_obj = Call.objects.get(sip_call_id = session.call_id)
-                except:
-                    call_obj = Call()
-                    call_obj.psap_id = ServerConfig.psap_id
-                    call_obj.sip_call_id = session.call_id
                 call_obj.status = status
-                call_obj.save()
+            call_obj.save()
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_DataCallUpdate %r", e)
