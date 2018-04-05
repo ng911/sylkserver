@@ -402,6 +402,11 @@ class PSAPApplication(SylkApplication):
                 self.end_ringing_call(room_number)
                 # add event that the user cancelled
 
+            self.remove_room(room_number)
+            room.stop()
+            NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    status='closed'))
             return
         '''
         room_uri = self.get_room_uri(uri=None, room_number=session.room_number)
