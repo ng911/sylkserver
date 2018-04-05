@@ -396,7 +396,9 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
 
         if not room.started:
+            log.info('remove_session room not started yet')
             if session == room_data.incoming_session:
+                log.info('remove_session room not started yet, end_ringing_call')
                 self.end_ringing_call(room_number)
                 # add event that the user cancelled
 
