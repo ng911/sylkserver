@@ -25,6 +25,7 @@ from sylk.configuration import ServerConfig
 # from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
+from sylk.location import ali_lookup
 
 log = ApplicationLogger(__package__)
 
@@ -210,6 +211,9 @@ class PSAPApplication(SylkApplication):
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
+
+            if (call_type == 'sos') and inoming_link.ali_format and (inoming_link.ali_format != ''):
+                ali_lookup(room_number, remote_identity.uri.user, inoming_link.ali_format)
 
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
