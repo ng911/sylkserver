@@ -52,9 +52,6 @@ Note - for now we ignore the psap_id
 @psap.route('/sops', methods=['GET'])
 def sops():
     sops = read_sops()
-    response = {
-        'success' : True,
-        'sops' : sops
-    }
+    sops['success'] = True
 
-    return jsonify(response)
+    return jsonify(sops)
