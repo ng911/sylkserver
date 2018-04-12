@@ -19,6 +19,7 @@ class ServerConfig(ConfigSection):
     enable_bonjour = False
     default_application = 'conference'
     psap_id = ""
+    sop_dir = "sop"
     asterisk_server = "127.0.0.1:5090"
     outgoing_gateway = "127.0.0.1:5090"
     application_map = ConfigSetting(type=StringList, value=['echo:echo'])
