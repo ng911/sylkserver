@@ -44,10 +44,12 @@ oauth = OAuth2Provider(app)
 from authentication import authentication
 from calltaker import calltaker
 from calls import calls
+from psap import psap
 
 app.register_blueprint(authentication, url_prefix='/auth')
 app.register_blueprint(calltaker, url_prefix='/calltaker')
 app.register_blueprint(calls, url_prefix='/calls')
+app.register_blueprint(psap, url_prefix='/psap')
 
 
 log = ApplicationLogger(__package__)
