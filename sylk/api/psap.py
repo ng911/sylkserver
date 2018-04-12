@@ -15,7 +15,7 @@ log = ApplicationLogger(__package__)
 '''
 Note - for now we ignore the psap_id
 '''
-@psap.route('/', methods=['GET'])
+@psap.route('/sops', methods=['GET'])
 def sops():
     response = {
         'success' : True,
