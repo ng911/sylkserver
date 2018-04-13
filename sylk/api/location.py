@@ -15,7 +15,7 @@ log = ApplicationLogger(__package__)
 
 
 @location.route('/<room_number>', methods=['GET'])
-def location(room_number):
+def get_location(room_number):
     try:
         page_no = get_argument('page', 0)
         params = {'room_number' : room_number}
