@@ -25,7 +25,6 @@ if __name__ == '__main__':  # parse command line options, and set the high level
     import logging
     global log
     handler = logging.StreamHandler(stream=sys.stdout)
-    handler = logging.FileHandler("testali.log")
 
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(

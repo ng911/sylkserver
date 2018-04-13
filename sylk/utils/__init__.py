@@ -51,5 +51,18 @@ def get_json_from_db_obj(db_obj, ignore_fields=None, include_fields=None):
     json_data = {x:format_db_obj_field(x, db_obj) for x in include_fields}
     return json_data
 
+'''
+Cuidado - this only handles string or maybe int values for now
+'''
+def set_db_obj_from_request(db_obj, request):
+    if (request.content_type is not None) and request.content_type.startswith('application/json'):
+        request_data = request.get_json()
+    else:
+        request_data = request.values()
+    field_names = request_data.keys()
+    db_obj_dict = db_obj.to_mongo(True).to_dict()
+    for field_name in field_names:
+        if field_name in db_obj_dict:
+            db_obj_dict[field_name] = request_data[field_name]
 
 

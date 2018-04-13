@@ -45,11 +45,13 @@ from authentication import authentication
 from calltaker import calltaker
 from calls import calls
 from psap import psap
+from location import location
 
 app.register_blueprint(authentication, url_prefix='/auth')
 app.register_blueprint(calltaker, url_prefix='/calltaker')
 app.register_blueprint(calls, url_prefix='/calls')
 app.register_blueprint(psap, url_prefix='/psap')
+app.register_blueprint(location, url_prefix='/location')
 
 
 log = ApplicationLogger(__package__)

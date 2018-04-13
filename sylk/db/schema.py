@@ -273,6 +273,7 @@ class Location(Document):
     room_number = StringField(required=True)
     location_id = ObjectIdField(required=True, default=bson.ObjectId)
     time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    updated_at = ComplexDateTimeField(default=datetime.datetime.utcnow)
     ali_format = StringField()
     raw_format = StringField()
     phone_number = StringField()

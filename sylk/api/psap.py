@@ -60,8 +60,16 @@ def sops():
 @psap.route('/speed_dial', methods=['GET'])
 def speed_dial():
     try:
+        user_id = get_argument('user_id')
+        params = {'psap_id' : ServerConfig.psap_id}
+        if user_id is None:
+            params['user_id__exists'] = False
+        else:
+            params['user_id'] = user_id
+
+        speed_dial_cursor = SpeedDial.objects(**params)
         speed_dials = []
-        for speed_dial_db_obj in SpeedDial.objects(psap_id=ServerConfig.psap_id, user_id__exists=False):
+        for speed_dial_db_obj in speed_dial_cursor:
             speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
             speed_dials.append(speed_dial)
 
@@ -75,8 +83,15 @@ def speed_dial():
 @psap.route('/greetings', methods=['GET'])
 def greetings():
     try:
+        user_id = get_argument('user_id')
+        params = {'psap_id' : ServerConfig.psap_id}
+        if user_id is None:
+            params['user_id__exists'] = False
+        else:
+            params['user_id'] = user_id
+        greeting_cursor = Greeting.objects(**params)
         greetings = []
-        for greeting_db_obj in Greeting.objects(psap_id=ServerConfig.psap_id, user_id__exists=False):
+        for greeting_db_obj in greeting_cursor:
             greeting = get_json_from_db_obj(greeting_db_obj, ignore_fields=['psap_id', 'user_id'])
             greetings.append(greeting)
 
