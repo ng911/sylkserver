@@ -4,7 +4,7 @@ from sylk.configuration import ServerConfig
 from flask import Blueprint, jsonify
 from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import SpeedDial, Greeting
+from sylk.db.schema import SpeedDial, Greeting, CallTransferLine
 from sylk.utils import get_json_from_db_obj
 from utils import get_argument
 
@@ -86,4 +86,18 @@ def greetings():
         result = {'success' : False, 'reason' : str(e)}
         return jsonify(result)
 
+
+@psap.route('/call_transfer_lines', methods=['GET'])
+def call_transfer_lines():
+    try:
+        call_transfer_lines = []
+        for call_transfer_line_obj in CallTransferLine.objects(psap_id=ServerConfig.psap_id):
+            call_transfer_line = get_json_from_db_obj(call_transfer_line_obj, ignore_fields=['psap_id'])
+            call_transfer_lines.append(call_transfer_line)
+
+        result = {'success': True, 'call_transfer_lines' : call_transfer_lines}
+        return jsonify(result)
+    except Exception as e:
+        result = {'success' : False, 'reason' : str(e)}
+        return jsonify(result)
 
