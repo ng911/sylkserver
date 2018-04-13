@@ -4,8 +4,8 @@ from sylk.configuration import ServerConfig
 from flask import Blueprint, jsonify
 from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import User
-from sylk.data.calltaker import CalltakerData
+from sylk.db.schema import SpeedDial
+from sylk.utils import get_json_from_db_obj
 from utils import get_argument
 
 psap = Blueprint('psap', __name__,
@@ -55,3 +55,19 @@ def sops():
     sops['success'] = True
 
     return jsonify(sops)
+
+@psap.route('/speed_dial', methods=['GET'])
+def speed_dial():
+    try:
+        speed_dials = []
+        for speed_dial_db_obj in SpeedDial.objects(psap_id=ServerConfig.psap_id, user_id__exists=False):
+            speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
+            speed_dials.append(speed_dial)
+
+        result = {'success': True, 'speed_dials' : speed_dials}
+        return jsonify(result)
+    except Exception as e:
+        result = {'success' : False, 'reason' : str(e)}
+        return jsonify(result)
+
+
