@@ -346,12 +346,13 @@ class CallTransferLine(Document):
     star_code = StringField(required=True)
 
 
-class MessageDefaultText(Document):
-    message_id = ObjectIdField(required=True, default=bson.ObjectId)
+class Greeting(Document):
+    greeting_id = ObjectIdField(required=True, default=bson.ObjectId)
     psap_id = ObjectIdField()
     user_id = ObjectIdField()
     desc = StringField(required=True)
     group = StringField()
+
 
 def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
     #ip_address = "192.168.1.3"
