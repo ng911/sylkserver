@@ -68,8 +68,9 @@ def set_db_obj_from_request(log, db_obj, request):
     db_obj_dict = db_obj.to_mongo(True).to_dict()
     for field_name in field_names:
         if field_name in db_obj_dict:
-            db_obj_dict[field_name] = request_data[field_name]
-            log.info("set_db_obj_from_request updating field %r ", field_name)
+            setattr(db_obj, field_name, request_data[field_name])
+            #db_obj_dict[field_name] = request_data[field_name]
+            log.info("set_db_obj_from_request updating field %r, value %r ", field_name, request_data[field_name])
     log.info("set_db_obj_from_request end ")
 
 
