@@ -59,7 +59,9 @@ def set_db_obj_from_request(log, db_obj, request):
         request_data = request.get_json()
         log.debug("request_data is json is %r", request_data)
     else:
-        request_data = request.values()
+        log.debug("request is %r", request)
+        request_data = request.values
+        log.debug("request.values is %r", request.values)
     log.debug("set_db_obj_from_request request_data is %r", request_data)
     field_names = request_data.keys()
     db_obj_dict = db_obj.to_mongo(True).to_dict()
