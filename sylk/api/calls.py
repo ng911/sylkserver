@@ -158,7 +158,7 @@ def update_call(room_number):
         return jsonify(response)
     except Exception as e:
         stactrace = traceback.format_exc()
-        log.error("exception %r in update_call for room &r", e, room_number)
+        log.error("exception %r in update_call for room %r", e, room_number)
         log.error("%r",stactrace)
         response = {
             'success' : False,
