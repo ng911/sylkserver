@@ -152,14 +152,14 @@ def update_call(room_number):
 
         conf_db_obj = Conference.objects.get(room_number=room_number)
 
-        set_db_obj_from_request(conf_db_obj, request)
+        set_db_obj_from_request(log, conf_db_obj, request)
         conf_db_obj.save()
         response = {'success':True}
         return jsonify(response)
     except Exception as e:
         stactrace = traceback.format_exc()
-        log.error("exception %r in update_call for room &r", str(e), room_number)
-        log.error(stactrace)
+        log.error("exception %r in update_call for room &r", e, room_number)
+        log.error("%r",stactrace)
         response = {
             'success' : False,
             'reason' : str(e)
