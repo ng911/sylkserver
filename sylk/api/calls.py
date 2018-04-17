@@ -1,12 +1,13 @@
 import traceback
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call
 from sylk.data.calltaker import CalltakerData
-from sylk.utils import get_json_from_db_obj
+from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
 from utils import get_argument
 from mongoengine import Q
+
 calls = Blueprint('calls', __name__,
                         template_folder='templates')
 
@@ -141,6 +142,32 @@ def join_conference(room_number):
 @calls.route('/dial/<phone_number>', methods=['GET'])
 def dial_number(phone_number):
     pass
+
+@calls.route('/update/<room_number>', methods=['PUT', 'POST'])
+def update_call(room_number):
+    log.info('inside update_call for %r', room_number)
+    try:
+        if (room_number is None) or (room_number == ''):
+            raise ValueError('missing or invalid room_number')
+
+        conf_db_obj = Conference.objects.get(room_number=room_number)
+
+        set_db_obj_from_request(conf_db_obj, request.args)
+        conf_db_obj.save()
+        response = {'success':True}
+        return jsonify(response)
+    except Exception as e:
+        stactrace = traceback.format_exc()
+        log.error("exception %r in update_call for room &r", str(e), room_number)
+        log.error(stactrace)
+        response = {
+            'success' : False,
+            'reason' : str(e)
+        }
+
+        return jsonify(response)
+
+
 
 '''
 sample current calls
