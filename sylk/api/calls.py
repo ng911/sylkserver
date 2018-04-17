@@ -152,7 +152,7 @@ def update_call(room_number):
 
         conf_db_obj = Conference.objects.get(room_number=room_number)
 
-        set_db_obj_from_request(conf_db_obj, request.args)
+        set_db_obj_from_request(conf_db_obj, request)
         conf_db_obj.save()
         response = {'success':True}
         return jsonify(response)

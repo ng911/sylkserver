@@ -123,7 +123,7 @@ def set_profile(user_id):
             profile_obj.psap_id = ServerConfig.psap_id
             profile_obj.user_id = user_id
 
-        set_db_obj_from_request(profile_obj, request.args)
+        set_db_obj_from_request(profile_obj, request)
         profile_obj.save()
         response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
         return jsonify(response)
