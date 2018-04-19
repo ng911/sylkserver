@@ -1,6 +1,7 @@
 import bson
 import arrow
 import datetime
+from mongoengine import fields
 
 def dump_var(log, data):
     if isinstance(data, object):
@@ -53,7 +54,7 @@ def get_json_from_db_obj(db_obj, ignore_fields=None, include_fields=None):
 
 '''
 Cuidado - this only handles string or maybe int values for now
-'''
+
 def set_db_obj_from_request(log, db_obj, request):
     log.info("set_db_obj_from_request request.content_type %r", request.content_type)
     if (request.content_type is not None) and request.content_type.startswith('application/json'):
@@ -72,5 +73,40 @@ def set_db_obj_from_request(log, db_obj, request):
             #db_obj_dict[field_name] = request_data[field_name]
             log.info("set_db_obj_from_request updating field %r, value %r ", field_name, request_data[field_name])
     log.info("set_db_obj_from_request end ")
+'''
 
+'''
+big thx from https://stackoverflow.com/questions/19002469/update-a-mongoengine-document-using-a-python-dict
+'''
+def set_db_obj_from_request(log, document, request):
+    def field_value(field, value):
+        if field.__class__ in (fields.ListField, fields.SortedListField):
+            return [
+                field_value(field.field, item)
+                for item in value
+            ]
+        if field.__class__ in (
+            fields.EmbeddedDocumentField,
+            fields.GenericEmbeddedDocumentField,
+            fields.ReferenceField,
+            fields.GenericReferenceField
+        ):
+            return field.document_type(**value)
+        else:
+            return value
+    if (request.content_type is not None) and request.content_type.startswith('application/json'):
+        request_data = request.get_json()
+        log.info("request_data is json is %r", request_data)
+    else:
+        log.info("request is %r", request)
+        request_data = request.values
+        log.info("request.values is %r", request.values)
+    log.debug("set_db_obj_from_request request_data is %r", request_data)
+
+    for key, value in request_data.items():
+        if key in document._fields:
+            log.debug("update %r to %r", key, value)
+            setattr(document, key, field_value(document._fields[key], value))
+
+    return document
 
