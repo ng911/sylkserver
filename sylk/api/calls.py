@@ -1,10 +1,10 @@
 import traceback
 from flask import Blueprint, jsonify, request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call
-from sylk.data.calltaker import CalltakerData
-from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
+from application.notification import NotificationCenter, NotificationData
+from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
 from utils import get_argument
 from mongoengine import Q
 
@@ -122,6 +122,37 @@ def conference_participants(room_number):
 
     return jsonify(response)
 
+'''
+Update the conference participant values like send_video, mute, send_audio, send_text 
+'''
+@calls.route('/conference/participants/<room_number>', methods=['PUT', 'POST'])
+def conference_participants_update(room_number):
+    try:
+        sip_uri = get_argument('sip_uri')
+        if (sip_uri is None) or (sip_uri == ''):
+            raise ValueError('missing sip_uri')
+        participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
+        set_db_obj_from_request(log, participant_db_obj, request)
+        participant_db_obj.save()
+
+        data = NotificationData(room_number=room_number)
+        copy_request_data_to_object(request, data)
+        NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_participants_update error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
 def conference_event_log(room_number):
     event_log_json = get_conference_event_log_json(room_number)
@@ -152,7 +183,7 @@ def update_call(room_number):
 
         conf_db_obj = Conference.objects.get(room_number=room_number)
 
-        set_db_obj_from_request(log, conf_db_obj, request)
+        set_db_obj_from_request(conf_db_obj, request)
         conf_db_obj.save()
         response = {'success':True}
         return jsonify(response)

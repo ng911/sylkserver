@@ -78,7 +78,7 @@ def set_db_obj_from_request(log, db_obj, request):
 '''
 big thx from https://stackoverflow.com/questions/19002469/update-a-mongoengine-document-using-a-python-dict
 '''
-def set_db_obj_from_request(log, document, request):
+def set_db_obj_from_request(document, request):
     def field_value(field, value):
         if field.__class__ in (fields.ListField, fields.SortedListField):
             return [
@@ -105,3 +105,14 @@ def set_db_obj_from_request(log, document, request):
 
     return document
 
+
+def copy_request_data_to_object(request, dest_object):
+    if (request.content_type is not None) and request.content_type.startswith('application/json'):
+        request_data = request.get_json()
+    else:
+        request_data = request.values
+
+    for key, value in request_data.items():
+        setattr(dest_object, key, value)
+
+    return dest_object

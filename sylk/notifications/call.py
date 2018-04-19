@@ -1,4 +1,4 @@
-from application.notification import IObserver, NotificationCenter, NotificationData
+from application.notification import NotificationCenter, NotificationData
 
 # status can be 'init', 'accept', 'reject', 'closed'
 def send_call_update_notification(sender, session, status):

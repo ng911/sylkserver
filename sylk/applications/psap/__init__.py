@@ -37,14 +37,14 @@ class RoomData(object):
         pass
 
 class ParticipantData(object):
-    __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute_audio', 'recv_audio', 'recv_video',
-                 'recv_chat', 'is_caller', 'is_active', 'is_calltaker']
+    __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute', 'send_audio', 'send_video',
+                 'send_text', 'is_caller', 'is_active', 'is_calltaker']
     def __init__(self):
         pass
 
     def __repr__(self):
-        return "display_name %r, uri %r, session %r, direction %r, mute_audio %r, recv_audio %r, recv_video %r, recv_chat %r, is_caller %r, is_active %r" % \
-               (self.display_name, self.uri, self.session, self.direction, self.mute_audio, self.recv_audio, self.recv_video, self.recv_chat, self.is_caller, self.is_active)
+        return "display_name %r, uri %r, session %r, direction %r, mute %r, send_audio %r, send_video %r, send_text %r, is_caller %r, is_active %r" % \
+               (self.display_name, self.uri, self.session, self.direction, self.mute, self.send_audio, self.send_video, self.send_text, self.is_caller, self.is_active)
 
 #RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
 #ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
@@ -64,6 +64,13 @@ class PSAPApplication(SylkApplication):
         CallData()
         ConferenceData()
         self._rooms = {}
+        self.init_observers()
+
+    def init_observers(self):
+        log.info("ConferenceData init_observers")
+        notification_center = NotificationCenter()
+        # this one is used to change the mute, or send status of different media streams
+        notification_center.add_observer(self, name='ConferenceParticipantDBUpdated')
 
     def start(self):
         log.info(u'PSAPApplication start')
@@ -469,10 +476,10 @@ class PSAPApplication(SylkApplication):
         participant_data.display_name = display_name
         participant_data.session = session
         participant_data.direction = direction
-        participant_data.mute_audio = mute_audio
-        participant_data.recv_audio = True
-        participant_data.recv_video = False
-        participant_data.recv_chat = False
+        participant_data.mute = mute_audio
+        participant_data.send_audio = True
+        participant_data.send_video = True
+        participant_data.send_text = True
         participant_data.is_caller = is_caller
         participant_data.is_active = True
         participant_data.is_calltaker = is_calltaker
@@ -531,6 +538,30 @@ class PSAPApplication(SylkApplication):
         handler = getattr(self, '_NH_%s' % notification.name, Null)
         handler(notification)
 
+    def _NH_ConferenceParticipantDBUpdated(self, notification):
+        log.info('inside ConferenceParticipantDBUpdated')
+        room_number = notification.data.room_number
+        sip_uri = notification.data.sip_uri
+        log.info('inside ConferenceParticipantDBUpdated room %r, uri %r', room_number, sip_uri)
+        try:
+            room_data = self.get_room_data(room_number)
+            for participant_data in room_data.participants.itervalues():
+                if str(participant_data.uri) == sip_uri:
+                    if hasattr(notification.data, 'send_video'):
+                        log.info('update send_video')
+                        participant_data.send_video = notification.data.send_video
+                    if hasattr(notification.data, 'send_text'):
+                        log.info('update send_text')
+                        participant_data.send_video = notification.data.send_text
+                    if hasattr(notification.data, 'send_audio'):
+                        log.info('update send_audio')
+                        participant_data.send_video = notification.data.send_audio
+                    if hasattr(notification.data, 'mute'):
+                        log.info('update mute')
+                        participant_data.send_video = notification.data.mute
+        except RoomNotFoundError:
+            log.error("_NH_ConferenceParticipantDBUpdated room not found %r", room_number)
+
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         self.add_session_to_room(session)
@@ -541,6 +572,7 @@ class PSAPApplication(SylkApplication):
         room.start()
         room.add_session(session)
         '''
+
 
     @run_in_green_thread
     def _NH_SIPSessionDidEnd(self, notification):
