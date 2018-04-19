@@ -94,6 +94,7 @@ def set_db_obj_from_request(log, document, request):
             return field.document_type(**value)
         else:
             return value
+    log.info("inside set_db_obj_from_request")
     if (request.content_type is not None) and request.content_type.startswith('application/json'):
         request_data = request.get_json()
         log.info("request_data is json is %r", request_data)
@@ -108,5 +109,6 @@ def set_db_obj_from_request(log, document, request):
             log.debug("update %r to %r", key, value)
             setattr(document, key, field_value(document._fields[key], value))
 
+    log.info("inside set_db_obj_from_request end")
     return document
 
