@@ -253,6 +253,9 @@ class ConferenceParticipant(Document):
     has_text = BooleanField(default=False)
     has_audio = BooleanField(default=True)
     has_video = BooleanField(default=False)
+    send_video = BooleanField(default=True)
+    send_audio = BooleanField(default=True)
+    send_text = BooleanField(default=True)
 
 
 class ConferenceEvent(Document):
