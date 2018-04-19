@@ -21,10 +21,8 @@ def read_sops():
     for name in os.listdir(ServerConfig.sop_dir):
         path = os.path.join(ServerConfig.sop_dir, name)
         if os.path.exists(path) and os.path.isfile(path):
-            log.info("path for sop found %r", path)
             try:
                 with open(os.path.join(ServerConfig.sop_dir, name), 'r') as fp:
-                    log.info("read sop file %r", name)
                     # logger.debug('sop file %r', fp)
                     parts = fp.read().split('----')
                     t1, t2, description = parts[0].strip().split(' ', 2)
