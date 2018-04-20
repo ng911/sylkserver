@@ -111,7 +111,7 @@ if __name__ == '__main__': # parse command line options, and set the high level 
 	parser.add_option('', '--port',   dest='port', default=11010, type='int', help='port to listen to for ringing sound connections')
 	parser.add_option('', '--int-ip1',   dest='int_ip1', default="127.0.0.1", help='ip address to listen to')
 	parser.add_option('', '--int-ip2',   dest='int_ip2', default="192.168.1.6", help='ip address to listen to')
-	
+
 	(options, args) = parser.parse_args()
 	# handler = log.ColorizingStreamHandler(sys.stdout)
 	#handler = logging.FileHandler("ali_simulator.log")
@@ -128,8 +128,13 @@ if __name__ == '__main__': # parse command line options, and set the high level 
 	aliSimulator2 = AliSimulator(options.int_ip2, options.port)
 	aliSimulator2.start()
 
+	gevent.wait([aliSimulator1._gin, aliSimulator2._gin])
+	'''	
 	line = ""
 	while line != "exit":
 		gevent.select.select([sys.stdin], [], [])
 		line = sys.stdin.readline()
 		line = line.rstrip()
+	'''
+
+	
