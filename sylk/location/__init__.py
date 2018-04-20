@@ -57,8 +57,6 @@ def process_ali_success(result):
         location_db_obj.latitude = float(ali_result['latitude'])
         location_db_obj.longitude = float(ali_result['longitude'])
         location_db_obj.radius = float(ali_result['radius'])
-        if (ali_result['latitude'] != '') and (ali_result['longitude'] != ''):
-            location_db_obj.location_point = [float(ali_result['latitude']), float(ali_result['longitude'])]
         location_db_obj.location = ali_result['location']
 
         location_db_obj.otcfield = ali_result['otcfield']
@@ -74,9 +72,14 @@ def process_ali_success(result):
         location_db_obj.police_no = ali_result['police_no']
 
         location_db_obj.save()
-        log.info("location object created with id %r", str(location_db_obj.location_id))
 
-        #publish_update_location_success(room_number, ali_result)
+        # in case lat and long values are wrong we can safely ignore it
+        log.info("location object created with id %r", str(location_db_obj.location_id))
+        if (ali_result['latitude'] != '') and (ali_result['longitude'] != ''):
+            location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
+        location_db_obj.save()
+
+            #publish_update_location_success(room_number, ali_result)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
