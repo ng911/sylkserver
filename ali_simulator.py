@@ -4,7 +4,7 @@ except ImportError: print 'Please install gevent and its dependencies and includ
 from gevent import monkey, Greenlet, GreenletExit
 monkey.patch_all()
 import gevent.select
-import logging, log
+import logging
 from optparse import OptionParser, OptionGroup
 import socket, select
 
