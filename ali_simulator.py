@@ -137,4 +137,3 @@ if __name__ == '__main__': # parse command line options, and set the high level 
 		line = line.rstrip()
 	'''
 
-	
