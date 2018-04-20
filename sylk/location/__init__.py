@@ -3,8 +3,23 @@ from aliquery import send_ali_request
 from sylk.db.schema import Location
 from sylk.wamp import publish_update_location_success, publish_update_location_failed
 import traceback
+from twisted.internet import reactor
 
-log = ApplicationLogger(__package__)
+if __name__ == '__main__':  # parse command line options, and set the high level properties
+    import logging
+    global log
+    handler = logging.StreamHandler(stream=sys.stdout)
+
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(
+        logging.Formatter('%(asctime)s.%(msecs)d %(name)s %(levelname)s - %(message)s', datefmt='%d-%m %H:%M:%S'))
+    log = logging.getLogger()
+    log.addHandler(handler)
+    log.setLevel(logging.DEBUG or logging.INFO)
+else:
+    global log
+    log = ApplicationLogger(__package__)
+
 
 def get_initialized_ali_data():
     ali_data = {}
@@ -24,43 +39,44 @@ def get_initialized_ali_data():
 
 def process_ali_success(result):
     (room_number, number, ali_format, ali_result, ali_result_xml, raw_ali_data) = result
-    log.debug("aliResult %r, aliResultXml %r, rawAliData %r", ali_result, ali_result_xml, raw_ali_data)
+    log.info("aliResult %r, aliResultXml %r, rawAliData %r", ali_result, ali_result_xml, raw_ali_data)
     # store the ali result in database and send a updated message
     try:
         location_db_obj = Location()
         location_db_obj.room_number = room_number
         location_db_obj.ali_format = ali_format
         location_db_obj.raw_format = raw_ali_data
-        location_db_obj.state = ali_result.state
-        location_db_obj.name = ali_result.name
-        location_db_obj.phone_number = ali_result.phone_number
-        location_db_obj.callback = ali_result.callback
-        location_db_obj.service_provider = ali_result.service_provider
-        location_db_obj.class_of_service = ali_result.class_of_service
-        location_db_obj.community = ali_result.community
+        location_db_obj.state = ali_result['state']
+        location_db_obj.name = ali_result['name']
+        location_db_obj.phone_number = ali_result['phone_number']
+        location_db_obj.callback = ali_result['callback']
+        location_db_obj.service_provider = ali_result['service_provider']
+        location_db_obj.class_of_service = ali_result['class_of_service']
+        location_db_obj.community = ali_result['community']
 
-        location_db_obj.latitiude = float(ali_result.latitiude)
-        location_db_obj.longitude = float(ali_result.longitude)
-        location_db_obj.radius = float(ali_result.radius)
-        if (ali_result.latitiude != '') and (ali_result.longitude != ''):
-            location_db_obj.location_point = [float(ali_result.latitiude), float(ali_result.longitude)]
-        location_db_obj.location = ali_result.location
+        location_db_obj.latitude = float(ali_result['latitude'])
+        location_db_obj.longitude = float(ali_result['longitude'])
+        location_db_obj.radius = float(ali_result['radius'])
+        if (ali_result['latitude'] != '') and (ali_result['longitude'] != ''):
+            location_db_obj.location_point = [float(ali_result['latitude']), float(ali_result['longitude'])]
+        location_db_obj.location = ali_result['location']
 
-        location_db_obj.otcfield = ali_result.otcfield
-        location_db_obj.psap_no = ali_result.psap_no
-        location_db_obj.esn = ali_result.esn
-        location_db_obj.postal = ali_result.postal
-        location_db_obj.psap_name = ali_result.psap_name
-        location_db_obj.pilot_no = ali_result.pilot_no
+        location_db_obj.otcfield = ali_result['otcfield']
+        location_db_obj.psap_no = ali_result['psap_no']
+        location_db_obj.esn = ali_result['esn']
+        location_db_obj.postal = ali_result['postal']
+        location_db_obj.psap_name = ali_result['psap_name']
+        location_db_obj.pilot_no = ali_result['pilot_no']
 
-        location_db_obj.agencies_display = ali_result.agencies_display
-        location_db_obj.fire_no = ali_result.fire_no
-        location_db_obj.ems_no = ali_result.ems_no
-        location_db_obj.police_no = ali_result.police_no
+        location_db_obj.agencies_display = ali_result['agencies_display']
+        location_db_obj.fire_no = ali_result['fire_no']
+        location_db_obj.ems_no = ali_result['ems_no']
+        location_db_obj.police_no = ali_result['police_no']
 
         location_db_obj.save()
+        log.info("location object created with id %r", str(location_db_obj.location_id))
 
-        publish_update_location_success(room_number, ali_result)
+        #publish_update_location_success(room_number, ali_result)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
@@ -68,6 +84,7 @@ def process_ali_success(result):
 
 
 def ali_lookup(room_number, number, ali_format):
+    log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
     d = send_ali_request(room_number, number, ali_format)
 
     def process_ali_failed(failure):
@@ -148,5 +165,21 @@ def aliRebid(self):
 
     self.rebidPending = False
 '''
+
+def runTests():
+    from aliquery import init_ali_links
+    log.info("start running tests")
+    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("192.168.1.6", 11010, "30WWireless"), ]
+    init_ali_links(ali_links)
+    #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
+    reactor.callLater(5, ali_lookup, '5ba81b2b1e32497e9bd9e38c2ee9cfcf', '4153054541', "30WWireless")
+    reactor.run()
+
+if __name__ == '__main__':  # parse command line options, and set the high level properties
+    log.info("starting location tests")
+    reactor.callLater(0, runTests)
+    log.info("starting reactor.run")
+    reactor.run()
+    log.info("all done")
 
 
