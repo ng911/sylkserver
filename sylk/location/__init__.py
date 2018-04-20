@@ -169,7 +169,7 @@ def aliRebid(self):
 def runTests():
     from aliquery import init_ali_links
     log.info("start running tests")
-    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("192.168.1.6", 11010, "30WWireless"), ]
+    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("159.65.73.31", 11010, "30WWireless"), ]
     init_ali_links(ali_links)
     #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
     reactor.callLater(5, ali_lookup, '5ba81b2b1e32497e9bd9e38c2ee9cfcf', '4153054541', "30WWireless")
