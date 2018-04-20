@@ -12,6 +12,7 @@ import sipsimple
 import sylk
 import sylk.wamp
 import sylk.api
+from sylk.location.aliquery import init_ali_links
 
 # noinspection PyUnusedLocal
 def stop_server(signum, frame):
@@ -85,6 +86,10 @@ if __name__ == '__main__':
     process.signals.add_handler(signal.SIGTERM, stop_server)
     process.signals.add_handler(signal.SIGINT, stop_server)
     process.signals.add_handler(signal.SIGUSR1, toggle_debugging)
+
+    # set up ali links
+    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("159.65.73.31", 11010, "30WWireless"), ]
+    init_ali_links(ali_links)
 
     log.info('starting api server')
     sylk.api.start_server()
