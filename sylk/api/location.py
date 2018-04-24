@@ -42,7 +42,7 @@ def get_location(room_number):
 def set_location(location_id):
     try:
         location_db_obj = Location.objects.get(location_id=location_id)
-        set_db_obj_from_request(location_db_obj, request, ignore_fields=['updated_at'])
+        set_db_obj_from_request(location_db_obj, request, ignore_fields=['updated_at', 'time'])
         location_db_obj.descrepancy = True
         location_db_obj.updated_at = datetime.datetime.utcnow()
         location_db_obj.save()
