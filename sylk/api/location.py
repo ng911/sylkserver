@@ -13,6 +13,22 @@ location = Blueprint('location', __name__,
 CORS(location)
 log = ApplicationLogger(__package__)
 
+def get_location_display(location_db_obj):
+    location_display = ''
+    if (location_db_obj.location is not None) and (location_db_obj.location != ''):
+        location_display = location_db_obj.location
+    if (location_db_obj.community is not None) and (location_db_obj.community != ''):
+        if location_display == '':
+            location_display = location_db_obj.community
+        else:
+            location_display = "%s, %s" % (location_display, location_db_obj.community)
+
+    if (location_db_obj.state is not None) and (location_db_obj.state != ''):
+        if location_display == '':
+            location_display = location_db_obj.state
+        else:
+            location_display = "%s, %s" % (location_display, location_db_obj.state)
+    return location_display
 
 @location.route('/<room_number>', methods=['GET'])
 def get_location(room_number):
@@ -46,7 +62,7 @@ def set_location(location_id):
         location_db_obj.descrepancy = True
         location_db_obj.updated_at = datetime.datetime.utcnow()
         location_db_obj.save()
-        response = {'success' : True}
+        response = {'success' : True, 'location_display' : get_location_display(location_db_obj)}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
