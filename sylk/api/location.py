@@ -23,7 +23,7 @@ def get_location(room_number):
         count = Location.objects(**params).count()
 
         if count > 0:
-            location_db_obj = Location.objects(room_number=room_number).order_by('-time')[page_no]
+            location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at')[page_no]
             location_json = get_json_from_db_obj(location_db_obj)
         else:
             location_json = {}

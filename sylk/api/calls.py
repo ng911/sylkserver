@@ -2,7 +2,7 @@ import traceback
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call
+from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call, Location
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
 from utils import get_argument
@@ -39,7 +39,31 @@ def current():
 
     return jsonify(response)
 
+def get_location_for_call(room_number):
+    try:
+        location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at').first()
+        if location_db_obj is not None:
+            location_display = ''
+            if (location_db_obj.location is not None) and (location_db_obj.location != ''):
+                location_display = location_db_obj.location
+            if (location_db_obj.community is not None) and (location_db_obj.community != ''):
+                if location_display == '':
+                    location_display = location_db_obj.community
+                else:
+                    location_display = "%r,%r" % (location_display, location_db_obj.community)
 
+            if (location_db_obj.state is not None) and (location_db_obj.state != ''):
+                if location_display == '':
+                    location_display = location_db_obj.state
+                else:
+                    location_display = "%r,%r" % (location_display, location_db_obj.state)
+            return location_display
+        return ''
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception in get_location_for_call for room %r, e %r", room_number, str(e))
+        log.error("%r", stacktrace)
+        return ""
 '''
 Note - for now we ignore the psap_id
 returns recent call history
@@ -52,8 +76,8 @@ def recent():
     # todo - add limit of 1 month to this data
     for conference_db_obj in Conference.objects(status__in=['closed', 'abandoned']):
         conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
-        #todo - get actual location
-        conference_json['location'] = '665 pine str, san francisco, california'
+
+        conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
         calls.append(conference_json)
 
     response = {

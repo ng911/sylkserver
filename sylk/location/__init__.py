@@ -1,3 +1,4 @@
+import datetime
 from sylk.applications import ApplicationLogger
 from aliquery import send_ali_request
 from sylk.db.schema import Location
@@ -70,6 +71,7 @@ def process_ali_success(result):
         location_db_obj.fire_no = ali_result['fire_no']
         location_db_obj.ems_no = ali_result['ems_no']
         location_db_obj.police_no = ali_result['police_no']
+        location_db_obj.time = location_db_obj.updated_at = datetime.datetime.utcnow()
 
         location_db_obj.save()
 
