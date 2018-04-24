@@ -105,6 +105,7 @@ def set_db_obj_from_request(document, request):
 
     for key, value in request_data.items():
         if key in document._fields:
+            log.info("update key %r, value %r", key, value)
             setattr(document, key, field_value(document._fields[key], value))
 
     return document
@@ -117,7 +118,6 @@ def copy_request_data_to_object(request, dest_object):
         request_data = request.values
 
     for key, value in request_data.items():
-        log.info("update key %r, value %r", key, value)
         setattr(dest_object, key, value)
 
     return dest_object
