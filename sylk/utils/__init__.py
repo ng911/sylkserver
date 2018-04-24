@@ -2,6 +2,10 @@ import bson
 import arrow
 import datetime
 from mongoengine import fields
+from sylk.applications import ApplicationLogger
+
+log = ApplicationLogger(__package__)
+
 
 def dump_var(log, data):
     if isinstance(data, object):
@@ -113,6 +117,7 @@ def copy_request_data_to_object(request, dest_object):
         request_data = request.values
 
     for key, value in request_data.items():
+        log.info("update key %r, value %r", key, value)
         setattr(dest_object, key, value)
 
     return dest_object
