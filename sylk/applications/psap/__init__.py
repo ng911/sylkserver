@@ -219,7 +219,13 @@ class PSAPApplication(SylkApplication):
 
             log.info('inoming_link.ali_format is %r', inoming_link.ali_format)
             if (call_type == 'sos') and inoming_link.ali_format and (inoming_link.ali_format != ''):
-                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, remote_identity.uri.user, inoming_link.ali_format)
+                lookup_number = remote_identity.uri.user
+                # make sure there is no + prefix in the number and it is 10 digits long
+                if lookup_number.startswith('+1'):
+                    lookup_number = lookup_number[2:]
+                elif lookup_number.startswith('1'):
+                    lookup_number = lookup_number[1:]
+                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, inoming_link.ali_format)
                 ali_lookup(room_number, remote_identity.uri.user, inoming_link.ali_format)
 
             NotificationCenter().post_notification('ConferenceCreated', self,
