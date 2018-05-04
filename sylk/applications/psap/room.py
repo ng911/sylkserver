@@ -410,8 +410,8 @@ class Room(object):
                 return
         '''
 
-        welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
-        welcome_handler.run()
+        #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
+        #welcome_handler.run()
         self.dispatch_conference_info()
 
         if len(self.sessions) == 1:
@@ -722,9 +722,9 @@ class Room(object):
                                                                                        format_identity(session.remote_identity),
                                                                                        stream.type))
 
-        if notification.data.added_streams:
-            welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
-            welcome_handler.run()
+        #if notification.data.added_streams:
+        #    welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
+        #    welcome_handler.run()
 
         for stream in notification.data.removed_streams:
             notification.center.remove_observer(self, sender=stream)
@@ -1000,7 +1000,7 @@ class WelcomeHandler(object):
     def _NH_SIPSessionWillEnd(self, notification):
         self.procs.killall()
 
-
+'''
 class RoomFile(object):
     def __init__(self, name, hash, size, sender):
         self.name = name
@@ -1012,7 +1012,7 @@ class RoomFile(object):
     def file_selector(self):
         return FileSelector.for_file(self.name, hash=self.hash)
 
-'''
+
 class FileTransferHandler(object):
     implements(IObserver)
 
