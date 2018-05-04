@@ -1,4 +1,5 @@
 
+import re
 from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from twisted.internet import reactor
@@ -7,7 +8,7 @@ from zope.interface import implements
 from sipsimple.threading.green import run_in_green_thread
 from sylk.applications import SylkApplication, ApplicationLogger
 from sipsimple.streams import MediaStreamRegistry
-from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader
+from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader, Header, SubjectHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.session import IllegalStateError
@@ -16,12 +17,13 @@ from sylk.accounts import get_user_account
 from sipsimple.account import Account
 from uuid import uuid4
 
+from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call
 from sylk.db.queue import get_queue_details, get_queue_members
 from acd import get_calltakers
 from sylk.data.call import CallData
 from sylk.data.conference import ConferenceData
-from sylk.configuration import ServerConfig
+from sylk.configuration import ServerConfig, SIPConfig
 # from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
@@ -132,20 +134,17 @@ class PSAPApplication(SylkApplication):
         else:
             return room
 
-    def get_room_uri_str(self, uri=None, room_number=None):
-        if room_number is None:
-            room_uri = '%s@%s' % (uri.user, uri.host)
-        else:
-            local_ip = SIPConfig.local_ip.normalized
-            room_uri = '%s@%s' % (room_number, local_ip)
+    '''
+    def get_room_uri_str(self, room_number):
+        local_ip = SIPConfig.local_ip.normalized
+        room_uri = '%s@%s' % (room_number, local_ip)
         return room_uri
 
-    def get_room_uri(self, uri=None, room_number=None):
-        room_uri_str = self.get_room_uri_str(uri, room_number)
+    def get_room_uri(self, room_number):
+        room_uri_str = self.get_room_uri_str(room_number)
         if not room_uri_str.startswith("sip:"):
             room_uri_str = "sip:%s" % room_uri_str
         return SIPURI.parse(room_uri_str)
-    '''
 
     def remove_room(self, room_number):
         self._rooms.pop(room_number, None)
@@ -247,12 +246,17 @@ class PSAPApplication(SylkApplication):
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
+                outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
+                                                                    caller_identity=session.remote_identity, is_calltaker=not is_calltaker)
+                ''' old code '''
+                '''
                 outgoing_call_initializer = OutgoingCallInitializer(target=sip_uri,
                                                                    audio=True,
                                                                    room_number=room_number,
                                                                    user=remote_identity.uri.user,
                                                                     app=self,
                                                                     is_calltaker=not is_calltaker)
+                '''
                 outgoing_call_initializer.start()
                 room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
                 #self.invited_parties[sip_uri] = outgoing_call_initializer
@@ -284,7 +288,7 @@ class PSAPApplication(SylkApplication):
         if not room.started:
             room_data = self.get_room_data(room_number)
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
-                outgoing_call_initializer.cancelCall()
+                outgoing_call_initializer.cancel_call()
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
             room_data.incoming_session.end()
             self.remove_room(room_number)
@@ -294,8 +298,25 @@ class PSAPApplication(SylkApplication):
     def incoming_subscription(self, request, data):
         request.reject(405)
 
-    def incoming_referral(self, request, data):
-        request.reject(405)
+    def incoming_referral(self, refer_request, data):
+        from_header = data.headers.get('From', Null)
+        to_header = data.headers.get('To', Null)
+        refer_to_header = data.headers.get('Refer-To', Null)
+        if Null in (from_header, to_header, refer_to_header):
+            refer_request.reject(400)
+            return
+
+        log.info(u'Room %s - join request from %s to %s' % ('%s@%s' % (to_header.uri.user, to_header.uri.host), from_header.uri, refer_to_header.uri))
+
+        # todo - add validation here
+        #try:
+        #    self.validate_acl(data.request_uri, from_header.uri)
+        #except ACLValidationError:
+        #    log.info(u'Room %s - invite participant request rejected: unauthorized by access list' % data.request_uri)
+        #    refer_request.reject(403)
+        #    return
+        referral_handler = IncomingReferralHandler(refer_request, data)
+        referral_handler.start()
 
     def incoming_message(self, request, data):
         request.reject(405)
@@ -353,7 +374,7 @@ class PSAPApplication(SylkApplication):
                 log.info('outgoing_call_initializer %r', outgoing_call_initializer)
 
                 if target != str(sip_uri):
-                    outgoing_call_initializer.cancelCall()
+                    outgoing_call_initializer.cancel_call()
             room_data.outgoing_calls = {}
 
             self.add_session_to_room(session)
@@ -620,7 +641,7 @@ class PSAPApplication(SylkApplication):
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
 
-class OutgoingCallInitializer(object):
+class OldOutgoingCallInitializer(object):
     implements(IObserver)
 
     def __init__(self, target, audio=False, chat=False, room_number=None, user=None, app=None, is_calltaker=False):
@@ -834,3 +855,295 @@ class OutgoingCallInitializer(object):
             send_notice('SIP session failed: %s' % notification.data.failure_reason)
         '''
 
+
+class OutgoingCallInitializer(object):
+    implements(IObserver)
+    '''
+    def __init__(self, target, audio=False, chat=False, room_number=None, user=None, app=None, is_calltaker=False):
+        self.app = app
+
+        self.account = get_user_account(user)
+        self.user = user
+        self.target = target
+        self.streams = []
+        if audio:
+            self.streams.append(MediaStreamRegistry.AudioStream())
+        if chat:
+            self.streams.append(MediaStreamRegistry.ChatStream())
+        self.wave_ringtone = None
+        self.room_number = room_number
+        self.outgoing_session = None
+        # we set it to true in case we need to cancel the session before look up succeeds
+        self.cancel = False
+        self.is_calltaker = is_calltaker
+    '''
+    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False):
+        self.app = PSAPApplication()
+        self.caller_identity = caller_identity
+        self.room_uri = room_uri
+        self.room_uri_str = '%s@%s' % (self.room_uri.user, self.room_uri.host)
+        self.room_number = self.room_uri.user
+        self.target_uri = target_uri
+        self.session = None
+        self.cancel = False
+        self.streams = []
+        self.is_calltaker = is_calltaker
+
+    def start(self):
+        if not self.target_uri.startswith(('sip:', 'sips:')):
+            self.target_uri = 'sip:%s' % self.target_uri
+        try:
+            self.target_uri = SIPURI.parse(self.target_uri)
+        except SIPCoreError:
+            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
+            return
+        settings = SIPSimpleSettings()
+        account = DefaultAccount()
+        if account.sip.outbound_proxy is not None:
+            uri = SIPURI(host=account.sip.outbound_proxy.host,
+                         port=account.sip.outbound_proxy.port,
+                         parameters={'transport': account.sip.outbound_proxy.transport})
+        else:
+            uri = self.target_uri
+        lookup = DNSLookup()
+        notification_center = NotificationCenter()
+        notification_center.add_observer(self, sender=lookup)
+        lookup.lookup_sip_proxy(uri, settings.sip.transport_list)
+
+    def cancel_call(self):
+        self.cancel = True
+        if self.outgoing_session is not None:
+            # todo add event sending here
+            self.session.end()
+            send_call_update_notification(self, self.session, 'cancel')
+
+    def handle_notification(self, notification):
+        handler = getattr(self, '_NH_%s' % notification.name, Null)
+        handler(notification)
+
+    def _NH_DNSLookupDidSucceed(self, notification):
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=notification.sender)
+        if self.cancel:
+            return
+        account = DefaultAccount()
+        psap_application = PSAPApplication()
+        try:
+            room = psap_application.get_room(self.room_number)
+        except RoomNotFoundError:
+            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
+            return
+        active_media = set(room.active_media).intersection(('audio', 'chat'))
+        if not active_media:
+            log.info('Room %s - failed to add %s' % (self.room_number, self.target_uri))
+            return
+        for stream_type in active_media:
+            self.streams.append(MediaStreamRegistry.get(stream_type)())
+        self.session = Session(account)
+        self.session.room_number = self.room_number
+        notification_center.add_observer(self, sender=self.session)
+        '''
+        if self.original_from_header.display_name:
+            original_identity = "%s <%s@%s>" % (self.original_from_header.display_name, self.original_from_header.uri.user, self.original_from_header.uri.host)
+        else:
+            original_identity = "%s@%s" % (self.original_from_header.uri.user, self.original_from_header.uri.host)
+        '''
+        from_header = FromHeader(SIPURI.new(self.room_uri), u'Conference Call')
+        to_header = ToHeader(self.target_uri)
+        extra_headers = []
+        #if ThorNodeConfig.enabled:
+        #    extra_headers.append(Header('Thor-Scope', 'conference-invitation'))
+        extra_headers.append(Header('X-Originator-From', str(self.caller_identity.uri)))
+        extra_headers.append(SubjectHeader(u'Join conference request from %s' % self.caller_identity))
+        route = notification.data.result[0]
+        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, extra_headers=extra_headers)
+
+    def _NH_SIPSessionNewOutgoing(self, notification):
+        log.info('OutgoingCallInitializer got _NH_SIPSessionNewOutgoing')
+        session = notification.sender
+        send_call_update_notification(self, session, 'init')
+
+    def _NH_DNSLookupDidFail(self, notification):
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=notification.sender)
+        self.app.outgoing_session_lookup_failed(self.room_number, self.target)
+
+    def _NH_SIPSessionGotRingIndication(self, notification):
+        session = notification.sender
+        send_call_update_notification(self, session, 'ringing')
+
+    def _NH_SIPSessionGotProvisionalResponse(self, notification):
+        pass
+
+    def _NH_SIPSessionDidStart(self, notification):
+        notification.center.remove_observer(self, sender=notification.sender)
+        session = notification.sender
+        remote_identity = str(session.remote_identity.uri)
+        log.info("Session sarted %s, %s" % (remote_identity, session.route))
+
+        log.info('startConference for room %s' % (self.room_number))
+        # self.incoming_session.room_number = self.room_number
+
+        log.info(u'_NH_SIPSessionDidStart for session.room_number %s' % session.room_number)
+        self.app.outgoing_session_did_start(self.target, session)
+        # self.app.add_outgoing_session(session)
+        send_call_active_notification(self, session)
+        #psap_application.add_participant(self.session, self.room_uri)
+        #log.info('Room %s - %s added %s' % (self.room_uri_str, self._refer_headers.get('From').uri, self.target_uri))
+        self.session = None
+        self.streams = []
+
+    def _NH_SIPSessionDidFail(self, notification):
+        log.info('Room %s - failed to add %s: %s' % (self.room_uri_str, self.target_uri, notification.data.reason))
+        notification.center.remove_observer(self, sender=notification.sender)
+        self.session = None
+        self.streams = []
+        session = notification.sender
+        remote_identity = str(session.remote_identity.uri)
+        log.info("Session failed %s, %s" % (remote_identity, session.route))
+        self.app.outgoing_session_did_fail(session, self.target, notification.data.code, notification.data.reason)
+        send_call_failed_notification(self, session=session, failure_code=notification.data.code,
+                                      failure_reason=notification.data.reason)
+
+    def _NH_SIPSessionDidEnd(self, notification):
+        # If any stream fails to start we won't get SIPSessionDidFail, we'll get here instead
+        log.info('Room %s - ended %s' % (self.room_uri_str, self.target_uri))
+        notification.center.remove_observer(self, sender=notification.sender)
+        self.session = None
+        self.streams = []
+        session = notification.sender
+        self.app.remove_session(session)
+        send_call_update_notification(self, session, 'closed')
+
+
+class IncomingReferralHandler(object):
+    implements(IObserver)
+
+    def __init__(self, refer_request, data):
+        self._refer_request = refer_request
+        self._refer_headers = data.headers
+        self.room_uri = data.request_uri
+        self.room_uri_str = '%s@%s' % (self.room_uri.user, self.room_uri.host)
+        self.room_number = self.room_uri.user
+        self.refer_to_uri = re.sub('<|>', '', data.headers.get('Refer-To').uri)
+        self.method = data.headers.get('Refer-To').parameters.get('method', 'INVITE').upper()
+        self.session = None
+        self.streams = []
+
+    def start(self):
+        if not self.refer_to_uri.startswith(('sip:', 'sips:')):
+            self.refer_to_uri = 'sip:%s' % self.refer_to_uri
+        try:
+            self.refer_to_uri = SIPURI.parse(self.refer_to_uri)
+        except SIPCoreError:
+            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.refer_to_uri))
+            self._refer_request.reject(488)
+            return
+        notification_center = NotificationCenter()
+        notification_center.add_observer(self, sender=self._refer_request)
+        if self.method == 'INVITE':
+            self._refer_request.accept()
+            settings = SIPSimpleSettings()
+            account = DefaultAccount()
+            if account.sip.outbound_proxy is not None:
+                uri = SIPURI(host=account.sip.outbound_proxy.host,
+                             port=account.sip.outbound_proxy.port,
+                             parameters={'transport': account.sip.outbound_proxy.transport})
+            else:
+                uri = self.refer_to_uri
+            lookup = DNSLookup()
+            notification_center.add_observer(self, sender=lookup)
+            lookup.lookup_sip_proxy(uri, settings.sip.transport_list)
+        elif self.method == 'BYE':
+            log.info('Room %s - %s removed %s from the room' % (self.room_uri_str, self._refer_headers.get('From').uri, self.refer_to_uri))
+            self._refer_request.accept()
+            psap_application = PSAPApplication()
+            psap_application.remove_participant(self.refer_to_uri, self.room_uri)
+            self._refer_request.end(200)
+        else:
+            self._refer_request.reject(488)
+
+    def handle_notification(self, notification):
+        handler = getattr(self, '_NH_%s' % notification.name, Null)
+        handler(notification)
+
+    def _NH_DNSLookupDidSucceed(self, notification):
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=notification.sender)
+        account = DefaultAccount()
+        psap_application = PSAPApplication()
+        try:
+            room = psap_application.get_room(self.room_number)
+        except RoomNotFoundError:
+            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.refer_to_uri))
+            self._refer_request.end(500)
+            return
+        active_media = set(room.active_media).intersection(('audio', 'chat'))
+        if not active_media:
+            log.info('Room %s - failed to add %s' % (self.room_number, self.refer_to_uri))
+            self._refer_request.end(500)
+            return
+        for stream_type in active_media:
+            self.streams.append(MediaStreamRegistry.get(stream_type)())
+        self.session = Session(account)
+        notification_center.add_observer(self, sender=self.session)
+        original_from_header = self._refer_headers.get('From')
+        if original_from_header.display_name:
+            original_identity = "%s <%s@%s>" % (original_from_header.display_name, original_from_header.uri.user, original_from_header.uri.host)
+        else:
+            original_identity = "%s@%s" % (original_from_header.uri.user, original_from_header.uri.host)
+        from_header = FromHeader(SIPURI.new(self.room_uri), u'Conference Call')
+        to_header = ToHeader(self.refer_to_uri)
+        extra_headers = []
+        if self._refer_headers.get('Referred-By', None) is not None:
+            extra_headers.append(Header.new(self._refer_headers.get('Referred-By')))
+        else:
+            extra_headers.append(Header('Referred-By', str(original_from_header.uri)))
+        #if ThorNodeConfig.enabled:
+        #    extra_headers.append(Header('Thor-Scope', 'conference-invitation'))
+        extra_headers.append(Header('X-Originator-From', str(original_from_header.uri)))
+        extra_headers.append(SubjectHeader(u'Join conference request from %s' % original_identity))
+        route = notification.data.result[0]
+        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, extra_headers=extra_headers)
+
+    def _NH_DNSLookupDidFail(self, notification):
+        notification.center.remove_observer(self, sender=notification.sender)
+
+    def _NH_SIPSessionGotRingIndication(self, notification):
+        if self._refer_request is not None:
+            self._refer_request.send_notify(180)
+
+    def _NH_SIPSessionGotProvisionalResponse(self, notification):
+        if self._refer_request is not None:
+            self._refer_request.send_notify(notification.data.code, notification.data.reason)
+
+    def _NH_SIPSessionDidStart(self, notification):
+        notification.center.remove_observer(self, sender=notification.sender)
+        if self._refer_request is not None:
+            self._refer_request.end(200)
+        psap_application = PSAPApplication()
+        psap_application.add_participant(self.session, self.room_uri)
+        log.info('Room %s - %s added %s' % (self.room_uri_str, self._refer_headers.get('From').uri, self.refer_to_uri))
+        self.session = None
+        self.streams = []
+
+    def _NH_SIPSessionDidFail(self, notification):
+        log.info('Room %s - failed to add %s: %s' % (self.room_uri_str, self.refer_to_uri, notification.data.reason))
+        notification.center.remove_observer(self, sender=notification.sender)
+        if self._refer_request is not None:
+            self._refer_request.end(notification.data.code or 500, notification.data.reason or  notification.data.code)
+        self.session = None
+        self.streams = []
+
+    def _NH_SIPSessionDidEnd(self, notification):
+        # If any stream fails to start we won't get SIPSessionDidFail, we'll get here instead
+        log.info('Room %s - ended %s' % (self.room_uri_str, self.refer_to_uri))
+        notification.center.remove_observer(self, sender=notification.sender)
+        if self._refer_request is not None:
+            self._refer_request.end(200)
+        self.session = None
+        self.streams = []
+
+    def _NH_SIPIncomingReferralDidEnd(self, notification):
+        notification.center.remove_observer(self, sender=notification.sender)
+        self._refer_request = None
