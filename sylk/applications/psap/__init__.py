@@ -885,7 +885,7 @@ class OutgoingCallInitializer(object):
         self.cancel = False
         self.is_calltaker = is_calltaker
     '''
-    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False):
+    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False):
         log.info("OutgoingCallInitializer for target %r, room %r, caller_identity %r, is_calltaker %r", target_uri, room_uri, caller_identity, is_calltaker)
         self.app = PSAPApplication()
         self.caller_identity = caller_identity
@@ -896,6 +896,8 @@ class OutgoingCallInitializer(object):
         self.target_uri = target_uri
         self.session = None
         self.cancel = False
+        self.has_audio = has_audio
+        self.has_chat = has_chat
         self.streams = []
         self.is_calltaker = is_calltaker
 
@@ -946,6 +948,7 @@ class OutgoingCallInitializer(object):
             log.info('_NH_DNSLookupDidSucceed RoomNotFoundError for room %r', self.room_number)
             log.info('_NH_DNSLookupDidSucceed Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
             return
+        '''
         active_media = set(room.active_media).intersection(('audio', 'chat'))
         if not active_media:
             log.info('_NH_DNSLookupDidSucceed no active media')
@@ -953,6 +956,12 @@ class OutgoingCallInitializer(object):
             return
         for stream_type in active_media:
             self.streams.append(MediaStreamRegistry.get(stream_type)())
+        '''
+        if self.has_audio:
+            self.streams.append(MediaStreamRegistry.AudioStream())
+        if self.has_chat:
+            self.streams.append(MediaStreamRegistry.ChatStream())
+
         self.session = Session(account)
         self.session.room_number = self.room_number
         notification_center.add_observer(self, sender=self.session)
