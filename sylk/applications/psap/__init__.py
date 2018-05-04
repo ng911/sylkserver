@@ -226,7 +226,7 @@ class PSAPApplication(SylkApplication):
                 elif lookup_number.startswith('1'):
                     lookup_number = lookup_number[1:]
                 log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, inoming_link.ali_format)
-                ali_lookup(room_number, remote_identity.uri.user, inoming_link.ali_format)
+                ali_lookup(room_number, lookup_number, inoming_link.ali_format)
 
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
