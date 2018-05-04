@@ -217,7 +217,9 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
 
+            log.info('inoming_link.ali_format is %r', inoming_link.ali_format)
             if (call_type == 'sos') and inoming_link.ali_format and (inoming_link.ali_format != ''):
+                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, remote_identity.uri.user, inoming_link.ali_format)
                 ali_lookup(room_number, remote_identity.uri.user, inoming_link.ali_format)
 
             NotificationCenter().post_notification('ConferenceCreated', self,
