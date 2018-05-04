@@ -410,6 +410,25 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     incoming_link_obj.save()
 
 
+def remove_room(room_number):
+    if room_number is not None:
+        print ("deleting room number %r", room_number)
+        Call.objects(room_number=room_number).delete()
+        ConferenceEvent.objects(room_number=room_number).delete()
+        ConferenceParticipant.objects(room_number=room_number).delete()
+        Location.objects.get(room_number=room_number).delete()
+        Conference.objects.get(room_number=room_number).delete()
+
+def remove_call(room_number=None, status=None):
+    if status is not None:
+        for confDbObj in Conference.objects(room_number=room_number):
+            room_number = confDbObj.room_number
+            remove_room(room_number)
+        return
+    if room_number is not None:
+        remove_room(room_number)
+
+
 '''
 Start of OAuth related db models
 '''
