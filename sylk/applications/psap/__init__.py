@@ -886,11 +886,13 @@ class OutgoingCallInitializer(object):
         self.is_calltaker = is_calltaker
     '''
     def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False):
+        log.info("OutgoingCallInitializer for target %r, room %r, caller_identity %r, is_calltaker %r", target_uri, room_uri, caller_identity, is_calltaker)
         self.app = PSAPApplication()
         self.caller_identity = caller_identity
         self.room_uri = room_uri
         self.room_uri_str = '%s@%s' % (self.room_uri.user, self.room_uri.host)
         self.room_number = self.room_uri.user
+        log.info("OutgoingCallInitializer room_number %r", self.room_number)
         self.target_uri = target_uri
         self.session = None
         self.cancel = False
@@ -898,13 +900,15 @@ class OutgoingCallInitializer(object):
         self.is_calltaker = is_calltaker
 
     def start(self):
+        log.info("OutgoingCallInitializer start")
         if not self.target_uri.startswith(('sip:', 'sips:')):
             self.target_uri = 'sip:%s' % self.target_uri
         try:
             self.target_uri = SIPURI.parse(self.target_uri)
         except SIPCoreError:
-            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
+            log.info('OutgoingCallInitializer start Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
             return
+        log.info("OutgoingCallInitializer start")
         settings = SIPSimpleSettings()
         account = DefaultAccount()
         if account.sip.outbound_proxy is not None:
