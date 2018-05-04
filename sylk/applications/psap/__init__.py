@@ -943,11 +943,13 @@ class OutgoingCallInitializer(object):
         try:
             room = psap_application.get_room(self.room_number)
         except RoomNotFoundError:
-            log.info('Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
+            log.info('_NH_DNSLookupDidSucceed RoomNotFoundError for room %r', self.room_number)
+            log.info('_NH_DNSLookupDidSucceed Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
             return
         active_media = set(room.active_media).intersection(('audio', 'chat'))
         if not active_media:
-            log.info('Room %s - failed to add %s' % (self.room_number, self.target_uri))
+            log.info('_NH_DNSLookupDidSucceed no active media')
+            log.info('_NH_DNSLookupDidSucceed Room %s - failed to add %s' % (self.room_number, self.target_uri))
             return
         for stream_type in active_media:
             self.streams.append(MediaStreamRegistry.get(stream_type)())
@@ -1006,7 +1008,7 @@ class OutgoingCallInitializer(object):
         self.streams = []
 
     def _NH_SIPSessionDidFail(self, notification):
-        log.info('Room %s - failed to add %s: %s' % (self.room_uri_str, self.target_uri, notification.data.reason))
+        log.info('_NH_SIPSessionDidFail Room %s - failed to add %s: %s' % (self.room_uri_str, self.target_uri, notification.data.reason))
         notification.center.remove_observer(self, sender=notification.sender)
         self.session = None
         self.streams = []
