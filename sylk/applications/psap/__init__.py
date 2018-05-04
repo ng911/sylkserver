@@ -989,7 +989,7 @@ class OutgoingCallInitializer(object):
     def _NH_DNSLookupDidFail(self, notification):
         notification_center = NotificationCenter()
         notification_center.remove_observer(self, sender=notification.sender)
-        self.app.outgoing_session_lookup_failed(self.room_number, self.target)
+        self.app.outgoing_session_lookup_failed(self.room_number, self.target_uri)
 
     def _NH_SIPSessionGotRingIndication(self, notification):
         session = notification.sender
@@ -1008,7 +1008,7 @@ class OutgoingCallInitializer(object):
         # self.incoming_session.room_number = self.room_number
 
         log.info(u'_NH_SIPSessionDidStart for session.room_number %s' % session.room_number)
-        self.app.outgoing_session_did_start(self.target, session)
+        self.app.outgoing_session_did_start(self.target_uri, session)
         # self.app.add_outgoing_session(session)
         send_call_active_notification(self, session)
         #psap_application.add_participant(self.session, self.room_uri)
@@ -1024,7 +1024,7 @@ class OutgoingCallInitializer(object):
         session = notification.sender
         remote_identity = str(session.remote_identity.uri)
         log.info("Session failed %s, %s" % (remote_identity, session.route))
-        self.app.outgoing_session_did_fail(session, self.target, notification.data.code, notification.data.reason)
+        self.app.outgoing_session_did_fail(session, self.target_uri, notification.data.code, notification.data.reason)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code,
                                       failure_reason=notification.data.reason)
 
