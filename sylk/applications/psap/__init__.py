@@ -912,7 +912,7 @@ class OutgoingCallInitializer(object):
 
     def cancel_call(self):
         self.cancel = True
-        if self.outgoing_session is not None:
+        if self.session is not None:
             # todo add event sending here
             self.session.end()
             send_call_update_notification(self, self.session, 'cancel')
