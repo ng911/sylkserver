@@ -56,9 +56,10 @@ def publish_update_call(room_number, call_data):
         wamp_session.publish(u'com.emergent.call', json_data)
 
 def publish_update_location_success(room_number, ali_result):
-    json_data = {'success' : True, 'ali_data' : ali_result}
+    json_data = {'success' : True, 'room_number': room_number, 'ali_data' : ali_result}
     if wamp_session is not None:
-        wamp_session.publish(u'com.emergent.location.%s' % room_number , json_data)
+        log.info("publish location update for room %s", room_number)
+        wamp_session.publish(u'com.emergent.location', json_data)
 
 def publish_update_location_failed(room_number):
     json_data = {'success' : False}
