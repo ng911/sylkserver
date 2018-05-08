@@ -81,7 +81,7 @@ def process_ali_success(result):
             location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
         location_db_obj.save()
 
-            #publish_update_location_success(room_number, ali_result)
+        publish_update_location_success(room_number, ali_result)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
