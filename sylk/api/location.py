@@ -41,10 +41,12 @@ def get_location(room_number):
         if count > 0:
             location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at')[page_no]
             location_json = get_json_from_db_obj(location_db_obj)
+            location_display = get_location_display(location_db_obj)
         else:
             location_json = {}
+            location_display = ''
 
-        response = {'success' : True, 'total_records' : count, 'page' : page_no, 'location' : location_json}
+        response = {'success' : True, 'total_records' : count, 'page' : page_no, 'location' : location_json, 'location_display': location_display}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
