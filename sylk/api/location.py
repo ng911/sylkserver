@@ -15,8 +15,8 @@ log = ApplicationLogger(__package__)
 
 def get_location_display(location_db_obj):
     location_display = ''
-    if (location_db_obj.location is not None) and (location_db_obj.location != ''):
-        location_display = location_db_obj.location
+    if (location_db_obj.postal is not None) and (location_db_obj.postal != ''):
+        location_display = location_db_obj.postal
     if (location_db_obj.community is not None) and (location_db_obj.community != ''):
         if location_display == '':
             location_display = location_db_obj.community
