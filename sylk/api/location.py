@@ -75,7 +75,7 @@ def set_location(location_id):
 @location.route('/display/<room_number>', methods=['GET'])
 def get_call_location_display(room_number):
     try:
-        location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at')[page_no]
+        location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at')[0]
 
         response = {'success' : True, 'display' : get_location_display(location_db_obj)}
         return jsonify(response)
