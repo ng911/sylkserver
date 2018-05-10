@@ -1,5 +1,5 @@
 import traceback
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call, Location
@@ -209,6 +209,10 @@ def update_call(room_number):
 
         return jsonify(response)
 
+
+@calls.route('/recordings/<path:path>')
+def send_recording(path):
+    return send_from_directory('static', path)
 
 
 '''
