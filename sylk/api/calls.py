@@ -213,7 +213,7 @@ def update_call(room_number):
 @calls.route('/recordings/<path:path>')
 def send_recording(path):
     log.info("send_recording for %r", path)
-    return send_from_directory('static', path)
+    return send_from_directory('recordings', path)
 
 
 '''
