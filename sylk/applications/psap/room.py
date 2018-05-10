@@ -15,7 +15,7 @@ from application.system import makedirs
 from eventlib import api, coros, proc
 from sipsimple.account.bonjour import BonjourPresenceState
 from sipsimple.application import SIPApplication
-from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError
+from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import SIPCoreError, SIPCoreInvalidStateError, SIPURI
 from sipsimple.core import Header, FromHeader, ToHeader, SubjectHeader
@@ -147,6 +147,7 @@ class Room(object):
         self.last_nicknames_map = {}
         self.participants_counter = Counter()
         self.history = deque(maxlen=ConferenceConfig.history_size)
+        self.recorder = None
 
     @property
     def empty(self):
@@ -223,6 +224,8 @@ class Room(object):
             self.bonjour_services = BonjourService(service='sipuri', name='Conference Room %s' % room_user, uri_user=room_user)
             self.bonjour_services.start()
         '''
+        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "%s.wav" % self.room_number)
+        self.recorder.start()
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
@@ -252,6 +255,7 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
+        self.recorder.stop()
         self.state = 'stopped'
 
     @run_in_thread('file-io')

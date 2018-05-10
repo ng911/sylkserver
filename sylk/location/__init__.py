@@ -22,6 +22,25 @@ else:
     log = ApplicationLogger(__package__)
 
 
+def get_location_display(ali_result):
+    location_display = ''
+    if ('postal' in ali_result) and (ali_result['postal'] != ''):
+        location_display = ali_result['postal']
+    if ('community' in ali_result) and (ali_result['community'] != ''):
+        if location_display == '':
+            location_display = ali_result['community']
+        else:
+            location_display = "%s, %s" % (location_display, ali_result['community'])
+
+    if ('state' in ali_result) and (ali_result['state'] != ''):
+        if location_display == '':
+            location_display = ali_result['state']
+        else:
+            location_display = "%s, %s" % (location_display, ali_result['state'])
+
+    return location_display
+
+
 def get_initialized_ali_data():
     ali_data = {}
     ali_data['postal'] = ""
@@ -81,7 +100,7 @@ def process_ali_success(result):
             location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
         location_db_obj.save()
 
-        publish_update_location_success(room_number, ali_result)
+        publish_update_location_success(room_number, ali_result, get_location_display(ali_result))
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
