@@ -590,6 +590,7 @@ class PSAPApplication(SylkApplication):
             log.error("_NH_ConferenceParticipantDBUpdated room not found %r", room_number)
 
     def _NH_SIPSessionDidStart(self, notification):
+        log.info("PSAP _NH_SIPSessionDidStart")
         session = notification.sender
         if session.state == 'incoming':
             log.info("_NH_SIPSessionDidStart for incoming call")
@@ -605,7 +606,7 @@ class PSAPApplication(SylkApplication):
 
     @run_in_green_thread
     def _NH_SIPSessionDidEnd(self, notification):
-        log.info('got _NH_SIPSessionDidEnd')
+        log.info('PSAP got _NH_SIPSessionDidEnd')
         # We could get this notifiction even if we didn't get SIPSessionDidStart
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
@@ -645,7 +646,7 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidFail(self, notification):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
-        log.info(u'Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
+        log.info(u'PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
         self.remove_session(session)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
