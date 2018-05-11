@@ -361,13 +361,9 @@ class PSAPApplication(SylkApplication):
                 pass
 
     def outgoing_session_will_start(self, sip_uri, session):
-        pass
-
-    def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
-
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
@@ -385,14 +381,17 @@ class PSAPApplication(SylkApplication):
                     outgoing_call_initializer.cancel_call()
             room_data.outgoing_calls = {}
 
-            self.add_session_to_room(session)
-            #todo - add proper value of is_calltaker
-            self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
-            calltakers = self.get_calltakers_in_room(room_number)
-            NotificationCenter().post_notification('ConferenceActive', self,
-                                                   NotificationData(room_number=room_number, calltakers=calltakers))
-        else:
-            session.end()
+    def outgoing_session_did_start(self, sip_uri, session):
+        room_number = session.room_number
+
+        self.add_session_to_room(session)
+        #todo - add proper value of is_calltaker
+        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
+        calltakers = self.get_calltakers_in_room(room_number)
+        NotificationCenter().post_notification('ConferenceActive', self,
+                                               NotificationData(room_number=room_number, calltakers=calltakers))
+        #else:
+        #    session.end()
 
     '''
     def add_outgoing_session(self, session):
