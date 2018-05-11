@@ -1,4 +1,6 @@
 import traceback
+import datetime
+import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
@@ -83,7 +85,7 @@ def get_room():
         call_id = get_argument('call_id')
         call_obj = Call.objects.get(sip_call_id=call_id)
         response = {
-            'success': False,
+            'success': True,
             'room_number' : call_obj.room_number
         }
         return jsonify(response)
@@ -108,10 +110,24 @@ def get_conference_event_log_json(room_number):
         events.append(event_json)
     return events
 
+def get_conference_duration(conference_db_obj):
+    if conference_db_obj.status == 'active':
+        cur_time = arrow.utcnow()
+        start_time = arrow.get(conference_db_obj.answer_time)
+        time_diff = cur_time - start_time
+        return time_diff.total_seconds()
+    elif conference_db_obj.status == 'closed':
+        end_time = arrow.get(conference_db_obj.end_time)
+        start_time = arrow.get(conference_db_obj.answer_time)
+        time_diff = end_time - start_time
+        return time_diff.total_seconds()
+    return 0
+
 @calls.route('/conference/<room_number>', methods=['GET'])
 def conference_info(room_number):
     conference_db_obj = Conference.objects.get(room_number=room_number)
     conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
+    conference_json['duration'] = get_conference_duration(conference_db_obj)
     conference_json['participants'] = get_conference_participants_json(room_number)
     conference_json['event_log'] = get_conference_event_log_json(room_number)
 
