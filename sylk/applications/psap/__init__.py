@@ -1002,7 +1002,7 @@ class OutgoingCallInitializer(object):
         # cancel other invited parties
         if self.app:
             session = notification.sender
-            self.app.outgoing_session_will_start(self.target, session)
+            self.app.outgoing_session_will_start(self.target_uri, session)
 
     def _NH_SIPSessionDidStart(self, notification):
         notification.center.remove_observer(self, sender=notification.sender)
