@@ -224,12 +224,12 @@ class Room(object):
             self.bonjour_services = BonjourService(service='sipuri', name='Conference Room %s' % room_user, uri_user=room_user)
             self.bonjour_services.start()
         '''
-        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
-        self.audio_conference.bridge.add(self.recorder)
-        self.recorder.start()
+        #self.recorder.start()
+        #self.audio_conference.bridge.add(self.recorder)
         self.moh_player = MoHPlayer(self.audio_conference)
         self.moh_player.start()
         self.state = 'started'
@@ -256,7 +256,7 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
-        self.recorder.stop()
+        #self.recorder.stop()
         self.state = 'stopped'
 
     @run_in_thread('file-io')
