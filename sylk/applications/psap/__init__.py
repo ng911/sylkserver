@@ -593,8 +593,6 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
-        if session.state == 'incoming':
-            log.info("_NH_SIPSessionDidStart for incoming call")
         self.add_session_to_room(session)
         send_call_active_notification(self, session)
         '''

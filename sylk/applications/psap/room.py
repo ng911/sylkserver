@@ -415,8 +415,8 @@ class Room(object):
                 return
         '''
 
-        #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
-        #welcome_handler.run()
+        welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
+        welcome_handler.run()
         self.dispatch_conference_info()
 
         if len(self.sessions) == 1:
@@ -727,9 +727,9 @@ class Room(object):
                                                                                        format_identity(session.remote_identity),
                                                                                        stream.type))
 
-        #if notification.data.added_streams:
-        #    welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
-        #    welcome_handler.run()
+        if notification.data.added_streams:
+            welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
+            welcome_handler.run()
 
         for stream in notification.data.removed_streams:
             notification.center.remove_observer(self, sender=stream)
