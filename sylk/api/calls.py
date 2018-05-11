@@ -203,7 +203,6 @@ def dial_number(phone_number):
 
 @calls.route('/update/<room_number>', methods=['PUT', 'POST'])
 def update_call(room_number):
-    log.info('inside update_call for %r', room_number)
     try:
         if (room_number is None) or (room_number == ''):
             raise ValueError('missing or invalid room_number')

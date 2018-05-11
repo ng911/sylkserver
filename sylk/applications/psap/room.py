@@ -225,6 +225,7 @@ class Room(object):
             self.bonjour_services.start()
         '''
         self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        self.audio_conference.add(self.recorder)
         self.recorder.start()
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
