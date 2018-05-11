@@ -228,7 +228,7 @@ class Room(object):
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
-        self.audio_conference.add(self.recorder)
+        self.audio_conference.bridge.add(self.recorder)
         self.recorder.start()
         self.moh_player = MoHPlayer(self.audio_conference)
         self.moh_player.start()
