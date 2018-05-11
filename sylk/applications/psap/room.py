@@ -415,8 +415,12 @@ class Room(object):
                 return
         '''
 
-        welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
-        welcome_handler.run()
+        #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
+        #welcome_handler.run()
+        for stream in session.streams:
+            self.room.audio_conference.add(stream)
+            self.room.audio_conference.unhold()
+
         self.dispatch_conference_info()
 
         if len(self.sessions) == 1:
@@ -728,8 +732,11 @@ class Room(object):
                                                                                        stream.type))
 
         if notification.data.added_streams:
-            welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
-            welcome_handler.run()
+            #welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
+            #welcome_handler.run()
+            self.audio_conference.add(stream)
+            self.audio_conference.unhold()
+
 
         for stream in notification.data.removed_streams:
             notification.center.remove_observer(self, sender=stream)
@@ -880,6 +887,7 @@ class WelcomeHandler(object):
 
     @run_in_green_thread
     def run(self):
+        log.info("inside welcomehandler run start")
         notification_center = NotificationCenter()
         notification_center.add_observer(self, sender=self.session)
 
@@ -895,6 +903,7 @@ class WelcomeHandler(object):
         self.streams = None
         self.room = None
         self.procs = None
+        log.info("inside welcomehandler run end")
 
     def play_file_in_player(self, player, file, delay):
         player.filename = file
@@ -905,20 +914,25 @@ class WelcomeHandler(object):
             log.warning(u'Error playing file %s: %s' % (file, e))
 
     def audio_welcome(self, stream):
+        log.info("inside audio_welcome start")
         player = WavePlayer(stream.mixer, '', pause_time=1, initial_delay=1, volume=50)
         stream.bridge.add(player)
         try:
             if self.initial:
                 file = Resources.get('sounds/co_welcome_conference.wav')
+                log.info("inside audio_welcome play initial")
                 self.play_file_in_player(player, file, 1)
             user_count = len({str(s.remote_identity.uri) for s in self.room.sessions if s.remote_identity.uri != self.session.remote_identity.uri and any(stream for stream in s.streams if stream.type == 'audio')})
             if user_count == 0:
+                log.info("inside audio_welcome play co_only_one")
                 file = Resources.get('sounds/co_only_one.wav')
                 self.play_file_in_player(player, file, 0.5)
             elif user_count == 1:
+                log.info("inside audio_welcome play co_there_is_one")
                 file = Resources.get('sounds/co_there_is_one.wav')
                 self.play_file_in_player(player, file, 0.5)
             elif user_count < 100:
+                log.info("inside audio_welcome play co_there_are")
                 file = Resources.get('sounds/co_there_are.wav')
                 self.play_file_in_player(player, file, 0.2)
                 if user_count <= 24:
@@ -931,6 +945,7 @@ class WelcomeHandler(object):
                     self.play_file_in_player(player, file, 0.1)
                 file = Resources.get('sounds/co_more_participants.wav')
                 self.play_file_in_player(player, file, 0)
+            log.info("inside audio_welcome play connected_tone")
             file = Resources.get('sounds/connected_tone.wav')
             self.play_file_in_player(player, file, 0.1)
         except proc.ProcExit:
