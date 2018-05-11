@@ -115,12 +115,12 @@ def get_conference_duration(conference_db_obj):
         cur_time = arrow.utcnow()
         start_time = arrow.get(conference_db_obj.answer_time)
         time_diff = cur_time - start_time
-        return time_diff.total_seconds()
+        return int(time_diff.total_seconds())
     elif conference_db_obj.status == 'closed':
         end_time = arrow.get(conference_db_obj.end_time)
         start_time = arrow.get(conference_db_obj.answer_time)
         time_diff = end_time - start_time
-        return time_diff.total_seconds()
+        return int(time_diff.total_seconds())
     return 0
 
 @calls.route('/conference/<room_number>', methods=['GET'])
