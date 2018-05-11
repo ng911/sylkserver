@@ -415,7 +415,7 @@ class PSAPApplication(SylkApplication):
             chat_stream = chat_streams[0] if chat_streams else None
             streams = [stream for stream in (audio_stream, chat_stream) if stream]
             try:
-                log.info("accept incoming session")
+                log.info("accept incoming session %r", session)
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
@@ -591,8 +591,8 @@ class PSAPApplication(SylkApplication):
             log.error("_NH_ConferenceParticipantDBUpdated room not found %r", room_number)
 
     def _NH_SIPSessionDidStart(self, notification):
-        log.info("PSAP _NH_SIPSessionDidStart")
         session = notification.sender
+        log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
         if session.state == 'incoming':
             log.info("_NH_SIPSessionDidStart for incoming call")
         self.add_session_to_room(session)
