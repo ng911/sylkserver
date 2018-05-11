@@ -416,7 +416,6 @@ class PSAPApplication(SylkApplication):
             streams = [stream for stream in (audio_stream, chat_stream) if stream]
             try:
                 session.accept(streams, is_focus=True)
-                self.add_session_to_room(session)
             except IllegalStateError:
                 pass
 
@@ -592,6 +591,8 @@ class PSAPApplication(SylkApplication):
 
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
+        if session.state == 'incoming':
+            log.info("_NH_SIPSessionDidStart for incoming call")
         self.add_session_to_room(session)
         send_call_active_notification(self, session)
         '''
