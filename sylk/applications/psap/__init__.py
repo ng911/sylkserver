@@ -997,6 +997,13 @@ class OutgoingCallInitializer(object):
     def _NH_SIPSessionGotProvisionalResponse(self, notification):
         pass
 
+    def _NH_SIPSessionWillStart(self, notification):
+        log.info("_NH_SIPSessionWillStart ")
+        # cancel other invited parties
+        if self.app:
+            session = notification.sender
+            self.app.outgoing_session_will_start(self.target, session)
+
     def _NH_SIPSessionDidStart(self, notification):
         notification.center.remove_observer(self, sender=notification.sender)
         session = notification.sender
