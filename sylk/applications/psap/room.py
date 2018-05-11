@@ -418,8 +418,8 @@ class Room(object):
         #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
         #welcome_handler.run()
         for stream in session.streams:
-            self.room.audio_conference.add(stream)
-            self.room.audio_conference.unhold()
+            self.audio_conference.add(stream)
+            self.audio_conference.unhold()
 
         self.dispatch_conference_info()
 
