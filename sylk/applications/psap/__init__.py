@@ -415,6 +415,7 @@ class PSAPApplication(SylkApplication):
             chat_stream = chat_streams[0] if chat_streams else None
             streams = [stream for stream in (audio_stream, chat_stream) if stream]
             try:
+                log.info("accept incoming session")
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
