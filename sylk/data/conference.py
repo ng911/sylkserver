@@ -11,6 +11,8 @@ from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
 from sylk.wamp import publish_create_call, publish_update_call, publish_active_call
 from sylk.utils import get_json_from_db_obj
+from sylk.api.calls import get_conference_participants_json
+
 import sylk.wamp
 
 log = ApplicationLogger(__package__)
@@ -79,6 +81,8 @@ class ConferenceData(object):
             '''
 
             json_data = get_json_from_db_obj(conference)
+            json_data['participants'] = get_conference_participants_json(room_number)
+
             publish_create_call(json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -102,6 +106,7 @@ class ConferenceData(object):
             conference_event.save()
 
             json_data = get_json_from_db_obj(conference)
+            json_data['participants'] = get_conference_participants_json(room_number)
             publish_update_call(room_number, json_data)
 
             for calltaker in calltakers:
@@ -134,6 +139,7 @@ class ConferenceData(object):
             conference_event.save()
 
             json_data = get_json_from_db_obj(conference)
+            json_data['participants'] = get_conference_participants_json(room_number)
             publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -163,6 +169,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
             # todo - change this to publish call details event
+            json_data['participants'] = get_conference_participants_json(room_number)
             publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -189,6 +196,7 @@ class ConferenceData(object):
             '''
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
+            json_data['participants'] = get_conference_participants_json(room_number)
             # todo - change this to publish call details event
             publish_update_call(room_number, json_data)
         except Exception as e:
