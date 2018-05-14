@@ -272,7 +272,7 @@ class PSAPApplication(SylkApplication):
             room_number = local_identity.uri.user
             session.room_number = room_number
             log.info("join call to room %r", room_number)
-            self.add_incoming_participant(self, display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
+            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
             reactor.callLater(0, self.accept_session, session)
         elif call_type == 'admin':
             pass
