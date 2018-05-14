@@ -34,6 +34,8 @@ def get_incoming_link(ip_address, port, called_number):
     found_ip_address = False
     for incoming_link in IncomingLink.objects(ip_address=ip_address):
         found_ip_address = True
+        log.info("get_incoming_link found ip_address %r", ip_address)
+        log.info("get_incoming_link port %r, called_number %r", incoming_link.port, incoming_link.called_no)
         if (incoming_link.port is None) and (incoming_link.called_no is None):
             return incoming_link
 
