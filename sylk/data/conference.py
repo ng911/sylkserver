@@ -163,7 +163,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
             # todo - change this to publish call details event
-            #publish_update_call(room_number, json_data)
+            publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in add_participant %r", e)
@@ -190,7 +190,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             json_data = get_json_from_db_obj(conference)
             # todo - change this to publish call details event
-            #publish_update_call(room_number, json_data)
+            publish_update_call(room_number, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_participant_active_status %r", e)
