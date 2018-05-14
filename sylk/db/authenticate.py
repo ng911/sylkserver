@@ -37,6 +37,7 @@ def get_incoming_link(ip_address, port, called_number):
         log.info("get_incoming_link found ip_address %r", ip_address)
         log.info("get_incoming_link port %r, called_number %r", incoming_link.port, incoming_link.called_no)
         if (incoming_link.port is None) and (incoming_link.called_no is None):
+            log.info("get_incoming_link found link")
             return incoming_link
 
         if (incoming_link.port is not None) and (incoming_link.port != port):
@@ -86,12 +87,17 @@ def authenticate_call(ip_address, port, called_number, calling_uri, conf_rooms):
         return (False, None, None)
 
     if incoming_link.is_origination_calltaker():
+        log.info("authenticate_call incoming link is calltaker gateway")
+        log.info("authenticate_call user is %r", calling_uri.user)
         calltaker_obj = get_calltaker_user(calling_uri.user)
-        if calltaker_obj is None:
+        if calltaker_obj is not None:
+            log.info("authenticate_call found calltaker_obj %r", calltaker_obj)
             # we need to check if the calltaker tried to join a conference room
             if called_number in conf_rooms:
+                log.info("authenticate_call send to sos_room")
                 return (True, 'sos_room', calltaker_obj)
             else:
+                log.info("authenticate_call send to outgoing")
                 return (True, 'outgoing', calltaker_obj)
 
     if incoming_link.is_origination_sos():
