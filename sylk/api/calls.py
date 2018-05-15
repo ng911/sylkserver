@@ -34,6 +34,7 @@ def current():
         #todo - get actual location
         conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
         conference_json['participants'] = get_conference_participants_json(conference_db_obj.room_number)
+        conference_json['event_log'] = get_conference_event_log_json(conference_db_obj.room_number)
         calls.append(conference_json)
     response = {
         'success' : True,
@@ -67,6 +68,8 @@ def recent():
         conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
 
         conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
+        conference_json['participants'] = get_conference_participants_json(conference_db_obj.room_number)
+        conference_json['event_log'] = get_conference_event_log_json(conference_db_obj.room_number)
         calls.append(conference_json)
 
     response = {
