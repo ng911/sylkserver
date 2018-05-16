@@ -1,15 +1,14 @@
 import traceback
-import datetime
-import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import Conference, ConferenceEvent, ConferenceParticipant, Call, Location
+from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
-from sylk.api.location import get_location_display
 from utils import get_argument
 from mongoengine import Q
+from sylk.db.calls import get_conference_participants_json, get_active_calltakers, get_conference_event_log_json, \
+                            get_conference_duration, get_conference_json, get_location_for_call
 
 calls = Blueprint('calls', __name__,
                         template_folder='templates')
@@ -17,9 +16,6 @@ calls = Blueprint('calls', __name__,
 CORS(calls)
 log = ApplicationLogger(__package__)
 
-ignore_conference_fields = [
-    'psap_id', 'type1', 'type2', 'pictures', 'primary_queue_id', 'secondary_queue_id', 'link_id'
-]
 
 '''
 Note - for now we ignore the psap_id
@@ -30,10 +26,7 @@ def current():
     log.info("get current calls")
     calls = []
     for conference_db_obj in Conference.objects(Q(status__in=['init', 'ringing', 'ringing_queued', 'queued', 'active']) | (Q(status='abandoned') & Q(callback=False))):
-        conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
-        #todo - get actual location
-        conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
-        conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
+        conference_json = get_conference_json(conference_db_obj)
         calls.append(conference_json)
     response = {
         'success' : True,
@@ -42,17 +35,6 @@ def current():
 
     return jsonify(response)
 
-def get_location_for_call(room_number):
-    try:
-        location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at').first()
-        if location_db_obj is not None:
-            return get_location_display(location_db_obj)
-        return ''
-    except Exception as e:
-        stacktrace = traceback.format_exc()
-        log.error("exception in get_location_for_call for room %r, e %r", room_number, str(e))
-        log.error("%r", stacktrace)
-        return ""
 '''
 Note - for now we ignore the psap_id
 returns recent call history
@@ -64,8 +46,7 @@ def recent():
     calls = []
     # todo - add limit of 1 month to this data
     for conference_db_obj in Conference.objects(status__in=['closed', 'abandoned']):
-        conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
-        conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
+        conference_json = get_conference_json(conference_db_obj)
         calls.append(conference_json)
 
     response = {
@@ -94,7 +75,7 @@ def get_room():
         }
         return jsonify(response)
 
-
+'''
 def get_conference_participants_json(room_number):
     participants = []
     for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
@@ -131,21 +112,22 @@ def get_conference_duration(conference_db_obj):
         time_diff = end_time - start_time
         return int(time_diff.total_seconds())
     return 0
-
-
-@calls.route('/conference/<room_number>', methods=['GET'])
-def conference_info(room_number):
-    conference_db_obj = Conference.objects.get(room_number=room_number)
+    
+def get_conference_json(conference_db_obj):
     conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
     conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
     conference_json['duration'] = get_conference_duration(conference_db_obj)
     conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
-    #conference_json['participants'] = get_conference_participants_json(room_number)
-    #conference_json['event_log'] = get_conference_event_log_json(room_number)
+
+'''
+
+@calls.route('/conference/<room_number>', methods=['GET'])
+def conference_info(room_number):
+    conference_db_obj = Conference.objects.get(room_number=room_number)
 
     response = {
         'success' : True,
-        'conference_data' : conference_json,
+        'conference_data' : get_conference_json(conference_db_obj),
         'participants': get_conference_participants_json(room_number),
         'event_log' : get_conference_event_log_json(room_number)
     }

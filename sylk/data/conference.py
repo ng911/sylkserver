@@ -10,8 +10,7 @@ from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
 from sylk.wamp import publish_create_call, publish_update_call, publish_active_call
-from sylk.utils import get_json_from_db_obj
-from sylk.api.calls import get_conference_participants_json
+from sylk.db.calls import get_conference_json, get_conference_participants_json
 
 import sylk.wamp
 
@@ -80,10 +79,10 @@ class ConferenceData(object):
             participant.save()
             '''
 
-            json_data = get_json_from_db_obj(conference)
-            json_data['participants'] = get_conference_participants_json(room_number)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
 
-            publish_create_call(json_data)
+            publish_create_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in create_conference %r", e)
@@ -105,10 +104,11 @@ class ConferenceData(object):
             conference_event.event_details = 'update call status to active'
             conference_event.save()
 
-            json_data = get_json_from_db_obj(conference)
-            json_data['participants'] = get_conference_participants_json(room_number)
-            publish_update_call(room_number, json_data)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
 
+            # todo- check, this one doesnt seem to be used by the calltaker. might remove it in future
             for calltaker in calltakers:
                 publish_active_call(calltaker, room_number)
         except Exception as e:
@@ -138,9 +138,9 @@ class ConferenceData(object):
                 conference_event.event_details = 'update call status to  {}'.format(status)
             conference_event.save()
 
-            json_data = get_json_from_db_obj(conference)
-            json_data['participants'] = get_conference_participants_json(room_number)
-            publish_update_call(room_number, json_data)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_conference_status %r", e)
@@ -167,10 +167,9 @@ class ConferenceData(object):
             conference_event.save()
 
             conference = Conference.objects.get(room_number=room_number)
-            json_data = get_json_from_db_obj(conference)
-            # todo - change this to publish call details event
-            json_data['participants'] = get_conference_participants_json(room_number)
-            publish_update_call(room_number, json_data)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in add_participant %r", e)
@@ -195,10 +194,9 @@ class ConferenceData(object):
             publish_update_call(room_number, json_data)
             '''
             conference = Conference.objects.get(room_number=room_number)
-            json_data = get_json_from_db_obj(conference)
-            json_data['participants'] = get_conference_participants_json(room_number)
-            # todo - change this to publish call details event
-            publish_update_call(room_number, json_data)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_participant_active_status %r", e)

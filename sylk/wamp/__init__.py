@@ -29,13 +29,14 @@ def publish_update_calltakers(json_data):
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.calltakers', json_data)
 
-def publish_create_call(call_data):
+def publish_create_call(room_number, call_data, participants):
     if wamp_session is not None:
         json_data = {}
         json_data['command'] = 'created'
-        json_data['room_number'] = call_data['room_number']
+        json_data['room_number'] = room_number
         json_data['call_data'] = call_data
-        log.info("publish com.emergent.call with json %r", json_data)
+        json_data['participants'] = participants
+        #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
 
 def publish_active_call(calltaker, room_number):
@@ -46,13 +47,15 @@ def publish_active_call(calltaker, room_number):
         wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data)
     pass
 
-def publish_update_call(room_number, call_data):
+def publish_update_call(room_number, call_data, participants):
     if wamp_session is not None:
         json_data = {}
         json_data['command'] = 'updated'
         json_data['room_number'] = room_number
         json_data['call_data'] = call_data
-        log.info("publish com.emergent.call with json %r", json_data)
+        json_data['participants'] = participants
+
+        #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
 
 def publish_update_location_success(room_number, ali_result, location_display):
@@ -65,8 +68,6 @@ def publish_update_location_failed(room_number):
     json_data = {'success' : False}
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.location.%s' % room_number, json_data)
-
-
 
 def publish_update_calls():
     if wamp_session is not None:
