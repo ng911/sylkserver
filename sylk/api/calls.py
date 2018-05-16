@@ -30,11 +30,11 @@ def current():
     log.info("get current calls")
     calls = []
     for conference_db_obj in Conference.objects(Q(status__in=['init', 'ringing', 'ringing_queued', 'queued', 'active']) | (Q(status='abandoned') & Q(callback=False))):
-        conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
+        conference_json = {}
+        conference_json['call_data'] = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
         #todo - get actual location
         conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
-        conference_json['participants'] = get_conference_participants_json(conference_db_obj.room_number)
-        conference_json['event_log'] = get_conference_event_log_json(conference_db_obj.room_number)
+        conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
         calls.append(conference_json)
     response = {
         'success' : True,
@@ -65,11 +65,9 @@ def recent():
     calls = []
     # todo - add limit of 1 month to this data
     for conference_db_obj in Conference.objects(status__in=['closed', 'abandoned']):
-        conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
-
+        conference_json = {}
+        conference_json['call_data'] = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
         conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
-        conference_json['participants'] = get_conference_participants_json(conference_db_obj.room_number)
-        conference_json['event_log'] = get_conference_event_log_json(conference_db_obj.room_number)
         calls.append(conference_json)
 
     response = {
@@ -106,12 +104,22 @@ def get_conference_participants_json(room_number):
         participants.append(participant_json)
     return participants
 
+
+def get_active_calltakers(room_number):
+    active_calltakers = []
+    for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
+        if participant_db_obj.is_active and participant_db_obj.is_calltaker:
+            active_calltakers.append(participant_db_obj.name)
+    return active_calltakers
+
+
 def get_conference_event_log_json(room_number):
     events = []
     for event_db_obj in ConferenceEvent.objects(room_number=room_number):
         event_json = get_json_from_db_obj(event_db_obj)
         events.append(event_json)
     return events
+
 
 def get_conference_duration(conference_db_obj):
     if conference_db_obj.status == 'active':
@@ -126,17 +134,23 @@ def get_conference_duration(conference_db_obj):
         return int(time_diff.total_seconds())
     return 0
 
+
 @calls.route('/conference/<room_number>', methods=['GET'])
 def conference_info(room_number):
     conference_db_obj = Conference.objects.get(room_number=room_number)
-    conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
+    conference_json = {}
+    conference_json['call_data'] = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
+    conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
     conference_json['duration'] = get_conference_duration(conference_db_obj)
-    conference_json['participants'] = get_conference_participants_json(room_number)
-    conference_json['event_log'] = get_conference_event_log_json(room_number)
+    conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
+    #conference_json['participants'] = get_conference_participants_json(room_number)
+    #conference_json['event_log'] = get_conference_event_log_json(room_number)
 
     response = {
         'success' : True,
-        'conference_data' : conference_json
+        'conference_data' : conference_json,
+        'participants': get_conference_participants_json(room_number),
+        'event_log' : get_conference_event_log_json(room_number)
     }
 
     return jsonify(response)
