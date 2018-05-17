@@ -1,4 +1,5 @@
 import traceback
+import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
@@ -21,6 +22,7 @@ log = ApplicationLogger(__package__)
 Note - for now we ignore the psap_id
 returns currently active calls
 '''
+
 @calls.route('/', methods=['GET'])
 def current():
     log.info("get current calls")
@@ -42,7 +44,6 @@ returns recent call history
 @calls.route('/recent', methods=['GET'])
 def recent():
     log.info("get recent calls")
-    log.info("get current calls")
     calls = []
     # todo - add limit of 1 month to this data
     for conference_db_obj in Conference.objects(status__in=['closed', 'abandoned']):
@@ -55,6 +56,30 @@ def recent():
     }
 
     return jsonify(response)
+
+
+'''
+Note - for now we ignore the psap_id
+returns recent call history
+'''
+@calls.route('/lastMonth', methods=['GET'])
+def lastMonth():
+    log.info("get current calls")
+    calls = []
+    arr_cur_time = arrow.utcnow()
+    arr_last_month = arr_cur_time.shift(days=-30)
+
+    for conference_db_obj in Conference.objects(start_time__gt=arr_last_month.naive):
+        conference_json = get_conference_json(conference_db_obj)
+        calls.append(conference_json)
+
+    response = {
+        'success' : True,
+        'calls' : calls
+    }
+
+    return jsonify(response)
+
 
 '''
 Get conference room for call id
