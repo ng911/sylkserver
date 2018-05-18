@@ -40,13 +40,13 @@ class RoomData(object):
 
 class ParticipantData(object):
     __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute', 'send_audio', 'send_video',
-                 'send_text', 'is_caller', 'is_active', 'is_calltaker']
+                 'send_text', 'is_caller', 'is_active', 'is_calltaker', 'is_primary']
     def __init__(self):
         pass
 
     def __repr__(self):
-        return "display_name %r, uri %r, session %r, direction %r, mute %r, send_audio %r, send_video %r, send_text %r, is_caller %r, is_active %r" % \
-               (self.display_name, self.uri, self.session, self.direction, self.mute, self.send_audio, self.send_video, self.send_text, self.is_caller, self.is_active)
+        return "display_name %r, uri %r, session %r, direction %r, mute %r, send_audio %r, send_video %r, send_text %r, is_caller %r, is_active %r, is_primary %r" % \
+               (self.display_name, self.uri, self.session, self.direction, self.mute, self.send_audio, self.send_video, self.send_text, self.is_caller, self.is_active, self.is_primary)
 
 #RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
 #ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
