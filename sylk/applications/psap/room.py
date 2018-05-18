@@ -235,6 +235,7 @@ class Room(object):
         self.state = 'started'
 
     def stop(self):
+        log.info("room - stop")
         if not self.started:
             return
         self.state = 'stopping'
@@ -418,6 +419,7 @@ class Room(object):
         #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
         #welcome_handler.run()
         for stream in session.streams:
+            log.info('adding audio confernce stream')
             self.audio_conference.add(stream)
             self.audio_conference.unhold()
 
@@ -436,6 +438,7 @@ class Room(object):
         '''
 
     def remove_session(self, session):
+        log.info("room remove session %r", session)
         notification_center = NotificationCenter()
         notification_center.remove_observer(self, sender=session)
         self.sessions.remove(session)
@@ -458,6 +461,7 @@ class Room(object):
         else:
             notification_center.remove_observer(self, sender=audio_stream)
             try:
+                log.info("removing audio conference stream")
                 self.audio_conference.remove(audio_stream)
             except ValueError:
                 # User may hangup before getting bridged into the conference
@@ -709,6 +713,7 @@ class Room(object):
             session.proposal_timer = None
 
     def _NH_SIPSessionDidRenegotiateStreams(self, notification):
+        log.info("room - _NH_SIPSessionDidRenegotiateStreams")
         session = notification.sender
         for stream in notification.data.added_streams:
             notification.center.add_observer(self, sender=stream)
@@ -734,6 +739,7 @@ class Room(object):
         if notification.data.added_streams:
             #welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
             #welcome_handler.run()
+            log.info("add stream to audio_conference")
             self.audio_conference.add(stream)
             self.audio_conference.unhold()
 
@@ -745,6 +751,7 @@ class Room(object):
             self.dispatch_server_message(txt, exclude=session)
             if stream.type == 'audio':
                 try:
+                    log.info("remove stream from audio_conference")
                     self.audio_conference.remove(stream)
                 except ValueError:
                     # User may hangup before getting bridged into the conference
