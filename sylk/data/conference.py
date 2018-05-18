@@ -147,7 +147,7 @@ class ConferenceData(object):
             log.error(stackTrace)
 
 
-    def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker):
+    def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker, is_primary):
         try:
             log.info('add_participant %r for room %r, display_name %r', sip_uri, room_number, display_name)
             participant = ConferenceParticipant()
@@ -157,6 +157,7 @@ class ConferenceData(object):
             participant.is_caller = is_caller
             participant.is_calltaker = is_calltaker
             participant.sip_uri = sip_uri
+            participant.is_primary = is_primary
             participant.save()
 
             conference_event = ConferenceEvent()

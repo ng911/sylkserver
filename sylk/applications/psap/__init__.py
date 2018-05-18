@@ -202,17 +202,20 @@ class PSAPApplication(SylkApplication):
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
+                forward_to_calltaker=True
             else:
                 outgoing_gateway = ServerConfig.outgoing_gateway
                 sip_uri = '{}@{}'.format(local_identity.uri.user, outgoing_gateway)
                 sip_uris = [sip_uri]
+                # todo check here if uri is to a calltaker
+                forward_to_calltaker=False
 
             if call_type == 'outgoing':
                 direction = 'out'
-                is_calltaker = True
+                is_call_from_calltaker = True
             else:
                 direction = 'in'
-                is_calltaker = False
+                is_call_from_calltaker = False
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
@@ -236,7 +239,7 @@ class PSAPApplication(SylkApplication):
                                                                     caller_name=remote_identity.uri.user,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
-            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_calltaker)
+            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
             # start call timer
             ring_time = queue_details.ring_time
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
@@ -255,7 +258,7 @@ class PSAPApplication(SylkApplication):
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
-                                                                    caller_identity=session.remote_identity, is_calltaker=not is_calltaker)
+                                                                    caller_identity=session.remote_identity, is_calltaker=forward_to_calltaker)
                 ''' old code '''
                 '''
                 outgoing_call_initializer = OutgoingCallInitializer(target=sip_uri,
@@ -369,6 +372,8 @@ class PSAPApplication(SylkApplication):
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
             reactor.callLater(0, self.accept_session, room_data.incoming_session)
 
+            if session.is_calltaker:
+                session.is_primary = True
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
                 room_data.invitation_timer = None
@@ -386,7 +391,7 @@ class PSAPApplication(SylkApplication):
 
         self.add_session_to_room(session)
         #todo - add proper value of is_calltaker
-        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
+        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         calltakers = self.get_calltakers_in_room(room_number)
         NotificationCenter().post_notification('ConferenceActive', self,
                                                NotificationData(room_number=room_number, calltakers=calltakers))
@@ -489,13 +494,13 @@ class PSAPApplication(SylkApplication):
             self.remove_room(room_number)
             room.stop()
 
-    def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker):
-        self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker)
+    def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False, is_primary=False):
+        self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker, is_primary)
 
     def add_incoming_participant(self, display_name, sip_uri, session, is_caller, is_calltaker):
         self.add_participant(display_name, sip_uri, session, 'in', False, is_caller, is_calltaker)
 
-    def add_participant(self, display_name, sip_uri, session, direction, mute_audio, is_caller, is_calltaker):
+    def add_participant(self, display_name, sip_uri, session, direction, mute_audio, is_caller, is_calltaker=False, is_primary=False):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
         participants = room_data.participants
@@ -511,12 +516,14 @@ class PSAPApplication(SylkApplication):
         participant_data.is_caller = is_caller
         participant_data.is_active = True
         participant_data.is_calltaker = is_calltaker
+        participant_data.is_primary = is_primary
         participants[str(sip_uri)] = participant_data
 
         NotificationCenter().post_notification('ConferenceParticipantAdded', self,
                                                NotificationData(room_number=room_number,
                                                                 direction='in',
                                                                 is_calltaker=is_calltaker,
+                                                                is_primary=is_primary,
                                                                 is_caller=is_caller,
                                                                 sip_uri=str(sip_uri),
                                                                 display_name=display_name))
@@ -965,6 +972,8 @@ class OutgoingCallInitializer(object):
 
         self.session = Session(account)
         self.session.room_number = self.room_number
+        self.session.is_primary = False
+        self.session.is_calltaker = self.is_calltaker
         notification_center.add_observer(self, sender=self.session)
         '''
         if self.original_from_header.display_name:
