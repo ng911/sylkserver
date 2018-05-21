@@ -149,6 +149,14 @@ class Room(object):
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
 
+    def get_debug_info(self):
+        sessions = []
+        for session in self.sessions:
+            session_data = {}
+            session_data['details'] = "%s" % session
+            sessions.append(session_data)
+        return {'sessions' : sessions}
+
     @property
     def empty(self):
         return len(self.sessions) == 0

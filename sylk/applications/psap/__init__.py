@@ -149,6 +149,11 @@ class PSAPApplication(SylkApplication):
     def remove_room(self, room_number):
         self._rooms.pop(room_number, None)
 
+    def get_room_debug_info(self, room_number):
+        # get sessions from room
+        room = self.get_room(room_number=room_number)
+        return {'room_number' : room_number, 'debug_info' : room.get_debug_info()}
+
     def incoming_session(self, session):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
         send_call_update_notification(self, session, 'init')
