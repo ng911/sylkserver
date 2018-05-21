@@ -154,6 +154,7 @@ class Room(object):
         for session in self.sessions:
             session_data = {}
             session_data['details'] = "%s" % session
+            session_data['info'] = "%s" % session.debug_info()
             sessions.append(session_data)
         return {'sessions' : sessions}
 
