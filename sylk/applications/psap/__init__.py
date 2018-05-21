@@ -152,6 +152,8 @@ class PSAPApplication(SylkApplication):
     def get_room_debug_info(self, room_number):
         # get sessions from room
         room = self.get_room(room_number=room_number)
+        if room is None:
+            return {'room_number': room_number, 'debug_info': 'room not active'}
         return {'room_number' : room_number, 'debug_info' : room.get_debug_info()}
 
     def incoming_session(self, session):
