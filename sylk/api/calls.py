@@ -3,6 +3,7 @@ import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
+from sylk.applications.psap import PSAPApplication
 from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
@@ -103,10 +104,11 @@ def get_room():
 
 @calls.route('/conference/debug_info/<room_number>', methods=['GET'])
 def conference_debug_info(room_number):
-
+    psap_app = PSAPApplication()
+    debug_info = psap_app.get_room_debug_info(room_number)
     response = {
         'success' : True,
-        'conference_data' : 'test debug info'
+        'debug_info' : debug_info
     }
 
     return jsonify(response)

@@ -104,6 +104,11 @@ class ConferenceApplication(SylkApplication):
         room_uri = '%s@%s' % (uri.user, uri.host)
         self._rooms.pop(room_uri, None)
 
+    def get_room_debug_info(self, room_number):
+        # get sessions from room
+        room = self.get_room(room_number=room_number)
+        return {'room_number' : room_number, 'debug_info' : room.get_debug_info()}
+
     def validate_acl(self, room_uri, from_uri):
         room_uri = '%s@%s' % (room_uri.user, room_uri.host)
         cfg = get_room_config(room_uri)
