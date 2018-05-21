@@ -386,7 +386,10 @@ class Session(object):
     def debug_info(self):
         streams_data = []
         for stream in self.streams:
-            stream_data = {'type' : type(stream), 'on_hold' : stream.on_hold, 'muted' : stream.muted}
+            stream_data = {'type' : stream.type, 'on_hold' : stream.on_hold,
+                           'muted' : stream.muted, 'hold_supported' : stream.hold_supported,
+                           'on_hold_by_local' : stream.on_hold_by_local, 'on_hold_by_remote' : stream.on_hold_by_remote,
+                           'consumer_slot' : stream.consumer_slot, 'producer_slot' : stream.producer_slot}
             streams_data.append(stream_data)
 
         return {
