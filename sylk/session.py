@@ -389,7 +389,19 @@ class Session(object):
             stream_data = {'type' : stream.type, 'on_hold' : stream.on_hold,
                            'muted' : stream.muted, 'hold_supported' : stream.hold_supported,
                            'on_hold_by_local' : stream.on_hold_by_local, 'on_hold_by_remote' : stream.on_hold_by_remote,
-                           'consumer_slot' : stream.consumer_slot, 'producer_slot' : stream.producer_slot}
+                           'consumer_slot' : stream.consumer_slot, 'producer_slot' : stream.producer_slot,
+                           'codec': stream.codec,
+                           'sample_rate': stream.sample_rate,
+                           'statistics': stream.statistics,
+                           'local_rtp_address': stream.local_rtp_address,
+                           'local_rtp_port': stream.local_rtp_port,
+                           'local_rtp_candidate': stream.local_rtp_candidate,
+                           'remote_rtp_address': stream.remote_rtp_address,
+                           'remote_rtp_port': stream.remote_rtp_port,
+                           'remote_rtp_candidate': stream.remote_rtp_candidate,
+                           'ice_active': stream.ice_active,
+                           'on_hold': stream.on_hold
+                           }
             streams_data.append(stream_data)
 
         return {
@@ -398,7 +410,14 @@ class Session(object):
             'on_hold': self.on_hold,
             '_hold_in_progress' : self._hold_in_progress,
             '_local_identity' : self._local_identity,
-            '_remote_identity': self._remote_identity
+            '_remote_identity': self._remote_identity,
+            'local_identity': self.local_identity,
+            'remote_identity': self.remote_identity,
+            '_invitation': self._invitation,
+            'peer_address': self.peer_address,
+            'request_uri': self.request_uri,
+            'remote_user_agent' : self.remote_user_agent,
+            'call_id' : self.call_id
         }
 
     def init_incoming(self, invitation, data):
