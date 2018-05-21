@@ -157,6 +157,14 @@ class Room(object):
     def stopping(self):
         return self.state in ('stopping', 'stopped')
 
+    def get_debug_info(self):
+        sessions = []
+        for session in self.sessions:
+            session_data = {}
+            session_data['details'] = "%s" % session
+            sessions.append(session_data)
+        return {'sessions' : sessions}
+
     @property
     def active_media(self):
         return set((stream.type for stream in chain(*(session.streams for session in self.sessions if session.streams))))
