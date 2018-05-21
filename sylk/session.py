@@ -383,6 +383,21 @@ class Session(object):
         self._remote_identity = None
         self._lock = RLock()
 
+    def debug_info(self):
+        streams_data = []
+        for stream in self.streams:
+            stream_data = {'type' : type(stream), 'on_hold' : stream.on_hold, 'muted' : stream.muted}
+            streams_data.append(stream_data)
+
+        return {
+            'streams': streams_data,
+            'direction': self.direction,
+            'on_hold': self.on_hold,
+            '_hold_in_progress' : self._hold_in_progress,
+            '_local_identity' : self._local_identity,
+            '_remote_identity': self._remote_identity
+        }
+
     def init_incoming(self, invitation, data):
         log.info("init_incoming with invitation")
         dump_object_member_vars(log, invitation)
