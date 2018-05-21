@@ -106,12 +106,7 @@ def get_room():
 def conference_debug_info(room_number):
     psap_app = PSAPApplication()
     debug_info = psap_app.get_room_debug_info(room_number)
-    response = {
-        'success' : True,
-        'debug_info' : debug_info
-    }
-
-    return jsonify(response)
+    return jsonify(debug_info)
 
 
 @calls.route('/conference/<room_number>', methods=['GET'])
