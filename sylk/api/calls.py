@@ -1,4 +1,5 @@
 import traceback
+import os.path
 import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -213,7 +214,10 @@ def update_call(room_number):
 @calls.route('/recordings/<path:path>')
 def send_recording(path):
     log.info("send_recording for %r", path)
-    return send_from_directory('recordings', path)
+    if os.path.isfile(path):
+        return send_from_directory('recordings', path)
+    else:
+        return send_from_directory('recordings', 'ca4182ebac4ed29dc2f8d9209fccca.wav')
 
 
 '''
