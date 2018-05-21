@@ -100,51 +100,17 @@ def get_room():
         }
         return jsonify(response)
 
-'''
-def get_conference_participants_json(room_number):
-    participants = []
-    for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
-        participant_json = get_json_from_db_obj(participant_db_obj)
-        participants.append(participant_json)
-    return participants
 
+@calls.route('/conference/debug_info/<room_number>', methods=['GET'])
+def conference_debug_info(room_number):
 
-def get_active_calltakers(room_number):
-    active_calltakers = []
-    for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
-        if participant_db_obj.is_active and participant_db_obj.is_calltaker:
-            active_calltakers.append(participant_db_obj.name)
-    return active_calltakers
+    response = {
+        'success' : True,
+        'conference_data' : 'test debug info'
+    }
 
+    return jsonify(response)
 
-def get_conference_event_log_json(room_number):
-    events = []
-    for event_db_obj in ConferenceEvent.objects(room_number=room_number):
-        event_json = get_json_from_db_obj(event_db_obj)
-        events.append(event_json)
-    return events
-
-
-def get_conference_duration(conference_db_obj):
-    if conference_db_obj.status == 'active':
-        cur_time = arrow.utcnow()
-        start_time = arrow.get(conference_db_obj.answer_time)
-        time_diff = cur_time - start_time
-        return int(time_diff.total_seconds())
-    elif conference_db_obj.status == 'closed':
-        end_time = arrow.get(conference_db_obj.end_time)
-        start_time = arrow.get(conference_db_obj.answer_time)
-        time_diff = end_time - start_time
-        return int(time_diff.total_seconds())
-    return 0
-    
-def get_conference_json(conference_db_obj):
-    conference_json = get_json_from_db_obj(conference_db_obj, ignore_fields=ignore_conference_fields)
-    conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
-    conference_json['duration'] = get_conference_duration(conference_db_obj)
-    conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
-
-'''
 
 @calls.route('/conference/<room_number>', methods=['GET'])
 def conference_info(room_number):
