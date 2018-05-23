@@ -207,12 +207,12 @@ class ConferenceData(object):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=old_primary_uri)
             participant.is_primary = False
-            old_primary_user_name = participant.display_name
+            old_primary_user_name = participant.name
             participant.save()
 
             participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=new_primary_uri)
             participant.is_primary = True
-            new_primary_user_name = participant.display_name
+            new_primary_user_name = participant.name
             participant.save()
 
             '''
