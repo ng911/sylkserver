@@ -199,25 +199,30 @@ class PSAPApplication(SylkApplication):
 
         NotificationCenter().add_observer(self, sender=session)
 
-        if (call_type == 'sos') or (call_type == 'outgoing'):
+        if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
             inoming_link = data
-            queue_details = get_queue_details(inoming_link.queue_id)
-            queue_members = get_queue_members(inoming_link.queue_id)
 
             if call_type == 'sos':
+                queue_details = get_queue_details(inoming_link.queue_id)
+                queue_members = get_queue_members(inoming_link.queue_id)
                 calltakers = get_calltakers(queue_details, queue_members)
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
                 forward_to_calltaker=True
             else:
-                outgoing_gateway = ServerConfig.outgoing_gateway
-                sip_uri = '{}@{}'.format(local_identity.uri.user, outgoing_gateway)
-                sip_uris = [sip_uri]
-                # todo check here if uri is to a calltaker
-                forward_to_calltaker=False
+                if call_type == 'outgoing':
+                    outgoing_gateway = ServerConfig.outgoing_gateway
+                    sip_uri = '{}@{}'.format(local_identity.uri.user, outgoing_gateway)
+                    sip_uris = [sip_uri]
+                    forward_to_calltaker=False
+                elif call_type == 'outgoing_calltaker':
+                    forward_to_calltaker=True
+                    server = ServerConfig.asterisk_server
+                    sip_uri = '{}@{}'.format(local_identity.uri.user, server)
+                    sip_uris = [sip_uri]
 
-            if call_type == 'outgoing':
+            if (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
                 direction = 'out'
                 is_call_from_calltaker = True
             else:
