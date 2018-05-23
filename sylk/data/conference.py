@@ -9,7 +9,7 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
-from sylk.wamp import publish_create_call, publish_update_call, publish_active_call
+from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary
 from sylk.db.calls import get_conference_json, get_conference_participants_json
 
 import sylk.wamp
@@ -203,6 +203,40 @@ class ConferenceData(object):
             log.error("exception in update_participant_active_status %r", e)
             log.error(stackTrace)
 
+    def update_primary_calltaker(self, room_number, old_primary_uri, new_primary_uri):
+        try:
+            participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=old_primary_uri)
+            participant.is_primary = False
+            old_primary_user_name = participant.display_name
+            participant.save()
+
+            participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=new_primary_uri)
+            participant.is_primary = True
+            new_primary_user_name = participant.display_name
+            participant.save()
+
+            '''
+            todo add an event that primary is changed
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'participant {} left'.format(display_name)
+            conference_event.save()
+            '''
+
+            '''
+            json_data = get_json_from_db_obj(participant, include_fields=['is_active'])
+            json_data['command'] = 'update_participant_status'
+            publish_update_call(room_number, json_data)
+            '''
+            publish_update_primary(room_number, old_primary_user_name, new_primary_user_name)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_participant_active_status %r", e)
+            log.error(stackTrace)
+
+
     def init_observers(self):
         log.info("ConferenceData init_observers")
         notification_center = NotificationCenter()
@@ -262,3 +296,13 @@ class ConferenceData(object):
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantRemoved %r", e)
             log.error(stackTrace)
+
+    def _NH_ConferenceParticipantNewPrimary(self, notification):
+        log.info("incoming _NH_ConferenceParticipantNewPrimary")
+        try:
+            self.update_primary_calltaker(notification.data.room_number, notification.data.old_primary_uri, notification.data.new_primary_uri)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantRemoved %r", e)
+            log.error(stackTrace)
+

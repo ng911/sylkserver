@@ -536,13 +536,14 @@ class PSAPApplication(SylkApplication):
                                                                 display_name=display_name))
 
     def set_new_primary(self, participants, primary_calltaker_uri):
+        log.info("inside set_new_primary old primary is %r", primary_calltaker_uri)
         for participant_data in participants.itervalues():
-            if participant_data.is_calltaker and participant_data.is_active and (participant_data.uri != primary_calltaker_uri):
+            if participant_data.is_calltaker and participant_data.is_active and (str(participant_data.uri) != primary_calltaker_uri):
                 # this is the new primary
                 participant_data.is_primary = True
-                return True
+                return True, str(participant_data.uri)
 
-        return False
+        return False, None
 
     # this just marks the participant inactive
     def remove_participant(self, session):
@@ -556,8 +557,13 @@ class PSAPApplication(SylkApplication):
             if participant_data.session == session:
                 participant_data.is_active = False
                 if participant_data.is_calltaker and participant_data.is_primary:
-                    if self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=participant_data.uri):
+                    (has_new_primary, new_primary_uri) = self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=str(participant_data.uri))
+                    if has_new_primary:
                         participant_data.is_primary = False
+                        NotificationCenter().post_notification('ConferenceParticipantNewPrimary', self,
+                                                               NotificationData(room_number=room_number,
+                                                                                old_primary_uri=str(participant_data.uri),
+                                                                                new_primary_uri=str(new_primary_uri)))
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
                                                                         display_name = participant_data.display_name,
