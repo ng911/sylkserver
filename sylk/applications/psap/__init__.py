@@ -247,7 +247,7 @@ class PSAPApplication(SylkApplication):
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status='ringing',
                                                                     primary_queue_id=inoming_link.queue_id if hasattr(inoming_link, 'queue_id') else None,
-                                                                    link_id=inoming_link.link_id,
+                                                                    link_id=inoming_link.link_id if hasattr(inoming_link, 'link_id') else None,
                                                                     caller_ani=remote_identity.uri.user, caller_uri=str(remote_identity.uri),
                                                                     caller_name=remote_identity.uri.user,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
