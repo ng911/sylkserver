@@ -232,8 +232,8 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
 
-            log.info('inoming_link.ali_format is %r', inoming_link.ali_format)
-            if (call_type == 'sos') and inoming_link.ali_format and (inoming_link.ali_format != ''):
+            if (call_type == 'sos') and hasattr(inoming_link, 'ali_format') and (inoming_link.ali_format != ''):
+                log.info('inoming_link.ali_format is %r', inoming_link.ali_format)
                 lookup_number = remote_identity.uri.user
                 # make sure there is no + prefix in the number and it is 10 digits long
                 if lookup_number.startswith('+1'):
