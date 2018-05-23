@@ -201,6 +201,7 @@ class PSAPApplication(SylkApplication):
 
         if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
             inoming_link = data
+            queue_details = None
 
             if call_type == 'sos':
                 queue_details = get_queue_details(inoming_link.queue_id)
@@ -253,8 +254,11 @@ class PSAPApplication(SylkApplication):
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
-            # start call timer
-            ring_time = queue_details.ring_time
+            if queue_details and queue_details.ring_time is not None:
+                # start call timer
+                ring_time = queue_details.ring_time
+            else:
+                ring_time = 60
             log.info("ringing timeout for conf room %r is %r", room_number, ring_time)
 
             try:
