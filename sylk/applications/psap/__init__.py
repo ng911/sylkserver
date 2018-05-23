@@ -535,16 +535,29 @@ class PSAPApplication(SylkApplication):
                                                                 sip_uri=str(sip_uri),
                                                                 display_name=display_name))
 
+    def set_new_primary(self, participants, primary_calltaker_uri):
+        for participant_data in participants.itervalues():
+            if participant_data.is_calltaker and participant_data.is_active and (participant_data.uri != primary_calltaker_uri):
+                # this is the new primary
+                participant_data.is_primary = True
+                return True
+
+        return False
+
     # this just marks the participant inactive
     def remove_participant(self, session):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
         log.info('room_data is %r', room_data)
         log.info('room_data.participants is %r', room_data.participants)
+
         for participant_data in room_data.participants.itervalues():
             log.info('participant_data is %r', participant_data)
             if participant_data.session == session:
                 participant_data.is_active = False
+                if participant_data.is_calltaker and participant_data.is_primary:
+                    if self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=participant_data.uri):
+                        participant_data.is_primary = False
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
                                                                         display_name = participant_data.display_name,
