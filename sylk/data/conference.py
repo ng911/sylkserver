@@ -245,6 +245,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceUpdated')
         notification_center.add_observer(self, name='ConferenceParticipantAdded')
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
+        notification_center.add_observer(self, name='ConferenceParticipantNewPrimary')
 
     def handle_notification(self, notification):
         log.info("ConferenceData got notification ")
@@ -303,6 +304,6 @@ class ConferenceData(object):
             self.update_primary_calltaker(notification.data.room_number, notification.data.old_primary_uri, notification.data.new_primary_uri)
         except Exception as e:
             stackTrace = traceback.format_exc()
-            log.error("exception in _NH_ConferenceParticipantRemoved %r", e)
+            log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
             log.error(stackTrace)
 
