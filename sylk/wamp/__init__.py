@@ -45,7 +45,7 @@ def publish_active_call(calltaker, room_number):
         json_data['command'] = 'active'
         json_data['room_number'] = room_number
         wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data)
-    pass
+
 
 def publish_update_call(room_number, call_data, participants):
     if wamp_session is not None:
@@ -58,7 +58,9 @@ def publish_update_call(room_number, call_data, participants):
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
 
+
 def publish_update_primary(room_number, old_primary_user_name, new_primary_user_name):
+    log.info("publish_update_primary room_number %r, old_primary_user_name %r, new_primary_user_name %r", room_number, old_primary_user_name, new_primary_user_name)
     if wamp_session is not None:
         json_data = {}
         json_data['command'] = 'primary_updated'
