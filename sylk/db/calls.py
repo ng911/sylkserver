@@ -26,6 +26,12 @@ def get_active_calltakers(room_number):
             active_calltakers.append(participant_db_obj.name)
     return active_calltakers
 
+def get_active_participants(room_number):
+    active_participants = []
+    for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
+        if participant_db_obj.is_active:
+            active_participants.append(participant_db_obj.name)
+    return active_participants
 
 def get_conference_event_log_json(room_number):
     events = []
@@ -54,6 +60,7 @@ def get_conference_json(conference_db_obj):
     conference_json['location'] = get_location_for_call(conference_db_obj.room_number)
     conference_json['duration'] = get_conference_duration(conference_db_obj)
     conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
+    conference_json['active_participants'] = get_active_participants(conference_db_obj.room_number)
 
     return conference_json
 
