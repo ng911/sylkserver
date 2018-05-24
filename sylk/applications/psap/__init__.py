@@ -3,6 +3,7 @@ import re
 from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from twisted.internet import reactor
+from twisted.internet import task
 from zope.interface import implements
 
 from sipsimple.threading.green import run_in_green_thread
@@ -28,13 +29,14 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
+from sylk.wamp import publish_update_call_timer
 
 log = ApplicationLogger(__package__)
 
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'participants']
+    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants']
     def __init__(self):
         pass
 
@@ -92,6 +94,9 @@ class PSAPApplication(SylkApplication):
         room_data.outgoing_calls = {}
         room_data.participants = {}
         room_data.direction = direction
+        room_data.invitation_timer = None
+        room_data.ringing_duration_timer = None
+        room_data.duration_timer = None
 
         self._rooms[room_number] = room_data
 
@@ -262,7 +267,16 @@ class PSAPApplication(SylkApplication):
 
             try:
                 ringing_timer = reactor.callLater(ring_time, self.on_ringing_timeout, session, room_number)
+
+                def ringing_duration_timer_cb(room_number):
+                    ringing_duration_timer_cb.duration = ringing_duration_timer_cb.duration + 1
+                    publish_update_call_timer(room_number, 'ringing', ringing_duration_timer_cb.duration)
+
+                ringing_duration_timer_cb.duration = 0
+                ringing_duration_timer = task.LoopingCall(ringing_duration_timer_cb, room_number)
+                ringing_duration_timer.start(1)  # call every sixty seconds
                 room_data.invitation_timer = ringing_timer
+                room_data.ringing_duration_timer = ringing_duration_timer
                 log.info("ringing_timer set ")
             except Exception as e:
                 log.error("exception in setting ringing_timer %r", e)
@@ -311,7 +325,12 @@ class PSAPApplication(SylkApplication):
     def end_ringing_call(self, room_number):
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
-        room_data.invitation_timer = None
+        if room_data.ringing_duration_timer != None:
+            room_data.ringing_duration_timer.stop()
+            room_data.ringing_duration_timer = None
+        if room_data.invitation_timer != None:
+            room_data.invitation_timer.cancel()
+            room_data.invitation_timer = None
         if not room.started:
             room_data = self.get_room_data(room_number)
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
@@ -390,6 +409,9 @@ class PSAPApplication(SylkApplication):
 
             if session.is_calltaker:
                 session.is_primary = True
+            if room_data.ringing_duration_timer is not None:
+                room_data.ringing_duration_timer.cancel()
+                room_data.ringing_duration_timer = None
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
                 room_data.invitation_timer = None
@@ -409,6 +431,7 @@ class PSAPApplication(SylkApplication):
         #todo - add proper value of is_calltaker
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         calltakers = self.get_calltakers_in_room(room_number)
+        log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
         NotificationCenter().post_notification('ConferenceActive', self,
                                                NotificationData(room_number=room_number, calltakers=calltakers))
         #else:

@@ -9,6 +9,8 @@ from collections import Counter, deque
 from glob import glob
 from itertools import chain, count, cycle
 
+from twisted.internet import task
+
 from application.notification import IObserver, NotificationCenter
 from application.python import Null
 from application.system import makedirs
@@ -39,6 +41,7 @@ from sylk.configuration.datatypes import URL
 from sylk.resources import Resources
 from sylk.session import Session, IllegalStateError
 from sylk.configuration import SIPConfig
+from sylk.wamp import publish_update_call_timer
 #from sylk.web import server as web_server
 
 
@@ -148,6 +151,7 @@ class Room(object):
         self.participants_counter = Counter()
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
+        self.duration_timer = None
 
     def get_debug_info(self):
         sessions = []
@@ -242,6 +246,13 @@ class Room(object):
         self.moh_player = MoHPlayer(self.audio_conference)
         self.moh_player.start()
         self.state = 'started'
+        self.duration = 0
+
+        def duration_timer_cb():
+            publish_update_call_timer(self.room_number, 'duration', self.duration)
+            self.duration = self.duration + 1
+        self.duration_timer = task.LoopingCall(duration_timer_cb)
+        self.duration_timer.start()
 
     def stop(self):
         log.info("room - stop")
@@ -268,6 +279,9 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.state = 'stopped'
+        if self.duration_timer is not None:
+            self.duration_timer.stop()
+            self.duration_timer = None
 
     @run_in_thread('file-io')
     def cleanup_files(self):
