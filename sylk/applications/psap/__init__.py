@@ -213,13 +213,13 @@ class PSAPApplication(SylkApplication):
             else:
                 if call_type == 'outgoing':
                     outgoing_gateway = ServerConfig.outgoing_gateway
-                    sip_uri = '+{}@{}'.format(local_identity.uri.user, outgoing_gateway)
+                    sip_uri = 'sip:+{}@{}'.format(local_identity.uri.user, outgoing_gateway)
                     sip_uris = [sip_uri]
                     forward_to_calltaker=False
                 elif call_type == 'outgoing_calltaker':
                     forward_to_calltaker=True
                     server = ServerConfig.asterisk_server
-                    sip_uri = '{}@{}'.format(local_identity.uri.user, server)
+                    sip_uri = 'sip:{}@{}'.format(local_identity.uri.user, server)
                     sip_uris = [sip_uri]
 
             if (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
