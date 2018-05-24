@@ -95,19 +95,19 @@ def authenticate_call(ip_address, port, called_number, calling_uri, conf_rooms):
             # we need to check if the calltaker tried to join a conference room
             if called_number in conf_rooms:
                 log.info("authenticate_call send to sos_room")
-                return (True, 'sos_room', calltaker_obj)
+                return (True, 'sos_room', incoming_link, calltaker_obj)
             elif get_calltaker_user(called_number) is not None:
                 log.info("authenticate_call send to outgoing calltaker")
-                return (True, 'outgoing_calltaker', calltaker_obj)
+                return (True, 'outgoing_calltaker', incoming_link, calltaker_obj)
             else:
                 log.info("authenticate_call send to outgoing number")
-                return (True, 'outgoing', calltaker_obj)
+                return (True, 'outgoing', incoming_link, calltaker_obj)
 
     if incoming_link.is_origination_sos():
-        return (True, 'sos', incoming_link)
+        return (True, 'sos', incoming_link, None)
 
     if incoming_link.is_origination_admin():
-        return (True, 'admin', incoming_link)
+        return (True, 'admin', incoming_link, None)
 
-    return (False, None, None)
+    return (False, None, None, None)
 
