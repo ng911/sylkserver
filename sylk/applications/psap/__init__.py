@@ -29,7 +29,7 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
-from sylk.wamp import publish_update_call_timer
+from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status
 
 log = ApplicationLogger(__package__)
 
@@ -122,6 +122,15 @@ class PSAPApplication(SylkApplication):
                 if participant_data.is_calltaker:
                     calltakers.append(participant_data.display_name)
         return calltakers
+
+    def get_room_caller(self, room_number):
+        if room_number in self._rooms:
+            room_data = self._rooms[room_number]
+            for participant_data in room_data.participants.itervalues():
+                if participant_data.is_caller:
+                    return (participant_data.display_name, participant_data.uri, participant_data.is_calltaker)
+        return (None, None, None)
+
 
     '''
     def get_room(self, uri=None, create=False, room_number=None):
@@ -258,6 +267,9 @@ class PSAPApplication(SylkApplication):
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
+            if direction == 'out':
+                publish_outgoing_call_status(room_number, remote_identity.uri.user, 'ringing')
+
             if queue_details and queue_details.ring_time is not None:
                 # start call timer
                 ring_time = queue_details.ring_time
@@ -316,9 +328,14 @@ class PSAPApplication(SylkApplication):
         room = self.get_room(room_number)
         if room and (not room.started):
             self.end_ringing_call(room_number)
-            send_call_update_notification(self, incoming_session, 'abandoned')
+            room_data = self.get_room_data(room_number)
+            if room_data and (room_data.direction == 'out'):
+                status = 'timed_out'
+            else:
+                status = 'abandoned'
+            send_call_update_notification(self, incoming_session, status)
             NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                   NotificationData(room_number=room_number, status='abandoned'))
+                                                   NotificationData(room_number=room_number, status=status))
         else:
             log.error("Error on_ringing_timeout recvd for active call %r", room_number)
 
@@ -390,6 +407,10 @@ class PSAPApplication(SylkApplication):
                 # todo send event that the call failed
                 #outgoing_call_initializer = room_data.outgoing_calls[sip_uri]
                 del room_data.outgoing_calls[str(sip_uri)]
+                if room_data.direction == 'out':
+                    (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
+                    if (display_name is not None) and is_calltaker:
+                        publish_outgoing_call_status(room_number, display_name, 'failed')
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
@@ -434,7 +455,10 @@ class PSAPApplication(SylkApplication):
         log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
         NotificationCenter().post_notification('ConferenceActive', self,
                                                NotificationData(room_number=room_number, calltakers=calltakers))
-        #else:
+        (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
+        if (display_name is not None) and is_calltaker:
+            publish_outgoing_call_status(room_number, display_name, 'active')
+            #else:
         #    session.end()
 
     '''

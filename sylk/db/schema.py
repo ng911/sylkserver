@@ -220,7 +220,7 @@ class Conference(Document):
     hold = BooleanField(default=False)
     full_mute = BooleanField(default=False)
     # timed_out is for outgoing calls and abandoned is for incoming
-    status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned', 'timed_out', 'cancel'))
+    status = StringField(required=True, choices=('init', 'ringing', 'ringing_queued', 'queued', 'active', 'closed', 'abandoned', 'timed_out', 'cancel', 'failed'))
     callback = BooleanField(default=False)
     callback_time = ComplexDateTimeField()
     callback_number = StringField()

@@ -71,6 +71,14 @@ def publish_update_call(room_number, call_data, participants):
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
 
+# status can be 'ringing', 'active', 'failed', 'timedout'
+def publish_outgoing_call_status(room_number, calltaker, status):
+    if wamp_session is not None:
+        json_data = {}
+        json_data['status'] = status
+        json_data['room_number'] = room_number
+        wamp_session.publish(u'com.emergent.call.outgoing.%s' % calltaker, json_data)
+
 
 def publish_update_primary(room_number, old_primary_user_name, new_primary_user_name):
     log.info("publish_update_primary room_number %r, old_primary_user_name %r, new_primary_user_name %r", room_number, old_primary_user_name, new_primary_user_name)
