@@ -252,7 +252,7 @@ class Room(object):
             publish_update_call_timer(self.room_number, 'duration', self.duration)
             self.duration = self.duration + 1
         self.duration_timer = task.LoopingCall(duration_timer_cb)
-        self.duration_timer.start()
+        self.duration_timer.start(1)
 
     def stop(self):
         log.info("room - stop")
