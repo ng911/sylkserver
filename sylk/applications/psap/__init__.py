@@ -410,7 +410,7 @@ class PSAPApplication(SylkApplication):
             if session.is_calltaker:
                 session.is_primary = True
             if room_data.ringing_duration_timer is not None:
-                room_data.ringing_duration_timer.cancel()
+                room_data.ringing_duration_timer.stop()
                 room_data.ringing_duration_timer = None
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
