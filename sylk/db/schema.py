@@ -215,7 +215,7 @@ class Conference(Document):
     type1 = StringField()   # not sure what this is, copied from old schema
     type2 = StringField()   # not sure what this is, copied from old schema
     pictures = ListField(field=StringField)
-    call_type = StringField(required=True, choices=('normal', 'sos', 'admin', 'sos_text'))
+    call_type = StringField(required=True, choices=('normal', 'sos', 'admin', 'sos_text', 'outgoing', 'outgoing_calltaker'))
     partial_mute = BooleanField(default=False)
     hold = BooleanField(default=False)
     full_mute = BooleanField(default=False)
