@@ -189,7 +189,7 @@ class PSAPApplication(SylkApplication):
         log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, from_uri %r, rooms %r",
             peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
         # first verify the session
-        (authenticated, call_type, data) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
+        (authenticated, call_type, incoming_link, calltaker_obj) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
         if not authenticated:
             log.info("call not authenticated, reject it")
@@ -200,12 +200,11 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().add_observer(self, sender=session)
 
         if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
-            inoming_link = data
             queue_details = None
 
             if call_type == 'sos':
-                queue_details = get_queue_details(inoming_link.queue_id)
-                queue_members = get_queue_members(inoming_link.queue_id)
+                queue_details = get_queue_details(incoming_link.queue_id)
+                queue_members = get_queue_members(incoming_link.queue_id)
                 calltakers = get_calltakers(queue_details, queue_members)
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
@@ -233,22 +232,22 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = self.create_room(session, call_type, direction=direction)
             session.room_number = room_number
 
-            if (call_type == 'sos') and hasattr(inoming_link, 'ali_format') and (inoming_link.ali_format != ''):
-                log.info('inoming_link.ali_format is %r', inoming_link.ali_format)
+            if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
+                log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 lookup_number = remote_identity.uri.user
                 # make sure there is no + prefix in the number and it is 10 digits long
                 if lookup_number.startswith('+1'):
                     lookup_number = lookup_number[2:]
                 elif lookup_number.startswith('1'):
                     lookup_number = lookup_number[1:]
-                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, inoming_link.ali_format)
-                ali_lookup(room_number, lookup_number, inoming_link.ali_format)
+                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
+                ali_lookup(room_number, lookup_number, incoming_link.ali_format)
 
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status='ringing',
-                                                                    primary_queue_id=inoming_link.queue_id if hasattr(inoming_link, 'queue_id') else None,
-                                                                    link_id=inoming_link.link_id if hasattr(inoming_link, 'link_id') else None,
+                                                                    primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
+                                                                    link_id=incoming_link.link_id,
                                                                     caller_ani=remote_identity.uri.user, caller_uri=str(remote_identity.uri),
                                                                     caller_name=remote_identity.uri.user,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
