@@ -4,5 +4,6 @@
 .idea/
 
 build/
+notebook/
 
 .idea/vcs.xml

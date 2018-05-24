@@ -14,7 +14,9 @@ comp = Component(
      extra="tarun"
  )
 
+
 wamp_session=None
+
 
 def publish_update_calltaker_status(user_id, username, status):
     if wamp_session is not None:
@@ -25,9 +27,11 @@ def publish_update_calltaker_status(user_id, username, status):
         }
         wamp_session.publish(u'com.emergent.calltaker', json_data)
 
+
 def publish_update_calltakers(json_data):
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.calltakers', json_data)
+
 
 def publish_create_call(room_number, call_data, participants):
     if wamp_session is not None:
@@ -39,12 +43,21 @@ def publish_create_call(room_number, call_data, participants):
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
 
+
 def publish_active_call(calltaker, room_number):
     if wamp_session is not None:
         json_data = {}
         json_data['command'] = 'active'
         json_data['room_number'] = room_number
         wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data)
+
+# type should be ringing or duration
+def publish_update_call_timer(room_number, type, val):
+    if wamp_session is not None:
+        json_data = {}
+        json_data['type'] = type
+        json_data['val'] = val
+        wamp_session.publish(u'com.emergent.calltimer.%s' % room_number, json_data)
 
 
 def publish_update_call(room_number, call_data, participants):
@@ -72,12 +85,12 @@ def publish_update_primary(room_number, old_primary_user_name, new_primary_user_
         wamp_session.publish(u'com.emergent.call', json_data)
 
 
-
 def publish_update_location_success(room_number, ali_result, location_display):
     json_data = {'success' : True, 'room_number': room_number, 'ali_data' : ali_result, 'location_display' : location_display}
     if wamp_session is not None:
         log.info("publish location update for room %s", room_number)
         wamp_session.publish(u'com.emergent.location', json_data)
+
 
 def publish_update_location_failed(room_number):
     json_data = {'success' : False}
