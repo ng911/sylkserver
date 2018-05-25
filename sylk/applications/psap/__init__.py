@@ -328,9 +328,9 @@ class PSAPApplication(SylkApplication):
 
         room = self.get_room(room_number)
         if room and (not room.started):
-            self.end_ringing_call(room_number)
             room_data = self.get_room_data(room_number)
             room_data.invitation_timer = None
+            self.end_ringing_call(room_number)
             if room_data and (room_data.direction == 'out'):
                 status = 'timed_out'
             else:
