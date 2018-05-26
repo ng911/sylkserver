@@ -355,7 +355,10 @@ class PSAPApplication(SylkApplication):
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
                 outgoing_call_initializer.cancel_call()
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
-            room_data.incoming_session.reject(code=408, reason="no user picked up")
+            if room_data.incoming_session.state == 'incoming':
+                room_data.incoming_session.reject(code=408, reason="no user picked up")
+            elif room_data.incoming_session.state == 'connected':
+                room_data.incoming_session.end()
             self.remove_room(room_number)
             # todo add more acd handling here
             # todo mark the conference as ended
