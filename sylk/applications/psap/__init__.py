@@ -660,7 +660,7 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         if room_data is None:
             raise ValueError('conference not active or does not exist')
-        for participant in room_data.participants:
+        for participant in room_data.participants.itervalues():
             if participant.is_calltaker and participant.display_name == calltaker_name:
                 return participant.session
 
