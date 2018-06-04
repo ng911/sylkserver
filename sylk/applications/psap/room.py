@@ -710,7 +710,7 @@ class Room(object):
         # if only one active session, we play music on hold
         num_active_sessions = 0
         for session in self.sessions:
-            if not session.on_hold and session.active:
+            if not session.on_hold and (session.state == 'connected'):
                 num_active_sessions = num_active_sessions + 1
         log.info('hold changed num active sessions is %r', num_active_sessions)
 
