@@ -166,6 +166,51 @@ def conference_participants_update(room_number):
         })
 
 
+@calls.route('/conference/hold/<room_number>', methods=['PUT', 'POST'])
+def conference_put_on_hold(room_number):
+    try:
+        calltaker = get_argument('calltaker')
+        if (calltaker is None) or (calltaker == ''):
+            raise ValueError('missing calltaker')
+
+        psap_app = PSAPApplication()
+        psap_app.put_calltaker_on_hold(room_number, calltaker)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference put hold error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+@calls.route('/conference/unhold/<room_number>', methods=['PUT', 'POST'])
+def conference_release_on_hold(room_number):
+    try:
+        calltaker = get_argument('calltaker')
+        if (calltaker is None) or (calltaker == ''):
+            raise ValueError('missing calltaker')
+        psap_app = PSAPApplication()
+        psap_app.remove_calltaker_on_hold(room_number, calltaker)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference release hold error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
 def conference_event_log(room_number):
     event_log_json = get_conference_event_log_json(room_number)
