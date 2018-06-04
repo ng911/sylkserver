@@ -658,6 +658,8 @@ class PSAPApplication(SylkApplication):
 
     def _get_calltaker_session(self, room_number, calltaker_name):
         room_data = self.get_room_data(room_number)
+        if room_data is None:
+            raise ValueError('conference not active or does not exist')
         for participant in room_data.participants:
             if participant.is_calltaker and participant.display_name == calltaker_name:
                 return participant.session
