@@ -699,6 +699,7 @@ class Room(object):
 
     def _NH_SIPSessionDidChangeHoldState(self, notification):
         session = notification.sender
+        log.info('inside room _NH_SIPSessionDidChangeHoldState for session %r, data %r, originator %s', session, notification.data, notification.data.originator)
         if notification.data.originator == 'remote':
             if notification.data.on_hold:
                 log.info(u'Room %s - %s has put the audio session on hold' % (self.uri, format_identity(session.remote_identity)))
