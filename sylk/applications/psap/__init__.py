@@ -648,6 +648,22 @@ class PSAPApplication(SylkApplication):
         room.start()
         room.add_session(session)
 
+    def put_calltaker_on_hold(self, room_number, calltaker_name):
+        session = self._get_calltaker_session(room_number, calltaker_name)
+        session.hold()
+
+    def remove_calltaker_on_hold(self, room_number, calltaker_name):
+        session = self._get_calltaker_session(room_number, calltaker_name)
+        session.unhold()
+
+    def _get_calltaker_session(self, room_number, calltaker_name):
+        room_data = self.get_room_data(room_number)
+        for participant in room_data.participants:
+            if participant.is_calltaker and participant.display_name == calltaker_name:
+                return participant.session
+
+        return None
+
     '''
     def remove_participant(self, participant_uri, room_uri):
         try:
@@ -683,7 +699,7 @@ class PSAPApplication(SylkApplication):
                         participant_data.send_video = notification.data.send_audio
                     if hasattr(notification.data, 'mute'):
                         log.info('update mute')
-                        participant_data.send_video = notification.data.mute
+                        participant_data.mute = notification.data.mute
         except RoomNotFoundError:
             log.error("_NH_ConferenceParticipantDBUpdated room not found %r", room_number)
 
