@@ -180,7 +180,7 @@ def search_calls():
 
         log.info('calls search found %d records', len(calls_cursor))
         calls = []
-        for call_db_obj in calls_cursor[]:
+        for call_db_obj in calls_cursor:
             # should return date, call, type, caller, callback, location, long, lat, notes, status
             call_data = get_json_from_db_obj(call_db_obj, ignore_fields=['psap_id', 'user_id'])
             calls.append(call_data)
