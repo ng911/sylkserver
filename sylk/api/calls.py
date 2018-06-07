@@ -151,7 +151,7 @@ def search_calls():
             filters['location_display'] = { '$regex' : location, '$options' : 'i'}
         if (notes != None) and (len(notes) > 0) :
             filters['notes'] = { '$regex' : notes , '$options' : 'i'}
-        if (len(start_time) > 0) and (len(end_time) > 0) :
+        if (start_time != None) and (end_time != None) and (len(start_time) > 0) and (len(end_time) > 0) :
             log.info("start_time is %r", start_time)
             log.info("end_time is %r", end_time)
             arrow_start = arrow.get(start_time)
