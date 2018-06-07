@@ -136,7 +136,7 @@ Old code
 @calls.route('/search', methods=['GET'])
 def search_calls():
     try:
-        log.info('inside search')
+        log.info('inside search for psap %s', ServerConfig.psap_id)
         calling_number = get_argument('calling_number')
         location = get_argument('location')
         note = get_argument('note')
@@ -145,12 +145,15 @@ def search_calls():
 
         filters = {'psap_id' : ServerConfig.psap_id, 'status' : {'$nin' : ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
         if (calling_number != None) and (len(calling_number) > 0) :
+            log.info('inside search calling_number %s', calling_number)
             filters['caller_ani'] = { '$regex' : calling_number , '$options' : 'i'}
         if (location != None) and (len(location) > 0) :
-            locationRegEx = "/%s/i" % location
+            log.info('inside search location %s', location)
             filters['location_display'] = { '$regex' : location, '$options' : 'i'}
         if (note != None) and (len(note) > 0) :
-            filters['note'] = { '$regex' : note , '$options' : 'i'}
+            log.info('inside search note %s', note)
+            note_reg_ex = "/%s/i" % note
+            filters['note'] = { '$regex' : note_reg_ex, '$options' : 'i'}
         if (start_time != None) and (end_time != None) and (len(start_time) > 0) and (len(end_time) > 0) :
             log.info("start_time is %r", start_time)
             log.info("end_time is %r", end_time)
@@ -162,6 +165,7 @@ def search_calls():
             filters['start_time'] = {'$gte' : formatted_start_time,
                                 '$lt': formatted_end_time }
         calls_cursor = Conference.objects(__raw__=filters)
+        log.info('calls search found %d records', len(calls_cursor))
         calls = []
         for call_db_obj in calls_cursor:
             # should return date, call, type, caller, callback, location, long, lat, notes, status
