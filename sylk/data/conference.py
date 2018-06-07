@@ -126,6 +126,13 @@ class ConferenceData(object):
                 conference.end_time = utcnow
             conference.save()
 
+            if (status == 'closed'):
+                conference_participants = ConferenceParticipant.objects(room_number=room_number)
+                for participant in conference_participants:
+                    participant.is_active = False
+                    participant.on_hold = False
+                    participant.save()
+
             conference_event = ConferenceEvent()
             conference_event.event = status
             conference_event.event_time = datetime.datetime.utcnow()
@@ -236,6 +243,34 @@ class ConferenceData(object):
             log.error("exception in update_participant_active_status %r", e)
             log.error(stackTrace)
 
+    def update_hold(self, room_number, calltaker, on_hold):
+        try:
+            participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
+            participant.hold = on_hold
+            participant.save()
+
+            '''
+            todo add an event that participant is on hold
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'participant {} left'.format(display_name)
+            conference_event.save()
+            '''
+            conference = Conference.objects.get(room_number=room_number)
+            if on_hold:
+                conference.status = 'on_hold'
+            else:
+                conference.status = 'active'
+            conference.save()
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_hold %r", e)
+            log.error(stackTrace)
 
     def init_observers(self):
         log.info("ConferenceData init_observers")
@@ -246,6 +281,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceParticipantAdded')
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
         notification_center.add_observer(self, name='ConferenceParticipantNewPrimary')
+        notification_center.add_observer(self, name='ConferenceHoldUpdated')
 
     def handle_notification(self, notification):
         log.info("ConferenceData got notification ")
@@ -288,7 +324,6 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceParticipantAdded %r", e)
             log.error(stackTrace)
 
-
     def _NH_ConferenceParticipantRemoved(self, notification):
         log.info("incoming _NH_ConferenceParticipantRemoved")
         try:
@@ -307,3 +342,11 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
             log.error(stackTrace)
 
+    def _NH_ConferenceHoldUpdated(self, notification):
+        log.info("incoming _NH_ConferenceHoldUpdated")
+        try:
+            self.update_hold(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
+            log.error(stackTrace)
