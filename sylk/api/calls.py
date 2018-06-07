@@ -10,6 +10,7 @@ from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
 from utils import get_argument
+from bson.objectid import ObjectId
 from mongoengine import Q
 from sylk.db.calls import get_conference_participants_json, get_active_calltakers, get_conference_event_log_json, \
                             get_conference_duration, get_conference_json, get_location_for_call
@@ -143,7 +144,7 @@ def search_calls():
         start_time = get_argument('start_time')
         end_time = get_argument('end_time')
 
-        filters = {'psap_id' : ServerConfig.psap_id, 'status' : {'$nin' : ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
+        filters = {'psap_id' : ObjectId(ServerConfig.psap_id), 'status' : {'$nin' : ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
         if (calling_number != None) and (len(calling_number) > 0) :
             log.info('inside search calling_number %s', calling_number)
             filters['caller_ani'] = { '$regex' : calling_number , '$options' : 'i'}
