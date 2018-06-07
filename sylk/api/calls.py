@@ -165,7 +165,7 @@ def search_calls():
             filters['start_time'] = {'$gte' : formatted_start_time,
                                 '$lt': formatted_end_time }
         log.info("inside call search filters is %r", filters)
-        calls_cursor = Conference.objects(__raw__=filters)
+        calls_cursor = Conference.objects(__raw__=filters).order_by('-start_time')
         log.info('calls search found %d records', len(calls_cursor))
         calls = []
         for call_db_obj in calls_cursor:
