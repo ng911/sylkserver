@@ -153,8 +153,7 @@ def search_calls():
             filters['location_display'] = { '$regex' : location, '$options' : 'i'}
         if (note != None) and (len(note) > 0) :
             log.info('inside search note %s', note)
-            note_reg_ex = "/%s/i" % note
-            filters['note'] = { '$regex' : note_reg_ex, '$options' : 'i'}
+            filters['note'] = { '$regex' : note, '$options' : 'i'}
         if (start_time != None) and (end_time != None) and (len(start_time) > 0) and (len(end_time) > 0) :
             log.info("start_time is %r", start_time)
             log.info("end_time is %r", end_time)
