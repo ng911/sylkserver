@@ -143,6 +143,12 @@ def search_calls():
         note = get_argument('note')
         start_time = get_argument('start_time')
         end_time = get_argument('end_time')
+        per_page = get_argument('per_page')
+        if per_page is not None:
+            per_page = int(per_page)
+        page_no = get_argument('page')
+        if page_no is not None:
+            page_no = int(page_no)
 
         filters = {'psap_id' : ObjectId(ServerConfig.psap_id), 'status' : {'$nin' : ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
         if (calling_number != None) and (len(calling_number) > 0) :
@@ -166,14 +172,20 @@ def search_calls():
                                 '$lt': formatted_end_time }
         log.info("inside call search filters is %r", filters)
         calls_cursor = Conference.objects(__raw__=filters).order_by('-start_time')
+        count = len(calls_cursor)
+        if (per_page is not None) and (per_page > 0) and (page_no is not None):
+            start_index = (page_no - 1) * per_page
+            end_index = start_index + per_page
+            calls_cursor = Conference.objects(__raw__=filters).order_by('-start_time')[start_index:end_index]
+
         log.info('calls search found %d records', len(calls_cursor))
         calls = []
-        for call_db_obj in calls_cursor:
+        for call_db_obj in calls_cursor[]:
             # should return date, call, type, caller, callback, location, long, lat, notes, status
             call_data = get_json_from_db_obj(call_db_obj, ignore_fields=['psap_id', 'user_id'])
             calls.append(call_data)
 
-        response = {'success': True, 'calls' : calls}
+        response = {'success': True, 'calls' : calls, 'count' : count}
 
         return jsonify(response)
     except Exception as e:
