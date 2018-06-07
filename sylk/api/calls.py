@@ -103,6 +103,26 @@ def get_room():
         return jsonify(response)
 
 
+@calls.route('/search', methods=['GET'])
+def search_calls():
+    try:
+        log.debug('inside search')
+        call_id = get_argument('call_id')
+        response = {
+            'success': True
+        }
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error('exception in search %s', str(e))
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'error' : str(e)
+        }
+        return jsonify(response)
+
+
 @calls.route('/conference/debug_info/<room_number>', methods=['GET'])
 def conference_debug_info(room_number):
     psap_app = PSAPApplication()
