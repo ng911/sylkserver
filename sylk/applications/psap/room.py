@@ -449,6 +449,11 @@ class Room(object):
 
         self.dispatch_conference_info()
 
+        if len(self.audio_conference.streams) == 1:
+            self.moh_player.play()
+        else:
+            self.moh_player.pause()
+
         if len(self.sessions) == 1:
             log.info(u'Room %s - started by %s with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
         else:

@@ -36,13 +36,13 @@ log = ApplicationLogger(__package__)
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants']
+    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants', 'status', 'hold_timer']
     def __init__(self):
         pass
 
 class ParticipantData(object):
     __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute', 'send_audio', 'send_video',
-                 'send_text', 'is_caller', 'is_active', 'is_calltaker', 'is_primary']
+                 'send_text', 'is_caller', 'is_active', 'is_calltaker', 'is_primary', 'on_hold']
     def __init__(self):
         pass
 
@@ -97,6 +97,8 @@ class PSAPApplication(SylkApplication):
         room_data.invitation_timer = None
         room_data.ringing_duration_timer = None
         room_data.duration_timer = None
+        room_data.status = 'init'
+        room_data.hold_timer = None
 
         self._rooms[room_number] = room_data
 
@@ -257,6 +259,7 @@ class PSAPApplication(SylkApplication):
                 log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
                 ali_lookup(room_number, lookup_number, incoming_link.ali_format)
 
+            room_data.status = 'ringing'
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status='ringing',
@@ -335,6 +338,7 @@ class PSAPApplication(SylkApplication):
                 status = 'timed_out'
             else:
                 status = 'abandoned'
+            room_data.status = status
             send_call_update_notification(self, incoming_session, status)
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number, status=status))
@@ -458,6 +462,8 @@ class PSAPApplication(SylkApplication):
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         calltakers = self.get_calltakers_in_room(room_number)
         log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+        room_data = self.get_room_data(room_number)
+        room_data.status = 'active'
         NotificationCenter().post_notification('ConferenceActive', self,
                                                NotificationData(room_number=room_number, calltakers=calltakers))
         (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
@@ -516,6 +522,7 @@ class PSAPApplication(SylkApplication):
 
             self.remove_room(room_number)
             room.stop()
+            room_data.status = 'closed'
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
                                                                     status='closed'))
@@ -550,10 +557,16 @@ class PSAPApplication(SylkApplication):
         log.info('remove_session room.length %r', room.length)
         # 2 because the other participant is the music server
         # todo - check why we had to change this to 1 here
-        if room.length == 1:
+        if room.length <= 1:
             # we need to stop the remaining session
             log.info('terminate all sessions')
-            room.terminate_sessions()
+            if (room_data.status != 'on_hold') or (room.length == 0):
+                room.terminate_sessions()
+                room_data.status = 'closed'
+                # mark all the participants in the room as inactive and
+                if room_data.hold_timer != None:
+                    room_data.hold_timer.stop()
+                    room_data.hold_timer = None
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
                                                                     status='closed'))
@@ -572,7 +585,21 @@ class PSAPApplication(SylkApplication):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
         participants = room_data.participants
-        participant_data = ParticipantData()
+
+        # check if the participant is on hold
+        if room_data.status == 'on_hold':
+            if room_data.hold_timer != None:
+                room_data.hold_timer.stop()
+                room_data.hold_timer = None
+            NotificationCenter().post_notification('ConferenceHoldUpdated', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    calltaker=display_name,
+                                                                    on_hold=False))
+        if str(sip_uri) in participants:
+            participant_data = participants[str(sip_uri)]
+        else:
+            participant_data = ParticipantData()
+
         participant_data.uri = str(sip_uri)
         participant_data.display_name = display_name
         participant_data.session = session
@@ -585,6 +612,7 @@ class PSAPApplication(SylkApplication):
         participant_data.is_active = True
         participant_data.is_calltaker = is_calltaker
         participant_data.is_primary = is_primary
+        participant_data.on_hold = False
         participants[str(sip_uri)] = participant_data
 
         NotificationCenter().post_notification('ConferenceParticipantAdded', self,
@@ -619,6 +647,7 @@ class PSAPApplication(SylkApplication):
             log.info('participant_data is %r', participant_data)
             if participant_data.session == session:
                 participant_data.is_active = False
+                participant_data.on_hold=False
                 if participant_data.is_calltaker and participant_data.is_primary:
                     log.info('remove_participant found primary calltaker is %r', participant_data.display_name)
                     (has_new_primary, new_primary_uri) = self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=str(participant_data.uri))
@@ -649,21 +678,48 @@ class PSAPApplication(SylkApplication):
         room.add_session(session)
 
     def put_calltaker_on_hold(self, room_number, calltaker_name):
-        session = self._get_calltaker_session(room_number, calltaker_name)
-        session.hold()
+        participant = self._get_calltaker_participant(room_number, calltaker_name)
+        if participant is None:
+            raise ValueError("invalid calltaker %r for room %r" % (calltaker_name, room_number))
+        if participant.on_hold:
+            return
 
-    def remove_calltaker_on_hold(self, room_number, calltaker_name):
-        session = self._get_calltaker_session(room_number, calltaker_name)
-        session.unhold()
+        participant.session.end()
+        room.remove_session(participant.session)
+        participant.on_hold = True
+        room_data = self.get_room_data(room_number)
+        #todo - finish this
+        if room_data.status == 'active':
+            # check if there is only one session in the call
+            if len(room.sessions) == 1:
+                def hold_timer_cb(room_number):
+                    hold_timer_cb.duration = hold_timer_cb.duration + 1
+                    publish_update_call_timer(room_number, 'hold', hold_timer_cb.duration)
 
-    def _get_calltaker_session(self, room_number, calltaker_name):
+                hold_timer_cb.duration = 0
+                hold_timer = task.LoopingCall(hold_timer_cb, room_number)
+                hold_timer.start(1)  # call every seconds
+                room_data.status = 'on_hold'
+                room_data.hold_timer = hold_timer
+                NotificationCenter().post_notification('ConferenceHoldUpdated', self,
+                                                       NotificationData(room_number=room_number,
+                                                                        calltaker=calltaker_name,
+                                                                        on_hold=True))
+
+
+    # this is done by participant joining the call again
+    #def remove_calltaker_on_hold(self, room_number, calltaker_name):
+    #    participant = self._get_calltaker_participant(room_number, calltaker_name)
+    #    participant.on_hold = False
+
+
+    def _get_calltaker_participant(self, room_number, calltaker_name):
         room_data = self.get_room_data(room_number)
         if room_data is None:
-            raise ValueError('conference not active or does not exist')
+            raise ValueError('conference %s not active or does not exist' % room_number)
         for participant in room_data.participants.itervalues():
             if participant.is_calltaker and participant.display_name == calltaker_name:
-                return participant.session
-
+                return participant
         return None
 
     '''
