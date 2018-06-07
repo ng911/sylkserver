@@ -3,6 +3,7 @@ import os.path
 import arrow
 from flask import Blueprint, jsonify, request, send_from_directory
 from flask_cors import CORS
+from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
 from sylk.applications.psap import PSAPApplication
 from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
@@ -102,15 +103,73 @@ def get_room():
         }
         return jsonify(response)
 
+'''
+Old code
+        filters = {'psap' : cls.psapName, 'end' : {'$ne' : None}}
+        if (len(callingNumber) > 0) :
+            filters['caller.contact'] = { '$regex' : callingNumber , '$options' : 'i'} 
+        if (len(callingLocation) > 0) :
+            locationRegEx = "/%s/i" % callingLocation
+            filters['$or'] = [{'locations.name' : locationRegEx}, {'locations.community' : locationRegEx}, {'locations.state' : locationRegEx}, {'locations.location' : locationRegEx} ]
+        if (len(notes) > 0) :
+            locationRegEx = "/%s/i" % callingLocation
+            filters['notes'] = { '$regex' : notes , '$options' : 'i'} 
+        if (len(startDate) > 0) and (len(endDate) > 0) :
+            logger.debug("startDate is %r", startDate)
+            logger.debug("endDate is %r", endDate)
+            locationRegEx = "/%s/i" % callingLocation
+            filters['start'] = {'$gte' : convertASDateToDatetime(startDate),
+                                '$lt': convertASDateToDatetime(endDate) } 
+        logger.debug("filters are %r", filters)
+        fullCallRecords = collection.find(filters)
+        fullCallsData = [bindable.Object(callRecord) \
+                for callRecord in fullCallRecords]
+        for callData in fullCallsData:
+            # logger.debug('callData is %r' % callData)
+            del callData['_id']
+            callData['start'] = cls.formatISODate(callData['start'])
+            callData['end'] = cls.formatISODate(callData['end'])
+
+
+'''
 
 @calls.route('/search', methods=['GET'])
 def search_calls():
     try:
-        log.debug('inside search')
-        call_id = get_argument('call_id')
-        response = {
-            'success': True
-        }
+        log.info('inside search')
+        calling_number = get_argument('calling_number')
+        location = get_argument('location')
+        notes = get_argument('notes')
+        start_time = get_argument('start_time')
+        end_time = get_argument('end_time')
+
+        filters = {'psap_id' : ServerConfig.psap_id, 'status' : {'$nin' : ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
+        if (calling_number != None) and (len(calling_number) > 0) :
+            filters['caller_ani'] = { '$regex' : calling_number , '$options' : 'i'}
+        if (location != None) and (len(location) > 0) :
+            locationRegEx = "/%s/i" % location
+            filters['location_display'] = { '$regex' : location, '$options' : 'i'}
+        if (notes != None) and (len(notes) > 0) :
+            filters['notes'] = { '$regex' : notes , '$options' : 'i'}
+        if (len(start_time) > 0) and (len(end_time) > 0) :
+            log.info("start_time is %r", start_time)
+            log.info("end_time is %r", end_time)
+            arrow_start = arrow.get(start_time)
+            arrow_end = arrow.get(end_time)
+            complex_time_format = 'YYYY,MM,DD,HH,mm,ss,SSSSSS'
+            formatted_start_time = arrow_start.format(complex_time_format)
+            formatted_end_time = arrow_end.format(complex_time_format)
+            filters['start_time'] = {'$gte' : formatted_start_time,
+                                '$lt': formatted_end_time }
+        calls_cursor = Conference.objects(__raw__=filters)
+        calls = []
+        for call_db_obj in calls_cursor:
+            # should return date, call, type, caller, callback, location, long, lat, notes, status
+            call_data = get_json_from_db_obj(call_db_obj, ignore_fields=['psap_id', 'user_id'])
+            calls.append(call_data)
+
+        response = {'success': True, 'calls' : calls}
+
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()

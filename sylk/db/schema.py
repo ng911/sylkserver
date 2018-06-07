@@ -235,6 +235,7 @@ class Conference(Document):
     caller_name = StringField()
     recording =  StringField()
     note =  StringField()
+    location_display = StringField()
     emergency_type = StringField(default='')
     secondary_type = StringField(default='')
 
