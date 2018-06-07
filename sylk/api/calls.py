@@ -139,7 +139,7 @@ def search_calls():
         log.info('inside search')
         calling_number = get_argument('calling_number')
         location = get_argument('location')
-        notes = get_argument('notes')
+        note = get_argument('note')
         start_time = get_argument('start_time')
         end_time = get_argument('end_time')
 
@@ -149,8 +149,8 @@ def search_calls():
         if (location != None) and (len(location) > 0) :
             locationRegEx = "/%s/i" % location
             filters['location_display'] = { '$regex' : location, '$options' : 'i'}
-        if (notes != None) and (len(notes) > 0) :
-            filters['notes'] = { '$regex' : notes , '$options' : 'i'}
+        if (note != None) and (len(note) > 0) :
+            filters['note'] = { '$regex' : note , '$options' : 'i'}
         if (start_time != None) and (end_time != None) and (len(start_time) > 0) and (len(end_time) > 0) :
             log.info("start_time is %r", start_time)
             log.info("end_time is %r", end_time)
