@@ -185,7 +185,7 @@ def search_calls():
             call_data = get_json_from_db_obj(call_db_obj, ignore_fields=['psap_id', 'user_id'])
             calls.append(call_data)
 
-        response = {'success': True, 'calls' : calls, 'count' : count}
+        response = {'success': True, 'calls' : calls, 'total_records' : count}
 
         return jsonify(response)
     except Exception as e:
