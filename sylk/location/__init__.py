@@ -1,7 +1,7 @@
 import datetime
 from sylk.applications import ApplicationLogger
 from aliquery import send_ali_request
-from sylk.db.schema import Location
+from sylk.db.schema import Location, Conference
 from sylk.wamp import publish_update_location_success, publish_update_location_failed
 import traceback
 from twisted.internet import reactor
@@ -100,7 +100,13 @@ def process_ali_success(result):
             location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
         location_db_obj.save()
 
-        publish_update_location_success(room_number, ali_result, get_location_display(ali_result))
+        # update call location in Conference table as well
+        location_display = get_location_display(ali_result)
+        conference_db_obj = Conference.objects.get(room_number=room_number)
+        conference_db_obj.location_display = location_display
+        conference_db_obj.save()
+
+        publish_update_location_success(room_number, ali_result, location_display)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)

@@ -3,7 +3,7 @@ import datetime
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import Location
+from sylk.db.schema import Location, Conference
 from utils import get_argument
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
 
@@ -64,7 +64,13 @@ def set_location(location_id):
         location_db_obj.descrepancy = True
         location_db_obj.updated_at = datetime.datetime.utcnow()
         location_db_obj.save()
-        response = {'success' : True, 'location_display' : get_location_display(location_db_obj)}
+        location_display = get_location_display(location_db_obj)
+        room_number = location_db_obj.room_number
+        if (room_number is not None) and (room_number != ''):
+            conference_db_obj = Conference.objects.get(room_number=room_number)
+            conference_db_obj.location_display = location_display
+            conference_db_obj.save()
+        response = {'success' : True, 'location_display' : location_display}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
