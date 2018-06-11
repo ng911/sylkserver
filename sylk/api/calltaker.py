@@ -91,6 +91,7 @@ def update_status(user_id):
 @calltaker.route('/profile/<user_id>', methods=['GET'])
 def get_profile(user_id):
     try:
+        log.info("inside get_profile for %r", user_id)
         if (user_id is None) or (user_id == ''):
             raise ValueError('missing or invalid user_id')
 
@@ -103,6 +104,8 @@ def get_profile(user_id):
         response = {'success':True, 'profile':profile_json}
         return jsonify(response)
     except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("%s", stacktrace)
         response = {
             'success' : False,
             'reason' : str(e)

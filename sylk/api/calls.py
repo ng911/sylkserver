@@ -174,8 +174,10 @@ def search_calls():
         calls_cursor = Conference.objects(__raw__=filters).order_by('-start_time')
         count = len(calls_cursor)
         if (per_page is not None) and (per_page > 0) and (page_no is not None):
+            log.info('inside search note per_page %d, page_no %d', per_page, page_no)
             start_index = (page_no - 1) * per_page
             end_index = start_index + per_page
+            log.info('inside search note start_index %d, end_index %d', start_index, end_index)
             calls_cursor = Conference.objects(__raw__=filters).order_by('-start_time')[start_index:end_index]
 
         log.info('calls search found %d records', len(calls_cursor))
