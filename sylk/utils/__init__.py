@@ -105,7 +105,7 @@ def set_db_obj_from_request(document, request, ignore_fields=[]):
 
     for key, value in request_data.items():
         if (key in document._fields) and (key not in ignore_fields):
-            #log.info("update key %r, value %r", key, value)
+            log.info("update key %r, value %r", key, value)
             setattr(document, key, field_value(document._fields[key], value))
 
     return document
