@@ -86,13 +86,13 @@ class User(Document):
         return  user
 
 
-class CallTakerStation(Document):
+class CalltakerStation(Document):
     station_id = StringField(required=True, unique=True, default=bson.ObjectId)
     name = StringField(required=True, unique=True)
     loud_ring_server = BooleanField()
 
 
-class CallTakerProfile(DynamicDocument):
+class CalltakerProfile(DynamicDocument):
     profile_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     user_id = ObjectIdField(required=False)
     incoming_ring = BooleanField(default=True)
@@ -103,7 +103,7 @@ class CallTakerProfile(DynamicDocument):
     auto_respond_after = IntField(min_value=0, default=10)
 
 
-class CallTakerActivity(Document):
+class CalltakerActivity(Document):
     user_id = ObjectIdField(required=True)
     event = StringField(required=True, choices=('login', 'made_busy', 'answer_call', 'hang_up', 'logout', 'rebid'))
     event_details = StringField()
