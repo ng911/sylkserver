@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import User, CallTakerProfile, Psap
+from sylk.db.schema import User, CalltakerProfile, Psap
 from sylk.data.calltaker import CalltakerData
 from utils import get_argument
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
@@ -96,10 +96,10 @@ def get_profile(user_id):
             raise ValueError('missing or invalid user_id')
 
         try:
-            profile_obj = CallTakerProfile.objects.get(user_id=user_id)
+            profile_obj = CalltakerProfile.objects.get(user_id=user_id)
         except:
             psap_db_obj = Psap.objects.get(psap_id=ServerConfig.psap_id)
-            profile_obj = CallTakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
+            profile_obj = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
         profile_json = get_json_from_db_obj(profile_obj, ignore_fields=['psap_id', 'user_id', 'profile_id'])
         response = {'success':True, 'profile':profile_json}
         return jsonify(response)
@@ -120,9 +120,9 @@ def set_profile(user_id):
             raise ValueError('missing or invalid user_id')
 
         try:
-            profile_obj = CallTakerProfile.objects.get(user_id=user_id)
+            profile_obj = CalltakerProfile.objects.get(user_id=user_id)
         except:
-            profile_obj = CallTakerProfile()
+            profile_obj = CalltakerProfile()
             profile_obj.psap_id = ServerConfig.psap_id
             profile_obj.user_id = user_id
 
