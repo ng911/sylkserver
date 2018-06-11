@@ -131,6 +131,8 @@ def set_profile(user_id):
         response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
         return jsonify(response)
     except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("%s", stacktrace)
         response = {
             'success' : False,
             'reason' : str(e)
