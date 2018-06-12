@@ -561,7 +561,7 @@ class PSAPApplication(SylkApplication):
         # todo - check why we had to change this to 1 here
         if room.length <= 1:
             # we need to stop the remaining session
-            log.info('check terminate all sessions room_data.status %r', room_data.status)
+            log.info('check terminate all sessions room_data.status %r, room length %d', room_data.status, room.length)
             if (room_data.status != 'on_hold') or (room.length == 0):
                 log.info('terminate all sessions room %s', room_number)
                 room.terminate_sessions()
