@@ -681,15 +681,14 @@ class PSAPApplication(SylkApplication):
 
     def put_calltaker_on_hold(self, room_number, calltaker_name):
         try:
-            participant = self._get_calltaker_participant(room_number, calltaker_name)
-            if participant is None:
+            log.info('inside put_calltaker_on_hold for room %s, calltaker %s', room_number, calltaker_name)
+            calltaker_participant = self._get_calltaker_participant(room_number, calltaker_name)
+            if calltaker_participant is None:
                 raise ValueError("invalid calltaker %r for room %r" % (calltaker_name, room_number))
-            if participant.on_hold:
+            if calltaker_participant.on_hold:
                 return
-            participant.on_hold = True
-            participant.session.end()
+            calltaker_participant.on_hold = True
             room = self.get_room(room_number)
-            room.remove_session(participant.session)
             room_data = self.get_room_data(room_number)
             #todo - finish this
             if room_data.status == 'active':
@@ -708,6 +707,9 @@ class PSAPApplication(SylkApplication):
                                                            NotificationData(room_number=room_number,
                                                                             calltaker=calltaker_name,
                                                                             on_hold=True))
+            calltaker_participant.session.end()
+            room.remove_session(calltaker_participant.session)
+
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("error in put_calltaker_on_hold %s", str(e))
