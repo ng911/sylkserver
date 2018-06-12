@@ -343,8 +343,8 @@ def conference_put_on_hold(room_number):
         })
     except Exception as e:
         stacktrace = traceback.print_exc()
+        log.error("conference put hold error %s", str(e))
         log.error("%r", stacktrace)
-        log.error("conference put hold error %r", e)
 
         return jsonify ({
             'success' : False,
