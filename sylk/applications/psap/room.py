@@ -470,6 +470,7 @@ class Room(object):
         '''
 
     def remove_session(self, session):
+        log.info("inside room remove_session ")
         log.info("inside room remove_session %r", session)
         notification_center = NotificationCenter()
         notification_center.remove_observer(self, sender=session)
