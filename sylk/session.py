@@ -17,6 +17,7 @@ from sipsimple.lookup import DNSLookup, DNSLookupError
 from sipsimple.payloads import ParserError
 from sipsimple.payloads.conference import ConferenceDocument
 from sipsimple.streams import MediaStreamRegistry, InvalidStreamError, UnknownStreamError
+from sipsimple.streams.rtp.audio import AudioStream
 from sipsimple.threading import run_in_twisted_thread
 from sipsimple.threading.green import Command, run_in_green_thread
 from sipsimple.util import ISOTimestamp
@@ -1381,9 +1382,10 @@ class Session(object):
         if not streams:
             return
         for stream in streams:
-            if (stream.type == 'audio') or (stream.type == 'video'):
+            if stream.type == 'audio':
                 log.info('set stream %r to mute', stream)
-                stream.muted(True)
+                AudioStream.muted(stream, True)
+                #stream.muted(True)
 
     @run_in_green_thread
     def unmute(self):
@@ -1391,9 +1393,10 @@ class Session(object):
         if not streams:
             return
         for stream in streams:
-            if (stream.type == 'audio') or (stream.type == 'video'):
+            if stream.type == 'audio':
                 log.info('set stream %r to unmute', stream)
-                stream.muted(False)
+                AudioStream.muted(stream, False)
+                #stream.muted(False)
 
     @run_in_green_thread
     def end(self):
