@@ -645,7 +645,7 @@ class PSAPApplication(SylkApplication):
 
         for participant_data in room_data.participants.itervalues():
             log.info('participant_data is %r', participant_data)
-            if participant_data.session == session:
+            if (participant_data.session == session) and (not participant_data.on_hold):
                 participant_data.is_active = False
                 participant_data.on_hold=False
                 if participant_data.is_calltaker and participant_data.is_primary:
