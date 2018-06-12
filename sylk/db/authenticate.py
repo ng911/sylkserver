@@ -84,7 +84,7 @@ def authenticate_call(ip_address, port, called_number, calling_uri, conf_rooms):
     incoming_link = get_incoming_link(ip_address, port, called_number)
 
     if incoming_link is None:
-        return (False, None, None)
+        return (False, None, None, None)
 
     if incoming_link.is_origination_calltaker():
         log.info("authenticate_call incoming link is calltaker gateway")
