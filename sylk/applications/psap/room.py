@@ -17,6 +17,7 @@ from application.system import makedirs
 from eventlib import api, coros, proc
 from sipsimple.account.bonjour import BonjourPresenceState
 from sipsimple.application import SIPApplication
+from sylk.applications import ApplicationLogger
 from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import SIPCoreError, SIPCoreInvalidStateError, SIPURI
@@ -43,6 +44,8 @@ from sylk.session import Session, IllegalStateError
 from sylk.configuration import SIPConfig
 from sylk.wamp import publish_update_call_timer
 #from sylk.web import server as web_server
+
+log = ApplicationLogger(__package__)
 
 
 def format_identity(identity):
@@ -467,7 +470,7 @@ class Room(object):
         '''
 
     def remove_session(self, session):
-        log.info("room remove session %r", session)
+        log.info("inside room remove_session %r", session)
         notification_center = NotificationCenter()
         notification_center.remove_observer(self, sender=session)
         self.sessions.remove(session)
@@ -486,6 +489,7 @@ class Room(object):
         try:
             audio_stream = next(stream for stream in session.streams or [] if stream.type == 'audio')
         except StopIteration:
+            log.error("remove_session no audio stream found")
             pass
         else:
             notification_center.remove_observer(self, sender=audio_stream)
@@ -506,6 +510,7 @@ class Room(object):
             pass
         else:
             if len(session.streams) == 1:
+                log.info("remove_session session.streams == 1 returning")
                 return
 
         self.dispatch_conference_info()
