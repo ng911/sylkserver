@@ -263,6 +263,64 @@ def conference_participants_update(room_number):
             'reason' : str(e)
         })
 
+@calls.route('/conference/mute_calltaker/<room_number>', methods=['PUT', 'POST'])
+def conference_mute_calltaker(room_number):
+    try:
+        name = get_argument('name')
+        if (name is None) or (name == ''):
+            raise ValueError('missing name')
+        psap_application = PSAPApplication()
+        psap_application.mute_calltaker(room_number, name)
+
+        '''
+        participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
+        set_db_obj_from_request(log, participant_db_obj, request)
+        participant_db_obj.save()
+
+        data = NotificationData(room_number=room_number)
+        copy_request_data_to_object(request, data)
+        NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
+        '''
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_participants_update error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+
+@calls.route('/conference/mute_all/<room_number>', methods=['PUT', 'POST'])
+def conference_mute_all(room_number):
+    try:
+        psap_application = PSAPApplication()
+        psap_application.mute_all(room_number)
+        '''
+        participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
+        set_db_obj_from_request(log, participant_db_obj, request)
+        participant_db_obj.save()
+
+        data = NotificationData(room_number=room_number)
+        copy_request_data_to_object(request, data)
+        NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
+        '''
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_participants_update error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
 
 @calls.route('/conference/hold/<room_number>', methods=['PUT', 'POST'])
 def conference_put_on_hold(room_number):

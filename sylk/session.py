@@ -1376,6 +1376,24 @@ class Session(object):
             self._send_unhold()
 
     @run_in_green_thread
+    def mute(self):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if (stream.type == 'audio') or (stream.type == 'video'):
+                stream.muted(True)
+
+    @run_in_green_thread
+    def unmute(self):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if (stream.type == 'audio') or (stream.type == 'video'):
+                stream.muted(False)
+
+    @run_in_green_thread
     def end(self):
         if self.state in (None, 'terminating', 'terminated'):
             return
