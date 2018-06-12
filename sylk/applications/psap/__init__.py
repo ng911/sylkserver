@@ -552,9 +552,14 @@ class PSAPApplication(SylkApplication):
         log.info('remove_session before remove room.length %r', room.length)
         log.info('remove_session for room.sessions %r', room.sessions)
         if (room.length > 1) and (session in room.sessions):
-            log.info('remove_session room.remove_session ')
-            room.remove_session(session)
-            log.info('remove_session room.remove_session done')
+            try:
+                log.info('remove_session room.remove_session ')
+                room.remove_session(session)
+                log.info('remove_session room.remove_session done')
+            except Exception as e:
+                stacktrace = traceback.format_exc()
+                log.error("%s", stacktrace)
+                log.error("exception in room.remove_session %s", str(e))
 
         log.info('remove_session room.length %r', room.length)
         # 2 because the other participant is the music server
