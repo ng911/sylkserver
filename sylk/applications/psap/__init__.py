@@ -692,8 +692,8 @@ class PSAPApplication(SylkApplication):
             room_data = self.get_room_data(room_number)
             #todo - finish this
             if room_data.status == 'active':
-                # check if there is only one session in the call
-                if len(room.sessions) == 1:
+                # check if there is only 2 sessions in the call
+                if len(room.sessions) <= 2:
                     def hold_timer_cb(room_number):
                         hold_timer_cb.duration = hold_timer_cb.duration + 1
                         publish_update_call_timer(room_number, 'hold', hold_timer_cb.duration)
