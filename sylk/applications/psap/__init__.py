@@ -706,6 +706,49 @@ class PSAPApplication(SylkApplication):
                                                                         calltaker=calltaker_name,
                                                                         on_hold=True))
 
+    def mute_calltaker(self, room_number, name, muted):
+        participant = self._get_calltaker_participant(room_number, name)
+        if participant is None:
+            raise ValueError("invalid calltaker %r for room %r" % (name, room_number))
+        if participant.session is not None:
+            if muted:
+                participant.session.mute()
+            else:
+                participant.session.unmute()
+
+        data = NotificationData(room_number=room_number, sip_uri=participant.sip_uri, muted=muted)
+        NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
+
+        '''
+        participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
+        set_db_obj_from_request(log, participant_db_obj, request)
+        participant_db_obj.save()
+
+        data = NotificationData(room_number=room_number)
+        copy_request_data_to_object(request, data)
+        NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
+        '''
+
+    def mute_all(self, room_number, muted):
+        room_data = self.get_room_data(room_number)
+        if room_data is None:
+            raise ValueError('conference %s not active or does not exist' % room_number)
+        if room_data.incoming_session is not None:
+            if muted:
+                room_data.incoming_session.mute()
+            else:
+                room_data.incoming_session.unmute()
+        for participant in room_data.participants.itervalues():
+            if participant.session is not None:
+                if muted:
+                    participant.session.mute()
+                else:
+                    participant.session.unmute()
+        data = NotificationData(room_number=room_number, muted=muted)
+        NotificationCenter().post_notification('ConferenceMuteAllUpdated', '', data)
+
+    def mute_user(self, room_number, sip_uri, muted):
+        pass
 
     # this is done by participant joining the call again
     #def remove_calltaker_on_hold(self, room_number, calltaker_name):

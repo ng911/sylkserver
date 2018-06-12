@@ -272,6 +272,54 @@ class ConferenceData(object):
             log.error("exception in update_hold %r", e)
             log.error(stackTrace)
 
+    def mute_participant(self, room_number, sip_uri, muted):
+        try:
+            participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
+            participant.mute = muted
+            participant.save()
+
+            '''
+            todo add an event that participant is on mute
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'participant {} left'.format(display_name)
+            conference_event.save()
+            '''
+            conference = Conference.objects.get(room_number=room_number)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_hold %r", e)
+            log.error(stackTrace)
+
+    def mute_all_participants(self, room_number, muted):
+        try:
+            for participant in ConferenceParticipant.objects(room_number=room_number, is_active=True):
+                participant.muted = muted
+                participant.save()
+
+            '''
+            todo add an event that participant is on mute
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'participant {} left'.format(display_name)
+            conference_event.save()
+            '''
+            conference = Conference.objects.get(room_number=room_number)
+            call_data = get_conference_json(conference)
+            participants_data = get_conference_participants_json(room_number)
+            publish_update_call(room_number, call_data, participants_data)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_hold %r", e)
+            log.error(stackTrace)
+
     def init_observers(self):
         log.info("ConferenceData init_observers")
         notification_center = NotificationCenter()
@@ -282,6 +330,8 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
         notification_center.add_observer(self, name='ConferenceParticipantNewPrimary')
         notification_center.add_observer(self, name='ConferenceHoldUpdated')
+        notification_center.add_observer(self, name='ConferenceMuteUpdated')
+        notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
 
     def handle_notification(self, notification):
         log.info("ConferenceData got notification ")
@@ -350,3 +400,22 @@ class ConferenceData(object):
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
             log.error(stackTrace)
+
+    def _NH_ConferenceMuteUpdated(self, notification):
+        log.info("incoming _NH_ConferenceMuteUpdated")
+        try:
+            self.mute_participant(notification.data.room_number, notification.data.sip_uri, notification.data.muted)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceMuteUpdated %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceMuteAllUpdated(self, notification):
+        log.info("incoming _NH_ConferenceMuteAllUpdated")
+        try:
+            self.mute_all_participants(notification.data.room_number, notification.data.muted)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceMuteAllUpdated %r", e)
+            log.error(stackTrace)
+
