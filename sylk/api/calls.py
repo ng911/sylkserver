@@ -269,8 +269,11 @@ def conference_mute_calltaker(room_number):
         name = get_argument('name')
         if (name is None) or (name == ''):
             raise ValueError('missing name')
+        muted = get_argument('muted')
+        if (muted is None) or (muted == ''):
+            raise ValueError('missing muted')
         psap_application = PSAPApplication()
-        psap_application.mute_calltaker(room_number, name)
+        psap_application.mute_calltaker(room_number, name, muted)
 
         '''
         participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
@@ -299,7 +302,10 @@ def conference_mute_calltaker(room_number):
 def conference_mute_all(room_number):
     try:
         psap_application = PSAPApplication()
-        psap_application.mute_all(room_number)
+        muted = get_argument('muted')
+        if (muted is None) or (muted == ''):
+            raise ValueError('missing muted')
+        psap_application.mute_all(room_number, muted)
         '''
         participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
         set_db_obj_from_request(log, participant_db_obj, request)
