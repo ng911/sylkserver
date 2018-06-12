@@ -35,7 +35,6 @@ from zope.interface import implements
 
 from sylk.accounts import DefaultAccount
 from sylk.applications.conference.configuration import get_room_config, ConferenceConfig
-from sylk.applications.psap import log
 from sylk.bonjour import BonjourService
 from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.configuration.datatypes import URL
@@ -45,7 +44,7 @@ from sylk.configuration import SIPConfig
 from sylk.wamp import publish_update_call_timer
 #from sylk.web import server as web_server
 
-#log = ApplicationLogger(__package__)
+log = ApplicationLogger(__package__)
 
 
 def format_identity(identity):
@@ -128,6 +127,7 @@ class Room(object):
     implements(IObserver)
 
     def __init__(self, room_number=None):
+        log.info('Room create room %s', room_number)
         if room_number is None:
             pass
         else:
