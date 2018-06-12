@@ -1382,6 +1382,7 @@ class Session(object):
             return
         for stream in streams:
             if (stream.type == 'audio') or (stream.type == 'video'):
+                log.info('set stream %r to mute', stream)
                 stream.muted(True)
 
     @run_in_green_thread
@@ -1391,6 +1392,7 @@ class Session(object):
             return
         for stream in streams:
             if (stream.type == 'audio') or (stream.type == 'video'):
+                log.info('set stream %r to unmute', stream)
                 stream.muted(False)
 
     @run_in_green_thread
