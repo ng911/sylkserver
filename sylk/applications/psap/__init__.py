@@ -709,8 +709,7 @@ class PSAPApplication(SylkApplication):
                                                                             calltaker=calltaker_name,
                                                                             on_hold=True))
             calltaker_participant.session.end()
-            room.remove_session(calltaker_participant.session)
-
+            #room.remove_session(calltaker_participant.session)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("error in put_calltaker_on_hold %s", str(e))
