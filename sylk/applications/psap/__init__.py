@@ -1,5 +1,6 @@
 
 import re
+import traceback
 from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from twisted.internet import reactor
@@ -679,33 +680,38 @@ class PSAPApplication(SylkApplication):
         room.add_session(session)
 
     def put_calltaker_on_hold(self, room_number, calltaker_name):
-        participant = self._get_calltaker_participant(room_number, calltaker_name)
-        if participant is None:
-            raise ValueError("invalid calltaker %r for room %r" % (calltaker_name, room_number))
-        if participant.on_hold:
-            return
-        participant.on_hold = True
-        participant.session.end()
-        room = self.get_room(room_number)
-        room.remove_session(participant.session)
-        room_data = self.get_room_data(room_number)
-        #todo - finish this
-        if room_data.status == 'active':
-            # check if there is only one session in the call
-            if len(room.sessions) == 1:
-                def hold_timer_cb(room_number):
-                    hold_timer_cb.duration = hold_timer_cb.duration + 1
-                    publish_update_call_timer(room_number, 'hold', hold_timer_cb.duration)
+        try:
+            participant = self._get_calltaker_participant(room_number, calltaker_name)
+            if participant is None:
+                raise ValueError("invalid calltaker %r for room %r" % (calltaker_name, room_number))
+            if participant.on_hold:
+                return
+            participant.on_hold = True
+            participant.session.end()
+            room = self.get_room(room_number)
+            room.remove_session(participant.session)
+            room_data = self.get_room_data(room_number)
+            #todo - finish this
+            if room_data.status == 'active':
+                # check if there is only one session in the call
+                if len(room.sessions) == 1:
+                    def hold_timer_cb(room_number):
+                        hold_timer_cb.duration = hold_timer_cb.duration + 1
+                        publish_update_call_timer(room_number, 'hold', hold_timer_cb.duration)
 
-                hold_timer_cb.duration = 0
-                hold_timer = task.LoopingCall(hold_timer_cb, room_number)
-                hold_timer.start(1)  # call every seconds
-                room_data.status = 'on_hold'
-                room_data.hold_timer = hold_timer
-                NotificationCenter().post_notification('ConferenceHoldUpdated', self,
-                                                       NotificationData(room_number=room_number,
-                                                                        calltaker=calltaker_name,
-                                                                        on_hold=True))
+                    hold_timer_cb.duration = 0
+                    hold_timer = task.LoopingCall(hold_timer_cb, room_number)
+                    hold_timer.start(1)  # call every seconds
+                    room_data.status = 'on_hold'
+                    room_data.hold_timer = hold_timer
+                    NotificationCenter().post_notification('ConferenceHoldUpdated', self,
+                                                           NotificationData(room_number=room_number,
+                                                                            calltaker=calltaker_name,
+                                                                            on_hold=True))
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error("error in put_calltaker_on_hold %s", str(e))
+            log.error("%s", stacktrace)
 
     def mute_calltaker(self, room_number, name, muted):
         participant = self._get_calltaker_participant(room_number, name)
