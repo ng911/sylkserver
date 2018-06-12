@@ -685,6 +685,7 @@ class PSAPApplication(SylkApplication):
             return
 
         participant.session.end()
+        room = self.get_room(room_number)
         room.remove_session(participant.session)
         participant.on_hold = True
         room_data = self.get_room_data(room_number)
