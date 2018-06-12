@@ -569,7 +569,7 @@ class PSAPApplication(SylkApplication):
                 if room_data.hold_timer != None:
                     room_data.hold_timer.stop()
                     room_data.hold_timer = None
-            NotificationCenter().post_notification('ConferenceUpdated', self,
+                NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
                                                                     status='closed'))
 
