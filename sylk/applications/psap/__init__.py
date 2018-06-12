@@ -716,7 +716,7 @@ class PSAPApplication(SylkApplication):
             else:
                 participant.session.unmute()
 
-        data = NotificationData(room_number=room_number, sip_uri=participant.sip_uri, muted=muted)
+        data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
         NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
 
         '''
