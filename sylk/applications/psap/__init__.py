@@ -607,7 +607,7 @@ class PSAPApplication(SylkApplication):
 
         older_sip_uri = None
         for participant in participants.itervalues():
-            if participant.is_calltaker and (participant.name == display_name):
+            if participant.is_calltaker and (participant.display_name == display_name):
                 participant_data = participants[str(sip_uri)]
                 older_sip_uri = participant_data.uri
 
