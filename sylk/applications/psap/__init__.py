@@ -594,6 +594,7 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         participants = room_data.participants
 
+        participant_data = None
         # check if the participant is on hold
         if room_data.status == 'on_hold':
             if room_data.hold_timer != None:
@@ -603,9 +604,17 @@ class PSAPApplication(SylkApplication):
                                                    NotificationData(room_number=room_number,
                                                                     calltaker=display_name,
                                                                     on_hold=False))
-        if str(sip_uri) in participants:
-            participant_data = participants[str(sip_uri)]
-        else:
+
+        older_sip_uri = None
+        for participant in participants:
+            if participant.is_calltaker and (participant.name == display_name):
+                participant_data = participants[str(sip_uri)]
+                older_sip_uri = participant_data.uri
+
+        if older_sip_uri is not None:
+            del participants[older_sip_uri]
+
+        if participant_data is None:
             participant_data = ParticipantData()
 
         participant_data.uri = str(sip_uri)
