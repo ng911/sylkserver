@@ -600,6 +600,7 @@ class PSAPApplication(SylkApplication):
             if room_data.hold_timer != None:
                 room_data.hold_timer.stop()
                 room_data.hold_timer = None
+            room_data.status = 'active'
             NotificationCenter().post_notification('ConferenceHoldUpdated', self,
                                                    NotificationData(room_number=room_number,
                                                                     calltaker=display_name,
