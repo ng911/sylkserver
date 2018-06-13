@@ -162,7 +162,7 @@ class ConferenceData(object):
             if is_calltaker:
                 # check if the participant already exists
                 try:
-                    participant = ConferenceParticipant.participants.get(room_number=room_number, is_calltaker=True, name=display_name)
+                    participant = ConferenceParticipant.objects.get(room_number=room_number, is_calltaker=True, name=display_name)
                 except:
                     pass
 
