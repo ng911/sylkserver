@@ -470,8 +470,6 @@ class Room(object):
         '''
 
     def remove_session(self, session):
-        log.info("inside room remove_session ")
-        log.info("inside room remove_session %r", session)
         notification_center = NotificationCenter()
         notification_center.remove_observer(self, sender=session)
         self.sessions.remove(session)
@@ -490,12 +488,10 @@ class Room(object):
         try:
             audio_stream = next(stream for stream in session.streams or [] if stream.type == 'audio')
         except StopIteration:
-            log.error("remove_session no audio stream found")
             pass
         else:
             notification_center.remove_observer(self, sender=audio_stream)
             try:
-                log.info("removing audio conference stream")
                 self.audio_conference.remove(audio_stream)
             except ValueError:
                 # User may hangup before getting bridged into the conference
@@ -511,7 +507,6 @@ class Room(object):
             pass
         else:
             if len(session.streams) == 1:
-                log.info("remove_session session.streams == 1 returning")
                 return
 
         self.dispatch_conference_info()
