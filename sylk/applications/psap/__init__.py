@@ -609,7 +609,8 @@ class PSAPApplication(SylkApplication):
         for participant in participants.itervalues():
             if participant.is_calltaker and (participant.display_name == display_name):
                 participant_data = participants[str(sip_uri)]
-                older_sip_uri = participant_data.uri
+                older_sip_uri = str(participant_data.uri)
+                log.info("add_participant found existing participant %s", participant.display_name)
 
         if older_sip_uri is not None:
             del participants[older_sip_uri]
