@@ -157,7 +157,17 @@ class ConferenceData(object):
     def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker, is_primary):
         try:
             log.info('add_participant %r for room %r, display_name %r', sip_uri, room_number, display_name)
-            participant = ConferenceParticipant()
+
+            participant = None
+            if is_calltaker:
+                # check if the participant already exists
+                try:
+                    participant = ConferenceParticipant.participants.get(room_number=room_number, is_calltaker=True, name=display_name)
+                except:
+                    pass
+
+            if participant is None:
+                participant = ConferenceParticipant()
             participant.room_number = room_number
             participant.name = display_name
             participant.direction = direction
