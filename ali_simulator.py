@@ -10,6 +10,14 @@ import socket, select
 
 logger = logging.getLogger('psap')
 
+sample_ali = {
+	'4153054541' :
+"112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(415)305-4541      01045\rCA 00070-2-011, SAN FRAN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS",
+	'4153054542' :
+"112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 4S        \r                    \rCALLBK=(415)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS" % formatted_phone
+}
+
+
 class AliSimulator:
 	def __init__(self, ipAddress, port):
 		self.sock, self._gin, self._conn = None, None, {}
@@ -85,7 +93,12 @@ class AliSimulator:
 		logger.debug("send_ali_data for connections")
 		formatted_phone = "(%s) %s-%s" % (phone_number[:3], phone_number[-7:-4], phone_number[-4:])
 		#sample_ali = "112\r(415) 555-1212 WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(712)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS"
-		sample_ali = "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(712)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS" % formatted_phone
+		if phone_number in sample_ali:
+			#ali_result = "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(712)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS" % formatted_phone
+			ali_result = sample_ali[phone_number] % formatted_phone
+		else:
+			ali_result = "112\r%s NO RECORD FOUND" % formatted_phone
+
 		try:
 			data = '\x02'
 			gevent.sleep(2)
@@ -93,7 +106,8 @@ class AliSimulator:
 			gevent.sleep(2)
 			
 			logger.debug("send_ali_data %r, data %r", ipAddress, data)
-			conn.send(sample_ali)
+			#conn.send(sample_ali)
+			conn.send(ali_result)
 
 			logger.debug("send_ali_data %r, data %r", ipAddress, sample_ali)
 			
