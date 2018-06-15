@@ -232,7 +232,7 @@ class PSAPApplication(SylkApplication):
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
-                [self._set_calltaker_busy(self, user_id=calltaker.user_id) for calltaker in calltakers.itervalues()]
+                [self._set_calltaker_busy(self, user_id=user_id) for user_id in calltakers]
                 forward_to_calltaker=True
             else:
                 if call_type == 'outgoing':
