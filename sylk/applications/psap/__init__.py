@@ -813,9 +813,9 @@ class PSAPApplication(SylkApplication):
         self._set_calltaker_status(user_id=user_id, username=username, status='available')
 
     def _set_calltaker_status(self, username=None, user_id=None, status='available'):
+        calltaker_data = CalltakerData()
         if user_id is None:
             calltaker_db_obj = get_calltaker_user(username)
-            calltaker_data = CalltakerData()
             user_id = calltaker_db_obj.user_id
         calltaker_data.update_status(user_id, status)
 
