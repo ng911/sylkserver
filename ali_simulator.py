@@ -110,7 +110,7 @@ class AliSimulator:
 			#conn.send(sample_ali)
 			conn.send(ali_result)
 
-			logger.debug("send_ali_data %r, data %r", ipAddress, sample_ali)
+			logger.debug("send_ali_data %r, data %r", ipAddress, ali_result)
 			
 			gevent.sleep(2)
 			data = '\x03'
