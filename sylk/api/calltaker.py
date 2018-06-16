@@ -55,7 +55,7 @@ def get(user_id):
 @calltaker.route('/register/<user_id>', methods=['GET'])
 def register(user_id):
     calltaker_data = CalltakerData()
-    calltaker_data.update_status(user_id, 'online')
+    calltaker_data.update_status(user_id, 'available')
 
     response = {
         'success' : True
