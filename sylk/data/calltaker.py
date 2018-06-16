@@ -69,6 +69,8 @@ class CalltakerData(object):
             user = self._calltakers[user_id]
             self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=status, username=user.username)
             sylk.wamp.publish_update_calltaker_status(user_id, user.username, status)
+        else:
+            log.error('user_id %r not found in _calltakers %r', user_id, self._calltakers)
 
     @property
     def calltakers(self):

@@ -79,6 +79,7 @@ def get_status(user_id):
 @calltaker.route('/status/<user_id>', methods=['POST', 'PUT'])
 def update_status(user_id):
     status = get_argument('status')
+    log.info('inside update_status calltaker %s, status %s', user_id, status)
     calltaker_data = CalltakerData()
     calltaker_data.update_status(user_id, status)
 
