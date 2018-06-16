@@ -466,9 +466,11 @@ class PSAPApplication(SylkApplication):
 
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
-                    participant = room_data.participants[target]
-                    if participant.is_calltaker:
-                        self._set_calltaker_available(username=participant.display_name)
+                    if outgoing_call_initializer.is_calltaker:
+                        # get the calltaker name from
+                        target_uri = SIPURI.parse(self.target)
+                        log.info("set user %s available", target_uri.user)
+                        self._set_calltaker_available(username=target_uri.user)
             room_data.outgoing_calls = {}
 
     def outgoing_session_did_start(self, sip_uri, session):
