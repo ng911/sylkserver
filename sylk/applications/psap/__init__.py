@@ -468,7 +468,7 @@ class PSAPApplication(SylkApplication):
                     outgoing_call_initializer.cancel_call()
                     if outgoing_call_initializer.is_calltaker:
                         # get the calltaker name from
-                        target_uri = SIPURI.parse(self.target)
+                        target_uri = SIPURI.parse(target)
                         log.info("set user %s available", target_uri.user)
                         self._set_calltaker_available(username=target_uri.user)
             room_data.outgoing_calls = {}
