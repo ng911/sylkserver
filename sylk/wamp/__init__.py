@@ -25,7 +25,10 @@ def publish_update_calltaker_status(user_id, username, status):
             'user_id': user_id,
             'status': status
         }
+        log.info("publish_update_calltaker_status for json %r", json_data)
         wamp_session.publish(u'com.emergent.calltaker', json_data)
+    else:
+        log.error("publish_update_calltaker_status wamp session is None")
 
 
 def publish_update_calltakers(json_data):
