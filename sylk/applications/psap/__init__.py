@@ -476,7 +476,7 @@ class PSAPApplication(SylkApplication):
 
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
-            room_data.outgoing_calls = {}
+            # room_data.outgoing_calls = {}
 
     def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
