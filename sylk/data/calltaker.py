@@ -72,6 +72,10 @@ class CalltakerData(object):
         if user_id in self._calltakers:
             user = self._calltakers[user_id]
             self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=status, username=user.username)
+            notification_data = NotificationData(username=user.username, \
+                                                 status=status, \
+                                                 user_id=user_id)
+            NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
             sylk.wamp.publish_update_calltaker_status(user_id, user.username, status)
         else:
             log.error('user_id %r not found in _calltakers %r', user_id, self._calltakers)
