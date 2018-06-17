@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from application.python import Null
 from application.python.types import Singleton
-from application.notification import IObserver, NotificationCenter
+from application.notification import IObserver, NotificationCenter, NotificationData
 from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.db.schema import Call
@@ -47,6 +47,10 @@ class CalltakerData(object):
         status = notification.data.status
         username = notification.data.username
         self._calltakers[user_id] = User(wamp_session_id=wamp_session_id, status=status, username=username)
+        notification_data = NotificationData(username=username, \
+                                             status=status, \
+                                             user_id=user_id)
+        NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
         sylk.wamp.publish_update_calltaker_status(user_id, username, status)
 
     def _NH_CalltakerSessionLeave(self, notification):
