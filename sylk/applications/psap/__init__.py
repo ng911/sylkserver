@@ -412,14 +412,19 @@ class PSAPApplication(SylkApplication):
         if room_data is not None:
             if sip_uri in room_data.outgoing_calls:
                 # todo send event that the call failed
-                #outgoing_call_initializer = room_data.outgoing_calls[sip_uri]
+                outgoing_call_initializer = room_data.outgoing_calls[str(sip_uri)]
                 del room_data.outgoing_calls[str(sip_uri)]
+                if outgoing_call_initializer.is_calltaker:
+                    # get the calltaker name from
+                    target_uri = SIPURI.parse(str(sip_uri))
+                    log.info("set user %s available", target_uri.user)
+                    self._set_calltaker_available(username=target_uri.user)
 
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
                 pass
 
-    def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason):
+    def outgoing_session_did_fail(self, session, sip_uri, is_calltaker, failure_code, reason):
         log.info('outgoing_session_did_fail session %r, sip_uri %r, failure_code %r, reason %r', session, sip_uri, failure_code, reason)
         room_number = session.room_number
         log.info('outgoing_session_did_fail room_number %r', room_number)
@@ -428,12 +433,17 @@ class PSAPApplication(SylkApplication):
             if str(sip_uri) in room_data.outgoing_calls:
                 log.info('found room_data.outgoing_calls ')
                 # todo send event that the call failed
-                #outgoing_call_initializer = room_data.outgoing_calls[sip_uri]
+                outgoing_call_initializer = room_data.outgoing_calls[str(sip_uri)]
                 del room_data.outgoing_calls[str(sip_uri)]
                 if room_data.direction == 'out':
                     (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
                     if (display_name is not None) and is_calltaker:
                         publish_outgoing_call_status(room_number, display_name, 'failed')
+                if outgoing_call_initializer.is_calltaker:
+                    # get the calltaker name from
+                    target_uri = SIPURI.parse(str(sip_uri))
+                    log.info("set user %s available", target_uri.user)
+                    self._set_calltaker_available(username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
@@ -466,11 +476,6 @@ class PSAPApplication(SylkApplication):
 
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
-                    if outgoing_call_initializer.is_calltaker:
-                        # get the calltaker name from
-                        target_uri = SIPURI.parse(target)
-                        log.info("set user %s available", target_uri.user)
-                        self._set_calltaker_available(username=target_uri.user)
             room_data.outgoing_calls = {}
 
     def outgoing_session_did_start(self, sip_uri, session):
