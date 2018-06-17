@@ -857,7 +857,7 @@ class PSAPApplication(SylkApplication):
                 if room_data.status == 'ringing_queued':
                     # send call to this calltaker
                     room_data.status == 'ringing'
-                    self._set_calltaker_status_busy(user_id=user_id)
+                    self._set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
                                                                         caller_identity=room_data.incoming_session.remote_identity,
@@ -873,7 +873,7 @@ class PSAPApplication(SylkApplication):
             for room_data in self._rooms.itervalues():
                 if (room_data.status == 'ringing') and (room_data.acd_strategy == 'ring_all'):
                     # send call to this calltaker
-                    self._set_calltaker_status_busy(user_id=user_id)
+                    self._set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
                                                                         caller_identity=room_data.incoming_session.remote_identity,
