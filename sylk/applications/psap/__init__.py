@@ -424,7 +424,7 @@ class PSAPApplication(SylkApplication):
                 # todo add handling here, put the call in queue?
                 pass
 
-    def outgoing_session_did_fail(self, session, sip_uri, is_calltaker, failure_code, reason):
+    def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason):
         log.info('outgoing_session_did_fail session %r, sip_uri %r, failure_code %r, reason %r', session, sip_uri, failure_code, reason)
         room_number = session.room_number
         log.info('outgoing_session_did_fail room_number %r', room_number)
