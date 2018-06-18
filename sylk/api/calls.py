@@ -422,10 +422,13 @@ def update_call(room_number):
 def send_recording(path):
     log.info("send_recording for %s", path)
     try:
+        return send_from_directory('recordings', path)
+        '''
         if os.path.isfile(path):
             return send_from_directory('recordings', path)
         else:
             return send_from_directory('recordings', 'ca4182ebac4ed29dc2f8d9209fccca.wav')
+        '''
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("send_recording for file %s, error %s", path, str(e))
