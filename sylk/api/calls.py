@@ -1,7 +1,7 @@
 import traceback
 import os.path
 import arrow
-from flask import Blueprint, jsonify, request, send_from_directory
+from flask import Blueprint, jsonify, request, send_from_directory, abort
 from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
@@ -420,12 +420,17 @@ def update_call(room_number):
 
 @calls.route('/recordings/<path:path>')
 def send_recording(path):
-    log.info("send_recording for %r", path)
-    if os.path.isfile(path):
-        return send_from_directory('recordings', path)
-    else:
-        return send_from_directory('recordings', 'ca4182ebac4ed29dc2f8d9209fccca.wav')
-
+    log.info("send_recording for %s", path)
+    try:
+        if os.path.isfile(path):
+            return send_from_directory('recordings', path)
+        else:
+            return send_from_directory('recordings', 'ca4182ebac4ed29dc2f8d9209fccca.wav')
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("send_recording for file %s, error %s", path, str(e))
+        log.error("%s", stacktrace)
+        abort(503)
 
 '''
 sample current calls
