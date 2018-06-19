@@ -230,6 +230,7 @@ class Conference(Document):
     link_id = ObjectIdField(required=True)
     #todo this should be moved to location?
     #agencies = EmbeddedDocumentListField(document_type=Agency)
+    is_ani_pseudo = BooleanField(default=False)
     caller_ani = StringField()
     caller_uri = StringField()
     caller_name = StringField()
@@ -238,6 +239,8 @@ class Conference(Document):
     location_display = StringField()
     emergency_type = StringField(default='')
     secondary_type = StringField(default='')
+    ali_result = StringField(default='none', hoices=('success', 'failed', 'pending', 'none'))
+    ali_format = StringField()
 
 
 class ConferenceParticipant(Document):

@@ -63,13 +63,14 @@ def publish_update_call_timer(room_number, type, val):
         wamp_session.publish(u'com.emergent.calltimer.%s' % room_number, json_data)
 
 
-def publish_update_call(room_number, call_data, participants):
+def publish_update_call(room_number, call_data, participants=None):
     if wamp_session is not None:
         json_data = {}
         json_data['command'] = 'updated'
         json_data['room_number'] = room_number
         json_data['call_data'] = call_data
-        json_data['participants'] = participants
+        if participants is not None:
+            json_data['participants'] = participants
 
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
