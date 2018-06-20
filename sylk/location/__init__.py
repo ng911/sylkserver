@@ -1,8 +1,9 @@
+import sys
 import datetime
 from sylk.applications import ApplicationLogger
 from aliquery import send_ali_request
 from sylk.db.schema import Location, Conference
-from sylk.wamp import publish_update_location_success, publish_update_location_failed, publish_update_call
+import sylk.wamp as wamp
 import sylk.db.calls as calls
 import traceback
 from twisted.internet import reactor
@@ -110,8 +111,8 @@ def process_ali_success(result):
         conference_db_obj.save()
 
         call_data = calls.get_conference_json(conference_db_obj)
-        publish_update_call(room_number, call_data)
-        publish_update_location_success(room_number, ali_result, location_display)
+        wamp.publish_update_call(room_number, call_data)
+        wamp.publish_update_location_success(room_number, ali_result, location_display)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
@@ -126,7 +127,7 @@ def ali_lookup(room_number, number, ali_format):
     conf_db_obj.ali_result = 'pending'
     conf_db_obj.save()
     call_data = calls.get_conference_json(conf_db_obj)
-    publish_update_call(room_number, call_data)
+    wamp.publish_update_call(room_number, call_data)
 
     # to do add psap location update wamp
 
@@ -139,12 +140,12 @@ def ali_lookup(room_number, number, ali_format):
             conference_db_obj.ali_result = "failed"
             conference_db_obj.save()
             call_data = calls.get_conference_json(conference_db_obj)
-            publish_update_call(room_number, call_data)
+            wamp.publish_update_call(room_number, call_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)
             log.error('process_ali_failed %s', str(e))
-        publish_update_location_failed(room_number)
+        wamp.publish_update_location_failed(room_number)
 
     d.addErrback(process_ali_failed)
     d.addCallback(process_ali_success)
