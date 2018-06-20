@@ -13,6 +13,7 @@ import sylk
 import sylk.wamp
 import sylk.api
 from sylk.location.aliquery import init_ali_links
+import sylk.data.calltaker as calltaker_data
 
 # noinspection PyUnusedLocal
 def stop_server(signum, frame):
@@ -97,6 +98,8 @@ if __name__ == '__main__':
 
     server = SylkServer()
     try:
+        # make sure calltaker_data is initialized
+        calltaker_data.CalltakerData()
         sylk.wamp.start()
         log.info('wamp.start done')
         server.run(options)
