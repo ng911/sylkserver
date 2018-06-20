@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_cors import CORS
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Location, Conference
+from sylk.db.location import get_location_display
 from utils import get_argument
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
 import sylk.location
@@ -13,23 +14,6 @@ location = Blueprint('location', __name__,
 
 CORS(location)
 log = ApplicationLogger(__package__)
-
-def get_location_display(location_db_obj):
-    location_display = ''
-    if (location_db_obj.postal is not None) and (location_db_obj.postal != ''):
-        location_display = location_db_obj.postal
-    if (location_db_obj.community is not None) and (location_db_obj.community != ''):
-        if location_display == '':
-            location_display = location_db_obj.community
-        else:
-            location_display = "%s, %s" % (location_display, location_db_obj.community)
-
-    if (location_db_obj.state is not None) and (location_db_obj.state != ''):
-        if location_display == '':
-            location_display = location_db_obj.state
-        else:
-            location_display = "%s, %s" % (location_display, location_db_obj.state)
-    return location_display
 
 @location.route('/<room_number>', methods=['GET'])
 def get_location(room_number):

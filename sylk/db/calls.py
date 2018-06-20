@@ -3,7 +3,7 @@ import arrow
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location
 from sylk.utils import get_json_from_db_obj
-import sylk.api.location as location
+import location
 
 log = ApplicationLogger(__package__)
 
