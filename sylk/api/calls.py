@@ -390,9 +390,24 @@ def join_conference(room_number):
     pass
 
 
-@calls.route('/dial/<phone_number>', methods=['GET'])
-def dial_number(phone_number):
-    pass
+@calls.route('/invite/<room_number>/<phone_number>', methods=['GET'])
+def invite_to_conference(room_number, phone_number):
+    try:
+        psap_application = PSAPApplication()
+        psap_application.invite_to_conference(room_number, phone_number)
+
+        response = {'success': True}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in invite_to_conference for room %r", str(e), room_number)
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'reason': str(e)
+        }
+        return jsonify(response)
+
 
 @calls.route('/update/<room_number>', methods=['PUT', 'POST'])
 def update_call(room_number):
@@ -407,9 +422,9 @@ def update_call(room_number):
         response = {'success':True}
         return jsonify(response)
     except Exception as e:
-        stactrace = traceback.format_exc()
-        log.error("exception %r in update_call for room %r", e, room_number)
-        log.error("%r",stactrace)
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in update_call for room %r", str(e), room_number)
+        log.error("%s",stacktrace)
         response = {
             'success' : False,
             'reason' : str(e)

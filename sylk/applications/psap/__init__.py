@@ -336,6 +336,37 @@ class PSAPApplication(SylkApplication):
         elif call_type == 'admin':
             pass
 
+    def invite_to_conference(self, room_number, phone_number):
+        log.info("invite_to_conference for room %s, phone %s", room_number, phone_number)
+        is_calltaker = False
+        calltaker_user = get_calltaker_user(phone_number)
+        if calltaker_user != None:
+            is_calltaker = True
+            server = ServerConfig.asterisk_server
+            sip_uri = "sip:%s@%s" % (phone_number, server)
+            self._set_calltaker_busy(user_id=calltaker_user.user_id)
+        else:
+            e164_number = self._format_number_to_e164(phone_number)
+            outgoing_gateway = ServerConfig.outgoing_gateway
+            sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
+        log.info("sip_uri is %s", sip_uri)
+
+        room_data = self.get_room_data(room_number)
+        outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
+                                                            caller_identity=room_data.incoming_session.remote_identity,
+                                                            is_calltaker=is_calltaker)
+        outgoing_call_initializer.start()
+        room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
+
+    def _format_number_to_e164(self, phone_number):
+        if len(phone_number) == 10:
+            return "+1%s" % phone_number
+        if phone_number[0] != '+':
+            return "+%s" % phone_number
+        return phone_number
+
+
+
     def on_ringing_timeout(self, incoming_session, room_number):
         log.info("on_ringing_timeout")
         log.info("timed out ringing for conf room %r", room_number)
