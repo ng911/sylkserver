@@ -6,7 +6,6 @@ from application.python.types import Singleton
 from application.notification import IObserver, NotificationCenter, NotificationData
 from sylk.applications import ApplicationLogger
 from zope.interface import implements
-from sylk.db.schema import Call
 #from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 import sylk.wamp
 
