@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request, send_from_directory, abort
 from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
-from sylk.applications.psap import PSAPApplication
+import sylk.applications.psap as psap
 from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
@@ -202,7 +202,7 @@ def search_calls():
 
 @calls.route('/conference/debug_info/<room_number>', methods=['GET'])
 def conference_debug_info(room_number):
-    psap_app = PSAPApplication()
+    psap_app = psap.PSAPApplication()
     debug_info = psap_app.get_room_debug_info(room_number)
     return jsonify(debug_info)
 
@@ -271,7 +271,7 @@ def conference_mute_calltaker(room_number):
         muted = get_argument('muted')
         if (muted is None) or (muted == ''):
             raise ValueError('missing muted')
-        psap_application = PSAPApplication()
+        psap_application = psap.PSAPApplication()
         psap_application.mute_calltaker(room_number, name, muted)
 
         '''
@@ -300,7 +300,7 @@ def conference_mute_calltaker(room_number):
 @calls.route('/conference/mute_all/<room_number>', methods=['PUT', 'POST'])
 def conference_mute_all(room_number):
     try:
-        psap_application = PSAPApplication()
+        psap_application = psap.PSAPApplication()
         muted = get_argument('muted')
         if (muted is None) or (muted == ''):
             raise ValueError('missing muted')
@@ -334,7 +334,7 @@ def conference_put_on_hold(room_number):
         if (calltaker is None) or (calltaker == ''):
             raise ValueError('missing calltaker')
 
-        psap_app = PSAPApplication()
+        psap_app = psap.PSAPApplication()
         psap_app.put_calltaker_on_hold(room_number, calltaker)
 
         return jsonify({
@@ -356,7 +356,7 @@ def conference_release_on_hold(room_number):
         calltaker = get_argument('calltaker')
         if (calltaker is None) or (calltaker == ''):
             raise ValueError('missing calltaker')
-        psap_app = PSAPApplication()
+        psap_app = psap.PSAPApplication()
         psap_app.remove_calltaker_on_hold(room_number, calltaker)
 
         return jsonify({
@@ -387,7 +387,7 @@ def conference_event_log(room_number):
 @calls.route('/invite/<room_number>/<phone_number>', methods=['GET'])
 def invite_to_conference(room_number, phone_number):
     try:
-        psap_application = PSAPApplication()
+        psap_application = psap.PSAPApplication()
         psap_application.invite_to_conference(room_number, phone_number)
 
         response = {'success': True}
