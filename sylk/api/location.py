@@ -6,7 +6,7 @@ from sylk.applications import ApplicationLogger
 from sylk.db.schema import Location, Conference
 from utils import get_argument
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
-from sylk.location import ali_lookup
+import sylk.location
 
 location = Blueprint('location', __name__,
                         template_folder='templates')
@@ -102,7 +102,7 @@ def do_ali_query(room_number):
         ali_format = get_argument('ali_format')
         lookup_number = get_argument('lookup_number')
 
-        _, trans_id = ali_lookup(room_number, lookup_number, ali_format)
+        _, trans_id = sylk.location.ali_lookup(room_number, lookup_number, ali_format)
         response = {'success' : True, 'trans_id' : trans_id}
         return jsonify(response)
     except Exception as e:
