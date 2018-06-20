@@ -2,7 +2,8 @@ import datetime
 from sylk.applications import ApplicationLogger
 from aliquery import send_ali_request
 from sylk.db.schema import Location, Conference
-from sylk.wamp import publish_update_location_success, publish_update_location_failed
+from sylk.wamp import publish_update_location_success, publish_update_location_failed, publish_update_call
+from sylk.db.calls import get_conference_json
 import traceback
 from twisted.internet import reactor
 
@@ -104,8 +105,12 @@ def process_ali_success(result):
         location_display = get_location_display(ali_result)
         conference_db_obj = Conference.objects.get(room_number=room_number)
         conference_db_obj.location_display = location_display
+        conference_db_obj.callback_number = location_db_obj.callback
+        conference_db_obj.ali_result = "success"
         conference_db_obj.save()
 
+        call_data = get_conference_json(conference_db_obj)
+        publish_update_call(room_number, call_data)
         publish_update_location_success(room_number, ali_result, location_display)
     except Exception as e:
         stacktrace = traceback.format_exc()
@@ -115,15 +120,36 @@ def process_ali_success(result):
 
 def ali_lookup(room_number, number, ali_format):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
-    d = send_ali_request(room_number, number, ali_format)
+
+    # setup ali status to pending
+    conf_db_obj = Conference.objects.get(room_number=room_number)
+    conf_db_obj.ali_result = 'pending'
+    conf_db_obj.save()
+    call_data = get_conference_json(conf_db_obj)
+    publish_update_call(room_number, call_data)
+
+    # to do add psap location update wamp
+
+    d, request_id = send_ali_request(room_number, number, ali_format)
 
     def process_ali_failed(failure):
         log.debug("ali_failed number %r, %r", room_number, number)
+        try:
+            conference_db_obj = Conference.objects.get(room_number=room_number)
+            conference_db_obj.ali_result = "failed"
+            conference_db_obj.save()
+            call_data = get_conference_json(conference_db_obj)
+            publish_update_call(room_number, call_data)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error('%s', stacktrace)
+            log.error('process_ali_failed %s', str(e))
         publish_update_location_failed(room_number)
 
     d.addErrback(process_ali_failed)
     d.addCallback(process_ali_success)
 
+    return request_id
 
 '''
 def aliRebid(self):

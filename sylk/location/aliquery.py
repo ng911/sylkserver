@@ -517,7 +517,7 @@ def send_ali_request(room_number, number, ali_format):
     for factory in factories:
         d = factory.send_ali_request(id, number)
         d.addCallback(process_ali_result)
-    return my_d
+    return my_d, id
 
 
 
