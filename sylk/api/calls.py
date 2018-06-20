@@ -385,11 +385,6 @@ def conference_event_log(room_number):
     return jsonify(response)
 
 
-@calls.route('/join/<room_number>', methods=['GET'])
-def join_conference(room_number):
-    pass
-
-
 @calls.route('/invite/<room_number>/<phone_number>', methods=['GET'])
 def invite_to_conference(room_number, phone_number):
     try:
