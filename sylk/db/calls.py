@@ -3,7 +3,7 @@ import arrow
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location
 from sylk.utils import get_json_from_db_obj
-from sylk.api.location import get_location_display
+import sylk.api.location as location
 
 log = ApplicationLogger(__package__)
 
@@ -69,7 +69,7 @@ def get_location_for_call(room_number):
     try:
         location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at').first()
         if location_db_obj is not None:
-            return get_location_display(location_db_obj)
+            return location.get_location_display(location_db_obj)
         return ''
     except Exception as e:
         stacktrace = traceback.format_exc()
