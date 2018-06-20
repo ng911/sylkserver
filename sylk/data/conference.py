@@ -10,7 +10,7 @@ from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
 from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary
-from sylk.db.calls import get_conference_json, get_conference_participants_json
+import sylk.db.calls as calls
 
 import sylk.wamp
 
@@ -79,8 +79,8 @@ class ConferenceData(object):
             participant.save()
             '''
 
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
 
             publish_create_call(room_number, call_data, participants_data)
         except Exception as e:
@@ -104,8 +104,8 @@ class ConferenceData(object):
             conference_event.event_details = 'update call status to active'
             conference_event.save()
 
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
 
             # todo- check, this one doesnt seem to be used by the calltaker. might remove it in future
@@ -145,8 +145,8 @@ class ConferenceData(object):
                 conference_event.event_details = 'update call status to  {}'.format(status)
             conference_event.save()
 
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -185,8 +185,8 @@ class ConferenceData(object):
             conference_event.save()
 
             conference = Conference.objects.get(room_number=room_number)
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -212,8 +212,8 @@ class ConferenceData(object):
             publish_update_call(room_number, json_data)
             '''
             conference = Conference.objects.get(room_number=room_number)
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -274,8 +274,8 @@ class ConferenceData(object):
             else:
                 conference.status = 'active'
             conference.save()
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -298,8 +298,8 @@ class ConferenceData(object):
             conference_event.save()
             '''
             conference = Conference.objects.get(room_number=room_number)
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
@@ -322,8 +322,8 @@ class ConferenceData(object):
             conference_event.save()
             '''
             conference = Conference.objects.get(room_number=room_number)
-            call_data = get_conference_json(conference)
-            participants_data = get_conference_participants_json(room_number)
+            call_data = calls.get_conference_json(conference)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
