@@ -12,8 +12,7 @@ from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_reque
 from utils import get_argument
 from bson.objectid import ObjectId
 from mongoengine import Q
-from sylk.db.calls import get_conference_participants_json, get_active_calltakers, get_conference_event_log_json, \
-                            get_conference_duration, get_conference_json, get_location_for_call
+import sylk.db.calls as db_calls
 
 calls = Blueprint('calls', __name__,
                         template_folder='templates')
@@ -32,7 +31,7 @@ def current():
     log.info("get current calls")
     calls = []
     for conference_db_obj in Conference.objects(Q(status__in=['init', 'ringing', 'ringing_queued', 'queued', 'active']) | (Q(status='abandoned') & Q(callback=False))):
-        conference_json = get_conference_json(conference_db_obj)
+        conference_json = db_calls.get_conference_json(conference_db_obj)
         calls.append(conference_json)
     response = {
         'success' : True,
@@ -51,7 +50,7 @@ def recent():
     calls = []
     # todo - add limit of 1 month to this data
     for conference_db_obj in Conference.objects(status__in=['closed', 'abandoned']):
-        conference_json = get_conference_json(conference_db_obj)
+        conference_json = db_calls.get_conference_json(conference_db_obj)
         calls.append(conference_json)
 
     response = {
@@ -74,7 +73,7 @@ def lastMonth():
     arr_last_month = arr_cur_time.shift(days=-30)
 
     for conference_db_obj in Conference.objects(start_time__gt=arr_last_month.naive):
-        conference_json = get_conference_json(conference_db_obj)
+        conference_json = db_calls.get_conference_json(conference_db_obj)
         calls.append(conference_json)
 
     response = {
@@ -214,9 +213,9 @@ def conference_info(room_number):
 
     response = {
         'success' : True,
-        'conference_data' : get_conference_json(conference_db_obj),
-        'participants': get_conference_participants_json(room_number),
-        'event_log' : get_conference_event_log_json(room_number)
+        'conference_data' : db_calls.get_conference_json(conference_db_obj),
+        'participants': db_calls.get_conference_participants_json(room_number),
+        'event_log' : db_calls.get_conference_event_log_json(room_number)
     }
 
     return jsonify(response)
@@ -224,7 +223,7 @@ def conference_info(room_number):
 
 @calls.route('/conference/participants/<room_number>', methods=['GET'])
 def conference_participants(room_number):
-    participants_json = get_conference_participants_json(room_number)
+    participants_json = db_calls.get_conference_participants_json(room_number)
 
     response = {
         'success' : True,
@@ -375,7 +374,7 @@ def conference_release_on_hold(room_number):
 
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
 def conference_event_log(room_number):
-    event_log_json = get_conference_event_log_json(room_number)
+    event_log_json = db_calls.get_conference_event_log_json(room_number)
 
     response = {
         'success' : True,
