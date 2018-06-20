@@ -4,7 +4,7 @@ from application.notification import IObserver, NotificationCenter, Notification
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 log = ApplicationLogger(__package__)
 from twisted.internet.defer import inlineCallbacks, returnValue
-import sylk.data.calltaker as calltaker_data
+#import sylk.data.calltaker as calltaker_data
 
 log.info("wamp session start")
 
@@ -120,7 +120,7 @@ def joined(session, details):
     global wamp_session
     log.info("wamp session ready %r, id %r", session, session._session_id)
     # make sure calltaker is initialized
-    calltaker_data.CalltakerData()
+    #calltaker_data.CalltakerData()
     wamp_session = session
 
     def on_calltaker_status(data):
