@@ -513,7 +513,7 @@ class PSAPApplication(SylkApplication):
                 # todo add handling here, put the call in queue?
                 pass
 
-    def outgoing_session_is_ringing(self, room_number, target, session):
+    def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
         if room and room.started:
             # get the target name
@@ -1386,7 +1386,7 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionGotRingIndication(self, notification):
         session = notification.sender
-        self.app.outgoing_session_is_ringing(self, self.room_number, self.target_uri, session)
+        self.app.outgoing_session_is_ringing(self.room_number, self.target_uri)
         send_call_update_notification(self, session, 'ringing')
 
     def _NH_SIPSessionGotProvisionalResponse(self, notification):
