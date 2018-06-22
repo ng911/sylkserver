@@ -153,6 +153,29 @@ class ConferenceData(object):
             log.error("exception in update_conference_status %r", e)
             log.error(stackTrace)
 
+    def add_participant_ringing(self, room_number, display_name):
+        conference_event = ConferenceEvent()
+        conference_event.event = 'ringing'
+        conference_event.event_time = datetime.datetime.utcnow()
+        conference_event.event_details = 'ringing {}'.format(display_name)
+        conference_event.room_number = room_number
+        conference_event.save()
+
+    def add_participant_timedout(self, room_number, display_name):
+        conference_event = ConferenceEvent()
+        conference_event.event = 'ringing'
+        conference_event.event_time = datetime.datetime.utcnow()
+        conference_event.event_details = 'timed out ringing to {} '.format(display_name)
+        conference_event.room_number = room_number
+        conference_event.save()
+
+    def add_participant_failed(self, room_number, display_name):
+        conference_event = ConferenceEvent()
+        conference_event.event = 'ringing'
+        conference_event.event_time = datetime.datetime.utcnow()
+        conference_event.event_details = 'call to {} failed'.format(display_name)
+        conference_event.room_number = room_number
+        conference_event.save()
 
     def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker, is_primary):
         try:
@@ -339,6 +362,9 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceParticipantAdded')
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
         notification_center.add_observer(self, name='ConferenceParticipantNewPrimary')
+        notification_center.add_observer(self, name='ConferenceParticipantRinging')
+        notification_center.add_observer(self, name='ConferenceParticipantFailed')
+        notification_center.add_observer(self, name='ConferenceParticipantTimedout')
         notification_center.add_observer(self, name='ConferenceHoldUpdated')
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
@@ -373,6 +399,33 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceUpdated %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceParticipantRinging(self, notification):
+        log.info("incoming _NH_ConferenceParticipantRinging")
+        try:
+            self.add_participant_ringing(notification.data.room_number, notification.data.display_name)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantRinging %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceParticipantFailed(self, notification):
+        log.info("incoming _NH_ConferenceParticipantFailed")
+        try:
+            self.add_participant_failed(notification.data.room_number, notification.data.display_name)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in ConferenceParticipantFailed %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceParticipantTimedout(self, notification):
+        log.info("incoming _NH_ConferenceParticipantTimedout")
+        try:
+            self.add_participant_timedout(notification.data.room_number, notification.data.display_name)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in ConferenceParticipantTimedout %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceParticipantAdded(self, notification):

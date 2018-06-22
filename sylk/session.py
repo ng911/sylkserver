@@ -1386,6 +1386,16 @@ class Session(object):
                 stream.muted = True
 
     @run_in_green_thread
+    def send_dtmf(self, dtmf_digit):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if stream.type == 'audio':
+                log.info('set stream %r to mute', stream)
+                stream.send_dtmf(dtmf_digit)
+
+    @run_in_green_thread
     def unmute(self):
         streams = (self.streams or []) + (self.proposed_streams or [])
         if not streams:

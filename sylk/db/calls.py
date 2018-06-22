@@ -1,9 +1,12 @@
 import traceback
+import datetime
+from bson import ObjectId
 import arrow
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location
+from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location, Conference
 from sylk.utils import get_json_from_db_obj
 import location
+from sylk.configuration import ServerConfig
 
 log = ApplicationLogger(__package__)
 
@@ -76,3 +79,15 @@ def get_location_for_call(room_number):
         log.error("exception in get_location_for_call for room %r, e %r", room_number, str(e))
         log.error("%r", stacktrace)
         return ""
+
+def clear_abandoned_calls(called_number):
+    filters = {'psap_id': ObjectId(ServerConfig.psap_id),
+               'callback' : False,
+               'status' : 'abandoned',
+               'call_type' : 'sos',
+               'or': [{'caller_ani': called_number}, {'callback_number': called_number}]}
+
+    for conf_db_obj in Conference.objects(__raw__=filters):
+        conf_db_obj.callback_time = datetime.datetime.utcnow
+        conf_db_obj.callback = True
+        conf_db_obj.save()
