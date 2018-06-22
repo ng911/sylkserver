@@ -384,10 +384,12 @@ class PSAPApplication(SylkApplication):
             session.send_dtmf(dtmf_digit)
 
     def star_code_transfer(self, room_number, star_code):
+        log.info('star_code_transfer for %s, %s', room_number, star_code)
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             session = room_data.incoming_session
             for dtmf_digit in star_code:
+                log.info('star_code_transfer send digit %s', dtmf_digit)
                 session.send_dtmf(dtmf_digit)
 
 
