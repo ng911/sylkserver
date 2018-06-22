@@ -239,7 +239,7 @@ class Conference(Document):
     location_display = StringField()
     emergency_type = StringField(default='')
     secondary_type = StringField(default='')
-    ali_result = StringField(default='none', hoices=('success', 'failed', 'pending', 'none'))
+    ali_result = StringField(default='none', hoices=('success', 'failed', 'pending', 'no records found', 'none'))
     ali_format = StringField()
 
 

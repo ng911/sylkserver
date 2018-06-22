@@ -22,6 +22,7 @@ from uuid import uuid4
 from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call, get_calltaker_user
 from sylk.db.queue import get_queue_details, get_queue_members
+from sylk.db.calls import clear_abandoned_calls
 from acd import get_calltakers
 import sylk.data.call as call_data
 import sylk.data.conference as conf_data
@@ -239,6 +240,8 @@ class PSAPApplication(SylkApplication):
                     outgoing_gateway = ServerConfig.outgoing_gateway
                     sip_uri = 'sip:+{}@{}'.format(local_identity.uri.user, outgoing_gateway)
                     sip_uris = [sip_uri]
+                    # clear abandoned calls for this user
+                    clear_abandoned_calls(local_identity.uri.user)
                     forward_to_calltaker=False
                 elif call_type == 'outgoing_calltaker':
                     forward_to_calltaker=True
@@ -365,6 +368,27 @@ class PSAPApplication(SylkApplication):
             return "+%s" % phone_number
         return phone_number
 
+    def _get_non_calltaker_sessions(self, room_number):
+        sessions = []
+        room_data = self.get_room_data(room_number)
+        if room_data is not None:
+            for participant in room_data.participants.itervalues():
+                if not participant.is_calltaker:
+                    sessions.append(participant.session)
+        return sessions
+
+
+    def send_dtmf(self, room_number, dtmf_digit):
+        sessions = self._get_non_calltaker_sessions(room_number)
+        for session in sessions:
+            session.send_dtmf(dtmf_digit)
+
+    def star_code_transfer(self, room_number, star_code):
+        room_data = self.get_room_data(room_number)
+        if room_data is not None:
+            session = room_data.incoming_session
+            for dtmf_digit in star_code:
+                session.send_dtmf(dtmf_digit)
 
 
     def on_ringing_timeout(self, incoming_session, room_number):
@@ -460,6 +484,12 @@ class PSAPApplication(SylkApplication):
         room_number = session.room_number
         log.info('outgoing_session_did_fail room_number %r', room_number)
         room_data = self.get_room_data(room_number)
+        room = self.get_room(room_number)
+        if room and room.started:
+            # get the target name
+            sip_uri_obj = SIPURI.parse(str(sip_uri))
+            NotificationCenter().post_notification('ConferenceParticipantFailed', self,
+                                                   NotificationData(room_number=room_number, display_name=sip_uri_obj.user))
         if room_data is not None:
             if str(sip_uri) in room_data.outgoing_calls:
                 log.info('found room_data.outgoing_calls ')
@@ -482,6 +512,14 @@ class PSAPApplication(SylkApplication):
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
                 pass
+
+    def outgoing_session_is_ringing(self, room_number, target, session):
+        room = self.get_room(room_number)
+        if room and room.started:
+            # get the target name
+            target_uri = SIPURI.parse(str(target))
+            NotificationCenter().post_notification('ConferenceParticipantRinging', self,
+                                                   NotificationData(room_number=room_number, display_name=target_uri.user))
 
     def outgoing_session_will_start(self, sip_uri, session):
         room_number = session.room_number
@@ -934,6 +972,11 @@ class PSAPApplication(SylkApplication):
                     if hasattr(notification.data, 'mute'):
                         log.info('update mute')
                         participant_data.mute = notification.data.mute
+                        if participant_data.mute:
+                            participant_data.session.mute()
+                        else:
+                            participant_data.session.unmute()
+
         except RoomNotFoundError:
             log.error("_NH_ConferenceParticipantDBUpdated room not found %r", room_number)
 
@@ -1343,6 +1386,7 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionGotRingIndication(self, notification):
         session = notification.sender
+        self.app.outgoing_session_is_ringing(self, self.room_number, self.target, session)
         send_call_update_notification(self, session, 'ringing')
 
     def _NH_SIPSessionGotProvisionalResponse(self, notification):

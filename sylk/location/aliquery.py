@@ -64,10 +64,10 @@ def sleep(secs):
 
 def parse_ali_30W_wireless(ali_result):
     if (ali_result == "") or (re.search("NO RECORD FOUND", ali_result) != None):
-        return ("", "")
+        return ({}, "")
     lines = ali_result.splitlines(True)
     if (len(lines) < 8):
-        return ("", "")
+        return ({}, "")
 
     state = ""
     customer_name = ""
@@ -206,7 +206,7 @@ def parse_ali_30W_wireless(ali_result):
 
 def parse_ali_30W_wireline(ali_result):
     if (ali_result == "") or (re.search("NO RECORD FOUND", ali_result) != None):
-        return ("", "")
+        return ({}, "")
     state = ""
     customer_name = ""
     phone_number = ""
@@ -230,7 +230,7 @@ def parse_ali_30W_wireline(ali_result):
     lines = ali_result.splitlines(True)
 
     if (len(lines) < 8):
-        return ("", "")
+        return ({}, "")
 
     # line 0 or first line is empty line
     # line 1

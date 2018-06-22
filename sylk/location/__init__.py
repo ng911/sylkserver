@@ -63,6 +63,12 @@ def process_ali_success(result):
     (room_number, number, ali_format, ali_result, ali_result_xml, raw_ali_data) = result
     log.info("aliResult %r, aliResultXml %r, rawAliData %r", ali_result, ali_result_xml, raw_ali_data)
     # store the ali result in database and send a updated message
+    if len(ali_result) == 0:
+        conference_db_obj = Conference.objects.get(room_number=room_number)
+        conference_db_obj.ali_result = "no records found"
+        conference_db_obj.save()
+        return
+
     try:
         location_db_obj = Location()
         location_db_obj.room_number = room_number

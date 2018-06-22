@@ -6,7 +6,7 @@ from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
 import sylk.applications.psap as psap
-from sylk.db.schema import Conference, ConferenceParticipant, Call, Location
+from sylk.db.schema import Conference, ConferenceParticipant, Call, CallTransferLine, IncomingLink
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
 from utils import get_argument
@@ -384,6 +384,40 @@ def conference_event_log(room_number):
     return jsonify(response)
 
 
+@calls.route('/conference/transfer_lines/<room_number>', methods=['GET'])
+def get_call_transfer_lines(room_number):
+    try:
+        conf_db_obj = Conference.objects.get(room_number=room_number)
+        transfer_lines = []
+        if (conf_db_obj.status == 'active') and (conf_db_obj.call_type != 'sos'):
+            if hasattr(conf_db_obj, 'link_id') and (conf_db_obj.link_id != None) and (conf_db_obj.link_id != ''):
+                link_obj = IncomingLink.objects.get(link_id=conf_db_obj.link_id)
+                type = None
+                if link_obj.orig_type == 'sos_wireless':
+                    type = 'wireless'
+                elif link_obj.orig_type == 'sos_wireline':
+                    type = 'wireline'
+                if type is not None:
+                    for call_transfer_line in CallTransferLine.objects(psap_id=ServerConfig.psap_id, type=type):
+                        transfer_lines.append({'name' : call_transfer_line.name, 'star_code' : call_transfer_line.star_code})
+
+        response = {
+            'success' : True,
+            'transfer_lines': transfer_lines
+        }
+
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in conference_transfer_lines for room %r", str(e), room_number)
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'reason': str(e)
+        }
+        return jsonify(response)
+
+
 @calls.route('/invite/<room_number>/<phone_number>', methods=['GET'])
 def invite_to_conference(room_number, phone_number):
     try:
@@ -395,6 +429,46 @@ def invite_to_conference(room_number, phone_number):
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("exception %s in invite_to_conference for room %r", str(e), room_number)
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'reason': str(e)
+        }
+        return jsonify(response)
+
+
+@calls.route('/conference/send_dtmf/<room_number>/<phone_number>', methods=['GET'])
+def send_dtmf(room_number):
+    try:
+        dtmf = get_argument('dtmf')
+        psap_application = psap.PSAPApplication()
+        psap_application.send_dtmf(room_number, dtmf)
+
+        response = {'success': True}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in send_dtmf for room %r", str(e), room_number)
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'reason': str(e)
+        }
+        return jsonify(response)
+
+
+@calls.route('/conference/transfer_line/<room_number>', methods=['GET'])
+def transfer_line(room_number):
+    try:
+        star_code = get_argument('star_code')
+        psap_application = psap.PSAPApplication()
+        psap_application.star_code_transfer(room_number, star_code)
+
+        response = {'success': True}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in transfer_line for room %r", str(e), room_number)
         log.error("%s", stacktrace)
         response = {
             'success': False,
