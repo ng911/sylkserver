@@ -129,9 +129,13 @@ def ali_lookup(room_number, number, ali_format):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
 
     # setup ali status to pending
-    conf_db_obj = Conference.objects.get(room_number=room_number)
-    conf_db_obj.ali_result = 'pending'
-    conf_db_obj.save()
+    try:
+        conf_db_obj = Conference.objects.get(room_number=room_number)
+        conf_db_obj.ali_result = 'pending'
+        conf_db_obj.save()
+    except:
+        # if the room does not exist we ignore this
+        pass
     call_data = calls.get_conference_json(conf_db_obj)
     wamp.publish_update_call(room_number, call_data)
 
