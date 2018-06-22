@@ -133,11 +133,12 @@ def ali_lookup(room_number, number, ali_format):
         conf_db_obj = Conference.objects.get(room_number=room_number)
         conf_db_obj.ali_result = 'pending'
         conf_db_obj.save()
+
+        call_data = calls.get_conference_json(conf_db_obj)
+        wamp.publish_update_call(room_number, call_data)
     except:
         # if the room does not exist we ignore this
         pass
-    call_data = calls.get_conference_json(conf_db_obj)
-    wamp.publish_update_call(room_number, call_data)
 
     # to do add psap location update wamp
 
