@@ -403,7 +403,7 @@ def get_call_transfer_lines(room_number):
                     type = 'wireless'
                 elif link_obj.orig_type == 'sos_wireline':
                     type = 'wireline'
-                type = 'wireless'
+                type = 'wireline'
                 if type is not None:
                     for call_transfer_line in CallTransferLine.objects(psap_id=ServerConfig.psap_id, type=type):
                         transfer_lines.append({'name' : call_transfer_line.name, 'star_code' : call_transfer_line.star_code})
