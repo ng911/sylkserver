@@ -442,7 +442,7 @@ def invite_to_conference(room_number, phone_number):
         return jsonify(response)
 
 
-@calls.route('/conference/send_dtmf/<room_number>/<phone_number>', methods=['GET'])
+@calls.route('/conference/send_dtmf/<room_number>/<phone_number>', methods=['GET', 'PUT', 'POST'])
 def send_dtmf(room_number):
     try:
         dtmf = get_argument('dtmf')
@@ -462,7 +462,7 @@ def send_dtmf(room_number):
         return jsonify(response)
 
 
-@calls.route('/conference/transfer_line/<room_number>', methods=['GET'])
+@calls.route('/conference/transfer_line/<room_number>', methods=['GET', 'PUT', 'POST'])
 def transfer_line(room_number):
     try:
         star_code = get_argument('star_code')
