@@ -80,7 +80,7 @@ def get_call_location_display(room_number):
         return jsonify(response)
 
 
-@location.route('/query/<room_number>', methods=['GET'])
+@location.route('/query/<room_number>', methods=['GET', 'POST', 'PUT'])
 def do_ali_query(room_number):
     try:
         ali_format = get_argument('ali_format')
