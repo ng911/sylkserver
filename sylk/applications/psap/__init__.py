@@ -1386,7 +1386,7 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionGotRingIndication(self, notification):
         session = notification.sender
-        self.app.outgoing_session_is_ringing(self, self.room_number, self.target, session)
+        self.app.outgoing_session_is_ringing(self, self.room_number, self.target_uri, session)
         send_call_update_notification(self, session, 'ringing')
 
     def _NH_SIPSessionGotProvisionalResponse(self, notification):
