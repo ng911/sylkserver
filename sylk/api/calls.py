@@ -391,7 +391,8 @@ def get_call_transfer_lines(room_number):
         conf_db_obj = Conference.objects.get(room_number=room_number)
         log.info('inside get_call_transfer_lines for room %s, status %r, call_type %r', room_number, conf_db_obj.status, conf_db_obj.call_type)
         transfer_lines = []
-        if (conf_db_obj.status == 'active') and (conf_db_obj.call_type != 'sos'):
+        #if (conf_db_obj.status == 'active') and (conf_db_obj.call_type == 'sos'):
+        if conf_db_obj.call_type == 'sos':
             log.info('conf is active and sos type')
             log.info('conf link_id is %r', conf_db_obj.link_id)
             if hasattr(conf_db_obj, 'link_id') and (conf_db_obj.link_id != None) and (conf_db_obj.link_id != ''):
