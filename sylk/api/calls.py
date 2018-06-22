@@ -387,12 +387,16 @@ def conference_event_log(room_number):
 @calls.route('/conference/transfer_lines/<room_number>', methods=['GET'])
 def get_call_transfer_lines(room_number):
     try:
+        log.info('inside get_call_transfer_lines for room %s', room_number)
         conf_db_obj = Conference.objects.get(room_number=room_number)
         transfer_lines = []
         if (conf_db_obj.status == 'active') and (conf_db_obj.call_type != 'sos'):
+            log.info('conf is active and sos type')
+            log.info('conf link_id is %r', conf_db_obj.link_id)
             if hasattr(conf_db_obj, 'link_id') and (conf_db_obj.link_id != None) and (conf_db_obj.link_id != ''):
                 link_obj = IncomingLink.objects.get(link_id=conf_db_obj.link_id)
                 type = None
+                log.info('link_obj.orig_type is %s', link_obj.orig_type)
                 if link_obj.orig_type == 'sos_wireless':
                     type = 'wireless'
                 elif link_obj.orig_type == 'sos_wireline':
