@@ -22,6 +22,10 @@ class ServerConfig(ConfigSection):
     sop_dir = "sop"
     asterisk_server = "127.0.0.1:5090"
     outgoing_gateway = "127.0.0.1:5090"
+    db_connection = "mongodb://localhost:27017/"
+    db_name = "ng911"
+    db_user = ""
+    db_pwd = ""
     application_map = ConfigSetting(type=StringList, value=['echo:echo'])
     disabled_applications = ConfigSetting(type=StringList, value='')
     extra_applications_dir = ConfigSetting(type=Path, value=None)

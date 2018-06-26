@@ -6,6 +6,7 @@ from mongoengine import *
 import time, datetime, logging, re, sys, traceback
 # from werkzeug.security import generate_password_hash, check_password_hash
 from collections import namedtuple
+from sylk.configuration import ServerConfig
 
 from sylk.applications import ApplicationLogger
 
@@ -29,7 +30,12 @@ client = connect(username="ws", password="Ecomm@911",
                  host='mongodb://localhost:33903/psap?replicaSet=rs-psap')
 '''
 #client = connect(host='mongodb://localhost:27107/ng911')
-connect('ng911')
+if len(ServerConfig.db_user) > 0:
+    connect(ServerConfig.db_name, username=ServerConfig.db_user, password=ServerConfig.db_pwd, host=ServerConfig.db_connection)
+else:
+    connect(ServerConfig.db_name, host=ServerConfig.db_connection)
+
+#connect('ng911')
 #db = client.ng911
 #db.authenticate("ws", "Ecomm@911")
 
