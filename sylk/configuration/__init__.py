@@ -22,7 +22,7 @@ class ServerConfig(ConfigSection):
     sop_dir = "sop"
     asterisk_server = "127.0.0.1:5090"
     outgoing_gateway = "127.0.0.1:5090"
-    wamp_crossbar_server = "ws://127.0.0.1:8080/ws"
+    wamp_crossbar_server = u"ws://127.0.0.1:8080/ws"
     db_connection = "mongodb://localhost:27017/"
     db_name = "ng911"
     db_user = ""
