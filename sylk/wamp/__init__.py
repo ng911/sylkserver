@@ -5,13 +5,15 @@ from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 log = ApplicationLogger(__package__)
 from twisted.internet.defer import inlineCallbacks, returnValue
 #import sylk.data.calltaker as calltaker_data
+from sylk.configuration import ServerConfig
 
 log.info("wamp session start")
 
 comp = Component(
-     transports=u"ws://159.65.73.31:8080/ws",
-     realm=u"realm1",
-     extra="tarun"
+     #transports=u"ws://127.0.0.1:8080/ws",
+    transports=ServerConfig.wamp_crossbar_server,
+    realm=u"realm1",
+    extra="tarun"
  )
 
 
