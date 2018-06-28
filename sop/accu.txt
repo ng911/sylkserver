@@ -1,0 +1,57 @@
+LAW ACCU ACCIDENT UNKNOWN INJURY
+----
+Police Fire
+----
+The information needed for an incident can change with each incident.  The following is a general guideline as to the information that is needed.
+
+8. Location
+
+Location of the incident is the first information needed on ALL emergency calls.
+
+9. Call Back Number
+
+The second piece of information is the call back number.
+
+10. Type of Emergency
+
+What is happening at the incident (Specifics)?
+
+11. Hazards
+
+Any dangers to the public or responders such as:
+
+f. Weapons in use or available
+
+g. Hazardous Materials
+
+h. Injuries
+
+i. Drug or alcohol use by subjects
+
+j. Large groups of people
+
+12. Time Frame
+
+When did it happen, is it still in progress?
+
+13. Who
+
+e. Who is the caller?
+
+f. Who is the victim?
+
+g. Who is the suspect?
+
+h. Descriptions of suspects and vehicles.
+
+14. Other Locations
+
+d. Caller's Location
+
+e. Location of Suspects
+
+f. Location of items involved in the incident (Weapons, Vehicles, etc.)
+----
+How many vehicles are involved?
+
+What types of vehicles are involved?                                                                                      |

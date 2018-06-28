@@ -1,0 +1,21 @@
+FIRE ALARM ALARM ACTIVATION
+----
+Fire
+----
+These are usually water flow, or smoke or heat detectors.  Personnel will:
+
+1. Acknowledge the system alert.
+
+2. Begin an incident record.
+
+3. Immediately dispatch fire units to the alarm location to check the area and relay all alarm information to the responding units.
+
+4. Make notifications as requested by the units on the scene.
+
+5. Record all actions taken and pertinent information. Pertinent information will include but not be limited to telephone and radio notifications and information received from units at the scene.
+----
+What type of alarm is it?
+
+Is it Audible?
+
+What area is it located in?

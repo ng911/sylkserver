@@ -1,0 +1,39 @@
+LAW ARSNI ARSON - IN PROGRESS
+----
+Police Fire
+----
+Panic Alarms
+
+These are the highest priority alarms.  By the nature of these alarms there is usually a victim at the scene, and/or a crime in progress.  Personnel will:
+
+6. Acknowledge the system alert.
+
+7. Begin an incident record.
+
+8. Immediately dispatch two officers to the alarm location to check the area and relay all alarm information to the responding officers.
+
+9. Make notifications as requested by the officers on the scene.
+
+10. Record all actions taken and pertinent information. Pertinent information will include but not be limited to telephone and radio notifications and information received from units at the scene.
+
+
+
+B.	Burglar Alarms
+
+These alarms come from an intrusion to a secured location, and may be door contacts, or motion detectors among others.  Personnel will
+
+6. Acknowledge the system alert.
+
+7. Begin an incident record.
+
+8. Dispatch per agency guidelines
+
+9. Make notifications as requested by personnel on the scene.
+
+10. Record all actions taken and pertinent information. Pertinent information will include but not be limited to telephone and radio notifications and information received from units at the scene.
+----
+Is everyone out of the area?
+
+How many people are involved?
+
+What is being lit on fire?
