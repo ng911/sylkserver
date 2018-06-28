@@ -22,8 +22,10 @@ from twisted.web.proxy import ReverseProxyResource
 from twisted.web.resource import Resource
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
+from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
 app.secret_key = 'best psap available, supercharged with webrtc'
 app.config['SESSION_TYPE'] = 'mongodb'
 #mongo_uri = 'mongodb://ws:kingfisher94108@ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903'
