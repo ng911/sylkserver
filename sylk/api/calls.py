@@ -1,7 +1,7 @@
 import traceback
 import os.path
 import arrow
-from flask import Blueprint, jsonify, request, send_from_directory, abort
+from flask import app, Blueprint, jsonify, request, send_from_directory, abort
 from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
@@ -508,7 +508,7 @@ def update_call(room_number):
 
 @calls.route('/recordings/<path:path>')
 def send_recording(path):
-    log.info("send_recording for %s", path)
+    log.info("send_recording for %s, root path %s", path, app.root_path)
     try:
         return send_from_directory('recordings', path)
         '''
