@@ -664,6 +664,7 @@ class PSAPApplication(SylkApplication):
             if (room_data.status != 'on_hold') or (room.length == 0) or ((room.length == 1) and (session in room.sessions)):
                 log.info('terminate all sessions room %s', room_number)
                 room.terminate_sessions()
+                room.stop()
                 room_data.status = 'closed'
                 # mark all the participants in the room as inactive and
                 if room_data.hold_timer != None:
