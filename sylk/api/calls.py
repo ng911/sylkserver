@@ -509,7 +509,9 @@ def update_call(room_number):
 @calls.route('/recordings/<path:path>')
 def send_recording(path):
     log.info("send_recording for %s, app.root_path %s", path, current_app.root_path)
-    recording_dir = os.path.join(current_app.root_path, '../recordings')
+    recording_dir = os.path.join(current_app.root_path, '../../recordings')
+    recording_dir = os.path.abspath(recording_dir)
+    log.info('recording_dir is %s', recording_dir)
     try:
         return send_from_directory(recording_dir, path)
         '''
