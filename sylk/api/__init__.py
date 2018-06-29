@@ -25,6 +25,7 @@ from twisted.web.wsgi import WSGIResource
 from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__)
+# from https://stackoverflow.com/questions/23347387/x-forwarded-proto-and-flask
 app.wsgi_app = ProxyFix(app.wsgi_app)
 app.secret_key = 'best psap available, supercharged with webrtc'
 app.config['SESSION_TYPE'] = 'mongodb'

@@ -673,7 +673,9 @@ class PSAPApplication(SylkApplication):
                                                    NotificationData(room_number=room_number,
                                                                     status='closed'))
 
+        log.info("remove_session check room empty stopping %r, length %r", room.stopping, room.length)
         if not room.stopping and room.empty:
+            log.info("remove_session remove_room")
             self.remove_room(room_number)
             room.stop()
 
