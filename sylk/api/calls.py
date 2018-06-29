@@ -510,7 +510,7 @@ def update_call(room_number):
 def send_recording(path):
     log.info("send_recording for %s, app.root_path %s", path, current_app.root_path)
     try:
-        return send_from_directory('recordings', path)
+        return send_from_directory('../recordings', path)
         '''
         if os.path.isfile(path):
             return send_from_directory('recordings', path)
