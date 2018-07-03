@@ -428,7 +428,7 @@ class AliClientFactory(ReconnectingClientFactory):
         self.ali_format = ali_format
         self.connected = False
         self.protocol = None
-        self.pending_ali_requests = []
+        self.pending_ali_requests = {}
 
     def startedConnecting(self, connector):
         log.info('AliClientFactory Started to connect.')
