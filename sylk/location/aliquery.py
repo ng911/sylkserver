@@ -626,7 +626,7 @@ def test_send_ali_request(room_number, number, format):
 
 def runTests():
     log.info("start running tests")
-    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("192.168.1.6", 11010, "30WWireless"), ]
+    ali_links = [("127.0.0.1", 11010, "30WWireless"), ("192.168.1.6", 11010, "30WWireless"), ("10.10.1.6", 11010, "30WWireline")]
     init_ali_links(ali_links)
     #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
     reactor.callLater(5, test_send_ali_request, '1100', '4153055512', "30WWireless")
