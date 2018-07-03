@@ -292,7 +292,8 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
-        self.recorder.stop()
+        reactor.callLater(0, self.recorder.stop)
+        #self.recorder.stop()
         self.state = 'stopped'
         if self.duration_timer is not None:
             self.duration_timer.stop()
