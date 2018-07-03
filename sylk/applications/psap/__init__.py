@@ -617,10 +617,10 @@ class PSAPApplication(SylkApplication):
 
             self.remove_room(room_number)
             room.stop()
-            room_data.status = 'closed'
+            room_data.status = 'abandoned'
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
-                                                                    status='closed'))
+                                                                    status='abandoned'))
             return
         '''
         room_uri = self.get_room_uri(uri=None, room_number=session.room_number)
