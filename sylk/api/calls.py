@@ -514,14 +514,10 @@ def send_recording(path):
     log.info('recording_dir is %s', recording_dir)
     try:
         # todo remove this later
-        abort(503)
-        #return send_from_directory(recording_dir, path)
-        '''
         if os.path.isfile(path):
             return send_from_directory('recordings', path)
         else:
-            return send_from_directory('recordings', 'ca4182ebac4ed29dc2f8d9209fccca.wav')
-        '''
+            abort(404)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("send_recording for file %s, error %s", path, str(e))
