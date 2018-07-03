@@ -143,7 +143,7 @@ class Room(object):
         self.subscriptions = []
         self.state = 'stopped'
         self.incoming_message_queue = coros.queue()
-        self.message_dispatcher = None
+        #self.message_dispatcher = None
         self.audio_conference = None
         self.moh_player = None
         self.conference_info_payload = None
@@ -243,7 +243,7 @@ class Room(object):
         log.info("inside room start 1")
         self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         log.info("inside room start 2")
-        self.message_dispatcher = proc.spawn(self._message_dispatcher)
+        #self.message_dispatcher = proc.spawn(self._message_dispatcher)
         log.info("inside room start 3")
         self.audio_conference = AudioConference()
         log.info("inside room start 4")
@@ -280,8 +280,8 @@ class Room(object):
         '''
         self.incoming_message_queue.send_exception(api.GreenletExit)
         self.incoming_message_queue = None
-        self.message_dispatcher.kill(proc.ProcExit)
-        self.message_dispatcher = None
+        #self.message_dispatcher.kill(proc.ProcExit)
+        #self.message_dispatcher = None
         self.moh_player.stop()
         self.moh_player = None
         self.audio_conference = None
