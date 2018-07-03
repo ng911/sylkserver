@@ -250,7 +250,7 @@ class Room(object):
         self.audio_conference.hold()
         log.info("inside room start 5")
         #self.recorder.start()
-        #reactor.callLater(0, self.recorder.start)
+        reactor.callLater(0, self.start_recorder)
         log.info("inside room start 6")
         #self.audio_conference.bridge.add(self.recorder)
         log.info("inside room start 7")
@@ -268,6 +268,14 @@ class Room(object):
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)
         log.info("inside room start 11")
+
+    def start_recorder(self):
+        self.recorder.start()
+        self.audio_conference.bridge.add(self.recorder)
+
+    def stop_recorder(self):
+        self.recorder.stop()
+        self.audio_conference.bridge.add(self.recorder)
 
     def stop(self):
         log.info("room - stop")
@@ -292,6 +300,7 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
+        reactor.callLater(0, self.stop_recorder)
         #reactor.callLater(0, self.recorder.stop)
         #self.recorder.stop()
         self.state = 'stopped'
