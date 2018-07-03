@@ -393,20 +393,27 @@ class Room(object):
     '''
 
     def add_session(self, session):
+        log.info("inside room add_session for session %r", session)
         notification_center = NotificationCenter()
         notification_center.add_observer(self, sender=session)
         self.sessions.append(session)
         remote_uri = str(session.remote_identity.uri)
         self.participants_counter[remote_uri] += 1
         try:
+            log.info("inside room add_session iterate chat streams")
             chat_stream = next(stream for stream in session.streams if stream.type == 'chat')
+            log.info("inside room add_session iterate chat streams done")
         except StopIteration:
+            log.info("inside room add_session iterate chat streams StopIteration")
             pass
         else:
             notification_center.add_observer(self, sender=chat_stream)
         try:
+            log.info("inside room add_session iterate audio_stream")
             audio_stream = next(stream for stream in session.streams if stream.type == 'audio')
+            log.info("inside room add_session iterate audio_stream done")
         except StopIteration:
+            log.info("inside room add_session iterate audio_stream StopIteration")
             pass
         else:
             notification_center.add_observer(self, sender=audio_stream)

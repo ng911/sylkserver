@@ -794,6 +794,7 @@ class PSAPApplication(SylkApplication):
         room = self.get_room(room_number)
         room.start()
         room.add_session(session)
+        log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
 
     def put_calltaker_on_hold(self, room_number, calltaker_name):
         try:
