@@ -240,22 +240,33 @@ class Room(object):
             self.bonjour_services = BonjourService(service='sipuri', name='Conference Room %s' % room_user, uri_user=room_user)
             self.bonjour_services.start()
         '''
+        log.info("inside room start 1")
         self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        log.info("inside room start 2")
         self.message_dispatcher = proc.spawn(self._message_dispatcher)
+        log.info("inside room start 3")
         self.audio_conference = AudioConference()
+        log.info("inside room start 4")
         self.audio_conference.hold()
+        log.info("inside room start 5")
         self.recorder.start()
+        log.info("inside room start 6")
         self.audio_conference.bridge.add(self.recorder)
+        log.info("inside room start 7")
         self.moh_player = MoHPlayer(self.audio_conference)
+        log.info("inside room start 8")
         self.moh_player.start()
+        log.info("inside room start 9")
         self.state = 'started'
         self.duration = 0
+        log.info("inside room start 10")
 
         def duration_timer_cb():
             publish_update_call_timer(self.room_number, 'duration', self.duration)
             self.duration = self.duration + 1
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)
+        log.info("inside room start 11")
 
     def stop(self):
         log.info("room - stop")

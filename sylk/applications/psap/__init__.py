@@ -792,7 +792,9 @@ class PSAPApplication(SylkApplication):
         '''
         NotificationCenter().add_observer(self, sender=session)
         room = self.get_room(room_number)
+        log.info(u'Room %s - call room.start' % (room_number))
         room.start()
+        log.info(u'Room %s - call room.add_session' % (room_number))
         room.add_session(session)
         log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
 
