@@ -335,6 +335,7 @@ class PSAPApplication(SylkApplication):
             session.room_number = room_number
             log.info("join call to room %r", room_number)
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
+            # todo add handling for ringing calls here
             reactor.callLater(0, self.accept_session, session)
         elif call_type == 'admin':
             pass
@@ -609,7 +610,7 @@ class PSAPApplication(SylkApplication):
             return
         room_data = self.get_room_data(room_number)
 
-        if not room.started:
+        if not room.started and (room_data.status in ['ringing', 'ringing_queued']):
             log.info('remove_session room not started yet')
             if session == room_data.incoming_session:
                 log.info('remove_session room not started yet, end_ringing_call')
