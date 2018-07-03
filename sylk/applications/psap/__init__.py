@@ -233,7 +233,7 @@ class PSAPApplication(SylkApplication):
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
-                [self._set_calltaker_busy(self, user_id=user_id) for user_id in calltakers]
+                [self.set_calltaker_busy(self, user_id=user_id) for user_id in calltakers]
                 forward_to_calltaker=True
             else:
                 if call_type == 'outgoing':
@@ -347,7 +347,7 @@ class PSAPApplication(SylkApplication):
             is_calltaker = True
             server = ServerConfig.asterisk_server
             sip_uri = "sip:%s@%s" % (phone_number, server)
-            self._set_calltaker_busy(user_id=calltaker_user.user_id)
+            self.set_calltaker_busy(user_id=calltaker_user.user_id)
         else:
             e164_number = self._format_number_to_e164(phone_number)
             outgoing_gateway = ServerConfig.outgoing_gateway
@@ -426,9 +426,10 @@ class PSAPApplication(SylkApplication):
             room_data = self.get_room_data(room_number)
             for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
                 outgoing_call_initializer.cancel_call()
+            log.info("end_ringing_call check room_data.participants")
             for participant in room_data.participants.itervalues():
                 if participant.is_calltaker:
-                    self._set_calltaker_available(username=participant.display_name)
+                    self.set_calltaker_available(username=participant.display_name)
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
             if room_data.incoming_session.state == 'incoming':
                 room_data.incoming_session.reject(code=408, reason="no user picked up")
@@ -475,7 +476,7 @@ class PSAPApplication(SylkApplication):
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
                     log.info("set user %s available", target_uri.user)
-                    self._set_calltaker_available(username=target_uri.user)
+                    self.set_calltaker_available(username=target_uri.user)
 
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
@@ -506,7 +507,7 @@ class PSAPApplication(SylkApplication):
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
                     log.info("set user %s available", target_uri.user)
-                    self._set_calltaker_available(username=target_uri.user)
+                    self.set_calltaker_available(username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
@@ -887,18 +888,18 @@ class PSAPApplication(SylkApplication):
                 return participant
         return None
 
-    def _set_calltaker_busy(self, username=None, user_id=None):
-        self._set_calltaker_status(user_id=user_id, username=username, status='busy')
+    def set_calltaker_busy(self, username=None, user_id=None):
+        self.set_calltaker_status(user_id=user_id, username=username, status='busy')
 
-    def _set_calltaker_available(self, username=None, user_id=None):
-        self._set_calltaker_status(user_id=user_id, username=username, status='available')
+    def set_calltaker_available(self, username=None, user_id=None):
+        self.set_calltaker_status(user_id=user_id, username=username, status='available')
 
-    def _set_calltaker_status(self, username=None, user_id=None, status='available'):
+    def set_calltaker_status(self, username=None, user_id=None, status='available'):
         calltaker_data = CalltakerData()
         if user_id is None:
             calltaker_db_obj = get_calltaker_user(username)
             user_id = str(calltaker_db_obj.user_id)
-        log.info("_set_calltaker_status user_id %r, username %r, status %r", user_id, username, status)
+        log.info("set_calltaker_status user_id %r, username %r, status %r", user_id, username, status)
         calltaker_data.update_status(user_id, status)
 
     '''
@@ -931,7 +932,7 @@ class PSAPApplication(SylkApplication):
                 if room_data.status == 'ringing_queued':
                     # send call to this calltaker
                     room_data.status == 'ringing'
-                    self._set_calltaker_busy(user_id=user_id)
+                    self.set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
                                                                         caller_identity=room_data.incoming_session.remote_identity,
@@ -947,7 +948,7 @@ class PSAPApplication(SylkApplication):
             for room_data in self._rooms.itervalues():
                 if (room_data.status == 'ringing') and (room_data.acd_strategy == 'ring_all'):
                     # send call to this calltaker
-                    self._set_calltaker_busy(user_id=user_id)
+                    self.set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
                                                                         caller_identity=room_data.incoming_session.remote_identity,
@@ -1296,6 +1297,11 @@ class OutgoingCallInitializer(object):
         self.has_chat = has_chat
         self.streams = []
         self.is_calltaker = is_calltaker
+        self.calltaker_name = None
+        if is_calltaker:
+            calltaker_uri = SIPURI.parse(str(target_uri))
+            self.calltaker_name = calltaker_uri.user
+
 
     def start(self):
         log.info("OutgoingCallInitializer start")
@@ -1322,6 +1328,10 @@ class OutgoingCallInitializer(object):
 
     def cancel_call(self):
         self.cancel = True
+        if self.is_calltaker:
+            log.info("set user %s available", self.calltaker_name)
+            self.app.set_calltaker_available(username=self.calltaker_name)
+
         if self.session is not None:
             # todo add event sending here
             self.session.end()
