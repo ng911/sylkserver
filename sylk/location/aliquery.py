@@ -396,7 +396,7 @@ class AliRequestProtocol(Protocol):
                 if ali_parser is not None:
                     (ali_result, ali_result_civic_xml) = ali_parser(ali_data)
                     del self.ali_requests[id]
-                    log.debug("ali result for number %r is %r", number, ali_result)
+                    log.info("ali result for number %r is %r", number, ali_result)
                     d.callback((self.ali_factory, id, number, self.ali_format, ali_result, ali_result_civic_xml, ali_data))
                 else:
                     log.error("no parser found for format %r", self.ali_format)
