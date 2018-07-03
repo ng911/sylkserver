@@ -513,7 +513,9 @@ def send_recording(path):
     recording_dir = os.path.abspath(recording_dir)
     log.info('recording_dir is %s', recording_dir)
     try:
-        return send_from_directory(recording_dir, path)
+        # todo remove this later
+        abort(503)
+        #return send_from_directory(recording_dir, path)
         '''
         if os.path.isfile(path):
             return send_from_directory('recordings', path)

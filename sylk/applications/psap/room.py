@@ -241,7 +241,7 @@ class Room(object):
             self.bonjour_services.start()
         '''
         log.info("inside room start 1")
-        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         log.info("inside room start 2")
         #self.message_dispatcher = proc.spawn(self._message_dispatcher)
         log.info("inside room start 3")
@@ -250,9 +250,9 @@ class Room(object):
         self.audio_conference.hold()
         log.info("inside room start 5")
         #self.recorder.start()
-        reactor.callLater(0, self.recorder.start)
+        #reactor.callLater(0, self.recorder.start)
         log.info("inside room start 6")
-        self.audio_conference.bridge.add(self.recorder)
+        #self.audio_conference.bridge.add(self.recorder)
         log.info("inside room start 7")
         self.moh_player = MoHPlayer(self.audio_conference)
         log.info("inside room start 8")
@@ -292,7 +292,7 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
-        reactor.callLater(0, self.recorder.stop)
+        #reactor.callLater(0, self.recorder.stop)
         #self.recorder.stop()
         self.state = 'stopped'
         if self.duration_timer is not None:
