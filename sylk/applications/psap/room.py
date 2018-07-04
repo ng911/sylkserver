@@ -241,7 +241,7 @@ class Room(object):
             self.bonjour_services.start()
         '''
         log.info("inside room start 1")
-        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         log.info("inside room start 2")
         #self.message_dispatcher = proc.spawn(self._message_dispatcher)
         log.info("inside room start 3")
@@ -271,9 +271,12 @@ class Room(object):
 
     def start_recorder(self):
         log.info("room start_recorder")
-        self.recorder.start()
-        log.info("room start_recorder done")
-        self.audio_conference.bridge.add(self.recorder)
+        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        log.info("room self.recorder.start")
+        if self.started:
+            self.recorder.start()
+            log.info("room start_recorder done")
+            self.audio_conference.bridge.add(self.recorder)
 
     def stop_recorder(self):
         log.info("room stop_recorder")
