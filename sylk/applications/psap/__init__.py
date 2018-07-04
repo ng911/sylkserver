@@ -238,7 +238,8 @@ class PSAPApplication(SylkApplication):
             else:
                 if call_type == 'outgoing':
                     outgoing_gateway = ServerConfig.outgoing_gateway
-                    sip_uri = 'sip:+{}@{}'.format(local_identity.uri.user, outgoing_gateway)
+                    e164_number = self._format_number_to_e164(local_identity.uri.user)
+                    sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
                     sip_uris = [sip_uri]
                     # clear abandoned calls for this user
                     clear_abandoned_calls(local_identity.uri.user)
