@@ -241,7 +241,7 @@ class Room(object):
             self.bonjour_services.start()
         '''
         log.info("inside room start 1")
-        #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         log.info("inside room start 2")
         #self.message_dispatcher = proc.spawn(self._message_dispatcher)
         log.info("inside room start 3")
