@@ -242,7 +242,7 @@ class PSAPApplication(SylkApplication):
                     sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
                     sip_uris = [sip_uri]
                     # clear abandoned calls for this user
-                    clear_abandoned_calls(local_identity.uri.user)
+                    #clear_abandoned_calls(local_identity.uri.user)
                     forward_to_calltaker=False
                 elif call_type == 'outgoing_calltaker':
                     forward_to_calltaker=True

@@ -199,6 +199,25 @@ def search_calls():
         }
         return jsonify(response)
 
+@calls.route('/abandoned/clear', methods=['GET', 'PUT', 'POST'])
+def conference_mute_calltaker():
+    try:
+        callback_number = get_argument('callback_number')
+        caller_ani = get_argument('caller_ani')
+        db_calls.clear_abandoned_calls(callback_number=callback_number, caller_ani=caller_ani)
+        response = {'success': True}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error('exception in search %s', str(e))
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'error' : str(e)
+        }
+        return jsonify(response)
+
+
 
 @calls.route('/conference/debug_info/<room_number>', methods=['GET'])
 def conference_debug_info(room_number):

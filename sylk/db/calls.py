@@ -80,6 +80,27 @@ def get_location_for_call(room_number):
         log.error("%r", stacktrace)
         return ""
 
+
+def clear_abandoned_calls(callback_number=None, caller_ani=None):
+    filters = {'psap_id': ObjectId(ServerConfig.psap_id),
+               'callback' : False,
+               'status' : 'abandoned',
+               'call_type' : 'sos'}
+
+    if callback_number is not None:
+       filters['callback_number'] = callback_number
+    elif caller_ani is not None:
+        filters['caller_ani'] = caller_ani
+    else:
+        log.error("clear_abandoned_calls no callback_number or caller_ani")
+        return
+
+    for conf_db_obj in Conference.objects(__raw__=filters):
+        conf_db_obj.callback_time = datetime.datetime.utcnow
+        conf_db_obj.callback = True
+        conf_db_obj.save()
+
+'''
 def clear_abandoned_calls(called_number):
     filters = {'psap_id': ObjectId(ServerConfig.psap_id),
                'callback' : False,
@@ -91,3 +112,5 @@ def clear_abandoned_calls(called_number):
         conf_db_obj.callback_time = datetime.datetime.utcnow
         conf_db_obj.callback = True
         conf_db_obj.save()
+'''
+
