@@ -266,15 +266,13 @@ class Room(object):
             self.duration = self.duration + 1
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)
-        log.info("inside room start 10.5 call start_recorder")
-        reactor.callLater(0, self.start_recorder)
         log.info("inside room start 11")
 
     def start_recorder(self):
         log.info("room start_recorder")
-        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
-        log.info("room self.recorder.start")
-        if self.started:
+        if self.recorder is None and self.started:
+            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+            log.info("room self.recorder.start")
             self.recorder.start()
             log.info("room start_recorder done")
             self.audio_conference.bridge.add(self.recorder)
@@ -488,7 +486,7 @@ class Room(object):
             self.audio_conference.add(stream)
             self.audio_conference.unhold()
 
-        self.dispatch_conference_info()
+        #self.dispatch_conference_info()
 
         if len(self.audio_conference.streams) == 1:
             self.moh_player.play()
@@ -499,8 +497,10 @@ class Room(object):
             log.info(u'Room %s - started by %s with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
         else:
             log.info(u'Room %s - %s joined with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
-        if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
-            self.dispatch_server_message('%s has joined the room %s' % (format_identity(session.remote_identity), self.format_stream_types(session.streams)), exclude=session)
+        log.info("inside room call start_recorder")
+        reactor.callLater(0, self.start_recorder)
+        #if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
+        #    self.dispatch_server_message('%s has joined the room %s' % (format_identity(session.remote_identity), self.format_stream_types(session.streams)), exclude=session)
 
         '''
         if ServerConfig.enable_bonjour:
@@ -547,12 +547,12 @@ class Room(object):
             if len(session.streams) == 1:
                 return
 
-        self.dispatch_conference_info()
+        #self.dispatch_conference_info()
         log.info(u'Room %s - %s left conference after %s' % (self.uri, format_identity(session.remote_identity), self.format_session_duration(session)))
         if not self.sessions:
             log.info(u'Room %s - Last participant left conference' % self.uri)
-        if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
-            self.dispatch_server_message('%s has left the room after %s' % (format_identity(session.remote_identity), self.format_session_duration(session)))
+        #if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
+        #    self.dispatch_server_message('%s has left the room after %s' % (format_identity(session.remote_identity), self.format_session_duration(session)))
 
         '''
         if ServerConfig.enable_bonjour:
@@ -730,7 +730,7 @@ class Room(object):
             self.session_nickname_map.pop(session, None)
             self.last_nicknames_map.pop(str(session.remote_identity.uri), None)
         notification.sender.accept_nickname(chunk)
-        self.dispatch_conference_info()
+        #self.dispatch_conference_info()
 
     def _NH_SIPIncomingSubscriptionDidEnd(self, notification):
         subscription = notification.sender
@@ -749,7 +749,7 @@ class Room(object):
                 log.info(u'Room %s - %s has put the audio session on hold' % (self.uri, format_identity(session.remote_identity)))
             else:
                 log.info(u'Room %s - %s has taken the audio session out of hold' % (self.uri, format_identity(session.remote_identity)))
-            self.dispatch_conference_info()
+            #self.dispatch_conference_info()
         # check number of active sessions
         # if only one active session, we play music on hold
         num_active_sessions = 0
@@ -795,7 +795,7 @@ class Room(object):
             notification.center.add_observer(self, sender=stream)
             txt = u'%s has added %s' % (format_identity(session.remote_identity), stream.type)
             log.info(u'Room %s - %s' % (self.uri, txt))
-            self.dispatch_server_message(txt, exclude=session)
+            #self.dispatch_server_message(txt, exclude=session)
             if stream.type == 'audio':
                 log.info(u'Room %s - audio stream %s/%sHz, end-points: %s:%d <-> %s:%d' % (self.uri, stream.codec, stream.sample_rate,
                                                                                           stream.local_rtp_address, stream.local_rtp_port,
@@ -824,7 +824,7 @@ class Room(object):
             notification.center.remove_observer(self, sender=stream)
             txt = u'%s has removed %s' % (format_identity(session.remote_identity), stream.type)
             log.info(u'Room %s - %s' % (self.uri, txt))
-            self.dispatch_server_message(txt, exclude=session)
+            #self.dispatch_server_message(txt, exclude=session)
             if stream.type == 'audio':
                 try:
                     log.info("remove stream from audio_conference")
@@ -840,7 +840,7 @@ class Room(object):
             if not session.streams:
                 log.info(u'Room %s - %s has removed all streams, session will be terminated' % (self.uri, format_identity(session.remote_identity)))
                 session.end()
-        self.dispatch_conference_info()
+        #self.dispatch_conference_info()
 
     def _NH_SIPSessionTransferNewIncoming(self, notification):
         log.info(u'Room %s - Call transfer request rejected, REFER must be out of dialog (RFC4579 5.5)' % self.uri)
