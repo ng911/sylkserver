@@ -142,7 +142,7 @@ class Room(object):
         self.sessions = []
         self.subscriptions = []
         self.state = 'stopped'
-        self.incoming_message_queue = coros.queue()
+        #self.incoming_message_queue = coros.queue()
         #self.message_dispatcher = None
         self.audio_conference = None
         self.moh_player = None
@@ -268,6 +268,7 @@ class Room(object):
         self.duration_timer.start(1)
         log.info("inside room start 11")
 
+    @run_in_thread('file-io')
     def start_recorder(self):
         log.info("room start_recorder")
         if self.recorder is None and self.started:
@@ -277,6 +278,7 @@ class Room(object):
             log.info("room start_recorder done")
             self.audio_conference.bridge.add(self.recorder)
 
+    @run_in_thread('file-io')
     def stop_recorder(self):
         log.info("room stop_recorder")
         if self.recorder != None:
@@ -293,8 +295,8 @@ class Room(object):
         self.bonjour_services.stop()
         self.bonjour_services = None
         '''
-        self.incoming_message_queue.send_exception(api.GreenletExit)
-        self.incoming_message_queue = None
+        #self.incoming_message_queue.send_exception(api.GreenletExit)
+        #self.incoming_message_queue = None
         #self.message_dispatcher.kill(proc.ProcExit)
         #self.message_dispatcher = None
         self.moh_player.stop()
@@ -685,7 +687,7 @@ class Room(object):
         content_type = message.content_type.lower()
         if content_type.startswith(('text/', 'image/')):
             stream.msrp_session.send_report(notification.data.chunk, 200, 'OK')
-            self.incoming_message_queue.send((session, 'message', data))
+            #self.incoming_message_queue.send((session, 'message', data))
         elif content_type == 'application/blink-screensharing':
             stream.msrp_session.send_report(notification.data.chunk, 200, 'OK')
             self.add_screen_image(message.sender, message.content)
@@ -714,7 +716,7 @@ class Room(object):
         stream.msrp_session.send_report(notification.data.chunk, 200, 'OK')
         data = notification.data
         session = notification.sender.session
-        self.incoming_message_queue.send((session, 'composing_indication', data))
+        #self.incoming_message_queue.send((session, 'composing_indication', data))
 
     def _NH_ChatStreamGotNicknameRequest(self, notification):
         nickname = notification.data.nickname
