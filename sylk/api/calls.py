@@ -1,7 +1,7 @@
 import traceback
 import os.path
 import arrow
-from flask import current_app, Blueprint, jsonify, request, send_from_directory, abort
+from flask import current_app, Blueprint, jsonify, request, send_file, abort
 from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
@@ -511,11 +511,12 @@ def send_recording(path):
     log.info("send_recording for %s, app.root_path %s", path, current_app.root_path)
     recording_dir = os.path.join(current_app.root_path, '../../recordings')
     recording_dir = os.path.abspath(recording_dir)
-    log.info('recording_dir is %s', recording_dir)
+    full_path = os.path.join(recording_dir, path)
+    log.info('recording_file path is %s', full_path)
     try:
         # todo remove this later
-        if os.path.isfile(path):
-            return send_from_directory('recordings', path)
+        if os.path.isfile(full_path):
+            return send_file(full_path)
         else:
             abort(404)
     except Exception as e:
