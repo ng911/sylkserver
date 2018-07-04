@@ -200,7 +200,7 @@ def search_calls():
         return jsonify(response)
 
 @calls.route('/abandoned/clear', methods=['GET', 'PUT', 'POST'])
-def conference_mute_calltaker():
+def clear_abandoned_calls():
     try:
         callback_number = get_argument('callback_number')
         caller_ani = get_argument('caller_ani')
