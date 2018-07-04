@@ -96,7 +96,7 @@ def clear_abandoned_calls(callback_number=None, caller_ani=None):
         return
 
     for conf_db_obj in Conference.objects(__raw__=filters):
-        conf_db_obj.callback_time = datetime.datetime.utcnow
+        conf_db_obj.callback_time = datetime.datetime.utcnow()
         conf_db_obj.callback = True
         conf_db_obj.save()
 
