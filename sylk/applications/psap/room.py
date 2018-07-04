@@ -250,7 +250,6 @@ class Room(object):
         self.audio_conference.hold()
         log.info("inside room start 5")
         #self.recorder.start()
-        reactor.callLater(0, self.start_recorder)
         log.info("inside room start 6")
         #self.audio_conference.bridge.add(self.recorder)
         log.info("inside room start 7")
@@ -267,6 +266,8 @@ class Room(object):
             self.duration = self.duration + 1
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)
+        log.info("inside room start 10.5 call start_recorder")
+        reactor.callLater(0, self.start_recorder)
         log.info("inside room start 11")
 
     def start_recorder(self):
