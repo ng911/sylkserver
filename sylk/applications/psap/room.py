@@ -270,12 +270,17 @@ class Room(object):
         log.info("inside room start 11")
 
     def start_recorder(self):
+        log.info("room start_recorder")
         self.recorder.start()
+        log.info("room start_recorder done")
         self.audio_conference.bridge.add(self.recorder)
 
     def stop_recorder(self):
-        self.recorder.stop()
-        self.audio_conference.bridge.add(self.recorder)
+        log.info("room stop_recorder")
+        if self.recorder != None:
+            self.recorder.stop()
+            log.info("room stop_recorder done")
+            self.recorder = None
 
     def stop(self):
         log.info("room - stop")
