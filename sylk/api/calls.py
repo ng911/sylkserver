@@ -204,8 +204,8 @@ def clear_abandoned_calls():
     try:
         callback_number = get_argument('callback_number')
         caller_ani = get_argument('caller_ani')
-        db_calls.clear_abandoned_calls(callback_number=callback_number, caller_ani=caller_ani)
-        response = {'success': True}
+        calls_cleared = db_calls.clear_abandoned_calls(callback_number=callback_number, caller_ani=caller_ani)
+        response = {'success': True, 'calls_cleared' : calls_cleared}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()

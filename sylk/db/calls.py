@@ -95,10 +95,14 @@ def clear_abandoned_calls(callback_number=None, caller_ani=None):
         log.error("clear_abandoned_calls no callback_number or caller_ani")
         return
 
+    calls_cleared = 0
     for conf_db_obj in Conference.objects(__raw__=filters):
         conf_db_obj.callback_time = datetime.datetime.utcnow()
         conf_db_obj.callback = True
+        calls_cleared = calls_cleared + 1
         conf_db_obj.save()
+
+    return calls_cleared
 
 '''
 def clear_abandoned_calls(called_number):
