@@ -268,7 +268,7 @@ class Room(object):
         self.duration_timer.start(1)
         log.info("inside room start 11")
 
-    @run_in_thread('file-io')
+    @run_in_twisted_thread
     def start_recorder(self):
         log.info("room start_recorder")
         if self.recorder is None and self.started:
@@ -278,7 +278,7 @@ class Room(object):
             log.info("room start_recorder done")
             self.audio_conference.bridge.add(self.recorder)
 
-    @run_in_thread('file-io')
+    @run_in_twisted_thread
     def stop_recorder(self):
         log.info("room stop_recorder")
         if self.recorder != None:
