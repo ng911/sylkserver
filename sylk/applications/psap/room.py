@@ -272,7 +272,7 @@ class Room(object):
     def start_recorder(self):
         log.info("room start_recorder")
         if self.recorder is None and self.started:
-            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "/recordings/%s.wav" % self.room_number)
             log.info("room self.recorder.start")
             self.recorder.start()
             log.info("room start_recorder done")
