@@ -32,16 +32,95 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
-from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status
+from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call
 
 log = ApplicationLogger(__package__)
 
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants', 'status', 'hold_timer', 'acd_strategy']
+    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants', 'status', 'hold_timer', 'acd_strategy', 'ignore_calltakers']
     def __init__(self):
-        pass
+        self.ignore_calltakers = []
+        self.participants = []
+        self.status = 'init'
+        self.ringing_duration_timer = None
+        self.duration_timer = None
+
+    @property
+    def incoming(self):
+        return self.direction == 'incoming'
+
+    @property
+    def room_number(self):
+        return self.room.room_number
+
+    @property
+    def outgoing(self):
+        return self.direction == 'outgoing'
+
+    @property
+    def is_emergeny(self):
+        return  self.call_type in ['sos', 'sos_room']
+
+    @property
+    def ringing(self):
+        return  self.status in ['init', 'ringing', 'ringing_queued']
+
+    @property
+    def is_acd_ring_all(self):
+        return  self.acd_strategy == 'ring_all'
+
+    @property
+    def is_call_active(self):
+        return  self.status == 'active'
+
+    @property
+    def is_call_on_hold(self):
+        return  self.status == 'on_hold'
+
+    @property
+    def has_call_ended(self):
+        return  self.status in ['closed', 'abandoned', 'timed_out']
+
+    @property
+    def calltakers(self):
+        calltakers = []
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_calltaker:
+                calltakers.append(participant_data.display_name)
+        return calltakers
+
+    @property
+    def caller(self):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_caller:
+                return (participant_data.display_name, participant_data.uri, participant_data.is_calltaker)
+        raise ValueError("caller missing something is wrong with room %s" % self.room_number)
+
+    @property
+    def primary_calltaker(self):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_calltaker and participant_data.is_primary:
+                return participant_data.display_name, participant_data
+        return None, None
+
+    def set_primary_calltaker(self, display_name):
+        calltaker_data = self.get_calltaker_data(display_name)
+        calltaker_data.is_primary = True
+
+    def set_first_calltaker_as_primary(self):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_calltaker and not participant_data.on_hold:
+                participant_data.is_primary = True
+                return
+
+    def get_calltaker_data(self, display_name):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_calltaker and (participant_data.display_name == display_name):
+                return participant_data
+        return None
+
 
 class ParticipantData(object):
     __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute', 'send_audio', 'send_video',
@@ -125,17 +204,23 @@ class PSAPApplication(SylkApplication):
         calltakers = []
         if room_number in self._rooms:
             room_data = self._rooms[room_number]
+            calltakers = room_data.calltakers
+            '''
             for participant_data in room_data.participants.itervalues():
                 if participant_data.is_calltaker:
                     calltakers.append(participant_data.display_name)
+            '''
         return calltakers
 
     def get_room_caller(self, room_number):
         if room_number in self._rooms:
             room_data = self._rooms[room_number]
+            '''
             for participant_data in room_data.participants.itervalues():
                 if participant_data.is_caller:
                     return (participant_data.display_name, participant_data.uri, participant_data.is_calltaker)
+            '''
+            return room_data.caller
         return (None, None, None)
 
 
@@ -223,8 +308,10 @@ class PSAPApplication(SylkApplication):
         if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
             queue_details = None
             acd_strategy = None
+            ignore_calltakers = None
 
             if call_type == 'sos':
+                session.is_calltaker = False
                 queue_details = get_queue_details(incoming_link.queue_id)
                 queue_members = get_queue_members(incoming_link.queue_id)
                 acd_strategy = queue_details.acd_strategy
@@ -235,8 +322,11 @@ class PSAPApplication(SylkApplication):
                 log.info("sip_uris is %r", sip_uris)
                 [self.set_calltaker_busy(self, user_id=user_id) for user_id in calltakers]
                 forward_to_calltaker=True
+                # add these calltakers to ignore list so we do not bother them again
+                ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
             else:
                 if call_type == 'outgoing':
+                    session.is_calltaker = True
                     outgoing_gateway = ServerConfig.outgoing_gateway
                     e164_number = self._format_number_to_e164(local_identity.uri.user)
                     sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
@@ -245,6 +335,7 @@ class PSAPApplication(SylkApplication):
                     #clear_abandoned_calls(local_identity.uri.user)
                     forward_to_calltaker=False
                 elif call_type == 'outgoing_calltaker':
+                    session.is_calltaker = True
                     forward_to_calltaker=True
                     server = ServerConfig.asterisk_server
                     sip_uri = 'sip:{}@{}'.format(local_identity.uri.user, server)
@@ -259,6 +350,8 @@ class PSAPApplication(SylkApplication):
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction, acd_strategy=acd_strategy)
             session.room_number = room_number
+            if ignore_calltakers is not None:
+                room_data.ignore_calltakers = ignore_calltakers
 
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
@@ -333,10 +426,26 @@ class PSAPApplication(SylkApplication):
                 #self.invited_parties[sip_uri] = outgoing_call_initializer
         elif call_type == 'sos_room':
             room_number = local_identity.uri.user
+            session.is_calltaker = True
             session.room_number = room_number
             log.info("join call to room %r", room_number)
+
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
             # todo add handling for ringing calls here
+            '''
+            todo - check if this needs to be moved to session did start
+            self.add_session_to_room(session)
+            room_data = self.get_room_data(room_number)
+            if room_data.status != 'active':
+                calltakers = self.get_calltakers_in_room(room_number)
+                log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+                room_data.status = 'active'
+                NotificationCenter().post_notification('ConferenceActive', self,
+                                                       NotificationData(room_number=room_number, calltakers=calltakers))
+                (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
+                if (display_name is not None) and is_calltaker:
+                    publish_outgoing_call_status(room_number, display_name, 'active')
+            '''
             reactor.callLater(0, self.accept_session, session)
         elif call_type == 'admin':
             pass
@@ -535,14 +644,16 @@ class PSAPApplication(SylkApplication):
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
             reactor.callLater(0, self.accept_session, room_data.incoming_session)
 
-            if session.is_calltaker:
-                session.is_primary = True
             if room_data.ringing_duration_timer is not None:
                 room_data.ringing_duration_timer.stop()
                 room_data.ringing_duration_timer = None
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
                 room_data.invitation_timer = None
+            ''' This moved to add_session_to_room
+            if session.is_calltaker:
+                session.is_primary = True
+            '''
             log.info('room_data.outgoing_calls %r', room_data.outgoing_calls)
             for target, outgoing_call_initializer in room_data.outgoing_calls.iteritems():
                 log.info('target %r', target)
@@ -555,18 +666,26 @@ class PSAPApplication(SylkApplication):
     def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
 
-        self.add_session_to_room(session)
         #todo - add proper value of is_calltaker
-        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
-        calltakers = self.get_calltakers_in_room(room_number)
-        log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+        #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
+        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
+        self.add_session_to_room(room_number, session)
+        '''
         room_data = self.get_room_data(room_number)
-        room_data.status = 'active'
-        NotificationCenter().post_notification('ConferenceActive', self,
-                                               NotificationData(room_number=room_number, calltakers=calltakers))
-        (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
-        if (display_name is not None) and is_calltaker:
-            publish_outgoing_call_status(room_number, display_name, 'active')
+        if room_data.status != 'active':
+            calltakers = self.get_calltakers_in_room(room_number)
+            log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+            room_data.status = 'active'
+            NotificationCenter().post_notification('ConferenceActive', self,
+                                                   NotificationData(room_number=room_number, calltakers=calltakers))
+            (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
+            if (display_name is not None) and is_calltaker:
+                publish_outgoing_call_status(room_number, display_name, 'active')
+        else:
+            publish_active_call(sip_uri.user, room_number)
+            # if the outgoing call was for a calltaker send active status notification
+        '''
+
             #else:
         #    session.end()
 
@@ -597,9 +716,8 @@ class PSAPApplication(SylkApplication):
             except IllegalStateError:
                 pass
 
-    def remove_session(self, session):
-        log.info('remove_session for session %r, room_number %r', session, session.room_number)
-        room_number = session.room_number
+    def remove_session_from_room(self, room_number, session):
+        log.info('remove_session_from_room for session %r, room_number %r', session, room_number)
         try:
             room = self.get_room(room_number)
             if room is None:
@@ -651,7 +769,7 @@ class PSAPApplication(SylkApplication):
         if (room.length > 1) and (session in room.sessions):
             try:
                 log.info('remove_session room.remove_session ')
-                room.remove_session(session)
+                room.remove_session_from_room(session.room_number, session)
                 log.info('remove_session room.remove_session done')
             except Exception as e:
                 stacktrace = traceback.format_exc()
@@ -683,8 +801,12 @@ class PSAPApplication(SylkApplication):
             self.remove_room(room_number)
             room.stop()
 
+    '''
     def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False, is_primary=False):
         self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker, is_primary)
+    '''
+    def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False):
+        self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker)
 
     def add_incoming_participant(self, display_name, sip_uri, session, is_caller, is_calltaker):
         self.add_participant(display_name, sip_uri, session, 'in', False, is_caller, is_calltaker)
@@ -696,6 +818,7 @@ class PSAPApplication(SylkApplication):
 
         participant_data = None
         # check if the participant is on hold
+        ''' moved to add_session_to_room
         if room_data.status == 'on_hold':
             if room_data.hold_timer != None:
                 room_data.hold_timer.stop()
@@ -705,7 +828,7 @@ class PSAPApplication(SylkApplication):
                                                    NotificationData(room_number=room_number,
                                                                     calltaker=display_name,
                                                                     on_hold=False))
-
+        '''
         older_sip_uri = None
         for participant in participants.itervalues():
             if participant.is_calltaker and (participant.display_name == display_name):
@@ -781,10 +904,10 @@ class PSAPApplication(SylkApplication):
                                                                         display_name = participant_data.display_name,
                                                                         sip_uri=str(participant_data.uri)))
 
-    def add_session_to_room(self, session):
+
+    def add_session_to_room(self, room_number, session):
         # Keep track of the invited participants, we must skip ACL policy
         # for SUBSCRIBE requests
-        room_number = session.room_number
         log.info(u'Room %s - outgoing session to %s started' % (room_number, session.remote_identity.uri))
         '''
         d = self.invited_participants_map.setdefault(room_uri_str, {})
@@ -798,6 +921,40 @@ class PSAPApplication(SylkApplication):
         log.info(u'Room %s - call room.add_session' % (room_number))
         room.add_session(session)
         log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
+        # new code
+        room_data = self.get_room_data(room_number)
+        # check for primary here
+        primary_calltaker_name, primary_calltaker_data = room_data.primary_calltaker
+        if (primary_calltaker_name is None) or primary_calltaker_data.on_hold:
+            # we need to set the calltaker as primary
+            if session.is_calltaker:
+                room_data.set_primary_calltaker(session.calltaker_name)
+            else:
+                room_data.set_first_calltaker_as_primary()
+
+        if not room_data.is_call_active:
+            if room_data.is_call_on_hold:
+                if room_data.hold_timer != None:
+                    room_data.hold_timer.stop()
+                    room_data.hold_timer = None
+                room_data.status = 'active'
+                NotificationCenter().post_notification('ConferenceHoldUpdated', self,
+                                                       NotificationData(room_number=room_number,
+                                                                        calltaker=session.calltaker_name,
+                                                                        on_hold=False))
+            else:
+                calltakers = room_data.calltakers
+                log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+                room_data.status = 'active'
+                NotificationCenter().post_notification('ConferenceActive', self,
+                                                       NotificationData(room_number=room_number, calltakers=calltakers))
+                (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
+                if (display_name is not None) and is_calltaker:
+                    publish_outgoing_call_status(room_number, display_name, 'active')
+        else:
+            # if the outgoing call was for a calltaker send active status notification
+            if session.is_calltaker:
+                publish_active_call(session.calltaker_name, room_number)
 
     def put_calltaker_on_hold(self, room_number, calltaker_name):
         try:
@@ -934,9 +1091,10 @@ class PSAPApplication(SylkApplication):
             sip_uri = "sip:%s@%s" % (username, server)
             for room_number in self._rooms:
                 room_data = self._rooms[room_number]
-                if room_data.status == 'ringing_queued':
+                if room_data.status == 'ringing_queued' and (username not in room_data.ignore_calltakers):
                     # send call to this calltaker
                     room_data.status == 'ringing'
+                    room_data.ignore_calltakers.append(username)
                     self.set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
@@ -951,7 +1109,8 @@ class PSAPApplication(SylkApplication):
             # if no queued calls, check if there are any ringing calls and we are ACD ring_all
             # store ring strategy as part of room data
             for room_data in self._rooms.itervalues():
-                if (room_data.status == 'ringing') and (room_data.acd_strategy == 'ring_all'):
+                if (room_data.status == 'ringing') and (room_data.acd_strategy == 'ring_all') and (username not in room_data.ignore_calltakers):
+                    room_data.ignore_calltakers.append(username)
                     # send call to this calltaker
                     self.set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
@@ -994,7 +1153,7 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
-        self.add_session_to_room(session)
+        self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
         '''
         room_number = session.room_number
@@ -1011,7 +1170,7 @@ class PSAPApplication(SylkApplication):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
 
-        self.remove_session(session)
+        self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
         room_number = session.room_number
@@ -1047,7 +1206,7 @@ class PSAPApplication(SylkApplication):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
         log.info(u'PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
-        self.remove_session(session)
+        self.remove_session_from_room(session.room_number, session)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
 
@@ -1377,6 +1536,7 @@ class OutgoingCallInitializer(object):
         self.session.room_number = self.room_number
         self.session.is_primary = False
         self.session.is_calltaker = self.is_calltaker
+        self.session.calltaker_name = self.calltaker_name
         notification_center.add_observer(self, sender=self.session)
         '''
         if self.original_from_header.display_name:
@@ -1456,7 +1616,7 @@ class OutgoingCallInitializer(object):
         self.session = None
         self.streams = []
         session = notification.sender
-        self.app.remove_session(session)
+        self.app.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
 
 
