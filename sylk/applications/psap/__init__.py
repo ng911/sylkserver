@@ -768,9 +768,7 @@ class PSAPApplication(SylkApplication):
         log.info('remove_session for room.sessions %r', room.sessions)
         if (room.length > 1) and (session in room.sessions):
             try:
-                log.info('remove_session room.remove_session ')
-                room.remove_session_from_room(session.room_number, session)
-                log.info('remove_session room.remove_session done')
+                room.remove_session(session)
             except Exception as e:
                 stacktrace = traceback.format_exc()
                 log.error("%s", stacktrace)
@@ -908,7 +906,7 @@ class PSAPApplication(SylkApplication):
     def add_session_to_room(self, room_number, session):
         # Keep track of the invited participants, we must skip ACL policy
         # for SUBSCRIBE requests
-        log.info(u'Room %s - outgoing session to %s started' % (room_number, session.remote_identity.uri))
+        log.info(u'add_session_to_room for Room %s - session %s' % (room_number, session.remote_identity.uri))
         '''
         d = self.invited_participants_map.setdefault(room_uri_str, {})
         d.setdefault(str(session.remote_identity.uri), 0)
@@ -925,11 +923,14 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         # check for primary here
         primary_calltaker_name, primary_calltaker_data = room_data.primary_calltaker
+        log.info("primary_calltaker_name is %r", primary_calltaker_name)
         if (primary_calltaker_name is None) or primary_calltaker_data.on_hold:
             # we need to set the calltaker as primary
             if session.is_calltaker:
+                log.info("primary_calltaker_name set to %r", session.calltaker_name)
                 room_data.set_primary_calltaker(session.calltaker_name)
             else:
+                log.info("set_first_calltaker_as_primary", primary_calltaker_name)
                 room_data.set_first_calltaker_as_primary()
 
         if not room_data.is_call_active:

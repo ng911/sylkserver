@@ -240,26 +240,16 @@ class Room(object):
             self.bonjour_services = BonjourService(service='sipuri', name='Conference Room %s' % room_user, uri_user=room_user)
             self.bonjour_services.start()
         '''
-        log.info("inside room start 1")
-        #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
-        log.info("inside room start 2")
+        self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         #self.message_dispatcher = proc.spawn(self._message_dispatcher)
-        log.info("inside room start 3")
         self.audio_conference = AudioConference()
-        log.info("inside room start 4")
         self.audio_conference.hold()
-        log.info("inside room start 5")
-        #self.recorder.start()
-        log.info("inside room start 6")
-        #self.audio_conference.bridge.add(self.recorder)
-        log.info("inside room start 7")
+        self.recorder.start()
+        self.audio_conference.bridge.add(self.recorder)
         self.moh_player = MoHPlayer(self.audio_conference)
-        log.info("inside room start 8")
         self.moh_player.start()
-        log.info("inside room start 9")
         self.state = 'started'
         self.duration = 0
-        log.info("inside room start 10")
 
         def duration_timer_cb():
             publish_update_call_timer(self.room_number, 'duration', self.duration)
@@ -267,27 +257,6 @@ class Room(object):
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)
         log.info("inside room start 11")
-
-    @run_in_green_thread
-    def start_recorder(self):
-        log.info("room start_recorder")
-        if self.recorder is None and self.started:
-            recording_file_name = "/root/recordings/%s.wav" % self.room_number
-            log.info("room self.recorder.start %s", recording_file_name)
-            open(recording_file_name, 'a').close()
-            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, recording_file_name)
-            log.info("room self.recorder.start")
-            self.recorder.start()
-            log.info("room start_recorder done")
-            self.audio_conference.bridge.add(self.recorder)
-
-    @run_in_green_thread
-    def stop_recorder(self):
-        log.info("room stop_recorder")
-        if self.recorder != None:
-            self.recorder.stop()
-            log.info("room stop_recorder done")
-            self.recorder = None
 
     def stop(self):
         log.info("room - stop")
@@ -312,9 +281,8 @@ class Room(object):
         self.subscriptions = []
         self.cleanup_files()
         self.conference_info_payload = None
-        reactor.callLater(0, self.stop_recorder)
-        #reactor.callLater(0, self.recorder.stop)
-        #self.recorder.stop()
+        self.recorder.stop()
+        self.recorder = None
         self.state = 'stopped'
         if self.duration_timer is not None:
             self.duration_timer.stop()
@@ -434,20 +402,14 @@ class Room(object):
         remote_uri = str(session.remote_identity.uri)
         self.participants_counter[remote_uri] += 1
         try:
-            log.info("inside room add_session iterate chat streams")
             chat_stream = next(stream for stream in session.streams if stream.type == 'chat')
-            log.info("inside room add_session iterate chat streams done")
         except StopIteration:
-            log.info("inside room add_session iterate chat streams StopIteration")
             pass
         else:
             notification_center.add_observer(self, sender=chat_stream)
         try:
-            log.info("inside room add_session iterate audio_stream")
             audio_stream = next(stream for stream in session.streams if stream.type == 'audio')
-            log.info("inside room add_session iterate audio_stream done")
         except StopIteration:
-            log.info("inside room add_session iterate audio_stream StopIteration")
             pass
         else:
             notification_center.add_observer(self, sender=audio_stream)
@@ -502,8 +464,6 @@ class Room(object):
             log.info(u'Room %s - started by %s with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
         else:
             log.info(u'Room %s - %s joined with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
-        log.info("inside room call start_recorder")
-        reactor.callLater(0, self.start_recorder)
         #if str(session.remote_identity.uri) not in set(str(s.remote_identity.uri) for s in self.sessions if s is not session):
         #    self.dispatch_server_message('%s has joined the room %s' % (format_identity(session.remote_identity), self.format_stream_types(session.streams)), exclude=session)
 
