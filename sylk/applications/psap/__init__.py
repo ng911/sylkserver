@@ -809,7 +809,7 @@ class PSAPApplication(SylkApplication):
     def add_incoming_participant(self, display_name, sip_uri, session, is_caller, is_calltaker):
         self.add_participant(display_name, sip_uri, session, 'in', False, is_caller, is_calltaker)
 
-    def add_participant(self, display_name, sip_uri, session, direction, mute_audio, is_caller, is_calltaker=False, is_primary=False):
+    def add_participant(self, display_name, sip_uri, session, direction, mute_audio, is_caller, is_calltaker=False):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
         participants = room_data.participants
@@ -837,6 +837,11 @@ class PSAPApplication(SylkApplication):
         if older_sip_uri is not None:
             del participants[older_sip_uri]
 
+        # check for primary here
+        is_primary = False
+        primary_calltaker_name, primary_calltaker_data = room_data.primary_calltaker
+        if ((primary_calltaker_name is None) or primary_calltaker_data.on_hold) and is_calltaker:
+            is_primary = True
         if participant_data is None:
             participant_data = ParticipantData()
 
@@ -921,18 +926,6 @@ class PSAPApplication(SylkApplication):
         log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
         # new code
         room_data = self.get_room_data(room_number)
-        # check for primary here
-        primary_calltaker_name, primary_calltaker_data = room_data.primary_calltaker
-        log.info("primary_calltaker_name is %r", primary_calltaker_name)
-        if (primary_calltaker_name is None) or primary_calltaker_data.on_hold:
-            # we need to set the calltaker as primary
-            if session.is_calltaker:
-                log.info("primary_calltaker_name set to %r", session.calltaker_name)
-                room_data.set_primary_calltaker(session.calltaker_name)
-            else:
-                log.info("set_first_calltaker_as_primary", primary_calltaker_name)
-                room_data.set_first_calltaker_as_primary()
-
         if not room_data.is_call_active:
             if room_data.is_call_on_hold:
                 if room_data.hold_timer != None:
