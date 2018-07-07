@@ -406,12 +406,15 @@ class PSAPApplication(SylkApplication):
 
             # create the conference room here
             #get_conference_application().incoming_session(self.incoming_session, room_number=room_number)
-
+            caller_identity = session.remote_identity
+            if direction == 'out':
+                caller_identity = SIPURI("sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip))
+            log.info("outgoing caller is %s", caller_identity)
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
-                                                                    caller_identity=session.remote_identity, is_calltaker=forward_to_calltaker)
+                                                                    caller_identity=caller_identity, is_calltaker=forward_to_calltaker)
                 ''' old code '''
                 '''
                 outgoing_call_initializer = OutgoingCallInitializer(target=sip_uri,

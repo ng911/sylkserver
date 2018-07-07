@@ -27,6 +27,7 @@ class ServerConfig(ConfigSection):
     db_name = "ng911"
     db_user = ""
     db_pwd = ""
+    from_number = "911"
     application_map = ConfigSetting(type=StringList, value=['echo:echo'])
     disabled_applications = ConfigSetting(type=StringList, value='')
     extra_applications_dir = ConfigSetting(type=Path, value=None)
