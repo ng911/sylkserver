@@ -245,7 +245,7 @@ class Room(object):
         self.audio_conference.hold()
         #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         #self.recorder.start()
-        self.audio_conference.bridge.add(self.recorder)
+        #self.audio_conference.bridge.add(self.recorder)
         self.moh_player = MoHPlayer(self.audio_conference)
         self.moh_player.start()
         self.state = 'started'
@@ -470,6 +470,7 @@ class Room(object):
         if self.recorder is None:
             self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
             self.recorder.start()
+            self.audio_conference.bridge.add(self.recorder)
 
         '''
         if ServerConfig.enable_bonjour:
