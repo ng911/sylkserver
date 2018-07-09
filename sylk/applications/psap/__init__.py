@@ -409,7 +409,7 @@ class PSAPApplication(SylkApplication):
             if direction == 'out':
                 caller_identity = "sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip)
             else:
-                caller_identity = str(self.session.remote_identity.uri)
+                caller_identity = str(session.remote_identity.uri)
             log.info("outgoing caller is %s", caller_identity)
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
