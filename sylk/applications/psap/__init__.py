@@ -1094,7 +1094,7 @@ class PSAPApplication(SylkApplication):
                 room_data = self._rooms[room_number]
                 if room_data.status == 'ringing_queued' and (username not in room_data.ignore_calltakers):
                     # send call to this calltaker
-                    room_data.status == 'ringing'
+                    room_data.status = 'ringing'
                     room_data.ignore_calltakers.append(username)
                     log.info("call presented to %s, set room %s to %s", username, room_number, room_data.status)
                     self.set_calltaker_busy(user_id=user_id)
