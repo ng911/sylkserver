@@ -406,9 +406,10 @@ class PSAPApplication(SylkApplication):
 
             # create the conference room here
             #get_conference_application().incoming_session(self.incoming_session, room_number=room_number)
-            caller_identity = session.remote_identity
             if direction == 'out':
-                caller_identity = SIPURI("sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip))
+                caller_identity = "sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip)
+            else:
+                caller_identity = str(self.session.remote_identity.uri)
             log.info("outgoing caller is %s", caller_identity)
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
@@ -628,7 +629,10 @@ class PSAPApplication(SylkApplication):
 
             if len(room_data.outgoing_calls) == 0:
                 # todo add handling here, put the call in queue?
-                pass
+                room_data.status = 'ringing_queued'
+                NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                       NotificationData(room_number=room_number,
+                                                                        status='ringing_queued'))
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
@@ -1546,7 +1550,7 @@ class OutgoingCallInitializer(object):
         extra_headers = []
         #if ThorNodeConfig.enabled:
         #    extra_headers.append(Header('Thor-Scope', 'conference-invitation'))
-        extra_headers.append(Header('X-Originator-From', str(self.caller_identity.uri)))
+        extra_headers.append(Header('X-Originator-From', self.caller_identity))
         extra_headers.append(SubjectHeader(u'Join conference request from %s' % self.caller_identity))
         route = notification.data.result[0]
         self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, extra_headers=extra_headers)
