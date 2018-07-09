@@ -1550,8 +1550,8 @@ class OutgoingCallInitializer(object):
         extra_headers = []
         #if ThorNodeConfig.enabled:
         #    extra_headers.append(Header('Thor-Scope', 'conference-invitation'))
-        extra_headers.append(Header('X-Originator-From', self.caller_identity))
-        extra_headers.append(SubjectHeader(u'Join conference request from %s' % self.caller_identity))
+        extra_headers.append(Header('X-Originator-From', str(self.caller_identity)))
+        extra_headers.append(SubjectHeader(u'Join conference request from %s' % str(self.caller_identity)))
         route = notification.data.result[0]
         self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, extra_headers=extra_headers)
 
