@@ -1096,6 +1096,7 @@ class PSAPApplication(SylkApplication):
                     # send call to this calltaker
                     room_data.status == 'ringing'
                     room_data.ignore_calltakers.append(username)
+                    log.info("call presented to %s, set room %s to %s", username, room_number, room_data.status)
                     self.set_calltaker_busy(user_id=user_id)
                     outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
                                                                         room_uri=self.get_room_uri(room_number),
