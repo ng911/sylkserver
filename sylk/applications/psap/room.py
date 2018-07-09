@@ -10,7 +10,7 @@ from glob import glob
 from itertools import chain, count, cycle
 
 from twisted.internet import task
-
+from flask import current_app
 from application.notification import IObserver, NotificationCenter
 from application.python import Null
 from application.system import makedirs
@@ -468,7 +468,7 @@ class Room(object):
         #    self.dispatch_server_message('%s has joined the room %s' % (format_identity(session.remote_identity), self.format_stream_types(session.streams)), exclude=session)
 
         if self.recorder is None:
-            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
+            self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, self._get_recording_file_path(self.room_number))
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
 
@@ -476,6 +476,12 @@ class Room(object):
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
         '''
+
+    def _get_recording_file_path(self, room_number):
+        recording_dir = os.path.join(current_app.root_path, '../../recordings')
+        recording_dir = os.path.abspath(recording_dir)
+        full_path = os.path.join(recording_dir, room_number)
+        return full_path
 
     def remove_session(self, session):
         notification_center = NotificationCenter()
