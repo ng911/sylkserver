@@ -479,7 +479,7 @@ class Room(object):
 
     def _get_recording_file_path(self, room_number):
         log.info("we started from %s", sys.argv[0])
-        recording_dir = os.path.join(sys.argv[0], 'recordings')
+        recording_dir = os.path.join(sys.argv[0], '../recordings')
         recording_dir = os.path.abspath(recording_dir)
         full_path = os.path.join(recording_dir, room_number)
         log.info("full_path for recording is %s", full_path)
