@@ -430,6 +430,7 @@ class PSAPApplication(SylkApplication):
                 #self.invited_parties[sip_uri] = outgoing_call_initializer
         elif call_type == 'sos_room':
             room_number = local_identity.uri.user
+            room_data = self.get_room_data(room_number)
             session.is_calltaker = True
             session.room_number = room_number
             log.info("join call to room %r", room_number)
@@ -451,6 +452,8 @@ class PSAPApplication(SylkApplication):
                     publish_outgoing_call_status(room_number, display_name, 'active')
             '''
             reactor.callLater(0, self.accept_session, session)
+            if room_data.ringing:
+                reactor.callLater(0, self.accept_session, room_data.incoming_session)
         elif call_type == 'admin':
             pass
 
