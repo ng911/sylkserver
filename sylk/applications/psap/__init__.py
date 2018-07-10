@@ -990,6 +990,7 @@ class PSAPApplication(SylkApplication):
                                                                             calltaker=calltaker_name,
                                                                             on_hold=True))
             calltaker_participant.session.end()
+            self.set_calltaker_available(username=calltaker_name)
             #room.remove_session(calltaker_participant.session)
         except Exception as e:
             stacktrace = traceback.format_exc()
