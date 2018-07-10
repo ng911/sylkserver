@@ -432,6 +432,7 @@ class PSAPApplication(SylkApplication):
             room_number = local_identity.uri.user
             room_data = self.get_room_data(room_number)
             session.is_calltaker = True
+            session.calltaker_name = remote_identity.uri.user
             session.room_number = room_number
             log.info("join call to room %r", room_number)
 
