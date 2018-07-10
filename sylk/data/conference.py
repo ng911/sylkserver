@@ -279,6 +279,12 @@ class ConferenceData(object):
     def update_hold(self, room_number, calltaker, on_hold):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
+            if on_hold:
+                participant.is_active = False
+                participant.is_primary = False
+            else:
+                participant.is_active = True
+                participant.is_primary = True
             participant.hold = on_hold
             participant.save()
 
