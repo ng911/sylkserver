@@ -969,6 +969,7 @@ class PSAPApplication(SylkApplication):
                 raise ValueError("invalid calltaker %r for room %r" % (calltaker_name, room_number))
             if calltaker_participant.on_hold:
                 return
+            calltaker_participant.is_active = False
             calltaker_participant.on_hold = True
             room = self.get_room(room_number)
             room_data = self.get_room_data(room_number)
