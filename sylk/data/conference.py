@@ -198,6 +198,7 @@ class ConferenceData(object):
             participant.is_calltaker = is_calltaker
             participant.sip_uri = sip_uri
             participant.is_primary = is_primary
+            participant.is_active = True
             participant.save()
 
             conference_event = ConferenceEvent()
@@ -304,6 +305,12 @@ class ConferenceData(object):
                 conference.status = 'active'
             conference.save()
             call_data = calls.get_conference_json(conference)
+            if on_hold:
+                # get the calltakers that started on hold
+                on_hold_by = []
+                for participant in ConferenceParticipant.objects(room_number=room_number, name=calltaker, is_calltaker=True, on_hold=True):
+                    on_hold_by.append(participant.name)
+                call_data['on_hold_by'] = on_hold_by
             participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
