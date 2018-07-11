@@ -484,7 +484,7 @@ def init_ali_links(link_array):
 g_ali_requests = {}
 
 def on_timeout(id):
-    log.debug("ali request timedout for id %r", id)
+    log.info("ali request timedout for id %r", id)
     global g_ali_requests
     if id in g_ali_requests:
         (my_d, room_number, protocols, timer) = g_ali_requests[id]
@@ -494,6 +494,7 @@ def on_timeout(id):
         my_d.errback(AliRequestTimeout(room_number, "request timedout"))
 
 def process_ali_result(result):
+    log.info("aliquery process_ali_result %r", result)
     (factory, id, number, ali_format, ali_result, ali_result_civic_xml, ali_data) = result
     if id in g_ali_requests:
         (my_d, room_number, factories, timer) = g_ali_requests[id]
@@ -503,6 +504,7 @@ def process_ali_result(result):
         for _factory in factories:
             if _factory != factory:
                 factory.cancel_ali_request(id)
+        log.info("aliquery do my_d.callback")
         my_d.callback((room_number, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
 
 
