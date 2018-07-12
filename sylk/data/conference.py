@@ -316,7 +316,7 @@ class ConferenceData(object):
                 for participant in ConferenceParticipant.objects(room_number=room_number, is_calltaker=True, hold=True):
                     participant.hold = False
                     participant.save()
-                participants_data = calls.get_conference_participants_json(room_number)
+            participants_data = calls.get_conference_participants_json(room_number)
             publish_update_call(room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
