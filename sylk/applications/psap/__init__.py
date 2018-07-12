@@ -950,6 +950,8 @@ class PSAPApplication(SylkApplication):
                     room_data.hold_timer.stop()
                     room_data.hold_timer = None
                 room_data.status = 'active'
+                for participant in room_data.participants.itervalues():
+                    participant.on_hold = False
                 NotificationCenter().post_notification('ConferenceHoldUpdated', self,
                                                        NotificationData(room_number=room_number,
                                                                         calltaker=session.calltaker_name,
