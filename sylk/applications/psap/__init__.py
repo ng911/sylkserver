@@ -454,6 +454,22 @@ class PSAPApplication(SylkApplication):
             '''
             reactor.callLater(0, self.accept_session, session)
             if room_data.ringing:
+                # also cancel the ringing timer and end ringing call
+                if room_data.ringing_duration_timer is not None:
+                    room_data.ringing_duration_timer.stop()
+                    room_data.ringing_duration_timer = None
+                if room_data.invitation_timer is not None:
+                    room_data.invitation_timer.cancel()
+                    room_data.invitation_timer = None
+                ''' This moved to add_session_to_room
+                if session.is_calltaker:
+                    session.is_primary = True
+                '''
+                log.info('room_data.outgoing_calls %r', room_data.outgoing_calls)
+                for target, outgoing_call_initializer in room_data.outgoing_calls.iteritems():
+                    log.info('target %r', target)
+                    log.info('outgoing_call_initializer %r', outgoing_call_initializer)
+                    outgoing_call_initializer.cancel_call()
                 reactor.callLater(0, self.accept_session, room_data.incoming_session)
             self.set_calltaker_busy(username=remote_identity.uri.user)
         elif call_type == 'admin':
@@ -518,9 +534,9 @@ class PSAPApplication(SylkApplication):
         log.info("timed out ringing for conf room %r", room_number)
 
         room = self.get_room(room_number)
-        if room and (not room.started):
-            room_data = self.get_room_data(room_number)
-            room_data.invitation_timer = None
+        room_data = self.get_room_data(room_number)
+        room_data.invitation_timer = None
+        if room and (not room.started) and room_data.ringing:
             self.end_ringing_call(room_number)
             if room_data and (room_data.direction == 'out'):
                 status = 'timed_out'
