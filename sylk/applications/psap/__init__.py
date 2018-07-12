@@ -915,7 +915,6 @@ class PSAPApplication(SylkApplication):
                                                                    NotificationData(room_number=room_number,
                                                                                     old_primary_uri=str(participant_data.uri),
                                                                                     new_primary_uri=str(new_primary_uri)))
-                        else:
                             # in this case we need to mark the old primary as available
                             self.set_calltaker_available(username=participant_data.display_name)
                     else:
