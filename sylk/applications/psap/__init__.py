@@ -455,6 +455,7 @@ class PSAPApplication(SylkApplication):
             reactor.callLater(0, self.accept_session, session)
             if room_data.ringing:
                 reactor.callLater(0, self.accept_session, room_data.incoming_session)
+            self.set_calltaker_busy(username=remote_identity.uri.user)
         elif call_type == 'admin':
             pass
 
@@ -904,15 +905,22 @@ class PSAPApplication(SylkApplication):
             if (participant_data.session == session) and (not participant_data.on_hold):
                 participant_data.is_active = False
                 participant_data.on_hold=False
-                if participant_data.is_calltaker and participant_data.is_primary:
-                    log.info('remove_participant found primary calltaker is %r', participant_data.display_name)
-                    (has_new_primary, new_primary_uri) = self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=str(participant_data.uri))
-                    if has_new_primary:
-                        participant_data.is_primary = False
-                        NotificationCenter().post_notification('ConferenceParticipantNewPrimary', self,
-                                                               NotificationData(room_number=room_number,
-                                                                                old_primary_uri=str(participant_data.uri),
-                                                                                new_primary_uri=str(new_primary_uri)))
+                if participant_data.is_calltaker:
+                    if participant_data.is_primary:
+                        log.info('remove_participant found primary calltaker is %r', participant_data.display_name)
+                        (has_new_primary, new_primary_uri) = self.set_new_primary(participants=room_data.participants, primary_calltaker_uri=str(participant_data.uri))
+                        if has_new_primary:
+                            participant_data.is_primary = False
+                            NotificationCenter().post_notification('ConferenceParticipantNewPrimary', self,
+                                                                   NotificationData(room_number=room_number,
+                                                                                    old_primary_uri=str(participant_data.uri),
+                                                                                    new_primary_uri=str(new_primary_uri)))
+                        else:
+                            # in this case we need to mark the old primary as available
+                            self.set_calltaker_available(username=participant_data.display_name)
+                    else:
+                        self.set_calltaker_available(username=participant_data.display_name)
+
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
                                                                         display_name = participant_data.display_name,
