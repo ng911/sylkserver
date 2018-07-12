@@ -58,7 +58,7 @@ class AliSimulator:
 				logger.debug('remote connected')
 				(ipAddress, port) = remote
 				logger.debug('ipAddress %r, port %r', ipAddress, port)
-				self._conn[ipAddress] = conn
+				self._conn["%s:%s" % (ipAddress, port)] = conn
 				gevent.spawn(self._alireceiver, conn, ipAddress)
 
 	def get_phone_number_from_recvd_data(self, phone_data):
@@ -82,17 +82,20 @@ class AliSimulator:
 							phone_number = self.get_phone_number_from_recvd_data(phone_data)
 							logger.debug("recvd phone_number is %r", phone_number)
 							self.send_ali_data(conn, phone_number, ipAddress)
+							phone_data = ""
 		except socket.error:
 			logger.debug("_sipreceiver socket error")
 			conn.close()
 			del self._conn[ipAddress]
 
+	'''
 	def isConnected(self, ipAddress):
 		if ipAddress in self._conn:
 			return True;
 		else:
 			return False
-	
+	'''
+
 	def send_ali_data(self, conn, phone_number, ipAddress):
 		logger.debug("send_ali_data for phone_number %s", phone_number)
 		formatted_phone = "(%s) %s-%s" % (phone_number[:3], phone_number[-7:-4], phone_number[-4:])
