@@ -949,6 +949,8 @@ class PSAPApplication(SylkApplication):
         log.info('session is calltaker %r', session.is_calltaker)
         log.info('room_data.participants is %r', room_data.participants)
         log.info('room_data.participants length is %r', len(room_data.participants))
+        for participant_data in room_data.participants.itervalues():
+            log.info('participant_data is %s', str(participant_data))
 
         for participant_data in room_data.participants.itervalues():
             log.info('participant_data is %r', participant_data)
