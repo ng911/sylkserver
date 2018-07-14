@@ -665,6 +665,7 @@ class PSAPApplication(SylkApplication):
 
     def outgoing_session_will_start(self, sip_uri, session):
         room_number = session.room_number
+        log.info('outgoing_session_will_start for sip_uri %s, session %r, room_number %s', sip_uri, session, room_number)
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
         if not room.started:
