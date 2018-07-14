@@ -13,8 +13,7 @@ comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
     transports=ServerConfig.wamp_crossbar_server,
     realm=u"realm1",
-    extra="tarun",
-    max_retries=-1
+    extra="tarun"
 )
 
 
@@ -209,7 +208,7 @@ def joined(session, details):
 @inlineCallbacks
 def left(session, details):
     global wamp_session
-    log.error("session left")
+    log.error("wamp session left")
     wamp_session = None
     # todo - try to reconnect here
 
@@ -218,7 +217,15 @@ def left(session, details):
 @inlineCallbacks
 def on_disconnect(session):
     global wamp_session
-    log.error("session disconnected")
+    log.error("wamp session disconnected")
+    wamp_session = None
+
+
+@comp.connectfailure
+@inlineCallbacks
+def on_connectfailure(session):
+    global wamp_session
+    log.error("wamp session connectfailure")
     wamp_session = None
 
 
