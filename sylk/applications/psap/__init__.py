@@ -976,7 +976,7 @@ class PSAPApplication(SylkApplication):
                                                                         on_hold=False))
             else:
                 calltakers = room_data.calltakers
-                log.info('outgoing_session_did_start send active notification to calltakers %s', calltakers)
+                log.info('add_session_to_room send active notification to calltakers %s', calltakers)
                 room_data.status = 'active'
                 NotificationCenter().post_notification('ConferenceActive', self,
                                                        NotificationData(room_number=room_number, calltakers=calltakers))
@@ -1511,7 +1511,6 @@ class OutgoingCallInitializer(object):
         except SIPCoreError:
             log.info('OutgoingCallInitializer start Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
             return
-        log.info("OutgoingCallInitializer start")
         settings = SIPSimpleSettings()
         account = DefaultAccount()
         if account.sip.outbound_proxy is not None:
