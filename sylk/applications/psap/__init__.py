@@ -415,6 +415,7 @@ class PSAPApplication(SylkApplication):
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
                 # create an outbound session here for calls to calltakers
+                log.info('creating outgoing_call_initializer is_calltaker %r', forward_to_calltaker)
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
                                                                     caller_identity=caller_identity, is_calltaker=forward_to_calltaker)
                 ''' old code '''
@@ -696,7 +697,7 @@ class PSAPApplication(SylkApplication):
             # room_data.outgoing_calls = {}
         '''
 
-    def outgoing_session_did_start(self, sip_uri, session):
+    def outgoing_session_did_start(self, sip_uri, is_calltaker, session):
         room_number = session.room_number
         log.info('outgoing_session_did_start for sip_uri %s, session %r, room_number %s', sip_uri, session, room_number)
 
@@ -727,7 +728,7 @@ class PSAPApplication(SylkApplication):
 
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
-        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True)
+        self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
         self.add_session_to_room(room_number, session)
         '''
         room_data = self.get_room_data(room_number)
@@ -1437,7 +1438,7 @@ class OldOutgoingCallInitializer(object):
         #self.incoming_session.room_number = self.room_number
 
         log.info(u'_NH_SIPSessionDidStart for session.room_number %s' % session.room_number)
-        self.app.outgoing_session_did_start(self.target, session)
+        self.app.outgoing_session_did_start(self.target, self.is_calltaker, session)
         #self.app.add_outgoing_session(session)
         send_call_active_notification(self, session)
 
