@@ -666,6 +666,8 @@ class PSAPApplication(SylkApplication):
     def outgoing_session_will_start(self, sip_uri, session):
         room_number = session.room_number
         log.info('outgoing_session_will_start for sip_uri %s, session %r, room_number %s', sip_uri, session, room_number)
+        '''
+        moving this to session did start
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
         if not room.started:
@@ -691,10 +693,36 @@ class PSAPApplication(SylkApplication):
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
             # room_data.outgoing_calls = {}
+        '''
 
     def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
         log.info('outgoing_session_did_start for sip_uri %s, session %r, room_number %s', sip_uri, session, room_number)
+
+        room = self.get_room(room_number)
+        room_data = self.get_room_data(room_number)
+        if not room.started:
+            # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
+            # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
+            reactor.callLater(0, self.accept_session, room_data.incoming_session)
+
+            if room_data.ringing_duration_timer is not None:
+                room_data.ringing_duration_timer.stop()
+                room_data.ringing_duration_timer = None
+            if room_data.invitation_timer is not None:
+                room_data.invitation_timer.cancel()
+                room_data.invitation_timer = None
+            ''' This moved to add_session_to_room
+            if session.is_calltaker:
+                session.is_primary = True
+            '''
+            log.info('room_data.outgoing_calls %r', room_data.outgoing_calls)
+            for target, outgoing_call_initializer in room_data.outgoing_calls.iteritems():
+                log.info('target %r', target)
+                log.info('outgoing_call_initializer %r', outgoing_call_initializer)
+
+                if target != str(sip_uri):
+                    outgoing_call_initializer.cancel_call()
 
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
