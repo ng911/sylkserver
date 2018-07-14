@@ -1659,7 +1659,7 @@ class OutgoingCallInitializer(object):
         # self.incoming_session.room_number = self.room_number
 
         log.info(u'_NH_SIPSessionDidStart for session.room_number %s' % session.room_number)
-        self.app.outgoing_session_did_start(self.target_uri, session)
+        self.app.outgoing_session_did_start(self.target_uri, self.is_calltaker, session)
         # self.app.add_outgoing_session(session)
         send_call_active_notification(self, session)
         #psap_application.add_participant(self.session, self.room_uri)
