@@ -694,6 +694,7 @@ class PSAPApplication(SylkApplication):
 
     def outgoing_session_did_start(self, sip_uri, session):
         room_number = session.room_number
+        log.info('outgoing_session_did_start for sip_uri %s, session %r, room_number %s', sip_uri, session, room_number)
 
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
