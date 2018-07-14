@@ -129,8 +129,8 @@ class ParticipantData(object):
         pass
 
     def __repr__(self):
-        return "display_name %r, uri %r, session %r, direction %r, mute %r, send_audio %r, send_video %r, send_text %r, is_caller %r, is_active %r, on_hold %r, is_primary %r" % \
-               (self.display_name, self.uri, self.session, self.direction, self.mute, self.send_audio, self.send_video, self.send_text, self.is_caller, self.is_active, self.on_hold, self.is_primary)
+        return "display_name %r, uri %r, session %r, is_calltaker %r, direction %r, mute %r, send_audio %r, send_video %r, send_text %r, is_caller %r, is_active %r, on_hold %r, is_primary %r" % \
+               (self.display_name, self.uri, self.session, self.is_calltaker, self.direction, self.mute, self.send_audio, self.send_video, self.send_text, self.is_caller, self.is_active, self.on_hold, self.is_primary)
 
 #RoomData = namedtuple('RoomData', 'room incoming_session call_type direction outgoing_calls invitation_timer participants')
 #ParticipantData = namedtuple('ParticipantData', 'display_name uri session direction mute_audio recv_audio recv_video recv_chat is_caller is_active')
@@ -945,6 +945,8 @@ class PSAPApplication(SylkApplication):
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
         log.info('room_data is %r', room_data)
+        log.info('session is %r', session)
+        log.info('session is calltaker %r', session.is_calltaker)
         log.info('room_data.participants is %r', room_data.participants)
 
         for participant_data in room_data.participants.itervalues():
