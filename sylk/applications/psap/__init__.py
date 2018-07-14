@@ -681,10 +681,10 @@ class PSAPApplication(SylkApplication):
             if room_data.invitation_timer is not None:
                 room_data.invitation_timer.cancel()
                 room_data.invitation_timer = None
-            ''' This moved to add_session_to_room
-            if session.is_calltaker:
-                session.is_primary = True
-            '''
+            #This moved to add_session_to_room
+            #if session.is_calltaker:
+            #    session.is_primary = True
+            #
             log.info('room_data.outgoing_calls %r', room_data.outgoing_calls)
             for target, outgoing_call_initializer in room_data.outgoing_calls.iteritems():
                 log.info('target %r', target)
