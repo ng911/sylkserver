@@ -213,7 +213,7 @@ def left(session, details):
     # todo - try to reconnect here
 
 
-@comp.disconnect
+@comp.on_disconnect
 @inlineCallbacks
 def on_disconnect(session):
     global wamp_session
@@ -221,12 +221,6 @@ def on_disconnect(session):
     wamp_session = None
 
 
-@comp.connectfailure
-@inlineCallbacks
-def on_connectfailure(session):
-    global wamp_session
-    log.error("wamp session connectfailure")
-    wamp_session = None
 
 
 def start():
