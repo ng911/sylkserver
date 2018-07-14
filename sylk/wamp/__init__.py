@@ -13,8 +13,9 @@ comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
     transports=ServerConfig.wamp_crossbar_server,
     realm=u"realm1",
-    extra="tarun"
- )
+    extra="tarun",
+    max_retries=-1
+)
 
 
 wamp_session=None
@@ -36,6 +37,8 @@ def publish_update_calltaker_status(user_id, username, status):
 def publish_update_calltakers(json_data):
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.calltakers', json_data)
+    else:
+        log.error("publish_update_calltakers wamp session is None")
 
 
 def publish_create_call(room_number, call_data, participants):
@@ -47,6 +50,8 @@ def publish_create_call(room_number, call_data, participants):
         json_data['participants'] = participants
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
+    else:
+        log.error("publish_create_call wamp session is None")
 
 
 def publish_active_call(calltaker, room_number):
@@ -55,6 +60,8 @@ def publish_active_call(calltaker, room_number):
         json_data['command'] = 'active'
         json_data['room_number'] = room_number
         wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data)
+    else:
+        log.error("publish_active_call wamp session is None")
 
 # type should be ringing or duration
 def publish_update_call_timer(room_number, type, val):
@@ -66,6 +73,8 @@ def publish_update_call_timer(room_number, type, val):
         wamp_session.publish(u'com.emergent.calltimer', json_data)
         # old code - now we send timer to all calltakers
         #wamp_session.publish(u'com.emergent.calltimer.%s' % room_number, json_data)
+    else:
+        log.error("publish_update_call_timer wamp session is None")
 
 
 def publish_update_call(room_number, call_data, participants=None):
@@ -79,6 +88,8 @@ def publish_update_call(room_number, call_data, participants=None):
 
         log.info("publish com.emergent.call with call_data %r", call_data)
         wamp_session.publish(u'com.emergent.call', json_data)
+    else:
+        log.error("publish_update_call wamp session is None")
 
 # status can be 'ringing', 'active', 'failed', 'timedout'
 def publish_outgoing_call_status(room_number, calltaker, status):
@@ -87,6 +98,8 @@ def publish_outgoing_call_status(room_number, calltaker, status):
         json_data['status'] = status
         json_data['room_number'] = room_number
         wamp_session.publish(u'com.emergent.call.outgoing.%s' % calltaker, json_data)
+    else:
+        log.error("publish_outgoing_call_status wamp session is None")
 
 
 def publish_update_primary(room_number, old_primary_user_name, new_primary_user_name):
@@ -100,6 +113,8 @@ def publish_update_primary(room_number, old_primary_user_name, new_primary_user_
 
         #log.info("publish com.emergent.call with json %r", json_data)
         wamp_session.publish(u'com.emergent.call', json_data)
+    else:
+        log.error("publish_update_primary wamp session is None")
 
 
 def publish_update_location_success(room_number, ali_result, location_display):
@@ -107,17 +122,23 @@ def publish_update_location_success(room_number, ali_result, location_display):
     if wamp_session is not None:
         log.info("publish location update for room %s", room_number)
         wamp_session.publish(u'com.emergent.location', json_data)
+    else:
+        log.error("publish_update_location_success wamp session is None")
 
 
 def publish_update_location_failed(room_number):
     json_data = {'success' : False}
     if wamp_session is not None:
         wamp_session.publish(u'com.emergent.location.%s' % room_number, json_data)
+    else:
+        log.error("publish_update_location_failed wamp session is None")
 
 def publish_update_calls():
     if wamp_session is not None:
         log.info("publish com.emergent.calls")
         wamp_session.publish(u'com.emergent.calls')
+    else:
+        log.error("publish_update_calls wamp session is None")
 
 @comp.on_join
 @inlineCallbacks
@@ -188,9 +209,17 @@ def joined(session, details):
 @inlineCallbacks
 def left(session, details):
     global wamp_session
-    log.info("session left")
+    log.error("session left")
     wamp_session = None
     # todo - try to reconnect here
+
+
+@comp.disconnect
+@inlineCallbacks
+def on_disconnect(session):
+    global wamp_session
+    log.error("session disconnected")
+    wamp_session = None
 
 
 def start():
