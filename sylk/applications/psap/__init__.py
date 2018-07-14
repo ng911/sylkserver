@@ -1116,6 +1116,7 @@ class PSAPApplication(SylkApplication):
         self.set_calltaker_status(user_id=user_id, username=username, status='busy')
 
     def set_calltaker_available(self, username=None, user_id=None):
+        log.info('set_calltaker_available for username %r, user_id %r', username, user_id)
         self.set_calltaker_status(user_id=user_id, username=username, status='available')
 
     def set_calltaker_status(self, username=None, user_id=None, status='available'):
