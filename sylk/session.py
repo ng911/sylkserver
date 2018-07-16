@@ -423,6 +423,8 @@ class Session(object):
     def init_incoming(self, invitation, data):
         log.info("init_incoming with invitation")
         dump_object_member_vars(log, invitation)
+        log.info("init_incoming with invitation data")
+        dump_object_member_vars(log, data)
         remote_sdp = invitation.sdp.proposed_remote
         if not remote_sdp:
             invitation.send_response(488)
