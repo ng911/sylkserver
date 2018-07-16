@@ -7,6 +7,7 @@ from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location, Con
 from sylk.utils import get_json_from_db_obj
 import location
 from sylk.configuration import ServerConfig
+from sylk.wamp import publish_clear_abandoned_call
 
 log = ApplicationLogger(__package__)
 
@@ -95,14 +96,15 @@ def clear_abandoned_calls(callback_number=None, caller_ani=None):
         log.error("clear_abandoned_calls no callback_number or caller_ani")
         return
 
-    calls_cleared = 0
+    calls_cleared = []
     for conf_db_obj in Conference.objects(__raw__=filters):
         conf_db_obj.callback_time = datetime.datetime.utcnow()
         conf_db_obj.callback = True
-        calls_cleared = calls_cleared + 1
+        calls_cleared.append(conf_db_obj.room_number)
         conf_db_obj.save()
 
-    return calls_cleared
+    publish_clear_abandoned_call(calls_cleared)
+    return len(calls_cleared)
 
 '''
 def clear_abandoned_calls(called_number):

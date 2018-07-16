@@ -62,6 +62,17 @@ def publish_active_call(calltaker, room_number):
     else:
         log.error("publish_active_call wamp session is None")
 
+
+def publish_clear_abandoned_call(rooms):
+    if wamp_session is not None:
+        json_data = {}
+        json_data['command'] = 'clear_abandoned'
+        json_data['rooms'] = rooms
+        wamp_session.publish(u'com.emergent.call', json_data)
+    else:
+        log.error("publish_clear_abandoned_call wamp session is None")
+
+
 # type should be ringing or duration
 def publish_update_call_timer(room_number, type, val):
     if wamp_session is not None:
