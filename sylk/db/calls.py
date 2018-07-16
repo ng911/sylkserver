@@ -87,9 +87,9 @@ def clear_abandoned_calls(callback_number=None, caller_ani=None):
                'status' : 'abandoned',
                'call_type' : 'sos'}
 
-    if callback_number is not None:
+    if (callback_number is not None) and (callback_number != ''):
        filters['callback_number'] = callback_number
-    elif caller_ani is not None:
+    elif (caller_ani is not None) and (caller_ani != ''):
         filters['caller_ani'] = caller_ani
     else:
         log.error("clear_abandoned_calls no callback_number or caller_ani")
