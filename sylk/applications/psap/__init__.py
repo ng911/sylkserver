@@ -49,7 +49,7 @@ class RoomData(object):
 
     @property
     def incoming(self):
-        return self.direction == 'incoming'
+        return self.direction == 'in'
 
     @property
     def room_number(self):
@@ -57,7 +57,7 @@ class RoomData(object):
 
     @property
     def outgoing(self):
-        return self.direction == 'outgoing'
+        return self.direction == 'out'
 
     @property
     def is_emergeny(self):
@@ -540,7 +540,7 @@ class PSAPApplication(SylkApplication):
         room_data.invitation_timer = None
         if room and (not room.started) and room_data.ringing:
             self.end_ringing_call(room_number)
-            if room_data and (room_data.direction == 'out'):
+            if room_data and (room_data.outgoing):
                 status = 'timed_out'
             else:
                 status = 'abandoned'
@@ -798,10 +798,14 @@ class PSAPApplication(SylkApplication):
 
             self.remove_room(room_number)
             room.stop()
-            room_data.status = 'abandoned'
+            if room_data.outgoing:
+                room_data.status = 'cancel'
+            else:
+                room_data.status = 'abandoned'
+
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
-                                                                    status='abandoned'))
+                                                                    status=room_data.status))
             return
         '''
         room_uri = self.get_room_uri(uri=None, room_number=session.room_number)
