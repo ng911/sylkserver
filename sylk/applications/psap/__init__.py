@@ -376,6 +376,7 @@ class PSAPApplication(SylkApplication):
                                                                     link_id=incoming_link.link_id,
                                                                     caller_ani=remote_identity.uri.user, caller_uri=str(remote_identity.uri),
                                                                     caller_name=remote_identity.uri.user,
+                                                                    called_number=local_identity.uri.user,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)

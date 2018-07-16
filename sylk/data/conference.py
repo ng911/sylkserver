@@ -29,7 +29,7 @@ class ConferenceData(object):
 
     def create_conference(self, room_number, direction='in', call_type='sos',
                           status='init', primary_queue_id=None, link_id=None, caller_ani='', caller_uri='', caller_name='',
-                          has_audio=True, has_text=False, has_video=False, has_tty=False):
+                          called_number='', has_audio=True, has_text=False, has_video=False, has_tty=False):
         try:
             log.info("inside create_conference")
             psap_id = ServerConfig.psap_id
@@ -57,7 +57,11 @@ class ConferenceData(object):
             conference_event = ConferenceEvent()
             conference_event.event = 'init'
             conference_event.event_time = cur_time
-            conference_event.event_details = 'Incoming call from {}'.format(caller_ani)
+            if direction == 'in':
+                conference_event.event_details = 'Incoming call from {}'.format(caller_ani)
+            else:
+                conference_event.event_details = 'Outgoing call from {} to {} '.format(caller_ani, called_number)
+
             conference_event.room_number = room_number
             conference_event.save()
 
