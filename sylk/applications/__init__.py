@@ -235,7 +235,7 @@ class IncomingRequestHandler(object):
         except ApplicationNotLoadedError:
             session.reject(404)
         else:
-            app.incoming_session(session)
+            app.incoming_session(session, notification.data.headers)
 
     def _NH_SIPIncomingSubscriptionGotSubscribe(self, notification):
         subscribe_request = notification.sender

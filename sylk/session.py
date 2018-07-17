@@ -424,8 +424,6 @@ class Session(object):
         log.info("init_incoming with invitation")
         dump_object_member_vars(log, invitation)
         log.info("init_incoming with invitation headers")
-        if 'X-Emergent-mute' in data.headers:
-            log.info("found X-Emergent-mute value %r", data.headers.get('X-Emergent-mute', None))
 
         remote_sdp = invitation.sdp.proposed_remote
         if not remote_sdp:

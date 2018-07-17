@@ -262,7 +262,7 @@ class PSAPApplication(SylkApplication):
             return {'room_number': room_number, 'debug_info': 'room not active'}
         return {'room_number' : room_number, 'debug_info' : room.get_debug_info()}
 
-    def incoming_session(self, session):
+    def incoming_session(self, session, headers):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
         send_call_update_notification(self, session, 'init')
 
@@ -438,6 +438,8 @@ class PSAPApplication(SylkApplication):
             session.calltaker_name = remote_identity.uri.user
             session.room_number = room_number
             log.info("join call to room %r", room_number)
+            if 'X-Emergent-mute' in headers:
+                log.info("found X-Emergent-mute value %r", headers.get('X-Emergent-mute', None))
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
             # todo add handling for ringing calls here
