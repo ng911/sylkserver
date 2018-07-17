@@ -261,7 +261,7 @@ def conference_participants(room_number):
 def conference_participant_mute(room_number):
     try:
         sip_uri = get_argument('sip_uri')
-        muted = get_argument('muted')
+        muted = get_argument('mute')
         if (sip_uri is None) or (sip_uri == ''):
             raise ValueError('missing sip_uri')
         participant_db_obj = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
