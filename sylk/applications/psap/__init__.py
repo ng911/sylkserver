@@ -33,6 +33,7 @@ from sylk.notifications.call import send_call_update_notification, send_call_act
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
 from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call
+from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
 
@@ -440,6 +441,9 @@ class PSAPApplication(SylkApplication):
             log.info("join call to room %r", room_number)
             if 'X-Emergent-mute' in headers:
                 log.info("found X-Emergent-mute value %r", headers.get('X-Emergent-mute', None))
+                mute_header = headers.get('X-Emergent-mute', None)
+                dump_object_member_vars(log, mute_header)
+                dump_object_member_funcs(log, mute_header)
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
             # todo add handling for ringing calls here
