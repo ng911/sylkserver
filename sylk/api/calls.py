@@ -262,6 +262,8 @@ def conference_participant_mute(room_number):
     try:
         sip_uri = get_argument('sip_uri')
         muted = get_argument('mute')
+        log.info('conference_participant_mute sip_uri %r, muted %r')
+        '''
         if (sip_uri is None) or (sip_uri == ''):
             raise ValueError('missing sip_uri')
         participant_db_obj = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
@@ -271,7 +273,9 @@ def conference_participant_mute(room_number):
 
         data = NotificationData(room_number=room_number, sip_uri=sip_uri, mute=muted)
         NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
-
+        '''
+        psap_application = psap.PSAPApplication()
+        psap_application.mute_user(room_number, sip_uri, muted)
         return jsonify({
             'success' : True
         })

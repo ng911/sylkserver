@@ -1121,7 +1121,18 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().post_notification('ConferenceMuteAllUpdated', '', data)
 
     def mute_user(self, room_number, sip_uri, muted):
-        pass
+        room_data = self.get_room_data(room_number)
+        participant = room_data.participants[str(sip_uri)]
+        if participant is None:
+            raise ValueError("invalid participant %r for room %r" % (sip_uri, room_number))
+        if participant.session is not None:
+            if muted:
+                participant.session.mute()
+            else:
+                participant.session.unmute()
+
+        data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
+        NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
 
     # this is done by participant joining the call again
     #def remove_calltaker_on_hold(self, room_number, calltaker_name):
