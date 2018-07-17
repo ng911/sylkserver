@@ -267,7 +267,7 @@ def conference_participants_update(room_number):
         if (sip_uri is None) or (sip_uri == ''):
             raise ValueError('missing sip_uri')
         participant_db_obj = ConferenceParticipant.objects(room_number=room_number, sip_uri=sip_uri)
-        set_db_obj_from_request(log, participant_db_obj, request)
+        set_db_obj_from_request(participant_db_obj, request)
         participant_db_obj.save()
 
         data = NotificationData(room_number=room_number)
