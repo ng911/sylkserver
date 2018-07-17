@@ -257,6 +257,35 @@ def conference_participants(room_number):
 
     return jsonify(response)
 
+@calls.route('/conference/participant/mute/<room_number>', methods=['PUT', 'POST'])
+def conference_participant_mute(room_number):
+    try:
+        sip_uri = get_argument('sip_uri')
+        muted = get_argument('muted')
+        if (sip_uri is None) or (sip_uri == ''):
+            raise ValueError('missing sip_uri')
+        participant_db_obj = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
+        participant_db_obj.mute = muted
+        #set_db_obj_from_request(participant_db_obj, request)
+        participant_db_obj.save()
+
+        data = NotificationData(room_number=room_number, sip_uri=sip_uri, mute=muted)
+        NotificationCenter().post_notification('ConferenceParticipantDBUpdated', '', data)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_participants_update error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+
 '''
 Update the conference participant values like send_video, mute, send_audio, send_text 
 '''
@@ -267,7 +296,8 @@ def conference_participants_update(room_number):
         if (sip_uri is None) or (sip_uri == ''):
             raise ValueError('missing sip_uri')
         participant_db_obj = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
-        set_db_obj_from_request(participant_db_obj, request)
+
+        #set_db_obj_from_request(participant_db_obj, request)
         participant_db_obj.save()
 
         data = NotificationData(room_number=room_number)
