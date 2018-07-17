@@ -1,7 +1,7 @@
 import traceback
 import os.path
 import arrow
-from flask import current_app, Blueprint, jsonify, request, send_file, abort
+from flask import current_app, Blueprint, jsonify, request, send_file, abort, render_template
 from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
@@ -132,6 +132,12 @@ Old code
 
 
 '''
+
+@calls.route('/print/<room_number>', methods=['GET'])
+def get_print_data(room_number):
+    conf_obj = Conference.objects.get(room_number=room_number)
+    return render_template('call_print.html', conference=conf_obj)
+
 
 @calls.route('/search', methods=['GET'])
 def search_calls():
