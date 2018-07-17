@@ -442,6 +442,7 @@ class PSAPApplication(SylkApplication):
             if 'X-Emergent-mute' in headers:
                 log.info("found X-Emergent-mute value %r", headers.get('X-Emergent-mute', None))
                 mute_header = headers.get('X-Emergent-mute', None)
+                log.info("mute_header is %s, body is %r, %s", str(mute_header), mute_header.body, str(mute_header.body))
                 dump_object_member_vars(log, mute_header)
                 dump_object_member_funcs(log, mute_header)
 
