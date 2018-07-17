@@ -439,12 +439,14 @@ class PSAPApplication(SylkApplication):
             session.calltaker_name = remote_identity.uri.user
             session.room_number = room_number
             log.info("join call to room %r", room_number)
+            mute_audio = False
             if 'X-Emergent-mute' in headers:
                 mute_header = headers.get('X-Emergent-mute', None)
                 if mute_header.body == '1':
                     log.info("need to mute this call")
+                    mute_audio = True
 
-            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True)
+            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=False, is_calltaker=True, mute_audio=mute_audio)
             # todo add handling for ringing calls here
             '''
             todo - check if this needs to be moved to session did start
@@ -873,11 +875,11 @@ class PSAPApplication(SylkApplication):
     def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False, is_primary=False):
         self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker, is_primary)
     '''
-    def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False):
-        self.add_participant(display_name, sip_uri, session, 'out', False, False, is_calltaker)
+    def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False, mute_audio=False):
+        self.add_participant(display_name, sip_uri, session, 'out', mute_audio, False, is_calltaker)
 
-    def add_incoming_participant(self, display_name, sip_uri, session, is_caller, is_calltaker):
-        self.add_participant(display_name, sip_uri, session, 'in', False, is_caller, is_calltaker)
+    def add_incoming_participant(self, display_name, sip_uri, session, is_caller, is_calltaker, mute_audio=False):
+        self.add_participant(display_name, sip_uri, session, 'in', mute_audio, is_caller, is_calltaker)
 
     def add_participant(self, display_name, sip_uri, session, direction, mute_audio, is_caller, is_calltaker=False):
         room_number = session.room_number
