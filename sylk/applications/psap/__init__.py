@@ -355,6 +355,7 @@ class PSAPApplication(SylkApplication):
             if ignore_calltakers is not None:
                 room_data.ignore_calltakers = ignore_calltakers
 
+            ali_format = ''
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 lookup_number = remote_identity.uri.user
@@ -364,6 +365,7 @@ class PSAPApplication(SylkApplication):
                 elif lookup_number.startswith('1'):
                     lookup_number = lookup_number[1:]
                 log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
+                ali_format = incoming_link.ali_format
                 ali_lookup(room_number, lookup_number, incoming_link.ali_format)
 
             if (len(sip_uris) == 0) and (call_type == 'sos'):
@@ -378,6 +380,7 @@ class PSAPApplication(SylkApplication):
                                                                     caller_ani=remote_identity.uri.user, caller_uri=str(remote_identity.uri),
                                                                     caller_name=remote_identity.uri.user,
                                                                     called_number=local_identity.uri.user,
+                                                                    ali_format=ali_format,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
