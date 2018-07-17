@@ -328,7 +328,6 @@ class ConferenceData(object):
                 conference_event.event = 'start_hold'
                 conference_event.event_details = 'put on hold by {}'.format(calltaker)
             else:
-                conference_event = ConferenceEvent()
                 conference_event.event = 'end_hold'
                 conference_event.event_details = 'taken off hold by {}'.format(calltaker)
                 conference.status = 'active'
