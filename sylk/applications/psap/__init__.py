@@ -920,6 +920,9 @@ class PSAPApplication(SylkApplication):
         if participant_data is None:
             participant_data = ParticipantData()
 
+        if mute_audio:
+            session.mute()
+
         participant_data.uri = str(sip_uri)
         participant_data.display_name = display_name
         participant_data.session = session
