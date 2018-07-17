@@ -183,7 +183,7 @@ class ConferenceData(object):
         conference_event.room_number = room_number
         conference_event.save()
 
-    def add_participant(self, room_number, display_name, sip_uri, direction, is_caller, is_calltaker, is_primary):
+    def add_participant(self, room_number, display_name, sip_uri, mute_audio, direction, is_caller, is_calltaker, is_primary):
         try:
             log.info('add_participant %r for room %r, display_name %r', sip_uri, room_number, display_name)
 
@@ -205,6 +205,7 @@ class ConferenceData(object):
             participant.sip_uri = sip_uri
             participant.is_primary = is_primary
             participant.is_active = True
+            participant.mute = mute_audio
             participant.save()
 
             conference_event = ConferenceEvent()

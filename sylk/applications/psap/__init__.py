@@ -942,6 +942,7 @@ class PSAPApplication(SylkApplication):
                                                                 is_primary=is_primary,
                                                                 is_caller=is_caller,
                                                                 sip_uri=str(sip_uri),
+                                                                mute_audio=mute_audio,
                                                                 display_name=display_name))
 
     def set_new_primary(self, participants, primary_calltaker_uri):
