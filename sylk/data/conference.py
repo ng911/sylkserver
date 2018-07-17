@@ -2,6 +2,7 @@ from collections import namedtuple
 import datetime
 import traceback
 
+from sipsimple.core import SIPURI
 from application.python import Null
 from application.python.types import Singleton
 from application.notification import IObserver, NotificationCenter
@@ -228,10 +229,15 @@ class ConferenceData(object):
             participant.save()
 
             conference_event = ConferenceEvent()
-            conference_event.event = 'leave'
+            if is_active:
+                conference_event.event = 'join'
+                conference_event.event_details = 'participant {} is active'.format(display_name)
+            else:
+                conference_event.event = 'leave'
+                conference_event.event_details = 'participant {} is inactive'.format(display_name)
+
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
-            conference_event.event_details = 'participant {} left'.format(display_name)
             conference_event.save()
 
             '''
@@ -259,6 +265,15 @@ class ConferenceData(object):
             participant.is_primary = True
             new_primary_user_name = participant.name
             participant.save()
+
+            conference_event = ConferenceEvent()
+            conference_event.event = 'update_primary'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            old_sip_uri = SIPURI(old_primary_uri)
+            new_sip_uri = SIPURI(new_primary_uri)
+            conference_event.event_details = 'primary calltaker changed from {} to {}'.format(old_sip_uri.user, new_sip_uri.user)
+            conference_event.save()
 
             '''
             todo add an event that primary is changed
@@ -303,10 +318,19 @@ class ConferenceData(object):
             conference_event.save()
             '''
             conference = Conference.objects.get(room_number=room_number)
+            conference_event = ConferenceEvent()
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
             if on_hold:
                 conference.status = 'on_hold'
+                conference_event.event = 'start_hold'
+                conference_event.event_details = 'put on hold by {}'.format(calltaker)
             else:
+                conference_event = ConferenceEvent()
+                conference_event.event = 'end_hold'
+                conference_event.event_details = 'taken off hold by {}'.format(calltaker)
                 conference.status = 'active'
+            conference_event.save()
             conference.save()
             call_data = calls.get_conference_json(conference)
             if on_hold:
@@ -333,15 +357,20 @@ class ConferenceData(object):
             participant.mute = muted
             participant.save()
 
-            '''
-            todo add an event that participant is on mute
             conference_event = ConferenceEvent()
-            conference_event.event = 'leave'
+            sip_uri_parsed = SIPURI.parse(str(sip_uri))
+            username = sip_uri_parsed.user
+            if muted:
+                conference_event.event = 'mute'
+                conference_event.event_details = 'participant {} muted'.format(username)
+            else:
+                conference_event.event = 'end_mute'
+                conference_event.event_details = 'participant {} unmuted'.format(username)
+
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
-            conference_event.event_details = 'participant {} left'.format(display_name)
             conference_event.save()
-            '''
+
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
@@ -356,6 +385,17 @@ class ConferenceData(object):
             for participant in ConferenceParticipant.objects(room_number=room_number, is_active=True):
                 participant.muted = muted
                 participant.save()
+            conference_event = ConferenceEvent()
+            if muted:
+                conference_event.event = 'mute'
+                conference_event.event_details = 'all participants muted'
+            else:
+                conference_event.event = 'end_mute'
+                conference_event.event_details = 'all participants unmuted'
+
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.save()
 
             '''
             todo add an event that participant is on mute
