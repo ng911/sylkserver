@@ -1209,7 +1209,8 @@ class PSAPApplication(SylkApplication):
 
             # if no queued calls, check if there are any ringing calls and we are ACD ring_all
             # store ring strategy as part of room data
-            for room_data in self._rooms.itervalues():
+            for room_number in self._rooms:
+                room_data = self._rooms[room_number]
                 if (room_data.status == 'ringing') and (room_data.acd_strategy == 'ring_all') and (username not in room_data.ignore_calltakers):
                     room_data.ignore_calltakers.append(username)
                     # send call to this calltaker
