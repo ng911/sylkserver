@@ -496,7 +496,7 @@ class PSAPApplication(SylkApplication):
             is_calltaker = True
             server = ServerConfig.asterisk_server
             sip_uri = "sip:%s@%s" % (phone_number, server)
-            self.set_calltaker_busy(user_id=calltaker_user.user_id)
+            self.set_calltaker_busy(user_id=str(calltaker_user.user_id))
         else:
             e164_number = self._format_number_to_e164(phone_number)
             outgoing_gateway = ServerConfig.outgoing_gateway
