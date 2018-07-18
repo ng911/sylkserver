@@ -422,7 +422,7 @@ class PSAPApplication(SylkApplication):
                 # create an outbound session here for calls to calltakers
                 log.info('creating outgoing_call_initializer is_calltaker %r', forward_to_calltaker)
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
-                                                                    caller_identity=caller_identity, is_calltaker=forward_to_calltaker)
+                                                                    caller_identity=caller_identity, is_calltaker=forward_to_calltaker, add_failed_event=False)
                 ''' old code '''
                 '''
                 outgoing_call_initializer = OutgoingCallInitializer(target=sip_uri,
@@ -631,13 +631,13 @@ class PSAPApplication(SylkApplication):
                 # todo add handling here, put the call in queue?
                 pass
 
-    def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason):
+    def outgoing_session_did_fail(self, session, sip_uri, failure_code, reason, add_failed_event=True):
         log.info('outgoing_session_did_fail session %r, sip_uri %r, failure_code %r, reason %r', session, sip_uri, failure_code, reason)
         room_number = session.room_number
         log.info('outgoing_session_did_fail room_number %r', room_number)
         room_data = self.get_room_data(room_number)
-        room = self.get_room(room_number)
-        if room and room.started:
+        #room = self.get_room(room_number)
+        if add_failed_event:
             # get the target name
             sip_uri_obj = SIPURI.parse(str(sip_uri))
             NotificationCenter().post_notification('ConferenceParticipantFailed', self,
@@ -1548,7 +1548,7 @@ class OutgoingCallInitializer(object):
         self.cancel = False
         self.is_calltaker = is_calltaker
     '''
-    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False):
+    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False, add_failed_event=True):
         log.info("OutgoingCallInitializer for target %r, room %r, caller_identity %r, is_calltaker %r", target_uri, room_uri, caller_identity, is_calltaker)
         self.app = PSAPApplication()
         self.caller_identity = caller_identity
@@ -1567,6 +1567,7 @@ class OutgoingCallInitializer(object):
         if is_calltaker:
             calltaker_uri = SIPURI.parse(str(target_uri))
             self.calltaker_name = calltaker_uri.user
+        self.add_failed_event = add_failed_event
 
 
     def start(self):
@@ -1706,7 +1707,7 @@ class OutgoingCallInitializer(object):
         session = notification.sender
         remote_identity = str(session.remote_identity.uri)
         log.info("Session failed %s, %s" % (remote_identity, session.route))
-        self.app.outgoing_session_did_fail(session, self.target_uri, notification.data.code, notification.data.reason)
+        self.app.outgoing_session_did_fail(session, self.target_uri, notification.data.code, notification.data.reason, self.add_failed_event)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code,
                                       failure_reason=notification.data.reason)
 

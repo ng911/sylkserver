@@ -58,18 +58,22 @@ def sops():
 @psap.route('/speed_dial', methods=['GET'])
 def speed_dial():
     try:
-        user_id = get_argument('user_id')
-        params = {'psap_id' : ServerConfig.psap_id}
-        if user_id is None:
-            params['user_id__exists'] = False
-        else:
-            params['user_id'] = user_id
-
-        speed_dial_cursor = SpeedDial.objects(**params)
         speed_dials = []
+        params = {'psap_id' : ServerConfig.psap_id}
+        params['user_id__exists'] = False
+        speed_dial_cursor = SpeedDial.objects(**params)
         for speed_dial_db_obj in speed_dial_cursor:
             speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
             speed_dials.append(speed_dial)
+
+        user_id = get_argument('user_id')
+        if user_id is not None:
+            params = {'psap_id': ServerConfig.psap_id}
+            params['user_id'] = user_id
+            speed_dial_cursor = SpeedDial.objects(**params)
+            for speed_dial_db_obj in speed_dial_cursor:
+                speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
+                speed_dials.append(speed_dial)
 
         result = {'success': True, 'speed_dials' : speed_dials}
         return jsonify(result)
