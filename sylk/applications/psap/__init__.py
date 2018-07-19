@@ -998,10 +998,7 @@ class PSAPApplication(SylkApplication):
                                                                         sip_uri=str(participant_data.uri)))
 
             if (participant_data.session == session) and participant_data.on_hold and participant_data.is_calltaker:
-                self.set_calltaker_available(username=participant_data.display_name)
-
-
-
+                reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
 
 
     def add_session_to_room(self, room_number, session):
