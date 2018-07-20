@@ -661,7 +661,7 @@ class PSAPApplication(SylkApplication):
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
 
-            if len(room_data.outgoing_calls) == 0:
+            if (len(room_data.outgoing_calls) == 0) and room_data.is_emergeny:
                 # todo add handling here, put the call in queue?
                 room_data.status = 'ringing_queued'
                 NotificationCenter().post_notification('ConferenceUpdated', self,
