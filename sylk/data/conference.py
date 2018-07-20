@@ -298,7 +298,57 @@ class ConferenceData(object):
             log.error("exception in update_participant_active_status %r", e)
             log.error(stackTrace)
 
-    def update_hold(self, room_number, calltaker, on_hold):
+    # this should only be called if participant hold status is changed without call hold status being changed
+    # todo - we prob need to remove this bad logic and combine with function below
+    def update_participant_hold_status(self, room_number, calltaker, on_hold):
+        participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
+        participant.is_primary = False
+        if on_hold:
+            participant.is_active = False
+        else:
+            participant.is_active = True
+        participant.hold = on_hold
+        participant.save()
+
+        conference = Conference.objects.get(room_number=room_number)
+        conference_event = ConferenceEvent()
+        conference_event.event_time = datetime.datetime.utcnow()
+        conference_event.room_number = room_number
+        if on_hold:
+            conference.status = 'on_hold'
+            conference_event.event = 'start_hold'
+            conference_event.event_details = 'calltker {} on hold'.format(calltaker)
+        else:
+            conference_event.event = 'end_hold'
+            conference_event.event_details = 'calltker {} off hold'.format(calltaker)
+            conference.status = 'active'
+        conference_event.save()
+        conference.save()
+        call_data = calls.get_conference_json(conference)
+        if call_data['status'] == 'on_hold':
+            on_hold_by = []
+            for participant in ConferenceParticipant.objects(room_number=room_number, name=calltaker, is_calltaker=True,
+                                                             hold=True):
+                on_hold_by.append(participant.name)
+            if len(on_hold_by) > 0:
+                call_data['on_hold_by'] = on_hold_by
+        '''
+        if on_hold:
+            # get the calltakers that started on hold
+            for participant in ConferenceParticipant.objects(room_number=room_number, name=calltaker, is_calltaker=True,
+                                                             hold=True):
+                on_hold_by.append(participant.name)
+            call_data['on_hold_by'] = on_hold_by
+        else:
+            # make sure we remove hold done by calltaker
+            for participant in ConferenceParticipant.objects(room_number=room_number, is_calltaker=True, hold=True):
+                participant.hold = False
+                participant.save()
+        '''
+        participants_data = calls.get_conference_participants_json(room_number)
+        publish_update_call(room_number, call_data, participants_data)
+
+    def update_call_hold(self, room_number, calltaker, on_hold):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
             if on_hold:
@@ -326,10 +376,10 @@ class ConferenceData(object):
             if on_hold:
                 conference.status = 'on_hold'
                 conference_event.event = 'start_hold'
-                conference_event.event_details = 'put on hold by {}'.format(calltaker)
+                conference_event.event_details = 'call put on hold by {}'.format(calltaker)
             else:
                 conference_event.event = 'end_hold'
-                conference_event.event_details = 'taken off hold by {}'.format(calltaker)
+                conference_event.event_details = 'call taken off hold by {}'.format(calltaker)
                 conference.status = 'active'
             conference_event.save()
             conference.save()
@@ -428,6 +478,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceParticipantRinging')
         notification_center.add_observer(self, name='ConferenceParticipantFailed')
         notification_center.add_observer(self, name='ConferenceParticipantTimedout')
+        notification_center.add_observer(self, name='ConferenceParticipantHoldUpdated')
         notification_center.add_observer(self, name='ConferenceHoldUpdated')
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
@@ -518,10 +569,19 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
             log.error(stackTrace)
 
+    def _NH_ConferenceParticipantHoldUpdated(self, notification):
+        log.info("incoming _NH_ConferenceParticipantHoldUpdated")
+        try:
+            self.update_participant_hold_status(notification.data.room_number, notification.data.display_name, notification.data.on_hold)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
+            log.error(stackTrace)
+
     def _NH_ConferenceHoldUpdated(self, notification):
         log.info("incoming _NH_ConferenceHoldUpdated")
         try:
-            self.update_hold(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
+            self.update_call_hold(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
