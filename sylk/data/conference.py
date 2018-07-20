@@ -133,10 +133,9 @@ class ConferenceData(object):
             conference.save()
 
             if (status == 'closed'):
-                conference_participants = ConferenceParticipant.objects(room_number=room_number)
-                for participant in conference_participants:
+                for participant in ConferenceParticipant.objects(room_number=room_number):
                     participant.is_active = False
-                    participant.on_hold = False
+                    participant.hold = False
                     participant.save()
 
             conference_event = ConferenceEvent()
