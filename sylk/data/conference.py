@@ -573,7 +573,7 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantHoldUpdated(self, notification):
         log.info("incoming _NH_ConferenceParticipantHoldUpdated")
         try:
-            self.update_participant_hold_status(notification.data.room_number, notification.data.display_name, notification.data.on_hold)
+            self.update_participant_hold_status(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
