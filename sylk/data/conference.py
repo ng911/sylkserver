@@ -301,6 +301,7 @@ class ConferenceData(object):
     # this should only be called if participant hold status is changed without call hold status being changed
     # todo - we prob need to remove this bad logic and combine with function below
     def update_participant_hold_status(self, room_number, calltaker, on_hold):
+        log.info("inside update_participant_hold_status for room_number {}, calltaker {}, on_hold {}".format(room_number, calltaker, on_hold))
         participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
         participant.is_primary = False
         if on_hold:
