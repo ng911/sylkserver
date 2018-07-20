@@ -1080,12 +1080,17 @@ class PSAPApplication(SylkApplication):
                     (has_new_primary, new_primary_uri) = self.set_new_primary(participants=room_data.participants,
                                                                               primary_calltaker_uri=str(
                                                                                   calltaker_participant.uri))
+                    if has_new_primary:
+                        calltaker_participant.is_primary = False
+                        NotificationCenter().post_notification('ConferenceParticipantNewPrimary', self,
+                                                               NotificationData(room_number=room_number,
+                                                                                old_primary_uri=str(
+                                                                                    calltaker_participant.uri),
+                                                                                new_primary_uri=str(new_primary_uri)))
                     NotificationCenter().post_notification('ConferenceParticipantHoldUpdated', self,
                                                            NotificationData(room_number=room_number,
                                                                             calltaker=calltaker_name,
-                                                                            on_hold=True,
-                                                                            has_new_primary=has_new_primary,
-                                                                            new_primary_uri=new_primary_uri))
+                                                                            on_hold=True))
 
             calltaker_participant.session.end()
             #self.set_calltaker_available(username=calltaker_name)

@@ -300,7 +300,7 @@ class ConferenceData(object):
 
     # this should only be called if participant hold status is changed without call hold status being changed
     # todo - we prob need to remove this bad logic and combine with function below
-    def update_participant_hold_status(self, room_number, calltaker, on_hold, has_new_primary=False, new_primary_uri=None):
+    def update_participant_hold_status(self, room_number, calltaker, on_hold):
         log.info("inside update_participant_hold_status for room_number {}, calltaker {}, on_hold {}".format(room_number, calltaker, on_hold))
         participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
         participant.is_primary = False
@@ -310,11 +310,6 @@ class ConferenceData(object):
             participant.is_active = True
         participant.hold = on_hold
         participant.save()
-
-        if has_new_primary:
-            participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=str(new_primary_uri), is_calltaker=True)
-            participant.is_primary = False
-            participant.save()
 
         conference_event = ConferenceEvent()
         conference_event.event_time = datetime.datetime.utcnow()
@@ -574,8 +569,7 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantHoldUpdated(self, notification):
         log.info("incoming _NH_ConferenceParticipantHoldUpdated")
         try:
-            self.update_participant_hold_status(notification.data.room_number, notification.data.calltaker, notification.data.on_hold,
-                                                notification.data.has_new_primary, notification.data.new_primary_uri)
+            self.update_participant_hold_status(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
