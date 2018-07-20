@@ -667,6 +667,11 @@ class PSAPApplication(SylkApplication):
                 NotificationCenter().post_notification('ConferenceUpdated', self,
                                                        NotificationData(room_number=room_number,
                                                                         status='ringing_queued'))
+            else:
+                room_data.incoming_session.reject(code=404, reason="bad number dialed")
+                NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                       NotificationData(room_number=room_number,
+                                                                        status='failed'))
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
