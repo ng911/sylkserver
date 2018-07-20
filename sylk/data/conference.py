@@ -312,7 +312,7 @@ class ConferenceData(object):
         participant.save()
 
         if has_new_primary:
-            participant = ConferenceParticipant.objects.get(room_number=room_number, uri=str(new_primary_uri), is_calltaker=True)
+            participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=str(new_primary_uri), is_calltaker=True)
             participant.is_primary = False
             participant.save()
 
