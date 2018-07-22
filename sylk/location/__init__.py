@@ -61,6 +61,9 @@ def get_initialized_ali_data():
 
 def process_ali_success(result):
     log.info("process_ali_success for %r", result)
+    if result is  None:
+        log.error("process_ali_success error result is %r", result)
+        return
     (room_number, number, ali_format, ali_result, ali_result_xml, raw_ali_data) = result
     log.info("aliResult %r, aliResultXml %r, rawAliData %r", ali_result, ali_result_xml, raw_ali_data)
     # store the ali result in database and send a updated message
