@@ -505,10 +505,7 @@ def process_ali_result(result):
             if _factory != factory:
                 factory.cancel_ali_request(id)
         log.info("aliquery do my_d.callback")
-        #my_d.callback((room_number, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
-        # just for testing
-        #my_d.errback(AliRequestTimeout(room_number, "request timedout"))
-        my_d.errback(ValueError("request timedout"))
+        my_d.callback((room_number, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
 
 
 def send_ali_request(room_number, number, ali_format):
