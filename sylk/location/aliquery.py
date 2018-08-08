@@ -512,14 +512,18 @@ def send_ali_request(room_number, number, ali_format):
     log.info("inside send_ali_request for room_number %r, number %r, ali_format %r", room_number, number, ali_format)
     my_d = defer.Deferred()
     id = str(uuid.uuid4())
-    factories = ali_factories[ali_format]
-    timer = reactor.callLater(20, on_timeout, id)
-    g_ali_requests[id] = (my_d, room_number, factories, timer)
-    log.info("facories length is %r", len(factories))
-    for factory in factories:
-        d = factory.send_ali_request(id, number)
-        d.addCallback(process_ali_result)
-    return my_d, id
+    if ali_format in ali_factories:
+        factories = ali_factories[ali_format]
+        timer = reactor.callLater(20, on_timeout, id)
+        g_ali_requests[id] = (my_d, room_number, factories, timer)
+        log.info("facories length is %r", len(factories))
+        for factory in factories:
+            d = factory.send_ali_request(id, number)
+            d.addCallback(process_ali_result)
+        return my_d, id
+    else:
+        return None, None
+
 
 
 

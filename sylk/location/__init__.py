@@ -162,8 +162,11 @@ def ali_lookup(room_number, number, ali_format):
             log.error('process_ali_failed %s', str(e))
         wamp.publish_update_location_failed(room_number)
 
-    d.addErrback(process_ali_failed)
-    d.addCallback(process_ali_success)
+    if d is not None:
+        d.addErrback(process_ali_failed)
+        d.addCallback(process_ali_success)
+    else:
+        process_ali_failed("format {} not available)".format(ali_format))
 
     return request_id
 
