@@ -1330,10 +1330,9 @@ class PSAPApplication(SylkApplication):
             room.stop()
         '''
 
-    def _NH_SIPSessionDidFail(self, notification):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
-        log.info(u'PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
+        log.info(u'PSAP Session from %s failed: %s, data %r' % (session.remote_identity.uri, notification.data.reason, notification.data))
         self.remove_session_from_room(session.room_number, session)
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
