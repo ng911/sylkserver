@@ -293,8 +293,8 @@ class PSAPApplication(SylkApplication):
 
         rooms = self.get_rooms()
 
-        log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, from_uri %r, rooms %r",
-            peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
+        log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, called_uri %r, from_uri %r, rooms %r",
+            peer_address.ip, peer_address.port, local_identity.uri.user, local_identity.uri, remote_identity.uri, rooms)
         # first verify the session
         (authenticated, call_type, incoming_link, calltaker_obj) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
