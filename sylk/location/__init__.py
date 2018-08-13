@@ -149,7 +149,7 @@ def ali_lookup(room_number, number, ali_format):
     d, request_id = send_ali_request(room_number, number, ali_format)
 
     def process_ali_failed(failure):
-        log.debug("ali_failed number %r, %r", room_number, number)
+        log.info("ali_failed number %r, %r", room_number, number)
         try:
             conference_db_obj = Conference.objects.get(room_number=room_number)
             conference_db_obj.ali_result = "failed"
