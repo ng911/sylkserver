@@ -193,6 +193,11 @@ class ConferenceData(object):
                     participant = ConferenceParticipant.objects.get(room_number=room_number, is_calltaker=True, name=display_name)
                 except:
                     pass
+            else:
+                try:
+                    participant = ConferenceParticipant.objects.get(room_number=room_number, is_calltaker=False, sip_uri=str(sip_uri))
+                except:
+                    pass
 
             if participant is None:
                 participant = ConferenceParticipant()
