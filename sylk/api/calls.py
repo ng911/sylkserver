@@ -72,7 +72,7 @@ def lastMonth():
     arr_cur_time = arrow.utcnow()
     arr_last_month = arr_cur_time.shift(days=-30)
 
-    for conference_db_obj in Conference.objects(start_time__gt=arr_last_month.naive):
+    for conference_db_obj in Conference.objects(start_time__gt=arr_last_month.naive)[0:100]:
         conference_json = db_calls.get_conference_json(conference_db_obj)
         calls.append(conference_json)
 
