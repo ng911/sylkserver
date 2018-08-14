@@ -134,6 +134,8 @@ def ali_lookup(room_number, number, ali_format):
 
     ali_available = check_ali_format_supported(ali_format)
     log.info("inside ali_lookup ali_available %r", ali_available)
+    if not ali_available:
+        return
 
     # setup ali status to pending
     try:
@@ -146,8 +148,6 @@ def ali_lookup(room_number, number, ali_format):
 
         call_data = calls.get_conference_json(conf_db_obj)
         wamp.publish_update_call(room_number, call_data)
-        if not ali_available:
-            return
     except:
         # if the room does not exist we ignore this
         pass
