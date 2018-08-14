@@ -48,6 +48,11 @@ class Psap(Document):
     ip_address = StringField(default="127.0.0.1")
     auto_rebid = BooleanField(default=True)
     default_profile_id = ObjectIdField()
+    meta = {
+        'indexes': [
+            'psap_id'
+        ]
+    }
 
 
 class User(Document):
@@ -59,6 +64,13 @@ class User(Document):
     secondary_psap_id = ObjectIdField()
     is_active = BooleanField(default=True)
     roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')))
+    meta = {
+        'indexes': [
+            'user_id',
+            'user_name',
+            'psap_id'
+        ]
+    }
 
     def get_id(self):
         return str(self.user_id)
@@ -96,6 +108,12 @@ class CalltakerStation(Document):
     station_id = StringField(required=True, unique=True, default=bson.ObjectId)
     name = StringField(required=True, unique=True)
     loud_ring_server = BooleanField()
+    meta = {
+        'indexes': [
+            'station_id',
+            'name'
+        ]
+    }
 
 
 class CalltakerProfile(DynamicDocument):
@@ -107,14 +125,27 @@ class CalltakerProfile(DynamicDocument):
     ring_delay = IntField(min_value=0, default=0)
     auto_respond = BooleanField(default=False)
     auto_respond_after = IntField(min_value=0, default=10)
+    meta = {
+        'indexes': [
+            'profile_id',
+            'user_id'
+        ]
+    }
 
 
 class CalltakerActivity(Document):
     user_id = ObjectIdField(required=True)
     event = StringField(required=True, choices=('login', 'made_busy', 'answer_call', 'hang_up', 'logout', 'rebid'))
     event_details = StringField()
-    star_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    meta = {
+        'indexes': [
+            'user_id',
+            'event',
+            'start_time'
+        ]
+    }
 
 
 class SpeedDial(Document):
@@ -123,6 +154,12 @@ class SpeedDial(Document):
     dest = StringField(required=True)
     name = StringField(required=True)
     group = StringField(required=False)
+    meta = {
+        'indexes': [
+            'psap_id',
+            'user_id'
+        ]
+    }
 
 
 class IncomingLink(Document):
@@ -138,6 +175,12 @@ class IncomingLink(Document):
     ringback = BooleanField(default=False)
     queue_id = ObjectIdField()
     ali_format = StringField()
+    meta = {
+        'indexes': [
+            'psap_id',
+            'link_id'
+        ]
+    }
 
     def is_origination_calltaker(self):
         return self.orig_type == 'calltaker_gateway'
@@ -163,6 +206,12 @@ class OutgoingLink(Document):
     ip_address = StringField(required=True)
     port = IntField(min_value=0)
     from_value = StringField()
+    meta = {
+        'indexes': [
+            'ip_address',
+            'link_id'
+        ]
+    }
 
 
 # add this later
@@ -177,11 +226,25 @@ class Queue(Document):
     name = StringField(required=True, default='default', unique=True)        #default is default queue
     ring_time = IntField(min_value=0, default=30, required=True)
     rollover_queue_id = ObjectIdField(required=False, default=None)
+    meta = {
+        'indexes': [
+            'queue_id',
+            'psap_id'
+        ]
+    }
 
 
 class QueueMember(Document):
     user_id = ObjectIdField(required=True)
     queue_id = ObjectIdField(required=True)
+    meta = {
+        'indexes': [
+            {
+                'fields' : ['queue_id', 'user_id'],
+                'unique' : True
+            }
+        ]
+    }
 
 
 class Call(Document):
@@ -198,6 +261,11 @@ class Call(Document):
     failure_code = StringField(required=False)
     failure_reason = StringField(required=False)
     status = StringField(required=True, choices=('init', 'reject', 'failed', 'ringing', 'queued', 'abandoned', 'active', 'closed', 'cancel'), default='init')
+    meta = {
+        'indexes': [
+            'psap_id', 'call_id'
+        ]
+    }
 
 
 class Agency(EmbeddedDocument):
@@ -247,6 +315,16 @@ class Conference(Document):
     secondary_type = StringField(default='')
     ali_result = StringField(default='none', hoices=('success', 'failed', 'pending', 'no records found', 'none'))
     ali_format = StringField()
+    meta = {
+        'indexes': [
+            'psap_id',
+            'room_number',
+            'start_time',
+            'call_type',
+            'callback',
+            'status'
+        ]
+    }
 
 
 class ConferenceParticipant(Document):
@@ -268,6 +346,13 @@ class ConferenceParticipant(Document):
     send_video = BooleanField(default=True)
     send_audio = BooleanField(default=True)
     send_text = BooleanField(default=True)
+    meta = {
+        'indexes': [
+            'sip_uri',
+            'room_number',
+            'name'
+        ]
+    }
 
 
 class ConferenceEvent(Document):
@@ -276,12 +361,24 @@ class ConferenceEvent(Document):
                                                 'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', 'abandoned', 'cancel', 'failed', 'update_primary'))
     event_details = StringField()
     event_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    meta = {
+        'indexes': [
+            'event',
+            'room_number'
+        ]
+    }
 
 
 class ConferenceMessage(Document):
     room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
+    meta = {
+        'indexes': [
+            'sender_uri',
+            'room_number'
+        ]
+    }
 
 
 class Location(Document):
@@ -319,6 +416,12 @@ class Location(Document):
     psap_name = StringField()
     pilot_no = StringField()
     descrepancy = BooleanField(default=False)
+    meta = {
+        'indexes': [
+            'room_number',
+            'location_id'
+        ]
+    }
     '''
     "caller" : {
         "category" : "unknown",
@@ -352,6 +455,13 @@ class AliServer(Document):
     ip2 = StringField()
     port2 = IntField(min_value=0)
     name = StringField()
+    meta = {
+        'indexes': [
+            'psap_id',
+            'type',
+            'format'
+        ]
+    }
 
 
 class CallTransferLine(Document):
@@ -360,6 +470,13 @@ class CallTransferLine(Document):
     type = StringField(required=True, choices=('wireless', 'wireline'))
     name = StringField(required=True)
     star_code = StringField(required=True)
+    meta = {
+        'indexes': [
+            'psap_id',
+            'line_id',
+            'type'
+        ]
+    }
 
 
 class Greeting(Document):
@@ -368,6 +485,13 @@ class Greeting(Document):
     user_id = ObjectIdField()
     desc = StringField(required=True)
     group = StringField()
+    meta = {
+        'indexes': [
+            'psap_id',
+            'greeting_id',
+            'user_id'
+        ]
+    }
 
 
 def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
