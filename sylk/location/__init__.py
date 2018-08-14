@@ -133,6 +133,8 @@ def ali_lookup(room_number, number, ali_format):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
 
     ali_available = check_ali_format_supported(ali_format)
+    log.info("inside ali_lookup ali_available %r", ali_available)
+
     # setup ali status to pending
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
