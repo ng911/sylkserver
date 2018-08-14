@@ -1,7 +1,7 @@
 import sys
 import datetime
 from sylk.applications import ApplicationLogger
-from aliquery import send_ali_request
+from aliquery import send_ali_request, check_ali_format_supported
 from sylk.db.schema import Location, Conference
 import sylk.wamp as wamp
 import sylk.db.calls as calls
@@ -132,14 +132,20 @@ def process_ali_success(result):
 def ali_lookup(room_number, number, ali_format):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
 
+    ali_available = check_ali_format_supported(ali_format)
     # setup ali status to pending
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
-        conf_db_obj.ali_result = 'pending'
+        if ali_available:
+            conf_db_obj.ali_result = 'pending'
+        else:
+            conf_db_obj.ali_result = 'ali format not supported'
         conf_db_obj.save()
 
         call_data = calls.get_conference_json(conf_db_obj)
         wamp.publish_update_call(room_number, call_data)
+        if not ali_available:
+            return
     except:
         # if the room does not exist we ignore this
         pass

@@ -508,6 +508,10 @@ def process_ali_result(result):
         my_d.callback((room_number, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
 
 
+def check_ali_format_supported(ali_format):
+    return ali_format in ali_factories
+
+
 def send_ali_request(room_number, number, ali_format):
     log.info("inside send_ali_request for room_number %r, number %r, ali_format %r", room_number, number, ali_format)
     my_d = defer.Deferred()
