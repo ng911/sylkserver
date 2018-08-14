@@ -67,7 +67,7 @@ class User(Document):
     meta = {
         'indexes': [
             'user_id',
-            'user_name',
+            'username',
             'psap_id'
         ]
     }
