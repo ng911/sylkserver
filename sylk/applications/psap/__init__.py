@@ -366,7 +366,6 @@ class PSAPApplication(SylkApplication):
                     lookup_number = lookup_number[1:]
                 log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
                 ali_format = incoming_link.ali_format
-                ali_lookup(room_number, lookup_number, incoming_link.ali_format)
 
             if (len(sip_uris) == 0) and (call_type == 'sos'):
                 room_data.status = 'ringing_queued'
@@ -383,6 +382,8 @@ class PSAPApplication(SylkApplication):
                                                                     ali_format=ali_format,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
+            if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
+                ali_lookup(room_number, lookup_number, incoming_link.ali_format)
             self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
             if direction == 'out':
                 publish_outgoing_call_status(room_number, remote_identity.uri.user, 'ringing')

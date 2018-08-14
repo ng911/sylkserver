@@ -141,7 +141,7 @@ def ali_lookup(room_number, number, ali_format):
         if ali_available:
             conf_db_obj.ali_result = 'pending'
         else:
-            conf_db_obj.ali_result = 'ali format not supported'
+            conf_db_obj.ali_result = 'none'
         conf_db_obj.save()
 
         call_data = calls.get_conference_json(conf_db_obj)
