@@ -1629,6 +1629,8 @@ class OutgoingCallInitializer(object):
 
         if self.session is not None:
             # todo add event sending here
+            notification_center = NotificationCenter()
+            notification_center.remove_observer(self, sender=self.session)
             self.session.end()
             send_call_update_notification(self, self.session, 'cancel')
 
