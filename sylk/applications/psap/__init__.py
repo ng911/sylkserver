@@ -662,13 +662,16 @@ class PSAPApplication(SylkApplication):
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
 
+            # todo this is wrong and a bug, fix this
             if (len(room_data.outgoing_calls) == 0) and room_data.is_emergeny:
                 # todo add handling here, put the call in queue?
+                log.info("put call in ringing queue")
                 room_data.status = 'ringing_queued'
                 NotificationCenter().post_notification('ConferenceUpdated', self,
                                                        NotificationData(room_number=room_number,
                                                                         status='ringing_queued'))
             else:
+                log.info("send bad number dialed")
                 room_data.incoming_session.reject(code=404, reason="bad number dialed")
                 NotificationCenter().post_notification('ConferenceUpdated', self,
                                                        NotificationData(room_number=room_number,
@@ -870,6 +873,7 @@ class PSAPApplication(SylkApplication):
                 if room_data.hold_timer != None:
                     room_data.hold_timer.stop()
                     room_data.hold_timer = None
+                self.remove_room(room_number)
                 NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number,
                                                                     status='closed'))
