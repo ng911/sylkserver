@@ -663,19 +663,20 @@ class PSAPApplication(SylkApplication):
 
 
             # todo this is wrong and a bug, fix this
-            if (len(room_data.outgoing_calls) == 0) and room_data.is_emergeny:
-                # todo add handling here, put the call in queue?
-                log.info("put call in ringing queue")
-                room_data.status = 'ringing_queued'
-                NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                       NotificationData(room_number=room_number,
-                                                                        status='ringing_queued'))
-            else:
-                log.info("send bad number dialed")
-                room_data.incoming_session.reject(code=404, reason="bad number dialed")
-                NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                       NotificationData(room_number=room_number,
-                                                                        status='failed'))
+            if (len(room_data.outgoing_calls) == 0):
+                if room_data.is_emergeny:
+                    # todo add handling here, put the call in queue?
+                    log.info("put call in ringing queue")
+                    room_data.status = 'ringing_queued'
+                    NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                           NotificationData(room_number=room_number,
+                                                                            status='ringing_queued'))
+                else:
+                    log.info("send bad number dialed")
+                    room_data.incoming_session.reject(code=404, reason="bad number dialed")
+                    NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                           NotificationData(room_number=room_number,
+                                                                            status='failed'))
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
