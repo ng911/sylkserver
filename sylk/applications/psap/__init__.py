@@ -1002,7 +1002,7 @@ class PSAPApplication(SylkApplication):
                             reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
                             #self.set_calltaker_available(username=participant_data.display_name)
                     else:
-                        self.set_calltaker_available(username=participant_data.display_name)
+                        reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
 
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
