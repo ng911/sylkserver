@@ -42,10 +42,11 @@ def publish_update_calltaker_status(user_id, username, status):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_update_calltakers(json_data):
     try:
         if wamp_session is not None:
-            wamp_session.publish(u'com.emergent.calltakers', json_data)
+            yield wamp_session.publish(u'com.emergent.calltakers', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_calltakers wamp session is None")
     except Exception as e:
@@ -54,6 +55,7 @@ def publish_update_calltakers(json_data):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_create_call(room_number, call_data, participants):
     try:
         if wamp_session is not None:
@@ -63,7 +65,7 @@ def publish_create_call(room_number, call_data, participants):
             json_data['call_data'] = call_data
             json_data['participants'] = participants
             #log.info("publish com.emergent.call with json %r", json_data)
-            wamp_session.publish(u'com.emergent.call', json_data)
+            yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_create_call wamp session is None")
     except Exception as e:
@@ -72,13 +74,14 @@ def publish_create_call(room_number, call_data, participants):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_active_call(calltaker, room_number):
     try:
         if wamp_session is not None:
             json_data = {}
             json_data['command'] = 'active'
             json_data['room_number'] = room_number
-            wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data)
+            yield wamp_session.publish(u'com.emergent.call.%s' % calltaker, json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_active_call wamp session is None")
     except Exception as e:
@@ -87,13 +90,14 @@ def publish_active_call(calltaker, room_number):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_clear_abandoned_call(rooms):
     try:
         if wamp_session is not None:
             json_data = {}
             json_data['command'] = 'clear_abandoned'
             json_data['rooms'] = rooms
-            wamp_session.publish(u'com.emergent.call', json_data)
+            yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_clear_abandoned_call wamp session is None")
     except Exception as e:
@@ -103,6 +107,7 @@ def publish_clear_abandoned_call(rooms):
 
 
 # type should be ringing or duration
+@inlineCallbacks
 def publish_update_call_timer(room_number, type, val):
     try:
         if wamp_session is not None:
@@ -110,7 +115,7 @@ def publish_update_call_timer(room_number, type, val):
             json_data['type'] = type
             json_data['val'] = val
             json_data['room_number'] = room_number
-            wamp_session.publish(u'com.emergent.calltimer', json_data)
+            yield wamp_session.publish(u'com.emergent.calltimer', json_data, options=PublishOptions(acknowledge=True))
             # old code - now we send timer to all calltakers
             #wamp_session.publish(u'com.emergent.calltimer.%s' % room_number, json_data)
         else:
@@ -144,13 +149,14 @@ def publish_update_call(room_number, call_data, participants=None):
 
 
 # status can be 'ringing', 'active', 'failed', 'timedout'
+@inlineCallbacks
 def publish_outgoing_call_status(room_number, calltaker, status):
     try:
         if wamp_session is not None:
             json_data = {}
             json_data['status'] = status
             json_data['room_number'] = room_number
-            wamp_session.publish(u'com.emergent.call.outgoing.%s' % calltaker, json_data)
+            yield wamp_session.publish(u'com.emergent.call.outgoing.%s' % calltaker, json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_outgoing_call_status wamp session is None")
     except Exception as e:
@@ -159,6 +165,7 @@ def publish_outgoing_call_status(room_number, calltaker, status):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_update_primary(room_number, old_primary_user_name, new_primary_user_name):
     try:
         log.info("publish_update_primary room_number %r, old_primary_user_name %r, new_primary_user_name %r", room_number, old_primary_user_name, new_primary_user_name)
@@ -170,7 +177,7 @@ def publish_update_primary(room_number, old_primary_user_name, new_primary_user_
             json_data['new_primary'] = new_primary_user_name
 
             #log.info("publish com.emergent.call with json %r", json_data)
-            wamp_session.publish(u'com.emergent.call', json_data)
+            yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_primary wamp session is None")
     except Exception as e:
@@ -179,12 +186,13 @@ def publish_update_primary(room_number, old_primary_user_name, new_primary_user_
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_update_location_success(room_number, ali_result, location_display):
     try:
         json_data = {'success' : True, 'room_number': room_number, 'ali_data' : ali_result, 'location_display' : location_display}
         if wamp_session is not None:
             log.info("publish location update for room %s", room_number)
-            wamp_session.publish(u'com.emergent.location', json_data)
+            yield wamp_session.publish(u'com.emergent.location', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_location_success wamp session is None")
     except Exception as e:
@@ -193,11 +201,12 @@ def publish_update_location_success(room_number, ali_result, location_display):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_update_location_failed(room_number):
     try:
         json_data = {'success' : False}
         if wamp_session is not None:
-            wamp_session.publish(u'com.emergent.location.%s' % room_number, json_data)
+            yield wamp_session.publish(u'com.emergent.location.%s' % room_number, json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_location_failed wamp session is None")
     except Exception as e:
@@ -205,11 +214,12 @@ def publish_update_location_failed(room_number):
         log.error("exception in wamp %s", str(e))
         log.error("%s", stackTrace)
 
+@inlineCallbacks
 def publish_update_calls():
     try:
         if wamp_session is not None:
             log.info("publish com.emergent.calls")
-            wamp_session.publish(u'com.emergent.calls')
+            yield wamp_session.publish(u'com.emergent.calls', options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_calls wamp session is None")
     except Exception as e:
