@@ -246,8 +246,9 @@ class Room(object):
         #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         #self.recorder.start()
         #self.audio_conference.bridge.add(self.recorder)
-        self.moh_player = MoHPlayer(self.audio_conference)
-        self.moh_player.start()
+        # todo -- commented temp for load testing. this might be causing the failures
+        #self.moh_player = MoHPlayer(self.audio_conference)
+        #self.moh_player.start()
         self.state = 'started'
         self.duration = 0
 
@@ -271,7 +272,8 @@ class Room(object):
         #self.incoming_message_queue = None
         #self.message_dispatcher.kill(proc.ProcExit)
         #self.message_dispatcher = None
-        self.moh_player.stop()
+        # todo -- commented temp for load testing. this might be causing the failures
+        #self.moh_player.stop()
         self.moh_player = None
         self.audio_conference = None
         notification_center = NotificationCenter()
@@ -455,10 +457,11 @@ class Room(object):
 
         #self.dispatch_conference_info()
 
-        if len(self.audio_conference.streams) == 1:
-            self.moh_player.play()
-        else:
-            self.moh_player.pause()
+        # todo -- commented temp for load testing. this might be causing the failures
+        #if len(self.audio_conference.streams) == 1:
+        #    self.moh_player.play()
+        #else:
+        #    self.moh_player.pause()
 
         if len(self.sessions) == 1:
             log.info(u'Room %s - started by %s with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))
@@ -513,10 +516,13 @@ class Room(object):
                 # User may hangup before getting bridged into the conference
                 pass
             if len(self.audio_conference.streams) == 0:
-                self.moh_player.pause()
+                # todo -- commented temp for load testing. this might be causing the failures
+                #self.moh_player.pause()
                 self.audio_conference.hold()
             elif len(self.audio_conference.streams) == 1:
-                self.moh_player.play()
+                pass
+                # todo -- commented temp for load testing. this might be causing the failures
+                #self.moh_player.play()
         try:
             next(stream for stream in session.streams if stream.type == 'file-transfer')
         except StopIteration:
@@ -811,10 +817,13 @@ class Room(object):
                     # User may hangup before getting bridged into the conference
                     pass
                 if len(self.audio_conference.streams) == 0:
-                    self.moh_player.pause()
+                    # todo -- commented temp for load testing. this might be causing the failures
+                    #self.moh_player.pause()
                     self.audio_conference.hold()
                 elif len(self.audio_conference.streams) == 1:
-                    self.moh_player.play()
+                    pass
+                    # todo -- commented temp for load testing. this might be causing the failures
+                    #self.moh_player.play()
             if not session.streams:
                 log.info(u'Room %s - %s has removed all streams, session will be terminated' % (self.uri, format_identity(session.remote_identity)))
                 session.end()
