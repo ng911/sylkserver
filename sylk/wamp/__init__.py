@@ -1,6 +1,7 @@
 import traceback
 from autobahn.twisted.component import Component
 from sylk.applications import ApplicationLogger
+from autobahn.wamp.types import PublishOptions
 from application.notification import IObserver, NotificationCenter, NotificationData
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 log = ApplicationLogger(__package__)
@@ -30,7 +31,7 @@ def publish_update_calltaker_status(user_id, username, status):
                 'status': status
             }
             log.info("publish_update_calltaker_status for json %r", json_data)
-            wamp_session.publish(u'com.emergent.calltaker', json_data)
+            yield wamp_session.publish(u'com.emergent.calltaker', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_calltaker_status wamp session is None")
     except Exception as e:
@@ -129,7 +130,7 @@ def publish_update_call(room_number, call_data, participants=None):
                 json_data['participants'] = participants
 
             log.info("publish com.emergent.call with call_data %r", call_data)
-            wamp_session.publish(u'com.emergent.call', json_data)
+            yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
         else:
             log.error("publish_update_call wamp session is None")
     except Exception as e:
