@@ -22,6 +22,7 @@ comp = Component(
 wamp_session=None
 
 
+@inlineCallbacks
 def publish_update_calltaker_status(user_id, username, status):
     try:
         if wamp_session is not None:
@@ -31,7 +32,8 @@ def publish_update_calltaker_status(user_id, username, status):
                 'status': status
             }
             log.info("publish_update_calltaker_status for json %r", json_data)
-            yield wamp_session.publish(u'com.emergent.calltaker', json_data, options=PublishOptions(acknowledge=True))
+            out = yield wamp_session.publish(u'com.emergent.calltaker', json_data, options=PublishOptions(acknowledge=True))
+            log.info("publish_update_calltaker_status returned %r", out)
         else:
             log.error("publish_update_calltaker_status wamp session is None")
     except Exception as e:
@@ -119,6 +121,7 @@ def publish_update_call_timer(room_number, type, val):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
 def publish_update_call(room_number, call_data, participants=None):
     try:
         if wamp_session is not None:
@@ -130,7 +133,8 @@ def publish_update_call(room_number, call_data, participants=None):
                 json_data['participants'] = participants
 
             log.info("publish com.emergent.call with call_data %r", call_data)
-            yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
+            out = yield wamp_session.publish(u'com.emergent.call', json_data, options=PublishOptions(acknowledge=True))
+            log.info("publish com.emergent.call returned %r", out)
         else:
             log.error("publish_update_call wamp session is None")
     except Exception as e:
