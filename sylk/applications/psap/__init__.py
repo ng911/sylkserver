@@ -1,6 +1,7 @@
 
 import re
 import traceback
+import psutil
 from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from twisted.internet import reactor
@@ -36,6 +37,9 @@ from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, p
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
+
+def get_num_open_files():
+    return len(psutil.Process().open_files())
 
 class RoomNotFoundError(Exception): pass
 
@@ -265,6 +269,7 @@ class PSAPApplication(SylkApplication):
 
     def incoming_session(self, session, headers):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
+        log.info(u'num open files is %d', get_num_open_files())
         send_call_update_notification(self, session, 'init')
 
         has_audio = False

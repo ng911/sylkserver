@@ -3,6 +3,7 @@
 import os
 import signal
 import sys
+import resource
 
 from application import log
 from application.process import process, ProcessError
@@ -95,6 +96,9 @@ if __name__ == '__main__':
     log.info('starting api server')
     sylk.api.start_server()
     log.info('starting api server done')
+
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    log.info('limit number of open files - soft %d, hard %d', soft, hard)
 
     server = SylkServer()
     try:
