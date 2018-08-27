@@ -36,6 +36,7 @@ app.config['SESSION_MONGODB'] = mongo_client
 app.config['SESSION_MONGODB_DB'] = 'ng911'
 app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
 
+Session(app)
 CORS(app)
 
 login_manager = LoginManager()
