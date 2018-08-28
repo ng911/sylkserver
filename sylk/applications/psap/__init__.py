@@ -14,6 +14,7 @@ from sipsimple.streams import MediaStreamRegistry
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader, Header, SubjectHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
+from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.session import IllegalStateError
 from sylk.session import Session
 from sylk.accounts import get_user_account
@@ -270,8 +271,10 @@ class PSAPApplication(SylkApplication):
     def incoming_session(self, session, headers):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
         log.info(u'num open files is %d', get_num_open_files())
-        from mem_top import mem_top
-        log.info(mem_top())
+        #from mem_top import mem_top
+        #log.info(mem_top())
+        import objgraph
+        objgraph.show_most_common_types(limit=20)
         send_call_update_notification(self, session, 'init')
 
         has_audio = False
