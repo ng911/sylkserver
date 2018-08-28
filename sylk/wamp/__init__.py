@@ -148,6 +148,26 @@ def publish_update_call(room_number, call_data, participants=None):
         log.error("%s", stackTrace)
 
 
+@inlineCallbacks
+def publish_update_call_ringing(room_number, ringing_calltakers):
+    try:
+        if wamp_session is not None:
+            json_data = {}
+            json_data['command'] = 'ringing_updated'
+            json_data['room_number'] = room_number
+            json_data['ringing_calltakers'] = ringing_calltakers
+            log.info("publish com.emergent.call with json_data %r", json_data)
+            out = yield wamp_session.publish(u'com.emergent.call', json_data,
+                                             options=PublishOptions(acknowledge=True))
+            log.info("publish com.emergent.call returned %r", out)
+        else:
+            log.error("publish_update_call_ringing wamp session is None")
+    except Exception as e:
+        stackTrace = traceback.format_exc()
+        log.error("exception in wamp %s", str(e))
+        log.error("%s", stackTrace)
+
+
 # status can be 'ringing', 'active', 'failed', 'timedout'
 @inlineCallbacks
 def publish_outgoing_call_status(room_number, calltaker, status):

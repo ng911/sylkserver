@@ -10,7 +10,7 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
-from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary
+from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary, publish_update_call_ringing
 import sylk.db.calls as calls
 
 import sylk.wamp
@@ -158,13 +158,14 @@ class ConferenceData(object):
             log.error("exception in update_conference_status %r", e)
             log.error(stackTrace)
 
-    def add_participant_ringing(self, room_number, display_name):
+    def add_participant_ringing(self, room_number, display_name, ringing_calltakers):
         conference_event = ConferenceEvent()
         conference_event.event = 'ringing'
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.event_details = 'ringing {}'.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
+        publish_update_call_ringing(room_number, ringing_calltakers)
 
     def add_participant_timedout(self, room_number, display_name):
         conference_event = ConferenceEvent()
@@ -519,7 +520,7 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantRinging(self, notification):
         log.info("incoming _NH_ConferenceParticipantRinging")
         try:
-            self.add_participant_ringing(notification.data.room_number, notification.data.display_name)
+            self.add_participant_ringing(notification.data.room_number, notification.data.display_name, notification.data.ringing_calltakers)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantRinging %r", e)

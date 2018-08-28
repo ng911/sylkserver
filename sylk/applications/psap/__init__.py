@@ -49,6 +49,7 @@ class RoomData(object):
     def __init__(self):
         self.ignore_calltakers = []
         self.participants = []
+        self.outgoing_calls = {}
         self.status = 'init'
         self.ringing_duration_timer = None
         self.duration_timer = None
@@ -95,6 +96,15 @@ class RoomData(object):
         for participant_data in self.participants.itervalues():
             if participant_data.is_calltaker:
                 calltakers.append(participant_data.display_name)
+        return calltakers
+
+    @property
+    def ringing_calltakers(self):
+        calltakers = []
+        if self.status == 'ringing':
+            for outgoing_call_initializer in self.outgoing_calls.itervalues():
+                if outgoing_call_initializer is not None and outgoing_call_initializer.is_calltaker and outgoing_call_initializer.is_ringing:
+                    calltakers.append(outgoing_call_initializer.calltaker_name)
         return calltakers
 
     @property
@@ -595,7 +605,8 @@ class PSAPApplication(SylkApplication):
             log.info("end_ringing_call check room_data.participants")
             for participant in room_data.participants.itervalues():
                 if participant.is_calltaker:
-                    reactor.callLater(1, self.set_calltaker_available, username=participant.display_name)
+                    pass
+                    #reactor.callLater(1, self.set_calltaker_available, username=participant.display_name)
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
             if room_data.incoming_session.state == 'incoming':
                 room_data.incoming_session.reject(code=408, reason="no user picked up")
@@ -673,7 +684,7 @@ class PSAPApplication(SylkApplication):
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
                     log.info("set user %s available", target_uri.user)
-                    reactor.callLater(1, self.set_calltaker_available, username=target_uri.user)
+                    #reactor.callLater(1, self.set_calltaker_available, username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
@@ -697,10 +708,11 @@ class PSAPApplication(SylkApplication):
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
         if room and room.started:
+            room_data = self.get_room_data(room_number)
             # get the target name
             target_uri = SIPURI.parse(str(target))
             NotificationCenter().post_notification('ConferenceParticipantRinging', self,
-                                                   NotificationData(room_number=room_number, display_name=target_uri.user))
+                                                   NotificationData(room_number=room_number, display_name=target_uri.user, ringing_calltakers=room_data.ringing_calltakers))
 
     def outgoing_session_will_start(self, sip_uri, session):
         room_number = session.room_number
@@ -767,6 +779,8 @@ class PSAPApplication(SylkApplication):
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
         self.add_session_to_room(room_number, session)
+        del room_data.outgoing_calls[str(sip_uri)]
+
         '''
         room_data = self.get_room_data(room_number)
         if room_data.status != 'active':
@@ -1015,18 +1029,19 @@ class PSAPApplication(SylkApplication):
                                                                                     old_primary_uri=str(participant_data.uri),
                                                                                     new_primary_uri=str(new_primary_uri)))
                             # in this case we need to mark the old primary as available
-                            reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
+                            #reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
                             #self.set_calltaker_available(username=participant_data.display_name)
                     else:
-                        reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
+                        pass
+                        #reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
 
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
                                                                         display_name = participant_data.display_name,
                                                                         sip_uri=str(participant_data.uri)))
 
-            if (participant_data.session == session) and participant_data.on_hold and participant_data.is_calltaker:
-                reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
+            #if (participant_data.session == session) and participant_data.on_hold and participant_data.is_calltaker:
+            #    reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
 
 
     def add_session_to_room(self, room_number, session):
@@ -1613,6 +1628,7 @@ class OutgoingCallInitializer(object):
         self.has_chat = has_chat
         self.streams = []
         self.is_calltaker = is_calltaker
+        self.is_ringing = False
         self.calltaker_name = None
         if is_calltaker:
             calltaker_uri = SIPURI.parse(str(target_uri))
@@ -1646,7 +1662,7 @@ class OutgoingCallInitializer(object):
         self.cancel = True
         if self.is_calltaker:
             log.info("set user %s available", self.calltaker_name)
-            self.app.set_calltaker_available(username=self.calltaker_name)
+            #self.app.set_calltaker_available(username=self.calltaker_name)
 
         if self.session is not None:
             # todo add event sending here
@@ -1720,6 +1736,7 @@ class OutgoingCallInitializer(object):
 
     def _NH_SIPSessionGotRingIndication(self, notification):
         session = notification.sender
+        self.is_ringing = True
         self.app.outgoing_session_is_ringing(self.room_number, self.target_uri)
         send_call_update_notification(self, session, 'ringing')
 
