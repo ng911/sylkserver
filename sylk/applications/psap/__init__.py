@@ -274,8 +274,13 @@ class PSAPApplication(SylkApplication):
         #from mem_top import mem_top
         #log.info(mem_top())
         import objgraph
-        out = objgraph.show_most_common_types(limit=20)
-        log.info("objgraph returned %r", out)
+        out = objgraph.most_common_types(limit=20)
+        log.info("objgraph most_common_types returned %r", out)
+        out = objgraph.growth(limit=20)
+        log.info("objgraph growth returned %r", out)
+        out = objgraph.get_leaking_objects()
+        log.info("objgraph get_leaking_objects returned %r", out)
+
         send_call_update_notification(self, session, 'init')
 
         has_audio = False
