@@ -595,7 +595,7 @@ class PSAPApplication(SylkApplication):
             log.info("end_ringing_call check room_data.participants")
             for participant in room_data.participants.itervalues():
                 if participant.is_calltaker:
-                    self.set_calltaker_available(username=participant.display_name)
+                    reactor.callLater(1, self.set_calltaker_available, username=participant.display_name)
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
             if room_data.incoming_session.state == 'incoming':
                 room_data.incoming_session.reject(code=408, reason="no user picked up")
@@ -673,7 +673,7 @@ class PSAPApplication(SylkApplication):
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
                     log.info("set user %s available", target_uri.user)
-                    self.set_calltaker_available(username=target_uri.user)
+                    reactor.callLater(1, self.set_calltaker_available, username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
