@@ -34,7 +34,7 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
-from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call
+from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, publish_update_call_ringing
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
@@ -707,12 +707,14 @@ class PSAPApplication(SylkApplication):
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
+        room_data = self.get_room_data(room_number)
+        publish_update_call_ringing(room_number, room_data.ringing_calltakers)
+
         if room and room.started:
-            room_data = self.get_room_data(room_number)
             # get the target name
             target_uri = SIPURI.parse(str(target))
             NotificationCenter().post_notification('ConferenceParticipantRinging', self,
-                                                   NotificationData(room_number=room_number, display_name=target_uri.user, ringing_calltakers=room_data.ringing_calltakers))
+                                                   NotificationData(room_number=room_number, display_name=target_uri.user))
 
     def outgoing_session_will_start(self, sip_uri, session):
         room_number = session.room_number
