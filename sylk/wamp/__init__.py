@@ -152,6 +152,7 @@ def publish_update_call(room_number, call_data, participants=None):
 def publish_update_call_ringing(room_number, ringing_calltakers):
     try:
         if wamp_session is not None:
+            log.info("inside publish_update_call_ringing for room %s, calltakers %r", room_number, ringing_calltakers)
             json_data = {}
             json_data['command'] = 'ringing_updated'
             json_data['room_number'] = room_number

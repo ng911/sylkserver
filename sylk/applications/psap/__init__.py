@@ -1735,6 +1735,7 @@ class OutgoingCallInitializer(object):
         self.app.outgoing_session_lookup_failed(self.room_number, self.target_uri)
 
     def _NH_SIPSessionGotRingIndication(self, notification):
+        log.info("inside _NH_SIPSessionGotRingIndication")
         session = notification.sender
         self.is_ringing = True
         self.app.outgoing_session_is_ringing(self.room_number, self.target_uri)
