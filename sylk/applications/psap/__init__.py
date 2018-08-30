@@ -58,19 +58,23 @@ class RoomData(object):
 
     # todo - remove this , only for load testing
     def startWampTesting(self):
-        def wamp_testing_cb():
+        log.info("startWampTesting")
+
+        def wamp_testing_cb(self):
             wamp_testing_cb.count = wamp_testing_cb.count + 1
             if (wamp_testing_cb.count % 2000) == 0:
                 log.info("sent %d test wamp messages so far", wamp_testing_cb.count)
+            log.info("sendTestWampMessages")
             self.sendTestWampMessages()
             if wamp_testing_cb.count > 10000000:
-                wamp_testing_cb.wamp_testing_timer.stop()
+                self.wamp_testing_timer.stop()
 
-        wamp_testing_cb.wamp_testing_timer = task.LoopingCall(wamp_testing_cb)
-        wamp_testing_cb.wamp_testing_timer.start(1)  # call every sixty seconds
+        self.wamp_testing_timer = task.LoopingCall(wamp_testing_cb, self)
+        self.wamp_testing_timer.start(1)  # call every sixty seconds
 
     # todo - remove this , only for load testing
     def sendTestWampMessages(self):
+        log.info("inside sendTestWampMessages")
         message = {'room_number': '7d6afa3cd94d484ebf6ec491caf6a392', 'participants': [
             {'send_video': True, 'direction': u'in', 'is_calltaker': False, 'name': u'+14153054541', 'mute': False,
              'is_active': True, 'has_audio': True, 'is_receive': True, 'is_send': True, 'has_video': False,
@@ -89,7 +93,9 @@ class RoomData(object):
                        'call_type': u'sos', 'has_audio': True, 'secondary_type': u'', 'emergency_type': u'',
                        'caller_name': u'+14153054541', 'callback': False, 'end_time': u'2018-08-30T19:10:35.224+0000',
                        'partial_mute': False}}
+        log.info("inside sendTestWampMessages do publish")
         my_wamp_publish(u'com.emergent.call', message)
+        log.info("inside sendTestWampMessages done")
 
     @property
     def incoming(self):
