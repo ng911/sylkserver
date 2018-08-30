@@ -34,7 +34,7 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup
-from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, publish_update_call_ringing
+from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, publish_update_call_ringing, my_wamp_publish
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
@@ -53,6 +53,43 @@ class RoomData(object):
         self.status = 'init'
         self.ringing_duration_timer = None
         self.duration_timer = None
+        # todo - remove this , only for load testing
+        self.startWampTesting()
+
+    # todo - remove this , only for load testing
+    def startWampTesting(self):
+        def wamp_testing_cb():
+            wamp_testing_cb.count = wamp_testing_cb.count + 1
+            if (wamp_testing_cb.count % 2000) == 0:
+                log.info("sent %d test wamp messages so far", wamp_testing_cb.count)
+            self.sendTestWampMessages()
+            if wamp_testing_cb.count > 10000000:
+                wamp_testing_cb.wamp_testing_timer.stop()
+
+        wamp_testing_cb.wamp_testing_timer = task.LoopingCall(wamp_testing_cb)
+        wamp_testing_cb.wamp_testing_timer.start(1)  # call every sixty seconds
+
+    # todo - remove this , only for load testing
+    def sendTestWampMessages(self):
+        message = {'room_number': '7d6afa3cd94d484ebf6ec491caf6a392', 'participants': [
+            {'send_video': True, 'direction': u'in', 'is_calltaker': False, 'name': u'+14153054541', 'mute': False,
+             'is_active': True, 'has_audio': True, 'is_receive': True, 'is_send': True, 'has_video': False,
+             'sip_uri': u'sip:+14153054541@138.68.0.101:5060', 'has_text': False, 'send_text': True,
+             'is_primary': False, 'is_caller': True, 'hold': False, 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392',
+             'send_audio': True}], 'command': 'updated',
+            'call_data': {'active_participants': [u'+14153054541'], 'is_ani_pseudo': False, 'has_tty': False,
+                       'hold_start': u'2018-08-30T19:10:35.224+0000',
+                       'caller_uri': u'sip:+14153054541@138.68.0.101:5060',
+                       'updated_at': u'2018-08-30T19:10:36.279+0000', 'has_text': False, 'duration': 0,
+                       'caller_ani': u'+14153054541', 'answer_time': u'2018-08-30T19:10:35.224+0000',
+                       'ali_result': u'none', 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392', 'has_video': False,
+                       'active_calltakers': [], 'callback_time': u'2018-08-30T19:10:35.224+0000', 'location': '',
+                       'full_mute': False, 'status': 'ringing', 'direction': u'in',
+                       'start_time': u'2018-08-30T19:10:35.224+0000', 'ali_format': u'30WWireless', 'hold': False,
+                       'call_type': u'sos', 'has_audio': True, 'secondary_type': u'', 'emergency_type': u'',
+                       'caller_name': u'+14153054541', 'callback': False, 'end_time': u'2018-08-30T19:10:35.224+0000',
+                       'partial_mute': False}}
+        my_wamp_publish(u'com.emergent.call', message)
 
     @property
     def incoming(self):
