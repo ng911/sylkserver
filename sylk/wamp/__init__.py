@@ -21,6 +21,16 @@ comp = Component(
 
 wamp_session=None
 
+
+def on_wamp_success(result):
+    log.info("my_wamp_publish deferred on_success %r", result)
+
+
+def on_wamp_error(failure):
+    log.info("my_wamp_publish deferred on_error")
+    log.info("my_wamp_publish deferred on_error %r", failure)
+
+
 def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
@@ -31,14 +41,7 @@ def my_wamp_publish(topic, json_data=None):
                 deferred = wamp_session.publish(topic, options=PublishOptions(acknowledge=True))
             log.info("my_wamp_publish returned %r", deferred)
 
-            def on_success(result):
-                log.info("my_wamp_publish deferred on_success %r", result)
-
-            def on_error(failure):
-                log.info("my_wamp_publish deferred on_error")
-                log.info("my_wamp_publish deferred on_error %r", failure)
-
-            deferred.addCallbacks(on_success, on_error)
+            deferred.addCallbacks(on_wamp_success, on_wamp_error)
             #deferred.addCallback(on_success)
             #deferred.addErrback(on_error)
         else:
@@ -121,7 +124,8 @@ def publish_update_call_timer(room_number, type, val):
         json_data['type'] = type
         json_data['val'] = val
         json_data['room_number'] = room_number
-        my_wamp_publish(u'com.emergent.calltimer', json_data)
+        # todo - un remove this timer stuff after load test
+        #my_wamp_publish(u'com.emergent.calltimer', json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
