@@ -644,6 +644,7 @@ class PSAPApplication(SylkApplication):
         request.reject(405)
 
     def outgoing_session_lookup_failed(self, room_number, sip_uri):
+        log.info("set outgoing_session_lookup_failed %s , %s", room_number, str(sip_uri))
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             if sip_uri in room_data.outgoing_calls:
@@ -684,7 +685,7 @@ class PSAPApplication(SylkApplication):
                 if outgoing_call_initializer.is_calltaker:
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
-                    log.info("set user %s available", target_uri.user)
+                    #log.info("set user %s available", target_uri.user)
                     #reactor.callLater(1, self.set_calltaker_available, username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
@@ -1664,7 +1665,8 @@ class OutgoingCallInitializer(object):
     def cancel_call(self):
         self.cancel = True
         if self.is_calltaker:
-            log.info("set user %s available", self.calltaker_name)
+            pass
+            #log.info("set user %s available", self.calltaker_name)
             #self.app.set_calltaker_available(username=self.calltaker_name)
 
         if self.session is not None:
