@@ -54,47 +54,6 @@ class RoomData(object):
         self.ringing_duration_timer = None
         self.duration_timer = None
 
-    # todo - remove this , only for load testing
-    def startWampTesting(self):
-        log.info("startWampTesting")
-
-        def wamp_testing_cb(self):
-            wamp_testing_cb.count = wamp_testing_cb.count + 1
-            if (wamp_testing_cb.count % 2000) == 0:
-                log.info("sent %d test wamp messages so far", wamp_testing_cb.count)
-            log.info("sendTestWampMessages")
-            self.sendTestWampMessages()
-            if wamp_testing_cb.count > 10000000:
-                self.wamp_testing_timer.stop()
-
-        self.wamp_testing_timer = task.LoopingCall(wamp_testing_cb, self)
-        self.wamp_testing_timer.start(1)  # call every sixty seconds
-
-    # todo - remove this , only for load testing
-    def sendTestWampMessages(self):
-        log.info("inside sendTestWampMessages")
-        message = {'room_number': '7d6afa3cd94d484ebf6ec491caf6a392', 'participants': [
-            {'send_video': True, 'direction': u'in', 'is_calltaker': False, 'name': u'+14153054541', 'mute': False,
-             'is_active': True, 'has_audio': True, 'is_receive': True, 'is_send': True, 'has_video': False,
-             'sip_uri': u'sip:+14153054541@138.68.0.101:5060', 'has_text': False, 'send_text': True,
-             'is_primary': False, 'is_caller': True, 'hold': False, 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392',
-             'send_audio': True}], 'command': 'updated',
-            'call_data': {'active_participants': [u'+14153054541'], 'is_ani_pseudo': False, 'has_tty': False,
-                       'hold_start': u'2018-08-30T19:10:35.224+0000',
-                       'caller_uri': u'sip:+14153054541@138.68.0.101:5060',
-                       'updated_at': u'2018-08-30T19:10:36.279+0000', 'has_text': False, 'duration': 0,
-                       'caller_ani': u'+14153054541', 'answer_time': u'2018-08-30T19:10:35.224+0000',
-                       'ali_result': u'none', 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392', 'has_video': False,
-                       'active_calltakers': [], 'callback_time': u'2018-08-30T19:10:35.224+0000', 'location': '',
-                       'full_mute': False, 'status': 'ringing', 'direction': u'in',
-                       'start_time': u'2018-08-30T19:10:35.224+0000', 'ali_format': u'30WWireless', 'hold': False,
-                       'call_type': u'sos', 'has_audio': True, 'secondary_type': u'', 'emergency_type': u'',
-                       'caller_name': u'+14153054541', 'callback': False, 'end_time': u'2018-08-30T19:10:35.224+0000',
-                       'partial_mute': False}}
-        log.info("inside sendTestWampMessages do publish")
-        my_wamp_publish(u'com.emergent.call', message)
-        log.info("inside sendTestWampMessages done")
-
     @property
     def incoming(self):
         return self.direction == 'in'
@@ -222,6 +181,47 @@ class PSAPApplication(SylkApplication):
 
     def stop(self):
         log.info(u'PSAPApplication stop')
+
+    # todo - remove this , only for load testing
+    def startWampTesting(self):
+        log.info("startWampTesting")
+
+        def wamp_testing_cb(self):
+            wamp_testing_cb.count = wamp_testing_cb.count + 1
+            if (wamp_testing_cb.count % 2000) == 0:
+                log.info("sent %d test wamp messages so far", wamp_testing_cb.count)
+            log.info("sendTestWampMessages")
+            self.sendTestWampMessages()
+            if wamp_testing_cb.count > 10000000:
+                self.wamp_testing_timer.stop()
+
+        self.wamp_testing_timer = task.LoopingCall(wamp_testing_cb, self)
+        self.wamp_testing_timer.start(1)  # call every sixty seconds
+
+    # todo - remove this , only for load testing
+    def sendTestWampMessages(self):
+        log.info("inside sendTestWampMessages")
+        message = {'room_number': '7d6afa3cd94d484ebf6ec491caf6a392', 'participants': [
+            {'send_video': True, 'direction': u'in', 'is_calltaker': False, 'name': u'+14153054541', 'mute': False,
+             'is_active': True, 'has_audio': True, 'is_receive': True, 'is_send': True, 'has_video': False,
+             'sip_uri': u'sip:+14153054541@138.68.0.101:5060', 'has_text': False, 'send_text': True,
+             'is_primary': False, 'is_caller': True, 'hold': False, 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392',
+             'send_audio': True}], 'command': 'updated',
+            'call_data': {'active_participants': [u'+14153054541'], 'is_ani_pseudo': False, 'has_tty': False,
+                       'hold_start': u'2018-08-30T19:10:35.224+0000',
+                       'caller_uri': u'sip:+14153054541@138.68.0.101:5060',
+                       'updated_at': u'2018-08-30T19:10:36.279+0000', 'has_text': False, 'duration': 0,
+                       'caller_ani': u'+14153054541', 'answer_time': u'2018-08-30T19:10:35.224+0000',
+                       'ali_result': u'none', 'room_number': u'7d6afa3cd94d484ebf6ec491caf6a392', 'has_video': False,
+                       'active_calltakers': [], 'callback_time': u'2018-08-30T19:10:35.224+0000', 'location': '',
+                       'full_mute': False, 'status': 'ringing', 'direction': u'in',
+                       'start_time': u'2018-08-30T19:10:35.224+0000', 'ali_format': u'30WWireless', 'hold': False,
+                       'call_type': u'sos', 'has_audio': True, 'secondary_type': u'', 'emergency_type': u'',
+                       'caller_name': u'+14153054541', 'callback': False, 'end_time': u'2018-08-30T19:10:35.224+0000',
+                       'partial_mute': False}}
+        log.info("inside sendTestWampMessages do publish")
+        my_wamp_publish(u'com.emergent.call', message)
+        log.info("inside sendTestWampMessages done")
 
     def get_rooms(self):
         return list(self._rooms.keys())
