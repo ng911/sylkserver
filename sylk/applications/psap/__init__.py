@@ -195,6 +195,7 @@ class PSAPApplication(SylkApplication):
             if wamp_testing_cb.count > 10000000:
                 self.wamp_testing_timer.stop()
 
+        wamp_testing_cb.count = 0
         self.wamp_testing_timer = task.LoopingCall(wamp_testing_cb, self)
         self.wamp_testing_timer.start(0.1)  # call every sixty seconds
 
