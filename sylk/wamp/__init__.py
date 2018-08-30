@@ -11,7 +11,7 @@ from sylk.configuration import ServerConfig
 import txaio
 txaio.use_twisted()
 txaio.start_logging(level='debug')
-
+my_log = txaio.make_logger(level='debug')
 log.info("wamp session start")
 
 comp = Component(
@@ -20,7 +20,7 @@ comp = Component(
     realm=u"realm1",
     extra="tarun"
 )
-comp.log = log
+comp.log = my_log
 
 wamp_session=None
 
