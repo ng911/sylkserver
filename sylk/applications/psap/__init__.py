@@ -190,13 +190,13 @@ class PSAPApplication(SylkApplication):
             wamp_testing_cb.count = wamp_testing_cb.count + 1
             if (wamp_testing_cb.count % 2000) == 0:
                 log.info("sent %d test wamp messages so far", wamp_testing_cb.count)
-            log.info("sendTestWampMessages")
+            log.info("sendTestWampMessages %r", wamp_testing_cb.count)
             self.sendTestWampMessages()
             if wamp_testing_cb.count > 10000000:
                 self.wamp_testing_timer.stop()
 
         self.wamp_testing_timer = task.LoopingCall(wamp_testing_cb, self)
-        self.wamp_testing_timer.start(1)  # call every sixty seconds
+        self.wamp_testing_timer.start(0.1)  # call every sixty seconds
 
     # todo - remove this , only for load testing
     def sendTestWampMessages(self):
