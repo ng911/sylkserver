@@ -279,10 +279,10 @@ def joined(session, details):
 @inlineCallbacks
 def left(session, details):
     global wamp_session
-    log.error("wamp session left")
+    log.error("wamp session left, session is %r, old session is %r", session, wamp_session)
     wamp_session = None
     # todo - try to reconnect here
-
+    start()
 
 @comp.on_disconnect
 @inlineCallbacks
