@@ -21,16 +21,25 @@ comp = Component(
 
 wamp_session=None
 
-@inlineCallbacks
 def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
             log.info("my_wamp_publish %s, json %r",topic, json_data)
             if json_data is not None:
-                out = yield wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
+                deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
             else:
-                out = yield wamp_session.publish(topic, options=PublishOptions(acknowledge=True))
-            log.info("my_wamp_publish returned %r", out)
+                deferred = wamp_session.publish(topic, options=PublishOptions(acknowledge=True))
+            log.info("my_wamp_publish returned %r", deferred)
+
+            def on_success(result):
+                log.info("my_wamp_publish deferred on_success %r", result)
+
+            def on_error(failure):
+                log.info("my_wamp_publish deferred on_error %r", failure)
+
+
+            deferred.addCallback(on_success)
+            deferred.addErrback(on_error)
         else:
             log.error("my_wamp_publish for %r, json %r, wamp session is None", topic, json_data)
     except Exception as e:
