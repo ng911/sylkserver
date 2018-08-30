@@ -53,8 +53,6 @@ class RoomData(object):
         self.status = 'init'
         self.ringing_duration_timer = None
         self.duration_timer = None
-        # todo - remove this , only for load testing
-        self.startWampTesting()
 
     # todo - remove this , only for load testing
     def startWampTesting(self):
@@ -219,6 +217,8 @@ class PSAPApplication(SylkApplication):
     def start(self):
         log.info(u'PSAPApplication start')
         self.init_observers()
+        # todo - remove this , only for load testing
+        self.startWampTesting()
 
     def stop(self):
         log.info(u'PSAPApplication stop')
