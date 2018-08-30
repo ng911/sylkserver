@@ -1,4 +1,5 @@
 import traceback
+import json
 from autobahn.twisted.component import Component
 from sylk.applications import ApplicationLogger
 from autobahn.wamp.types import PublishOptions
@@ -26,7 +27,7 @@ wamp_session=None
 
 
 def on_wamp_success(result):
-    log.info("my_wamp_publish deferred on_success %r", result)
+    log.info("my_wamp_publish deferred on_success %r, %s", result, result)
 
 
 def on_wamp_error(failure):
@@ -38,11 +39,15 @@ def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
             log.info("my_wamp_publish %s, json %r",topic, json_data)
+            json_size = 0
             if json_data is not None:
+                json_obj = json.dumps(json_data)
+                json_size = len(json_obj)
                 deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
             else:
-                deferred = wamp_session.publish(topic, options=PublishOptions(acknowledge=True))
+                deferred = wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
             log.info("my_wamp_publish returned %r", deferred)
+            log.info("my_wamp_publish json size is %d", json_size)
 
             deferred.addCallbacks(on_wamp_success, on_wamp_error)
             #deferred.addCallback(on_success)
@@ -53,6 +58,9 @@ def my_wamp_publish(topic, json_data=None):
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s, topic %s, json %r", str(e), topic, json_data)
         log.error("%s", stackTrace)
+    except:
+        log.error("exception in wamp topic %s, json %r", topic, json_data)
+
 
 def publish_update_calltaker_status(user_id, username, status):
     try:
