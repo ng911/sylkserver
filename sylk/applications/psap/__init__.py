@@ -177,7 +177,7 @@ class PSAPApplication(SylkApplication):
         log.info(u'PSAPApplication start')
         self.init_observers()
         # todo - remove this , only for load testing
-        self.startWampTesting()
+        #self.startWampTesting()
 
     def stop(self):
         log.info(u'PSAPApplication stop')

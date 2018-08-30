@@ -8,6 +8,9 @@ log = ApplicationLogger(__package__)
 from twisted.internet.defer import inlineCallbacks, returnValue
 #import sylk.data.calltaker as calltaker_data
 from sylk.configuration import ServerConfig
+import txaio
+txaio.use_twisted()
+txaio.start_logging(level='debug')
 
 log.info("wamp session start")
 
@@ -17,7 +20,7 @@ comp = Component(
     realm=u"realm1",
     extra="tarun"
 )
-
+#comp.log = log
 
 wamp_session=None
 
@@ -125,7 +128,7 @@ def publish_update_call_timer(room_number, type, val):
         json_data['val'] = val
         json_data['room_number'] = room_number
         # todo - un remove this timer stuff after load test
-        #my_wamp_publish(u'com.emergent.calltimer', json_data)
+        my_wamp_publish(u'com.emergent.calltimer', json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
