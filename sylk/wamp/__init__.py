@@ -35,11 +35,12 @@ def my_wamp_publish(topic, json_data=None):
                 log.info("my_wamp_publish deferred on_success %r", result)
 
             def on_error(failure):
+                log.info("my_wamp_publish deferred on_error")
                 log.info("my_wamp_publish deferred on_error %r", failure)
 
-
-            deferred.addCallback(on_success)
-            deferred.addErrback(on_error)
+            deferred.addCallbacks(on_success, on_error)
+            #deferred.addCallback(on_success)
+            #deferred.addErrback(on_error)
         else:
             log.error("my_wamp_publish for %r, json %r, wamp session is None", topic, json_data)
     except Exception as e:
