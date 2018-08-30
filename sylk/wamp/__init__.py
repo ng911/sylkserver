@@ -235,6 +235,7 @@ def joined(session, details):
     # make sure calltaker is initialized
     #calltaker_data.CalltakerData()
     wamp_session = session
+    wamp_session.log = my_log
 
     def on_calltaker_status(data):
         log.info("event on_calltaker_status received")
