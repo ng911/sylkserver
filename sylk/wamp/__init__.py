@@ -1,9 +1,11 @@
 import traceback
 import json
+import uuid
 from autobahn.twisted.component import Component
 from sylk.applications import ApplicationLogger
 from autobahn.wamp.types import PublishOptions
 from application.notification import IObserver, NotificationCenter, NotificationData
+from sipsimple.threading import run_in_twisted_thread
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 log = ApplicationLogger(__package__)
 from twisted.internet.defer import inlineCallbacks, returnValue
@@ -25,7 +27,6 @@ comp.log = my_log
 
 wamp_session=None
 
-
 def on_wamp_success(result):
     log.info("my_wamp_publish deferred on_success %r, %s", result, result)
 
@@ -35,6 +36,38 @@ def on_wamp_error(failure):
     log.info("my_wamp_publish deferred on_error %r", failure)
 
 
+'''
+cur_wamp_request = {
+    'topic' : '',
+    'data' : None
+}
+
+pending_requests = []
+
+def append_to_pending_request(topic, data):
+    # create a unique id for this request
+    key = uuid.uuid4()
+    pending_requests[key] = {
+        'topic' : topic,
+        'data' : data
+    }
+
+def process_pending_requests():
+    pending_requests_copy = pending_requests.copy()
+    for key, request in pending_requests_copy.iter_items:
+        @inlineCallbacks
+
+
+@inlineCallbacks
+def send_one_request(request):
+    if request.data is None:
+        json_data = {}
+    else:
+        json_data = request.data
+    yield wamp_session.publish(request.topic, json_data, options=PublishOptions(acknowledge=True))
+'''
+
+@run_in_twisted_thread
 def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
@@ -54,6 +87,7 @@ def my_wamp_publish(topic, json_data=None):
             #deferred.addErrback(on_error)
         else:
             log.error("my_wamp_publish for %r, json %r, wamp session is None", topic, json_data)
+
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s, topic %s, json %r", str(e), topic, json_data)
@@ -321,5 +355,7 @@ def on_disconnect(session):
 
 
 
+@run_in_twisted_thread
 def start():
      comp.start()
+
