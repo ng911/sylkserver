@@ -1,9 +1,12 @@
+import re
 import socket, select
 import sys
 from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue
 import uuid
+
+from sylk.applications import ApplicationLogger
 
 
 '''
@@ -17,10 +20,6 @@ from gevent import monkey, Greenlet, GreenletExit
 monkey.patch_socket()
 '''
 
-import re
-
-from sylk.applications import ApplicationLogger
-from sipsimple.threading import run_in_twisted_thread
 
 
 if __name__ == '__main__':  # parse command line options, and set the high level properties
@@ -472,7 +471,6 @@ class AliClientFactory(ReconnectingClientFactory):
         self.protocol = None
         ReconnectingClientFactory.clientConnectionFailed(self, connector, reason)
 
-@run_in_twisted_thread
 def init_ali_links(link_array):
     global ali_factories
     for link in link_array:
@@ -496,7 +494,6 @@ def on_timeout(id):
             protocol.cancel_ali_request(id)
         my_d.errback(AliRequestTimeout(room_number, "request timedout"))
 
-@run_in_twisted_thread
 def process_ali_result(result):
     log.info("aliquery process_ali_result %r", result)
     (factory, id, number, ali_format, ali_result, ali_result_civic_xml, ali_data) = result
@@ -516,7 +513,6 @@ def check_ali_format_supported(ali_format):
     return ali_format in ali_factories
 
 
-@run_in_twisted_thread
 def send_ali_request(room_number, number, ali_format):
     log.info("inside send_ali_request for room_number %r, number %r, ali_format %r", room_number, number, ali_format)
     my_d = defer.Deferred()
