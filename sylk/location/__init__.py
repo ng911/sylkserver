@@ -2,11 +2,12 @@ import sys
 import datetime
 from sylk.applications import ApplicationLogger
 from aliquery import send_ali_request, check_ali_format_supported
-from sylk.db.schema import Location, Conference
+from sylk.db.schema import Location, Conference, ConferenceParticipant, User
 import sylk.wamp as wamp
 import sylk.db.calls as calls
 import traceback
 from twisted.internet import reactor
+import alidump
 
 if __name__ == '__main__':  # parse command line options, and set the high level properties
     import logging
@@ -120,6 +121,9 @@ def process_ali_success(result):
         conference_db_obj.ali_result = "success"
         conference_db_obj.save()
 
+        if conference_db_obj.status in ['init', 'ringing', 'ringing_queued', 'queued', 'active']:
+            dump_ali(room_number, raw_ali_data)
+
         call_data = calls.get_conference_json(conference_db_obj)
         wamp.publish_update_call(room_number, call_data)
         wamp.publish_update_location_success(room_number, ali_result, location_display)
@@ -128,8 +132,29 @@ def process_ali_success(result):
         log.error("error in process_ali_success %r",e)
         log.error(stacktrace)
 
+def dump_ali(room_number, ali_data):
+    # get active calltakers and station ids
+    log.info("dump_ali for room %s", room_number)
+    station_ids = []
 
-def ali_lookup(room_number, number, ali_format):
+    for conference_participant_obj in ConferenceParticipant.objects.get(room_number=room_number, is_active=True,
+                                                                        is_calltaker=True):
+        calltaker = conference_participant_obj.name
+        try:
+            calltaker_db_obj = User.objects.get(username=calltaker)
+            if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
+                station_ids.append(calltaker)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error("%s", stacktrace)
+            log.error("error in getting calltaker data %s", e)
+
+    for station_id in station_ids:
+        log.info("send ali data to station_id  %s", station_id)
+        alidump.dump_ali(station_id, ali_data)
+
+
+def ali_lookup(room_number, number, ali_format, station_id=''):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
 
     ali_available = check_ali_format_supported(ali_format)
