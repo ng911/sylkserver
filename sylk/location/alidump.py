@@ -31,8 +31,8 @@ class AliDumpFactory(Factory):
         return AliDumpProtocol(self)
 
     def dumpAli(self, stationId, rawAliData):
-        log.info('dumpAli - for station %s, num clients %d', stationId, len(self.factory.ali_clients))
-        for ali_client in self.factory.ali_clients:
+        log.info('dumpAli - for station %s, num clients %d', stationId, len(self.ali_clients))
+        for ali_client in self.ali_clients:
             ali_client.transport.write('\x02')
             ali_client.transport.write(stationId)
             ali_client.transport.write(rawAliData)
