@@ -71,7 +71,7 @@ def send_one_request(request):
 def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
-            log.info("my_wamp_publish %s, json %r",topic, json_data)
+            log.debug("my_wamp_publish %s, json %r",topic, json_data)
             json_size = 0
             if json_data is not None:
                 json_obj = json.dumps(json_data)
@@ -79,8 +79,6 @@ def my_wamp_publish(topic, json_data=None):
                 deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
             else:
                 deferred = wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
-            log.info("my_wamp_publish returned %r", deferred)
-            log.info("my_wamp_publish json size is %d", json_size)
 
             deferred.addCallbacks(on_wamp_success, on_wamp_error)
             #deferred.addCallback(on_success)

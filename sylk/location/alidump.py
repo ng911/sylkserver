@@ -53,5 +53,7 @@ def dump_ali(station_id, raw_ali_data):
             stacktrace = traceback.format_exc()
             log.error("%s", stacktrace)
             log.error("dump_ali error for , %s, %s", station_id, str(e))
+    else:
+        log.error("ali dump server not started?")
 
 

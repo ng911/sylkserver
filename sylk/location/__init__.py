@@ -143,7 +143,7 @@ def dump_ali(room_number, ali_data):
         try:
             calltaker_db_obj = User.objects.get(username=calltaker)
             if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
-                station_ids.append(calltaker)
+                station_ids.append(calltaker_db_obj.station_id)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("%s", stacktrace)
