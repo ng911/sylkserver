@@ -137,7 +137,7 @@ def dump_ali(room_number, ali_data):
     log.info("dump_ali for room %s", room_number)
     station_ids = []
 
-    for conference_participant_obj in ConferenceParticipant.objects.get(room_number=room_number, is_active=True,
+    for conference_participant_obj in ConferenceParticipant.objects(room_number=room_number, is_active=True,
                                                                         is_calltaker=True):
         calltaker = conference_participant_obj.name
         try:

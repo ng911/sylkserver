@@ -3,6 +3,7 @@ import traceback
 from twisted.internet.protocol import Protocol, Factory
 from twisted.internet import reactor
 
+from sipsimple.threading import run_in_twisted_thread
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
 
@@ -37,11 +38,13 @@ class AliDumpFactory(Factory):
             ali_client.transport.write(rawAliData)
             ali_client.transport.write('\x03')
 
+@run_in_twisted_thread
 def start_alidump_server():
     global ali_dump_factory
     ali_dump_factory = AliDumpFactory()
     reactor.listenTCP(ServerConfig.alidump_port, ali_dump_factory)
 
+@run_in_twisted_thread
 def dump_ali(station_id, raw_ali_data):
     if ali_dump_factory is not None:
         try:
