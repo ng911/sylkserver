@@ -63,6 +63,7 @@ class User(Document):
     psap_id = ObjectIdField()
     secondary_psap_id = ObjectIdField()
     is_active = BooleanField(default=True)
+    station_id = StringField(required=False)
     roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')))
     meta = {
         'indexes': [
@@ -315,6 +316,7 @@ class Conference(Document):
     secondary_type = StringField(default='')
     ali_result = StringField(default='none', hoices=('success', 'failed', 'pending', 'no records found', 'none', 'ali format not supported'))
     ali_format = StringField()
+    ringing_calltakers = ListField()
     meta = {
         'indexes': [
             'psap_id',
