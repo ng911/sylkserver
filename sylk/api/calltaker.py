@@ -48,7 +48,6 @@ def get(user_id):
     response['username'] = user_obj.username
     response['status'] = status
     response['user_id'] = user_id
-    response.append(calltaker)
     return jsonify(response)
 
 
@@ -68,6 +67,8 @@ def register(user_id):
 def get_status(user_id):
     calltaker_data = CalltakerData()
     status = calltaker_data.status(user_id)
+    if status is None:
+        status = 'offline'
 
     response = {
         'success' : True,

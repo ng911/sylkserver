@@ -132,26 +132,44 @@ def process_ali_success(result):
         log.error("error in process_ali_success %r",e)
         log.error(stacktrace)
 
-def dump_ali(room_number, ali_data):
+
+def dump_ali(room_number, ali_data=None, calltaker=None):
     # get active calltakers and station ids
     log.info("dump_ali for room %s", room_number)
-    station_ids = []
-
-    for conference_participant_obj in ConferenceParticipant.objects(room_number=room_number, is_active=True,
-                                                                        is_calltaker=True):
-        calltaker = conference_participant_obj.name
+    if ali_data is None:
+        # get latest ali data from location db
+        try:
+            location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at').first()
+            if (location_db_obj is None) or not hasattr(location_db_obj, 'raw_format'):
+                return
+            ali_data = location_db_obj.raw_format
+        except:
+            return
+    if (calltaker is None) or (calltaker == ''):
+        station_ids = []
+        for conference_participant_obj in ConferenceParticipant.objects(room_number=room_number, is_active=True,
+                                                                            is_calltaker=True):
+            calltaker = conference_participant_obj.name
+            try:
+                calltaker_db_obj = User.objects.get(username=calltaker)
+                if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
+                    station_ids.append(calltaker_db_obj.station_id)
+            except Exception as e:
+                stacktrace = traceback.format_exc()
+                log.error("%s", stacktrace)
+                log.error("error in getting calltaker data %s", e)
+        for station_id in station_ids:
+            log.info("send ali data to station_id  %s", station_id)
+            alidump.dump_ali(station_id, ali_data)
+    else:
         try:
             calltaker_db_obj = User.objects.get(username=calltaker)
             if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
-                station_ids.append(calltaker_db_obj.station_id)
+                alidump.dump_ali(calltaker_db_obj.station_id, ali_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("%s", stacktrace)
             log.error("error in getting calltaker data %s", e)
-
-    for station_id in station_ids:
-        log.info("send ali data to station_id  %s", station_id)
-        alidump.dump_ali(station_id, ali_data)
 
 
 def ali_lookup(room_number, number, ali_format, station_id=''):

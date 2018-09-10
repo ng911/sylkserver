@@ -67,13 +67,14 @@ class ConferenceData(object):
             conference_event.room_number = room_number
             conference_event.save()
 
+            '''
             conference_event = ConferenceEvent()
             conference_event.event = 'ringing'
             conference_event.event_time = datetime.datetime.utcnow()
-            conference_event.event_details = 'send call ringing '.format()
+            conference_event.event_details = 'call ringing '
             conference_event.room_number = room_number
             conference_event.save()
-
+            '''
             '''
             participant = ConferenceParticipant()
             participant.room_number = room_number
@@ -216,7 +217,11 @@ class ConferenceData(object):
             conference_event.event = 'join'
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
-            conference_event.event_details = 'participant {} joined'.format(display_name)
+            if is_calltaker:
+                conference_event.event_details = 'Calltaker {} answered call'.format(display_name)
+            else:
+                conference_event.event_details = '{} answered call'.format(display_name)
+
             conference_event.save()
 
             conference = Conference.objects.get(room_number=room_number)
@@ -320,9 +325,9 @@ class ConferenceData(object):
         conference_event.room_number = room_number
         if on_hold:
             conference_event.event = 'start_hold'
-            conference_event.event_details = 'calltker {} on hold'.format(calltaker)
+            conference_event.event_details = 'Call put on hold by {}'.format(calltaker)
         else:
-            conference_event.event_details = 'calltker {} off hold'.format(calltaker)
+            conference_event.event_details = 'Call taken off hold by {}'.format(calltaker)
         conference_event.save()
         conference = Conference.objects.get(room_number=room_number)
         call_data = calls.get_conference_json(conference)
@@ -377,10 +382,10 @@ class ConferenceData(object):
             if on_hold:
                 conference.status = 'on_hold'
                 conference_event.event = 'start_hold'
-                conference_event.event_details = 'call put on hold by {}'.format(calltaker)
+                conference_event.event_details = 'Call put on hold by {}'.format(calltaker)
             else:
                 conference_event.event = 'end_hold'
-                conference_event.event_details = 'call taken off hold by {}'.format(calltaker)
+                conference_event.event_details = 'Call taken off hold by {}'.format(calltaker)
                 conference.status = 'active'
             conference_event.save()
             conference.save()

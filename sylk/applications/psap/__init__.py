@@ -33,7 +33,7 @@ from sylk.configuration import ServerConfig, SIPConfig
 # from sylk.utils import dump_object_member_vars, dump_object_member_funcs, dump_var
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
-from sylk.location import ali_lookup
+from sylk.location import ali_lookup, dump_ali
 from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, publish_update_call_ringing, my_wamp_publish
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
@@ -67,7 +67,7 @@ class RoomData(object):
         return self.direction == 'out'
 
     @property
-    def is_emergeny(self):
+    def is_emergency(self):
         return  self.call_type in ['sos', 'sos_room']
 
     @property
@@ -736,7 +736,7 @@ class PSAPApplication(SylkApplication):
 
             # todo this is wrong and a bug, fix this
             if (len(room_data.outgoing_calls) == 0):
-                if room_data.is_emergeny:
+                if room_data.is_emergency:
                     # todo add handling here, put the call in queue?
                     log.info("put call in ringing queue")
                     room_data.status = 'ringing_queued'
@@ -827,6 +827,8 @@ class PSAPApplication(SylkApplication):
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
         self.add_session_to_room(room_number, session)
         del room_data.outgoing_calls[str(sip_uri)]
+        if is_calltaker and room_data.is_emergency:
+            dump_ali(room_number, calltaker=str(sip_uri.user))
 
         '''
         room_data = self.get_room_data(room_number)
