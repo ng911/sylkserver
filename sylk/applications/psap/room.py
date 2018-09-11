@@ -417,7 +417,7 @@ class Room(object):
             self.audio_conference.bridge.add(self.beep_player)
             self.beep_player.filename = beep_file
         try:
-            self.beep_player.play().wait()
+            self.beep_player.play()
         except WavePlayerError as e:
             log.warning(u'Error playing file %s: %s' % (beep_file, e))
         if self.beep_timer is None:
