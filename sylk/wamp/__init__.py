@@ -72,7 +72,7 @@ def send_one_request(request):
 def my_wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
-            log.debug("my_wamp_publish %s, json %r",topic, json_data)
+            #log.debug("my_wamp_publish %s, json %r",topic, json_data)
             json_size = 0
             if json_data is not None:
                 json_obj = json.dumps(json_data)
