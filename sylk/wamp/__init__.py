@@ -28,7 +28,8 @@ comp.log = my_log
 wamp_session=None
 
 def on_wamp_success(result):
-    log.debug("my_wamp_publish deferred on_success %r, %s", result, result)
+    #log.debug("my_wamp_publish deferred on_success %r, %s", result, result)
+    pass
 
 
 def on_wamp_error(failure):
