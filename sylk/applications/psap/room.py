@@ -155,6 +155,8 @@ class Room(object):
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
         self.duration_timer = None
+        self.beep_player = None
+        self.beep_timer = None
 
     def get_debug_info(self):
         sessions = []
@@ -274,6 +276,15 @@ class Room(object):
         #self.message_dispatcher = None
         # todo -- commented temp for load testing. this might be causing the failures
         #self.moh_player.stop()
+        if self.beep_timer is not None:
+            self.beep_timer.stop()
+            self.beep_timer = None
+
+        if self.beep_player is not None:
+            self.beep_player.stop()
+            self.audio_conference.bridge.remove(self.beep_player)
+            self.beep_player = None
+
         self.moh_player = None
         self.audio_conference = None
         notification_center = NotificationCenter()
@@ -289,6 +300,7 @@ class Room(object):
         if self.duration_timer is not None:
             self.duration_timer.stop()
             self.duration_timer = None
+
 
     @run_in_thread('file-io')
     def cleanup_files(self):
@@ -396,6 +408,27 @@ class Room(object):
             handler.init_outgoing(uri, file)
     '''
 
+    def play_beep(self):
+        log.info("inside play beep for room %s", self.room_number)
+        if self.beep_player is None:
+            beep_file = Resources.get('sounds/connected_tone.wav')
+            self.beep_player = WavePlayer(SIPApplication.voice_audio_mixer, '', pause_time=1, initial_delay=1, volume=20)
+            self.paused = True
+            self.audio_conference.bridge.add(self.beep_player)
+            self.beep_player.filename = beep_file
+        try:
+            self.beep_player.play().wait()
+        except WavePlayerError as e:
+            log.warning(u'Error playing file %s: %s' % (beep_file, e))
+        if self.beep_timer is None:
+            self.beep_timer = task.LoopingCall(self.play_beep)
+            self.beep_timer.start(5)
+
+    def stop_beep(self):
+        if self.beep_timer is not None:
+            self.beep_timer.stop()
+            self.beep_timer = None
+
     def add_session(self, session):
         log.info("inside room add_session for session %r", session)
         notification_center = NotificationCenter()
@@ -462,6 +495,8 @@ class Room(object):
         #    self.moh_player.play()
         #else:
         #    self.moh_player.pause()
+        if len(self.audio_conference.streams) > 1:
+            self.stop_beep()
 
         if len(self.sessions) == 1:
             log.info(u'Room %s - started by %s with %s' % (self.uri, format_identity(session.remote_identity), self.format_stream_types(session.streams)))

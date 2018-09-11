@@ -1161,6 +1161,7 @@ class PSAPApplication(SylkApplication):
                     hold_timer_cb.duration = 0
                     hold_timer = task.LoopingCall(hold_timer_cb, room_number)
                     hold_timer.start(1)  # call every seconds
+                    room.play_beep()
                     room_data.status = 'on_hold'
                     room_data.hold_timer = hold_timer
                     NotificationCenter().post_notification('ConferenceHoldUpdated', self,
