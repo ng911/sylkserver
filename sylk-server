@@ -62,6 +62,8 @@ if __name__ == '__main__':
         pid_file = '{}.pid'.format(name)
         try:
             process.runtime_directory = options.runtime_directory
+            log.info('pid_file is {}'.format(pid_file))
+            log.info('options.runtime_directory is {}'.format(options.runtime_directory))
             process.daemonize(pid_file)
         except ProcessError as e:
             log.fatal('Failed to start {name}: {exception!s}'.format(name=fullname, exception=e))
