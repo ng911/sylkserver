@@ -34,7 +34,7 @@ def toggle_debugging(signum, frame):
 
 
 if __name__ == '__main__':
-    log.info('stdout is {}'.format(sys.stdout.fileno()))
+    #log.info('stdout is {}'.format(sys.stdout.fileno()))
     a = os.fdopen(sys.stdout.fileno(), "w")
     a.write("hello there")
     name = 'sylk-server'

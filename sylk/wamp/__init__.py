@@ -11,10 +11,10 @@ log = ApplicationLogger(__package__)
 from twisted.internet.defer import inlineCallbacks, returnValue
 #import sylk.data.calltaker as calltaker_data
 from sylk.configuration import ServerConfig
-import txaio
-txaio.use_twisted()
-txaio.start_logging(level='debug')
-my_log = txaio.make_logger(level='debug')
+#import txaio
+#txaio.use_twisted()
+#txaio.start_logging(level='debug')
+#my_log = txaio.make_logger(level='debug')
 log.info("wamp session start")
 
 comp = Component(
