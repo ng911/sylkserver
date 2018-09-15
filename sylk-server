@@ -63,6 +63,7 @@ if __name__ == '__main__':
         try:
             process.runtime_directory = options.runtime_directory
             log.info('pid_file is {}'.format(pid_file))
+            log.info('stdout is {}'.format(sys.stdout.fileno()))
             log.info('options.runtime_directory is {}'.format(options.runtime_directory))
             process.daemonize(pid_file)
         except ProcessError as e:
