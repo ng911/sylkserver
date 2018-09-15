@@ -23,7 +23,7 @@ comp = Component(
     realm=u"realm1",
     extra="tarun"
 )
-comp.log = my_log
+#comp.log = my_log
 
 wamp_session=None
 
