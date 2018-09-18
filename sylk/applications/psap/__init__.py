@@ -821,6 +821,8 @@ class PSAPApplication(SylkApplication):
 
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
+        NotificationCenter().post_notification('ConferenceAnswered', self,
+                                               NotificationData(room_number=room_number, display_name=str(sip_uri.user), is_calltaker=is_calltaker), status=room_data.status)
 
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
@@ -926,7 +928,7 @@ class PSAPApplication(SylkApplication):
                 del d[str(session.remote_identity.uri)]
             #room_uri = session.local_identity.uri
         '''
-        self.remove_participant(session)
+        display_name = self.remove_participant(session)
 
         log.info('remove_session before remove room.length %r', room.length)
         log.info('remove_session for room.sessions %r', room.sessions)
@@ -949,6 +951,7 @@ class PSAPApplication(SylkApplication):
                 room.terminate_sessions()
                 room.stop()
                 room_data.status = 'closed'
+
                 # mark all the participants in the room as inactive and
                 if room_data.hold_timer != None:
                     room_data.hold_timer.stop()
@@ -963,6 +966,11 @@ class PSAPApplication(SylkApplication):
             log.info("remove_session remove_room")
             self.remove_room(room_number)
             room.stop()
+
+        if display_name != '':
+            NotificationCenter().post_notification('ConferenceLeave', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    status=room_data.status, display_name=display_name, is_calltaker=session.is_calltaker))
 
     '''
     def add_outgoing_participant(self, display_name, sip_uri, session, is_calltaker=False, is_primary=False):
@@ -1054,6 +1062,7 @@ class PSAPApplication(SylkApplication):
         log.info("inside remove_participant")
         room_number = session.room_number
         room_data = self.get_room_data(room_number)
+        display_name = ''
         log.info('room_data is %r', room_data)
         log.info('session is %r', session)
         log.info('session is calltaker %r', session.is_calltaker)
@@ -1067,6 +1076,7 @@ class PSAPApplication(SylkApplication):
             if (participant_data.session == session) and (not participant_data.on_hold):
                 participant_data.is_active = False
                 participant_data.on_hold=False
+                display_name = participant_data.display_name
                 if participant_data.is_calltaker:
                     if participant_data.is_primary:
                         log.info('remove_participant found primary calltaker is %r', participant_data.display_name)
@@ -1091,6 +1101,8 @@ class PSAPApplication(SylkApplication):
 
             #if (participant_data.session == session) and participant_data.on_hold and participant_data.is_calltaker:
             #    reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
+
+        return display_name
 
 
     def add_session_to_room(self, room_number, session):

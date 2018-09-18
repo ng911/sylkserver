@@ -104,12 +104,14 @@ class ConferenceData(object):
             conference.answer_time = utcnow
             conference.save()
 
+            '''
             conference_event = ConferenceEvent()
             conference_event.event = 'active'
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             conference_event.event_details = 'update call status to active'
             conference_event.save()
+            '''
 
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
@@ -121,6 +123,46 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_conference_status %r", e)
+            log.error(stackTrace)
+
+    def on_conference_answered(self, room_number, display_name, is_calltaker, status):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'active'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            if status != 'active':
+                if is_calltaker:
+                    conference_event.event_details = 'Calltaker {} answered the call'.format(display_name)
+                else:
+                    conference_event.event_details = '{} answred the call'.format(display_name)
+            else:
+                if is_calltaker:
+                    conference_event.event_details = 'Calltaker {} joined the call'.format(display_name)
+                else:
+                    conference_event.event_details = '{} joined the call'.format(display_name)
+
+            conference_event.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in on_conference_answered %r", e)
+            log.error(stackTrace)
+
+    def on_conference_leave(self, room_number, display_name, is_calltaker):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            if is_calltaker:
+                conference_event.event_details = 'Calltaker {} released the call'.format(display_name)
+            else:
+                conference_event.event_details = '{} hung up'.format(display_name)
+
+            conference_event.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in on_conference_leave %r", e)
             log.error(stackTrace)
 
     def update_conference_status(self, room_number, status):
@@ -139,6 +181,7 @@ class ConferenceData(object):
                     participant.hold = False
                     participant.save()
 
+            '''
             conference_event = ConferenceEvent()
             conference_event.event = status
             conference_event.event_time = datetime.datetime.utcnow()
@@ -150,6 +193,12 @@ class ConferenceData(object):
             else:
                 conference_event.event_details = 'update call status to  {}'.format(status)
             conference_event.save()
+            '''
+            if status == 'abandoned':
+                conference_event = ConferenceEvent()
+                conference_event.event = status
+                conference_event.event_details = 'call timed out'
+                conference_event.save()
 
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
@@ -239,6 +288,7 @@ class ConferenceData(object):
             participant.is_active = is_active
             participant.save()
 
+            '''
             conference_event = ConferenceEvent()
             if is_active:
                 conference_event.event = 'join'
@@ -250,6 +300,7 @@ class ConferenceData(object):
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             conference_event.save()
+            '''
 
             '''
             json_data = get_json_from_db_obj(participant, include_fields=['is_active'])
@@ -477,6 +528,8 @@ class ConferenceData(object):
         notification_center = NotificationCenter()
         notification_center.add_observer(self, name='ConferenceCreated')
         notification_center.add_observer(self, name='ConferenceActive')
+        notification_center.add_observer(self, name='ConferenceAnswered')
+        notification_center.add_observer(self, name='ConferenceLeave')
         notification_center.add_observer(self, name='ConferenceUpdated')
         notification_center.add_observer(self, name='ConferenceParticipantAdded')
         notification_center.add_observer(self, name='ConferenceParticipantRemoved')
@@ -510,6 +563,24 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceActive %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceAnswered(self, notification):
+        log.info("incoming _NH_ConferenceAnswered")
+        try:
+            self.on_conference_answered(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceAnswered %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceLeave(self, notification):
+        log.info("incoming _NH_ConferenceLeave")
+        try:
+            self.on_conference_leave(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceLeave %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceUpdated(self, notification):
