@@ -822,7 +822,8 @@ class PSAPApplication(SylkApplication):
                 if target != str(sip_uri):
                     outgoing_call_initializer.cancel_call()
         NotificationCenter().post_notification('ConferenceAnswered', self,
-                                               NotificationData(room_number=room_number, display_name=str(sip_uri.user), is_calltaker=is_calltaker), status=room_data.status)
+                                               NotificationData(room_number=room_number, display_name=str(sip_uri.user),
+                                                                is_calltaker=is_calltaker, status=room_data.status))
 
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)

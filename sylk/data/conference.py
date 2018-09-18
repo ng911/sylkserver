@@ -148,7 +148,7 @@ class ConferenceData(object):
             log.error("exception in on_conference_answered %r", e)
             log.error(stackTrace)
 
-    def on_conference_leave(self, room_number, display_name, is_calltaker):
+    def on_conference_leave(self, room_number, display_name, is_calltaker, status):
         try:
             conference_event = ConferenceEvent()
             conference_event.event = 'leave'
