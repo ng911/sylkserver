@@ -274,7 +274,7 @@ class ConferenceData(object):
 
             conference_event.save()
             '''
-            
+
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)

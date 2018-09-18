@@ -736,7 +736,7 @@ class PSAPApplication(SylkApplication):
 
             # todo this is wrong and a bug, fix this
             if (len(room_data.outgoing_calls) == 0):
-                if room_data.is_emergency:
+                if room_data.is_emergency and not room_data.is_call_active:
                     # todo add handling here, put the call in queue?
                     log.info("put call in ringing queue")
                     room_data.status = 'ringing_queued'
