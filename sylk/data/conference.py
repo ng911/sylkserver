@@ -135,7 +135,7 @@ class ConferenceData(object):
                 if is_calltaker:
                     conference_event.event_details = 'Calltaker {} answered the call'.format(display_name)
                 else:
-                    conference_event.event_details = '{} answred the call'.format(display_name)
+                    conference_event.event_details = '{} answered the call'.format(display_name)
             else:
                 if is_calltaker:
                     conference_event.event_details = 'Calltaker {} joined the call'.format(display_name)
@@ -262,6 +262,7 @@ class ConferenceData(object):
             participant.mute = mute_audio
             participant.save()
 
+            '''
             conference_event = ConferenceEvent()
             conference_event.event = 'join'
             conference_event.event_time = datetime.datetime.utcnow()
@@ -272,7 +273,8 @@ class ConferenceData(object):
                 conference_event.event_details = '{} answered call'.format(display_name)
 
             conference_event.save()
-
+            '''
+            
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
