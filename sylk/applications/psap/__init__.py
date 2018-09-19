@@ -634,6 +634,8 @@ class PSAPApplication(SylkApplication):
             send_call_update_notification(self, incoming_session, status)
             NotificationCenter().post_notification('ConferenceUpdated', self,
                                                    NotificationData(room_number=room_number, status=status))
+            NotificationCenter().post_notification('ConferenceTimedOut', self,
+                                                   NotificationData(room_number=room_number))
         else:
             log.error("Error on_ringing_timeout recvd for active call %r", room_number)
 
@@ -1437,10 +1439,22 @@ class PSAPApplication(SylkApplication):
     @run_in_green_thread
     def _NH_SIPSessionDidFail(self, notification):
         session = notification.sender
+        room_number = session.room_number
+        room_data = self.get_room_data(room_number)
         notification.center.remove_observer(self, sender=session)
         log.info('PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
         log.info('notification.data: %r' % (notification.data))
         self.remove_session_from_room(session.room_number, session)
+        if int(notification.data.code) == 487:
+            # the caller cancelled the call
+            is_calltaker = False
+            if hasattr(session, 'is_calltaker'):
+                is_calltaker = session.is_calltaker
+            NotificationCenter().post_notification('ConferenceLeave', self,
+                                                   NotificationData(room_number=session.room_number,
+                                                                    status=room_data.status, display_name=str(session.remote_identity.uri),
+                                                                    is_calltaker=is_calltaker))
+
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
 

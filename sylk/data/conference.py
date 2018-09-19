@@ -165,6 +165,21 @@ class ConferenceData(object):
             log.error("exception in on_conference_leave %r", e)
             log.error(stackTrace)
 
+    def on_conference_timedout(self, room_number):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'timed_out'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'Call timed out'
+
+            conference_event.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in on_conference_timedout %r", e)
+            log.error(stackTrace)
+
+
     def update_conference_status(self, room_number, status):
         try:
             conference = Conference.objects.get(room_number=room_number)
@@ -194,6 +209,7 @@ class ConferenceData(object):
                 conference_event.event_details = 'update call status to  {}'.format(status)
             conference_event.save()
             '''
+            '''
             if status == 'abandoned':
                 conference_event = ConferenceEvent()
                 conference_event.event = status
@@ -201,6 +217,7 @@ class ConferenceData(object):
                 conference_event.event_time = datetime.datetime.utcnow()
                 conference_event.room_number = room_number
                 conference_event.save()
+            '''
 
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
@@ -545,6 +562,8 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceHoldUpdated')
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
+        notification_center.add_observer(self, name='ConferenceTimedOut')
+
 
     def handle_notification(self, notification):
         log.info("ConferenceData got notification ")
@@ -585,6 +604,15 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceLeave %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceTimedOut(self, notification):
+        log.info("incoming _NH_ConferenceTimedOut")
+        try:
+            self.on_conference_timedout(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceTimedOut %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceUpdated(self, notification):
