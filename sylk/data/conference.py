@@ -198,6 +198,8 @@ class ConferenceData(object):
                 conference_event = ConferenceEvent()
                 conference_event.event = status
                 conference_event.event_details = 'call timed out'
+                conference_event.event_time = datetime.datetime.utcnow()
+                conference_event.room_number = room_number
                 conference_event.save()
 
             call_data = calls.get_conference_json(conference)
