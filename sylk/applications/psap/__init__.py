@@ -556,6 +556,10 @@ class PSAPApplication(SylkApplication):
                     outgoing_call_initializer.cancel_call()
                 reactor.callLater(0, self.accept_session, room_data.incoming_session)
             self.set_calltaker_busy(username=remote_identity.uri.user)
+            NotificationCenter().post_notification('ConferenceAnswered', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    display_name=str(remote_identity.uri.user),
+                                                                    is_calltaker=True, status=room_data.status))
         elif call_type == 'admin':
             pass
 
@@ -737,7 +741,7 @@ class PSAPApplication(SylkApplication):
             # todo this is wrong and a bug, fix this
             if (len(room_data.outgoing_calls) == 0):
                 if room_data.is_emergency and not room_data.is_call_active:
-                    # todo add handling here, put the call in queue?
+                      # todo add handling here, put the call in queue?
                     log.info("put call in ringing queue")
                     room_data.status = 'ringing_queued'
                     NotificationCenter().post_notification('ConferenceUpdated', self,
