@@ -1452,7 +1452,7 @@ class PSAPApplication(SylkApplication):
                 is_calltaker = session.is_calltaker
             NotificationCenter().post_notification('ConferenceLeave', self,
                                                    NotificationData(room_number=session.room_number,
-                                                                    status=room_data.status, display_name=str(session.remote_identity.uri),
+                                                                    status=room_data.status, display_name=str(session.remote_identity.uri.user),
                                                                     is_calltaker=is_calltaker))
 
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
