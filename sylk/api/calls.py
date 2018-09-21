@@ -486,7 +486,9 @@ def get_call_transfer_lines(room_number):
 def invite_to_conference(room_number, phone_number):
     try:
         psap_application = psap.PSAPApplication()
-        psap_application.invite_to_conference(room_number, phone_number)
+        call_from = get_argument('from')
+
+        psap_application.invite_to_conference(room_number, call_from, phone_number)
 
         response = {'success': True}
         return jsonify(response)

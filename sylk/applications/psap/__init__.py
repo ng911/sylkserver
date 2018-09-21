@@ -563,7 +563,7 @@ class PSAPApplication(SylkApplication):
         elif call_type == 'admin':
             pass
 
-    def invite_to_conference(self, room_number, phone_number):
+    def invite_to_conference(self, room_number, call_from, phone_number):
         log.info("invite_to_conference for room %s, phone %s", room_number, phone_number)
         is_calltaker = False
         calltaker_user = get_calltaker_user(phone_number)
@@ -579,7 +579,7 @@ class PSAPApplication(SylkApplication):
         log.info("sip_uri is %s", sip_uri)
 
         room_data = self.get_room_data(room_number)
-        publish_outgoing_call_status(room_number, phone_number, 'ringing')
+        publish_outgoing_call_status(room_number, call_from, 'ringing')
         outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
                                                             caller_identity=room_data.incoming_session.remote_identity,
                                                             is_calltaker=is_calltaker)
