@@ -579,6 +579,7 @@ class PSAPApplication(SylkApplication):
         log.info("sip_uri is %s", sip_uri)
 
         room_data = self.get_room_data(room_number)
+        publish_outgoing_call_status(room_number, phone_number, 'ringing')
         outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
                                                             caller_identity=room_data.incoming_session.remote_identity,
                                                             is_calltaker=is_calltaker)
@@ -759,7 +760,9 @@ class PSAPApplication(SylkApplication):
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
-        publish_update_call_ringing(room_number, room_data.ringing_calltakers)
+        if not room_data.is_call_active:
+            # update ringing calltakers
+            publish_update_call_ringing(room_number, room_data.ringing_calltakers)
 
         if room and room.started:
             # get the target name
@@ -1719,6 +1722,8 @@ class OutgoingCallInitializer(object):
 
     def start(self):
         log.info("OutgoingCallInitializer start")
+        room_number = self.room_number
+        room_data = self.app.get_room_data(room_number)
         if not self.target_uri.startswith(('sip:', 'sips:')):
             self.target_uri = 'sip:%s' % self.target_uri
         try:
@@ -1738,6 +1743,13 @@ class OutgoingCallInitializer(object):
         notification_center = NotificationCenter()
         notification_center.add_observer(self, sender=lookup)
         lookup.lookup_sip_proxy(uri, settings.sip.transport_list)
+
+        if room_data.is_call_active:
+            NotificationCenter().post_notification('ConferenceOutgoingCall', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    display_name=str(uri.user),
+                                                                    is_calltaker=self.is_calltaker))
+
 
     def cancel_call(self):
         self.cancel = True

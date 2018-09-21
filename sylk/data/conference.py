@@ -95,6 +95,25 @@ class ConferenceData(object):
             log.error("exception in create_conference %r", e)
             log.error(stackTrace)
 
+    def outgoing_call(self, room_number, display_name, is_calltaker):
+        try:
+            log.info("inside outgoing_call")
+            cur_time = datetime.datetime.utcnow()
+            conference_event = ConferenceEvent()
+            conference_event.event = 'init'
+            conference_event.event_time = cur_time
+            if is_calltaker:
+                conference_event.event_details = 'Calling calltaker {} '.format(display_name)
+            else:
+                conference_event.event_details = 'Calling {} '.format(display_name)
+
+            conference_event.room_number = room_number
+            conference_event.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in create_conference %r", e)
+            log.error(stackTrace)
+
     def set_conference_active(self, room_number, calltakers):
         try:
             conference = Conference.objects.get(room_number=room_number)
@@ -548,6 +567,7 @@ class ConferenceData(object):
         log.info("ConferenceData init_observers")
         notification_center = NotificationCenter()
         notification_center.add_observer(self, name='ConferenceCreated')
+        notification_center.add_observer(self, name='ConferenceOutgoingCall')
         notification_center.add_observer(self, name='ConferenceActive')
         notification_center.add_observer(self, name='ConferenceAnswered')
         notification_center.add_observer(self, name='ConferenceLeave')
@@ -577,6 +597,15 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceCreated %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceOutgoingCall(self, notification):
+        log.info("incoming _NH_ConferenceOutgoingCall")
+        try:
+            self.outgoing_call(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceOutgoingCall %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceActive(self, notification):
