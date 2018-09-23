@@ -582,9 +582,17 @@ class PSAPApplication(SylkApplication):
         publish_outgoing_call_status(room_number, call_from, 'ringing')
         outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
                                                             caller_identity=room_data.incoming_session.remote_identity,
-                                                            is_calltaker=is_calltaker)
+                                                            is_calltaker=is_calltaker, inviting_calltaker=call_from)
         outgoing_call_initializer.start()
         room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
+        return outgoing_call_initializer.ref_id
+
+    def cancel_invite_to_conference(self, room_number, call_from, ref_id):
+        room_data = self.get_room_data(room_number)
+        for outgoing_call_initializer in room_data.outgoing_calls.itervalues():
+            if outgoing_call_initializer.ref_id == ref_id:
+                outgoing_call_initializer.cancel_call()
+                publish_outgoing_call_status(room_number, call_from, 'cancel')
 
     def _format_number_to_e164(self, phone_number):
         if len(phone_number) == 10:
@@ -1697,10 +1705,12 @@ class OutgoingCallInitializer(object):
         self.cancel = False
         self.is_calltaker = is_calltaker
     '''
-    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False, add_failed_event=True):
+    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False, add_failed_event=True, inviting_calltaker=None):
         log.info("OutgoingCallInitializer for target %r, room %r, caller_identity %r, is_calltaker %r", target_uri, room_uri, caller_identity, is_calltaker)
         self.app = PSAPApplication()
         self.caller_identity = caller_identity
+        # if this is none we use the caller_identity
+        self.inviting_calltaker = inviting_calltaker
         self.room_uri = room_uri
         self.room_uri_str = '%s@%s' % (self.room_uri.user, self.room_uri.host)
         self.room_number = self.room_uri.user
@@ -1714,6 +1724,7 @@ class OutgoingCallInitializer(object):
         self.is_calltaker = is_calltaker
         self.is_ringing = False
         self.calltaker_name = None
+        self.ref_id = uuid4().hex
         if is_calltaker:
             calltaker_uri = SIPURI.parse(str(target_uri))
             self.calltaker_name = calltaker_uri.user
@@ -1749,7 +1760,6 @@ class OutgoingCallInitializer(object):
                                                    NotificationData(room_number=room_number,
                                                                     display_name=str(uri.user),
                                                                     is_calltaker=self.is_calltaker))
-
 
     def cancel_call(self):
         self.cancel = True
@@ -1858,6 +1868,10 @@ class OutgoingCallInitializer(object):
         self.app.outgoing_session_did_start(self.target_uri, self.is_calltaker, session)
         # self.app.add_outgoing_session(session)
         send_call_active_notification(self, session)
+
+        if self.inviting_calltaker is not None:
+            publish_outgoing_call_status(self.room_number, self.self.inviting_calltaker, 'active')
+
         #psap_application.add_participant(self.session, self.room_uri)
         #log.info('Room %s - %s added %s' % (self.room_uri_str, self._refer_headers.get('From').uri, self.target_uri))
         self.session = None
@@ -1872,6 +1886,8 @@ class OutgoingCallInitializer(object):
         remote_identity = str(session.remote_identity.uri)
         log.info("Session failed %s, %s" % (remote_identity, session.route))
         self.app.outgoing_session_did_fail(session, self.target_uri, notification.data.code, notification.data.reason, self.add_failed_event)
+        if self.inviting_calltaker is not None:
+            publish_outgoing_call_status(self.room_number, self.self.inviting_calltaker, 'failed')
         send_call_failed_notification(self, session=session, failure_code=notification.data.code,
                                       failure_reason=notification.data.reason)
 

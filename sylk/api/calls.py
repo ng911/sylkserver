@@ -488,7 +488,27 @@ def invite_to_conference(room_number, phone_number):
         psap_application = psap.PSAPApplication()
         call_from = get_argument('from')
 
-        psap_application.invite_to_conference(room_number, call_from, phone_number)
+        ref_id = psap_application.invite_to_conference(room_number, call_from, phone_number)
+
+        response = {'success': True, 'ref_id' : ref_id}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("exception %s in invite_to_conference for room %r", str(e), room_number)
+        log.error("%s", stacktrace)
+        response = {
+            'success': False,
+            'reason': str(e)
+        }
+        return jsonify(response)
+
+@calls.route('/cancel_invite/<room_number>/<call_id>', methods=['GET'])
+def cancel_invite_to_conference(room_number, call_id):
+    try:
+        psap_application = psap.PSAPApplication()
+        call_from = get_argument('from')
+
+        psap_application.cancel_invite_to_conference(room_number, call_from, call_id)
 
         response = {'success': True}
         return jsonify(response)
@@ -501,7 +521,6 @@ def invite_to_conference(room_number, phone_number):
             'reason': str(e)
         }
         return jsonify(response)
-
 
 @calls.route('/conference/send_dtmf/<room_number>', methods=['GET', 'PUT', 'POST'])
 def send_dtmf(room_number):
