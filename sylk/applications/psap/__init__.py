@@ -1870,7 +1870,7 @@ class OutgoingCallInitializer(object):
         send_call_active_notification(self, session)
 
         if self.inviting_calltaker is not None:
-            publish_outgoing_call_status(self.room_number, self.self.inviting_calltaker, 'active')
+            publish_outgoing_call_status(self.room_number, self.inviting_calltaker, 'active')
 
         #psap_application.add_participant(self.session, self.room_uri)
         #log.info('Room %s - %s added %s' % (self.room_uri_str, self._refer_headers.get('From').uri, self.target_uri))
@@ -1887,7 +1887,7 @@ class OutgoingCallInitializer(object):
         log.info("Session failed %s, %s" % (remote_identity, session.route))
         self.app.outgoing_session_did_fail(session, self.target_uri, notification.data.code, notification.data.reason, self.add_failed_event)
         if self.inviting_calltaker is not None:
-            publish_outgoing_call_status(self.room_number, self.self.inviting_calltaker, 'failed')
+            publish_outgoing_call_status(self.room_number, self.inviting_calltaker, 'failed')
         send_call_failed_notification(self, session=session, failure_code=notification.data.code,
                                       failure_reason=notification.data.reason)
 
