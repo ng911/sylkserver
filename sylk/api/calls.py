@@ -507,7 +507,7 @@ def cancel_invite_to_conference(room_number, call_id):
     try:
         psap_application = psap.PSAPApplication()
         call_from = get_argument('from')
-
+        log.info('inside cancel_invite_to_conference for room {}, call id {}, from {}'.format(room_number, call_id, call_from))
         psap_application.cancel_invite_to_conference(room_number, call_from, call_id)
 
         response = {'success': True}
