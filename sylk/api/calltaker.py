@@ -128,14 +128,14 @@ def set_profile(user_id):
         except:
             log.info('inside set_profile create new profile_obj')
             psap_db_obj = Psap.objects.get(psap_id=ServerConfig.psap_id)
-            profile_obj = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
-            profile_obj_new = deepcopy(profile_obj)
-            profile_obj_new.id = None
-            profile_obj_new.user_id = user_id
+            profile_obj_psap = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
+            profile_obj = deepcopy(profile_obj_psap)
+            profile_obj.id = None
+            profile_obj.user_id = user_id
 
-        set_db_obj_from_request(profile_obj_new, request)
-        profile_obj_new.save()
-        response = {'success':True, 'profile_id':str(profile_obj_new.profile_id)}
+        set_db_obj_from_request(profile_obj, request)
+        profile_obj.save()
+        response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
