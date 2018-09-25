@@ -1,4 +1,5 @@
 import traceback
+from copy import deepcopy
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
 from sylk.configuration import ServerConfig
@@ -120,17 +121,21 @@ def set_profile(user_id):
     try:
         if (user_id is None) or (user_id == ''):
             raise ValueError('missing or invalid user_id')
-
+        log.info('inside set_profile for user {}'.format(user_id))
         try:
             profile_obj = CalltakerProfile.objects.get(user_id=user_id)
+            log.info('inside set_profile foud existing profile_obj {}'.format(profile_obj.profile_id))
         except:
-            profile_obj = CalltakerProfile()
-            profile_obj.psap_id = ServerConfig.psap_id
-            profile_obj.user_id = user_id
+            log.info('inside set_profile create new profile_obj')
+            psap_db_obj = Psap.objects.get(psap_id=ServerConfig.psap_id)
+            profile_obj = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
+            profile_obj_new = deepcopy(profile_obj)
+            profile_obj_new.id = None
+            profile_obj_new.user_id = user_id
 
-        set_db_obj_from_request(profile_obj, request)
-        profile_obj.save()
-        response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
+        set_db_obj_from_request(profile_obj_new, request)
+        profile_obj_new.save()
+        response = {'success':True, 'profile_id':str(profile_obj_new.profile_id)}
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
