@@ -1,4 +1,5 @@
 import traceback
+import json
 from copy import deepcopy
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -122,7 +123,8 @@ def set_profile(user_id):
         if (user_id is None) or (user_id == ''):
             raise ValueError('missing or invalid user_id')
         log.info('inside set_profile for user {}'.format(user_id))
-        json_data = get_argument('json')
+        str_json_data = get_argument('json')
+        json_data = json.loads(str_json_data)
         log.info('inside set_profile jsonData is {}'.format(json_data))
         try:
             profile_obj = CalltakerProfile.objects.get(user_id=user_id)
