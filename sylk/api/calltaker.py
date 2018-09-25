@@ -135,7 +135,9 @@ def set_profile(user_id):
             profile_obj.id = None
             profile_obj.user_id = user_id
 
-        set_db_obj_from_request(profile_obj, request)
+        for profile_name, val in json_data.iter_items():
+            setattr(profile_obj, profile_name, val)
+        #set_db_obj_from_request(profile_obj, request)
         profile_obj.save()
         response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
         return jsonify(response)
