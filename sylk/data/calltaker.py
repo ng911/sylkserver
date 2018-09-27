@@ -1,4 +1,4 @@
-import datetime
+import time
 from collections import namedtuple
 
 from application.python import Null
@@ -46,21 +46,26 @@ class CalltakerData(object):
         status = notification.data.status
         username = notification.data.username
         self._calltakers[user_id] = User(wamp_session_id=wamp_session_id, status=status, username=username)
+        self.notify_status_updated(user_id, username, status)
+
+    def notify_status_updated(self, user_id, username, status):
         notification_data = NotificationData(username=username, \
                                              status=status, \
                                              user_id=user_id)
-        NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
         sylk.wamp.publish_update_calltaker_status(user_id, username, status)
+        NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
 
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
         wamp_session_id = str(notification.data.wamp_session_id)
         if wamp_session_id in self._wamp_sessions:
             user_id = self._wamp_sessions[wamp_session_id]
+            del self._wamp_sessions[wamp_session_id]
             if user_id in self._calltakers:
                 user = self._calltakers[user_id]
                 if user.wamp_session_id == wamp_session_id:
-                    self._calltakers[user_id] = User(wamp_session_id=None, status="offline", username=user.username)
+                    del self._calltakers[user_id]
+                    self.notify_status_updated(user_id, user.username, 'offline')
 
     def status(self, user_id):
         if user_id in self._calltakers:
@@ -71,11 +76,14 @@ class CalltakerData(object):
         if user_id in self._calltakers:
             user = self._calltakers[user_id]
             self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=status, username=user.username)
+            self.notify_status_updated(user_id, user.username, status)
+            '''
             notification_data = NotificationData(username=user.username, \
                                                  status=status, \
                                                  user_id=user_id)
             NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
             sylk.wamp.publish_update_calltaker_status(user_id, user.username, status)
+            '''
         else:
             log.error('user_id %r not found in _calltakers %r', user_id, self._calltakers)
 
@@ -83,7 +91,7 @@ class CalltakerData(object):
     def calltakers(self):
         calltakers = []
         for user_id, calltaker in self._calltakers.iteritems():
-            calltakers.append({'user_id' : user_id, 'username' : calltaker.username, 'status' : calltaker.status })
+            calltakers.append({'user_id' : user_id, 'username' : calltaker.username, 'status' : calltaker.status, 'update_time' : time.time() })
         return calltakers
 
     @property

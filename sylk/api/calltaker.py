@@ -1,5 +1,6 @@
 import traceback
 import json
+import time
 from copy import deepcopy
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -74,7 +75,8 @@ def get_status(user_id):
 
     response = {
         'success' : True,
-        'status' : status
+        'status' : status,
+        'update_time' : time.time()
     }
 
     return jsonify(response)
@@ -87,7 +89,8 @@ def update_status(user_id):
     calltaker_data.update_status(user_id, status)
 
     response = {
-        'success' : True
+        'success' : True,
+        'update_time' : time.time()
     }
 
     return jsonify(response)

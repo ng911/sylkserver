@@ -1,5 +1,6 @@
 import traceback
 import json
+import time
 import uuid
 from autobahn.twisted.component import Component
 from sylk.applications import ApplicationLogger
@@ -100,7 +101,8 @@ def publish_update_calltaker_status(user_id, username, status):
         json_data = {
             'username': username,
             'user_id': user_id,
-            'status': status
+            'status': status,
+            'update_time' : time.time()
         }
         log.info("publish_update_calltaker_status for json %r", json_data)
         my_wamp_publish(u'com.emergent.calltaker', json_data)
@@ -287,21 +289,25 @@ def joined(session, details):
             notification_data = NotificationData(username=data['username'], \
                                                   status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
             notification_center.post_notification('CalltakerStatus', session, notification_data)
+            '''
             out = {
                 'command' : 'status_updated'
             }
             session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
+            '''
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
         log.info("on_session_leave event received: %r", data)
         notification_center = NotificationCenter()
         notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
+        '''
         out = {
             'command': 'status_updated'
         }
         session.publish(u'com.emergent.calltakers', out)
+        '''
 
     try:
         yield session.subscribe(on_session_leave, u'wamp.session.on_leave')
