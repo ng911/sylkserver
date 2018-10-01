@@ -664,8 +664,7 @@ class PSAPApplication(SylkApplication):
             log.info("end_ringing_call check room_data.participants")
             for participant in room_data.participants.itervalues():
                 if participant.is_calltaker:
-                    pass
-                    #reactor.callLater(1, self.set_calltaker_available, username=participant.display_name)
+                    self.set_calltaker_available(username=participant.display_name)
             log.info('room_data.incoming_session %r end', room_data.incoming_session)
             if room_data.incoming_session.state == 'incoming':
                 room_data.incoming_session.reject(code=408, reason="no user picked up")
@@ -743,8 +742,8 @@ class PSAPApplication(SylkApplication):
                 if outgoing_call_initializer.is_calltaker:
                     # get the calltaker name from
                     target_uri = SIPURI.parse(str(sip_uri))
-                    #log.info("set user %s available", target_uri.user)
-                    #reactor.callLater(1, self.set_calltaker_available, username=target_uri.user)
+                    log.info("set user %s available", target_uri.user)
+                    self.set_calltaker_available(username=target_uri.user)
             else:
                 log.info('not found room_data.outgoing_calls for %r', str(sip_uri))
 
@@ -1107,10 +1106,10 @@ class PSAPApplication(SylkApplication):
                                                                                     new_primary_uri=str(new_primary_uri)))
                             # in this case we need to mark the old primary as available
                             #reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
-                            #self.set_calltaker_available(username=participant_data.display_name)
+                            self.set_calltaker_available(username=participant_data.display_name)
                     else:
-                        pass
                         #reactor.callLater(1, self.set_calltaker_available, username=participant_data.display_name)
+                        self.set_calltaker_available(username=participant_data.display_name)
 
                 NotificationCenter().post_notification('ConferenceParticipantRemoved', self,
                                                        NotificationData(room_number=room_number,
@@ -1215,7 +1214,7 @@ class PSAPApplication(SylkApplication):
                                                                             on_hold=True))
 
             calltaker_participant.session.end()
-            #self.set_calltaker_available(username=calltaker_name)
+            self.set_calltaker_available(username=calltaker_name)
             #room.remove_session(calltaker_participant.session)
         except Exception as e:
             stacktrace = traceback.format_exc()
@@ -1326,8 +1325,9 @@ class PSAPApplication(SylkApplication):
         log.info("incoming _NH_CalltakerStatusUpdate")
         user_id = notification.data.user_id
         status = notification.data.status
+        janus_busy = notification.data.janus_busy
         username = notification.data.username
-        if status == 'available':
+        if (status == 'available') and not janus_busy:
             # check if there are any queued calls
             # mark calls as queued calls
             server = ServerConfig.asterisk_server
@@ -1764,9 +1764,8 @@ class OutgoingCallInitializer(object):
     def cancel_call(self):
         self.cancel = True
         if self.is_calltaker:
-            pass
-            #log.info("set user %s available", self.calltaker_name)
-            #self.app.set_calltaker_available(username=self.calltaker_name)
+            log.info("set user %s available", self.calltaker_name)
+            self.app.set_calltaker_available(username=self.calltaker_name)
 
         if self.session is not None:
             # todo add event sending here

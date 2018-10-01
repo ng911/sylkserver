@@ -287,7 +287,7 @@ def joined(session, details):
             log.info("process status command")
             notification_center = NotificationCenter()
             notification_data = NotificationData(username=data['username'], \
-                                                  status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'])
+                                                  status=data['status'], wamp_session_id=data['wamp_session_id'], user_id=data['user_id'], janus_busy=data['janus_busy'])
             notification_center.post_notification('CalltakerStatus', session, notification_data)
             out = {
                 'command' : 'status_updated'

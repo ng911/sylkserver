@@ -95,6 +95,20 @@ def update_status(user_id):
 
     return jsonify(response)
 
+@calltaker.route('/janus/status/<user_id>', methods=['POST', 'PUT'])
+def update_janus_status(user_id):
+    janus_busy = get_argument('janus_busy')
+    log.info('inside update_janus_status calltaker %s, status %s', user_id, janus_busy)
+    calltaker_data = CalltakerData()
+    calltaker_data.update_janus_status(user_id, janus_busy)
+
+    response = {
+        'success' : True,
+        'update_time' : time.time()
+    }
+
+    return jsonify(response)
+
 @calltaker.route('/profile/<user_id>', methods=['GET'])
 def get_profile(user_id):
     try:
