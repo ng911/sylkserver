@@ -210,6 +210,20 @@ def publish_update_call_ringing(room_number, ringing_calltakers):
         log.error("%s", stackTrace)
 
 
+def publish_update_call_events(room_number):
+    try:
+        log.info("inside publish_update_call_events for room %s", room_number)
+        json_data = {}
+        json_data['command'] = 'events_updated'
+        json_data['room_number'] = room_number
+        log.info("publish com.emergent.call with json_data %r", json_data)
+        my_wamp_publish(u'com.emergent.call', json_data)
+    except Exception as e:
+        stackTrace = traceback.format_exc()
+        log.error("exception in wamp %s", str(e))
+        log.error("%s", stackTrace)
+
+
 # status can be 'ringing', 'active', 'failed', 'timedout'
 def publish_outgoing_call_status(room_number, calltaker, status):
     try:

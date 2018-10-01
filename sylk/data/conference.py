@@ -10,7 +10,7 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
-from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary
+from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary, publish_update_call_events
 import sylk.db.calls as calls
 
 import sylk.wamp
@@ -162,6 +162,7 @@ class ConferenceData(object):
                     conference_event.event_details = '{} joined the call'.format(display_name)
 
             conference_event.save()
+            publish_update_call_events(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_answered %r", e)
@@ -179,6 +180,7 @@ class ConferenceData(object):
                 conference_event.event_details = '{} hung up'.format(display_name)
 
             conference_event.save()
+            publish_update_call_events(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_leave %r", e)
@@ -193,6 +195,7 @@ class ConferenceData(object):
             conference_event.event_details = 'Call timed out'
 
             conference_event.save()
+            publish_update_call_events(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_timedout %r", e)
@@ -210,6 +213,7 @@ class ConferenceData(object):
                 conference_event.event_details = 'Call to {} failed'.format(display_name)
 
             conference_event.save()
+            publish_update_call_events(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_timedout %r", e)
@@ -269,6 +273,7 @@ class ConferenceData(object):
         conference_event.event_details = 'ringing {}'.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
+        publish_update_call_events(room_number)
 
     def add_participant_timedout(self, room_number, display_name):
         conference_event = ConferenceEvent()
@@ -277,14 +282,16 @@ class ConferenceData(object):
         conference_event.event_details = 'timed out ringing to {} '.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
+        publish_update_call_events(room_number)
 
     def add_participant_failed(self, room_number, display_name):
         conference_event = ConferenceEvent()
-        conference_event.event = 'ringing'
+        conference_event.event = 'failed'
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.event_details = 'call to {} failed'.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
+        publish_update_call_events(room_number)
 
     def add_participant(self, room_number, display_name, sip_uri, mute_audio, direction, is_caller, is_calltaker, is_primary):
         try:
