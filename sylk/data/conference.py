@@ -198,6 +198,22 @@ class ConferenceData(object):
             log.error("exception in on_conference_timedout %r", e)
             log.error(stackTrace)
 
+    def on_conference_call_failed(self, room_number, display_name, is_calltaker, reason):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'failed'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            if is_calltaker:
+                conference_event.event_details = 'Call to Calltaker {} failed'.format(display_name)
+            else:
+                conference_event.event_details = 'Call to {} failed'.format(display_name)
+
+            conference_event.save()
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in on_conference_timedout %r", e)
+            log.error(stackTrace)
 
     def update_conference_status(self, room_number, status):
         try:
@@ -583,6 +599,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
         notification_center.add_observer(self, name='ConferenceTimedOut')
+        notification_center.add_observer(self, name='ConferenceCallFailed')
 
 
     def handle_notification(self, notification):
@@ -642,6 +659,15 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceTimedOut %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceCallFailed(self, notification):
+        log.info("incoming _NH_ConferenceCallFailed")
+        try:
+            self.on_conference_call_failed(**notification.data.__dict__)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceCallFailed %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceUpdated(self, notification):

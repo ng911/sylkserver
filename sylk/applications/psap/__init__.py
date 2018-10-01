@@ -761,9 +761,16 @@ class PSAPApplication(SylkApplication):
                     log.info("send bad number dialed")
                     if not room_data.is_call_active:
                         room_data.incoming_session.reject(code=404, reason="bad number dialed")
-                    NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                           NotificationData(room_number=room_number,
-                                                                            status='failed'))
+                        NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                               NotificationData(room_number=room_number,
+                                                                                status='failed'))
+                    else:
+                        display_name = str(session.remote_identity.uri.user)
+                        NotificationCenter().post_notification('ConferenceCallFailed', self,
+                                                               NotificationData(room_number=room_number,
+                                                                                display_name=display_name,
+                                                                                is_calltaker=session.is_calltaker,
+                                                                                reason=reason))
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)
