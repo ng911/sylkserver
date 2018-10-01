@@ -764,6 +764,7 @@ class PSAPApplication(SylkApplication):
                         NotificationCenter().post_notification('ConferenceUpdated', self,
                                                                NotificationData(room_number=room_number,
                                                                                 status='failed'))
+                    '''
                     else:
                         display_name = str(session.remote_identity.uri.user)
                         NotificationCenter().post_notification('ConferenceCallFailed', self,
@@ -771,6 +772,7 @@ class PSAPApplication(SylkApplication):
                                                                                 display_name=display_name,
                                                                                 is_calltaker=session.is_calltaker,
                                                                                 reason=reason))
+                    '''
 
     def outgoing_session_is_ringing(self, room_number, target):
         room = self.get_room(room_number)

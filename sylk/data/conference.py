@@ -201,6 +201,7 @@ class ConferenceData(object):
             log.error("exception in on_conference_timedout %r", e)
             log.error(stackTrace)
 
+    '''
     def on_conference_call_failed(self, room_number, display_name, is_calltaker, reason):
         try:
             conference_event = ConferenceEvent()
@@ -218,6 +219,7 @@ class ConferenceData(object):
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_timedout %r", e)
             log.error(stackTrace)
+    '''
 
     def update_conference_status(self, room_number, status):
         try:
@@ -606,7 +608,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
         notification_center.add_observer(self, name='ConferenceTimedOut')
-        notification_center.add_observer(self, name='ConferenceCallFailed')
+        #notification_center.add_observer(self, name='ConferenceCallFailed')
 
 
     def handle_notification(self, notification):
@@ -668,6 +670,7 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceTimedOut %r", e)
             log.error(stackTrace)
 
+    '''
     def _NH_ConferenceCallFailed(self, notification):
         log.info("incoming _NH_ConferenceCallFailed")
         try:
@@ -676,6 +679,7 @@ class ConferenceData(object):
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceCallFailed %r", e)
             log.error(stackTrace)
+    '''
 
     def _NH_ConferenceUpdated(self, notification):
         log.info("incoming _NH_ConferenceUpdated")
