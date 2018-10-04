@@ -2,6 +2,7 @@
 import re
 import traceback
 import psutil
+import time
 from application.notification import IObserver, NotificationCenter, NotificationData
 from application.python import Null
 from twisted.internet import reactor
@@ -45,7 +46,10 @@ def get_num_open_files():
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls', 'invitation_timer', 'ringing_duration_timer', 'duration_timer', 'participants', 'status', 'hold_timer', 'acd_strategy', 'ignore_calltakers']
+    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls',
+                 'invitation_timer', 'ringing_duration_timer', 'duration_timer',
+                 'participants', 'status', 'hold_timer', 'acd_strategy',
+                 'ignore_calltakers', 'start_timestamp']
     def __init__(self):
         self.ignore_calltakers = []
         self.participants = []
@@ -53,6 +57,7 @@ class RoomData(object):
         self.status = 'init'
         self.ringing_duration_timer = None
         self.duration_timer = None
+        self.start_timestamp = time.time()
 
     @property
     def incoming(self):
@@ -327,11 +332,11 @@ class PSAPApplication(SylkApplication):
         log.info(u'num open files is %d', get_num_open_files())
         #from mem_top import mem_top
         #log.info(mem_top())
-        #import objgraph
-        #out = objgraph.most_common_types(limit=20)
-        #log.info("objgraph most_common_types returned %s", out)
-        #out = objgraph.growth(limit=20)
-        #log.info("objgraph growth returned %s", out)
+        import objgraph
+        out = objgraph.most_common_types(limit=20)
+        log.info("objgraph most_common_types returned %s", out)
+        out = objgraph.growth(limit=20)
+        log.info("objgraph growth returned %s", out)
         #out = objgraph.get_leaking_objects()
         #log.info("objgraph get_leaking_objects returned %r", out)
 
@@ -1331,6 +1336,13 @@ class PSAPApplication(SylkApplication):
         handler = getattr(self, '_NH_%s' % notification.name, Null)
         handler(notification)
 
+    def get_oldest_call_with_status(self, status, username):
+        filtered_calls = [(room_number, room_data) for room_number, room_data in self._rooms.iteritems() if (room_data.status == status) and (username not in room_data.ignore_calltakers)]
+        if len(filtered_calls) > 0:
+            (room_number, room_data) = min(filtered_calls, key=lambda call:call[1].start_timestamp)
+            return (room_number, room_data)
+        return (None, None)
+
     def _NH_CalltakerStatusUpdate(self, notification):
         log.info("incoming _NH_CalltakerStatusUpdate")
         user_id = notification.data.user_id
@@ -1342,6 +1354,28 @@ class PSAPApplication(SylkApplication):
             # mark calls as queued calls
             server = ServerConfig.asterisk_server
             sip_uri = "sip:%s@%s" % (username, server)
+            (room_number, room_data) = self.get_oldest_call_with_status('ringing_queued', username)
+            if room_number is None:
+                (room_number, room_data) = self.get_oldest_call_with_status('ringing', username)
+                if room_number is None:
+                    return
+
+            old_status = room_data.status
+            if room_data.status != 'ringing':
+                room_data.status = 'ringing'
+            room_data.ignore_calltakers.append(username)
+            log.info("call presented to %s, set room %s to %s", username, room_number, room_data.status)
+            self.set_calltaker_busy(user_id=user_id)
+            outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri,
+                                                                room_uri=self.get_room_uri(room_number),
+                                                                caller_identity=room_data.incoming_session.remote_identity,
+                                                                is_calltaker=True)
+            outgoing_call_initializer.start()
+            room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
+            if old_status != 'ringing':
+                NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                       NotificationData(room_number=room_number, status=room_data.status))
+            '''
             for room_number in self._rooms:
                 room_data = self._rooms[room_number]
                 if room_data.status == 'ringing_queued' and (username not in room_data.ignore_calltakers):
@@ -1375,6 +1409,7 @@ class PSAPApplication(SylkApplication):
                     outgoing_call_initializer.start()
                     room_data.outgoing_calls[str(sip_uri)] = outgoing_call_initializer
                     return
+            '''
 
     def _NH_ConferenceParticipantDBUpdated(self, notification):
         log.info('inside ConferenceParticipantDBUpdated')
