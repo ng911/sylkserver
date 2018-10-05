@@ -230,6 +230,11 @@ class IncomingRequestHandler(object):
         except UnauthorizedRequest:
             session.reject(403)
             return
+        # todo remove it later
+        # this is just temp
+        log.info("call not authenticated, reject it")
+        session.reject(403)
+        return
         try:
             app = self.get_application(session.request_uri, notification.data.headers)
         except ApplicationNotLoadedError:

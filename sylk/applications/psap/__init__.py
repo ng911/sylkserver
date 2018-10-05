@@ -341,9 +341,6 @@ class PSAPApplication(SylkApplication):
         #log.info("objgraph get_leaking_objects returned %r", out)
         # todo remove this
         # this is just temporary to test the mem / resource leak
-        log.info("call not authenticated, reject it")
-        session.reject(403)
-        return
 
         send_call_update_notification(self, session, 'init')
 
