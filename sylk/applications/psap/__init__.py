@@ -343,6 +343,7 @@ class PSAPApplication(SylkApplication):
         # this is just temporary to test the mem / resource leak
         log.info("call not authenticated, reject it")
         session.reject(403)
+        return
 
         send_call_update_notification(self, session, 'init')
 
