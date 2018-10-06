@@ -945,6 +945,11 @@ class Session(object):
             notification_center.remove_observer(self, sender=self._invitation)
             self.greenlet = None
             self.state = 'terminated'
+            for stream in self.proposed_streams:
+                notification_center.remove_observer(self, sender=stream)
+                stream.deactivate()
+                stream.end()
+
             self.proposed_streams = None
             notification_center.post_notification('SIPSessionDidFail', self, NotificationData(originator='local', code=code, reason=sip_status_messages[code], failure_reason='user request', redirect_identities=None))
 
