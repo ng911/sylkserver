@@ -946,7 +946,6 @@ class Session(object):
             self.greenlet = None
             self.state = 'terminated'
             for stream in self.proposed_streams:
-                notification_center.remove_observer(self, sender=stream)
                 stream.deactivate()
                 stream.end()
 
