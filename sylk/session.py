@@ -457,7 +457,7 @@ class Session(object):
         self.state = 'incoming'
         self.transport = invitation.transport
         self._invitation = invitation
-        self.conference = ConferenceHandler(self)
+        #self.conference = ConferenceHandler(self)
         if 'isfocus' in invitation.remote_contact_header.parameters:
             self.remote_focus = True
         notification_center = NotificationCenter()
