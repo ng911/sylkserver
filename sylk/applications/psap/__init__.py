@@ -332,11 +332,13 @@ class PSAPApplication(SylkApplication):
         log.info(u'num open files is %d', get_num_open_files())
         #from mem_top import mem_top
         #log.info(mem_top())
+        ''' uncomment for load testing 
         import objgraph
         out = objgraph.most_common_types(limit=20)
         log.info("objgraph most_common_types returned %s", out)
         out = objgraph.growth(limit=20)
         log.info("objgraph growth returned %s", out)
+        '''
         #out = objgraph.get_leaking_objects()
         #log.info("objgraph get_leaking_objects returned %r", out)
         # todo remove this
