@@ -1353,6 +1353,7 @@ class PSAPApplication(SylkApplication):
         status = notification.data.status
         janus_busy = notification.data.janus_busy
         username = notification.data.username
+        log.info('user_id is %r, janus_busy  is %r, status is %r', user_id, janus_busy, status)
         if (status == 'available') and not janus_busy:
             # check if there are any queued calls
             # mark calls as queued calls
