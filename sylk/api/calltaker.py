@@ -84,8 +84,11 @@ def get_status(user_id):
 @calltaker.route('/status/<user_id>', methods=['POST', 'PUT'])
 def update_status(user_id):
     status = get_argument('status')
-    log.info('inside update_status calltaker %s, status %s', user_id, status)
     calltaker_data = CalltakerData()
+    # get older values
+    janus_busy = calltaker_data.is_janus_busy(user_id)
+    old_status = calltaker_data.status(user_id)
+    log.info('inside update_status calltaker %s, status %s, old_status %r, janus_busy %r', user_id, status, old_status, janus_busy)
     calltaker_data.update_status(user_id, status)
 
     response = {
@@ -98,8 +101,11 @@ def update_status(user_id):
 @calltaker.route('/janus/status/<user_id>', methods=['POST', 'PUT'])
 def update_janus_status(user_id):
     janus_busy = get_argument('janus_busy')
-    log.info('inside update_janus_status calltaker %s, status %s', user_id, janus_busy)
     calltaker_data = CalltakerData()
+    old_janus_busy = calltaker_data.is_janus_busy(user_id)
+    status = calltaker_data.status(user_id)
+    log.info('inside update_janus_status calltaker %s, janus_status %s, old_janus_status %s, status %r', user_id, janus_busy, old_janus_busy, status)
+    log.info('inside update_janus_status calltaker %s, status %s', user_id, janus_busy)
     calltaker_data.update_janus_status(user_id, janus_busy)
 
     response = {

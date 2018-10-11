@@ -56,6 +56,8 @@ class CalltakerData(object):
                                              user_id=user_id)
         sylk.wamp.publish_update_calltaker_status(user_id, username, status)
         NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
+        log.info('notify_status_updated user_id %r, status %r, janus_status %r, username %r',
+            user_id, status, janus_busy, username)
 
     def _NH_CalltakerSessionLeave(self, notification):
         log.info("incoming _NH_CalltakerSessionLeave")
@@ -77,6 +79,8 @@ class CalltakerData(object):
     def update_status(self, user_id, status):
         if user_id in self._calltakers:
             user = self._calltakers[user_id]
+            log.info('inside calltaker update_status user_id %r, status %r, janus_status %r, username %r, wamp_session_id %r',
+                     user_id, status, user.janus_busy, user.username, user.wamp_session_id)
             self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=status, username=user.username, janus_busy=user.janus_busy)
             self.notify_status_updated(user_id, user.username, status, user.janus_busy)
             '''
@@ -97,6 +101,8 @@ class CalltakerData(object):
     def update_janus_status(self, user_id, is_busy):
         if user_id in self._calltakers:
             user = self._calltakers[user_id]
+            log.info('inside calltaker update_janus_status user_id %r, status %r, janus_status %r, username %r, wamp_session_id %r',
+                     user_id, user.status, is_busy, user.username, user.wamp_session_id)
             self._calltakers[user_id] = User(wamp_session_id=user.wamp_session_id, status=user.status, username=user.username, janus_busy=is_busy)
             self.notify_status_updated(user_id, user.username, user.status, is_busy)
             '''
