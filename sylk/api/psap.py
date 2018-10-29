@@ -82,6 +82,28 @@ def speed_dial():
         return jsonify(result)
 
 
+@psap.route('/speed_dial', methods=['PUT', 'POST'])
+def update_speed_dial():
+    try:
+        log.info('inside update speed dial')
+        result = {'success': True}
+        return jsonify(result)
+    except Exception as e:
+        result = {'success' : False, 'reason' : str(e)}
+        return jsonify(result)
+
+
+@psap.route('/speed_dial', methods=['DELETE'])
+def delete_speed_dial():
+    try:
+        log.info('inside delete speed dial')
+        result = {'success': True}
+        return jsonify(result)
+    except Exception as e:
+        result = {'success' : False, 'reason' : str(e)}
+        return jsonify(result)
+
+
 @psap.route('/greetings', methods=['GET'])
 def greetings():
     try:
