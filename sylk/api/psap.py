@@ -87,6 +87,18 @@ def update_speed_dial():
     try:
         log.info('inside update speed dial')
         result = {'success': True}
+        user_id = get_argument('user_id')
+        name = get_argument('name')
+        number = get_argument('number')
+        log.info('inside update speed dial, user_id %r, name %r, number %r', user_id, name, number)
+        try:
+            speedDialObj = SpeedDial.objects.get(user_id=user_id, name=name)
+        except:
+            speedDialObj = SpeedDial()
+            speedDialObj.name = name
+
+        speedDialObj.number = number
+        speedDialObj.save()
         return jsonify(result)
     except Exception as e:
         result = {'success' : False, 'reason' : str(e)}
@@ -97,6 +109,11 @@ def update_speed_dial():
 def delete_speed_dial():
     try:
         log.info('inside delete speed dial')
+        user_id = get_argument('user_id')
+        name = get_argument('name')
+        log.info('inside delete speed dial, user_id %r, name %r', user_id, name)
+        speedDialObj = SpeedDial.objects.get(user_id=user_id, name=name)
+        speedDialObj.delete()
         result = {'success': True}
         return jsonify(result)
     except Exception as e:
