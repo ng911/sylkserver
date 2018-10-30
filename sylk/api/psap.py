@@ -97,7 +97,7 @@ def update_speed_dial():
             speedDialObj = SpeedDial()
             speedDialObj.name = name
 
-        speedDialObj.number = number
+        speedDialObj.dest = number
         speedDialObj.save()
         return jsonify(result)
     except Exception as e:
