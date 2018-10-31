@@ -99,6 +99,7 @@ def update_speed_dial():
             speedDialObj = SpeedDial()
             speedDialObj.name = name
             speedDialObj.user_id = user_id
+            speedDialObj.psap_id = ServerConfig.psap_id
 
         speedDialObj.dest = number
         speedDialObj.save()
