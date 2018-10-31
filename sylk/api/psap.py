@@ -64,6 +64,7 @@ def speed_dial():
         speed_dial_cursor = SpeedDial.objects(**params)
         for speed_dial_db_obj in speed_dial_cursor:
             speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
+            speed_dial['type'] = 'psap'
             speed_dials.append(speed_dial)
 
         user_id = get_argument('user_id')
@@ -73,6 +74,7 @@ def speed_dial():
             speed_dial_cursor = SpeedDial.objects(**params)
             for speed_dial_db_obj in speed_dial_cursor:
                 speed_dial = get_json_from_db_obj(speed_dial_db_obj, ignore_fields=['psap_id', 'user_id'])
+                speed_dial['type'] = 'calltaker'
                 speed_dials.append(speed_dial)
 
         result = {'success': True, 'speed_dials' : speed_dials}
@@ -96,6 +98,7 @@ def update_speed_dial():
         except:
             speedDialObj = SpeedDial()
             speedDialObj.name = name
+            speedDialObj.user_id = user_id
 
         speedDialObj.dest = number
         speedDialObj.save()
