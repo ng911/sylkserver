@@ -104,7 +104,7 @@ def publish_update_calltaker_status(user_id, username, status):
             'status': status,
             'update_time' : time.time()
         }
-        log.info("publish_update_calltaker_status for json %r", json_data)
+        #log.info("publish_update_calltaker_status for json %r", json_data)
         my_wamp_publish(u'com.emergent.calltaker', json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
