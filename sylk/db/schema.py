@@ -32,7 +32,7 @@ client = connect(username="ws", password="Ecomm@911",
 '''
 #client = connect(host='mongodb://localhost:27107/ng911')
 if len(ServerConfig.db_user) > 0:
-    log.info("connect to mongodb user %r, db %s, connections %r", ServerConfig.db_name, ServerConfig.db_user, ServerConfig.db_connection)
+    log.info("connect to mongodb user %r, db %s, connections %r", ServerConfig.db_user, ServerConfig.db_name, ServerConfig.db_connection)
     connect(ServerConfig.db_name, username=ServerConfig.db_user, password=ServerConfig.db_pwd, host=ServerConfig.db_connection,
             replicaSet="emergent911rs", read_preference=ReadPreference.SECONDARY_PREFERRED)
 else:

@@ -14,6 +14,7 @@ from functools import wraps
 
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Grant, Client, Token, User
+from sylk.configuration import ServerConfig
 
 log = ApplicationLogger(__package__)
 
@@ -30,10 +31,12 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 app.secret_key = 'best psap available, supercharged with webrtc'
 app.config['SESSION_TYPE'] = 'mongodb'
 #mongo_uri = 'mongodb://ws:kingfisher94108@ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903'
-mongo_uri = 'mongodb://localhost:27017/ng911'
+#mongo_uri = 'mongodb://localhost:27017/ng911'
+mongo_uri = ServerConfig.full_db_connection
 mongo_client = MongoClient(mongo_uri)
 app.config['SESSION_MONGODB'] = mongo_client
-app.config['SESSION_MONGODB_DB'] = 'ng911'
+#app.config['SESSION_MONGODB_DB'] = 'ng911'
+app.config['SESSION_MONGODB_DB'] = ServerConfig.db_name
 app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
 
 Session(app)

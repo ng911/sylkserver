@@ -24,6 +24,7 @@ class ServerConfig(ConfigSection):
     outgoing_gateway = "127.0.0.1:5090"
     wamp_crossbar_server = u"ws://127.0.0.1:8080/ws"
     db_connection = "mongodb://localhost:27017/"
+    full_db_connection = "mongodb://localhost:27017/"
     db_name = "ng911"
     db_user = ""
     db_pwd = ""
