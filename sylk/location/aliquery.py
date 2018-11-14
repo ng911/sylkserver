@@ -658,9 +658,10 @@ def test_process_ali_result(result):
 
 
 def test_send_ali_request(room_number, number, format):
-    d = send_ali_request(room_number, number, format)
+    d, id = send_ali_request(room_number, number, format)
     def on_error(err):
         log.info("error in test_send_ali_request for room_number %r", room_number)
+    log.info('send_ali_request for %r, %r, %r, got id %r', room_number, number, format, id)
     d.addErrback(on_error)
     d.addCallback(test_process_ali_result)
 
