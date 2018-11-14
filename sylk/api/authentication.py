@@ -8,7 +8,7 @@ from wtforms import validators, ValidationError
 from utils import get_argument, is_safe_url
 from mongoengine import DoesNotExist
 from sylk.applications import ApplicationLogger
-from sylk.db.schema import Grant, Client, Token, User
+from sylk.db.schema import Grant, Client, Token, User, CalltakerStation
 
 authentication = Blueprint('authentication', __name__,
                         template_folder='templates')
@@ -129,10 +129,20 @@ def session_info():
     # handle this for us, and we use a custom LoginForm to validate.
     log.info("session_info")
     user_id = ''
+    username = ''
     if 'user_id' in session:
         user_id = session['user_id']
-        user_obj = User.objects.get(user_id=user_id)
-        username = user_obj.username
+        if (user_id is not None) and (user_id != ''):
+            user_obj = User.objects.get(user_id=user_id)
+            username = user_obj.username
+            ip_address = request.remote_addr
+            log.info("session_info ip_address is %r", ip_address)
+            try:
+                station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
+                user_obj.station_id = station_db_obj.station_id
+                user_obj.save()
+            except:
+                pass
     return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username})
 
 

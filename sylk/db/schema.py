@@ -110,7 +110,8 @@ class User(Document):
 
 
 class CalltakerStation(Document):
-    station_id = StringField(required=True, unique=True, default=bson.ObjectId)
+    station_id = StringField(required=True, unique=True)
+    ip_address = StringField(required=True, unique=True)
     name = StringField(required=True, unique=True)
     loud_ring_server = BooleanField()
     meta = {

@@ -5,6 +5,7 @@ from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue
 import uuid
+from aliparsers import parse_warren_wireless, parse_warren_wireline
 
 from sylk.applications import ApplicationLogger
 
@@ -333,7 +334,9 @@ def parse_ali_30W_wireline(ali_result):
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory
 
 ali_parsers = { '30WWireless' : parse_ali_30W_wireless,
-                '30WWireline' : parse_ali_30W_wireline}
+                '30WWireline' : parse_ali_30W_wireline,
+                'WarrenWireless' : parse_warren_wireless,
+                'WarrenWireline': parse_warren_wireline}
 
 '''
     This class uses Twisted 
@@ -379,6 +382,32 @@ class AliRequestProtocol(Protocol):
                 self._send_ali_request(id, number, d)
                 del self.pending_ali_requests[id]
 
+    def process_ali_data_warren(self, ali_data):
+        log.info("process_ali_data %r", ali_data)
+        # discard the first 3 characters (message_type, pos1 and pos2)
+        ali_data = ali_data[3:]
+        #recvd_number = ali_data[0:15]
+        # check which request this matches to
+        npa = ali_data[33:36]
+        nxx = ali_data[37:40]
+        recvd_number = '{}{}{}'.format(npa, nxx, ali_data[41:45])
+        log.info("process_ali_data recvd_number %r", recvd_number)
+        i = 0
+        d = None
+
+        for (id, ali_request) in self.ali_requests.copy().iteritems():
+            (number, d) = ali_request
+            log.info("number %r, recvd_number %r", number, recvd_number)
+            if number == recvd_number:
+                ali_parser = ali_parsers[self.ali_format]
+                if ali_parser is not None:
+                    (ali_result, ali_result_civic_xml) = ali_parser(ali_data)
+                    del self.ali_requests[id]
+                    log.info("ali result for number %r is %r", number, ali_result)
+                    d.callback((self.ali_factory, id, number, self.ali_format, ali_result, ali_result_civic_xml, ali_data))
+                else:
+                    log.error("no parser found for format %r", self.ali_format)
+
     def process_ali_data(self, ali_data):
         log.info("process_ali_data %r", ali_data)
         # discard the first 3 characters (message_type, pos1 and pos2)
@@ -418,7 +447,8 @@ class AliRequestProtocol(Protocol):
                     self.start_char_recvd = True
             else:
                 if c == '\x03':
-                    self.process_ali_data(self.recvd_ali_data)
+                    # we will fix this later for franklin as well
+                    self.process_ali_data_warren(self.recvd_ali_data)
                     self.recvd_ali_data = ''
                     self.start_char_recvd = False
                 else:
@@ -519,17 +549,17 @@ def send_ali_request(room_number, number, ali_format):
     id = str(uuid.uuid4())
     if ali_format in ali_factories:
         factories = ali_factories[ali_format]
-        timer = reactor.callLater(20, on_timeout, id)
-        g_ali_requests[id] = (my_d, room_number, factories, timer)
-        log.info("facories length is %r", len(factories))
-        for factory in factories:
-            d = factory.send_ali_request(id, number)
-            d.addCallback(process_ali_result)
-        return my_d, id
+    elif 'all' in ali_factories:
+        factories = ali_factories['all']
     else:
         return None, None
-
-
+    timer = reactor.callLater(20, on_timeout, id)
+    g_ali_requests[id] = (my_d, room_number, factories, timer)
+    log.info("facories length is %r", len(factories))
+    for factory in factories:
+        d = factory.send_ali_request(id, number)
+        d.addCallback(process_ali_result)
+    return my_d, id
 
 
 def get_sample_ali_result():
@@ -642,9 +672,17 @@ def runTests():
     #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
     reactor.callLater(5, test_send_ali_request, '1100', '4153055512', "30WWireless")
 
+def runTestsWarren():
+    log.info("start running tests")
+    # if no format is specified that means ali is for both wireline and wireless
+    ali_links = [("192.168.102.40", 10001, "all"), ("192.168.102.41", 10001, "all")]
+    init_ali_links(ali_links)
+    #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
+    reactor.callLater(5, test_send_ali_request, '1100', '4153055512', "30WWireless")
+
 if __name__ == '__main__':  # parse command line options, and set the high level properties
     log.info("starting aliquery")
-    reactor.callLater(0, runTests)
+    reactor.callLater(0, runTestsWarren)
     log.info("starting reactor.run")
     reactor.run()
     log.info("all done")
