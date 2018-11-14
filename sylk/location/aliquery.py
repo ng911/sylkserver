@@ -678,7 +678,7 @@ def runTestsWarren():
     ali_links = [("192.168.102.40", 10001, "all"), ("192.168.102.41", 10001, "all")]
     init_ali_links(ali_links)
     #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
-    reactor.callLater(5, test_send_ali_request, '1100', '4153055512', "30WWireless")
+    reactor.callLater(5, test_send_ali_request, '1100', '5737514857', "30WWireless")
 
 if __name__ == '__main__':  # parse command line options, and set the high level properties
     log.info("starting aliquery")
