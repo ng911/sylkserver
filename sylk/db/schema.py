@@ -62,6 +62,7 @@ class Psap(Document):
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     username = StringField(required=True, unique=True)
+    fullname = StringField(required=False)
     password_hash = StringField(required=True, unique=True)
     created_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
     psap_id = ObjectIdField()
