@@ -680,9 +680,13 @@ def runTestsWarren():
     #send_ali_request(room_number='1100', number='4153055512', ali_format="30WWireless")
     reactor.callLater(5, test_send_ali_request, '1100', '5737514857', "30WWireless")
 
-if __name__ == '__main__':  # parse command line options, and set the high level properties
+def main():
     log.info("starting aliquery")
     reactor.callLater(0, runTestsWarren)
     log.info("starting reactor.run")
     reactor.run()
     log.info("all done")
+
+if __name__ == '__main__':  # parse command line options, and set the high level properties
+    main()
+
