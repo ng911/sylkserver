@@ -502,6 +502,23 @@ class Greeting(Document):
     }
 
 
+def create_calltaker(username, password, fullname, queue_id, psap_id):
+    utcnow = datetime.datetime.utcnow()
+    user = User()
+    user.username = username
+    user.fullname = fullname
+    user.password_hash = User.generate_password_hash(password)
+    user.created_at = utcnow
+    user.psap_id = psap_id
+    user.roles=['calltaker']
+    user.save()
+
+    queueMember = QueueMember()
+    queueMember.queue_id = queue_id
+    queueMember.user_id = user.user_id
+    queueMember.save()
+
+
 def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
     #ip_address = "192.168.1.3"
     #asterisk_ip_address = ip_address
