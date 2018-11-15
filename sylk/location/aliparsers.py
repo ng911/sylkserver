@@ -154,8 +154,8 @@ def parse_warren_wireline(raw_ali):
     '''
     line = lines[13]
     law = []
-    law[0] = line[0:22]
-    law[1] = line[23:]
+    law.append(line[0:22])
+    law.append(line[23:])
     agenciesDisplay = line
 
     '''
@@ -166,8 +166,8 @@ def parse_warren_wireline(raw_ali):
     '''
     line = lines[14]
     fire = []
-    fire[0] = line[0:22]
-    fire[1] = line[23:]
+    fire.append(line[0:22])
+    fire.append(line[23:])
     agenciesDisplay = '{} {}'.format(agenciesDisplay, line)
 
     '''
@@ -178,8 +178,8 @@ def parse_warren_wireline(raw_ali):
     '''
     line = lines[15]
     ems = []
-    ems[0] = line[0:22]
-    ems[1] = line[23:]
+    ems.append(line[0:22])
+    ems.append(line[23:])
     agenciesDisplay = '{} {}'.format(agenciesDisplay, line)
 
     otcfield = ''
@@ -396,8 +396,8 @@ def parse_warren_wireless(raw_ali):
     i = i+1
     line = lines[i]
     law = []
-    law[0] = line[0:22]
-    law[1] = line[23:]
+    law.append(line[0:22])
+    law.append(line[23:])
     agenciesDisplay = line
 
     '''
@@ -409,8 +409,8 @@ def parse_warren_wireless(raw_ali):
     i = i+1
     line = lines[i]
     fire = []
-    fire[0] = line[0:22]
-    fire[1] = line[23:]
+    fire.append(line[0:22])
+    fire.append(line[23:])
     agenciesDisplay = '{} {}'.format(agenciesDisplay, line)
 
     '''
@@ -422,8 +422,8 @@ def parse_warren_wireless(raw_ali):
     i = i+1
     line = lines[i]
     ems = []
-    ems[0] = line[0:22]
-    ems[1] = line[23:]
+    ems.append(line[0:22])
+    ems.append(line[23:])
     agenciesDisplay = '{} {}'.format(agenciesDisplay, line)
 
     otcfield = ''
