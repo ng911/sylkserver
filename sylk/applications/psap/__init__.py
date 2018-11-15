@@ -417,6 +417,7 @@ class PSAPApplication(SylkApplication):
                     forward_to_calltaker=False
                 elif call_type == 'outgoing_calltaker':
                     session.is_calltaker = True
+                    session.calltaker_name = remote_identity.uri.user
                     forward_to_calltaker=True
                     server = ServerConfig.asterisk_server
                     sip_uri = 'sip:{}@{}'.format(local_identity.uri.user, server)
