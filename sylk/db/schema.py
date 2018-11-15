@@ -529,6 +529,15 @@ def add_speed_dial(name, group, number, psap_id):
     speedDialObj.save()
 
 
+def add_call_transfer_line(type, name, star_code, psap_id):
+    lineObj = CallTransferLine()
+    lineObj.psap_id = psap_id
+    lineObj.type = type
+    lineObj.name = name
+    lineObj.star_code = star_code
+    lineObj.save()
+
+
 def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
     #ip_address = "192.168.1.3"
     #asterisk_ip_address = ip_address
