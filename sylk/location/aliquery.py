@@ -355,17 +355,18 @@ class AliRequestTimeout(Exception):
 
 
 class AliRequestProtocol(Protocol):
-    def __init__(self, ali_format, ali_factory, pending_ali_requests):
+    def __init__(self, ali_factory, pending_ali_requests):
         global ali_protocols
         self.is_connected = False
         self.start_char_recvd = False
         self.recvd_ali_data = ''
         self.pending_ali_requests = pending_ali_requests
-        self.ali_format = ali_format
+        self.ali_format = ''
         self.ali_requests = {}
         self.ali_factory = ali_factory
 
-    def send_ali_request(self, id, number, d):
+    def send_ali_request(self, id, number, ali_format, d):
+        self.ali_format = ali_format
         data_to_send = "%s0101" % number
         data_to_send = make_string_divisible_by_8(data_to_send)
         data_to_send = "%s\r" % data_to_send
@@ -378,8 +379,8 @@ class AliRequestProtocol(Protocol):
         self.is_connected = True
         if len(self.pending_ali_requests) > 0:
             for id, ali_request in self.pending_ali_requests.copy().iteritems():
-                (number, d) = ali_request
-                self._send_ali_request(id, number, d)
+                (number, ali_format, d) = ali_request
+                self._send_ali_request(id, number, ali_format, d)
                 del self.pending_ali_requests[id]
 
     def process_ali_data_warren(self, ali_data):
@@ -471,20 +472,20 @@ class AliClientFactory(ReconnectingClientFactory):
             self.protocol.cancel_ali_request(id)
 
     # returns a deferred
-    def send_ali_request(self, id, number):
+    def send_ali_request(self, id, number, ali_format):
         log.info("AliRequestProtocol send_ali_request id %r, number %r", id, number)
         d = defer.Deferred()
         if not self.connected:
-            self.pending_ali_requests[id] = (number, d)
+            self.pending_ali_requests[id] = (number, ali_format, d)
         else:
-            self.protocol.send_ali_request(id, number, d)
+            self.protocol.send_ali_request(id, number, ali_format, d)
         return d
 
     def buildProtocol(self, addr):
         log.info('AliClientFactory buildProtocol.')
         log.info('AliClientFactory Resetting reconnection delay')
         self.connected = True
-        self.protocol = AliRequestProtocol(self.ali_format, self, self.pending_ali_requests)
+        self.protocol = AliRequestProtocol(self, self.pending_ali_requests)
         self.resetDelay()
         self.pending_ali_requests = {}
         return self.protocol
@@ -557,7 +558,7 @@ def send_ali_request(room_number, number, ali_format):
     g_ali_requests[id] = (my_d, room_number, factories, timer)
     log.info("facories length is %r", len(factories))
     for factory in factories:
-        d = factory.send_ali_request(id, number)
+        d = factory.send_ali_request(id, number, ali_format)
         d.addCallback(process_ali_result)
     return my_d, id
 
