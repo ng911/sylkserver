@@ -525,7 +525,7 @@ def add_speed_dial(name, group, number, psap_id):
     speedDialObj.name = name
     if group != "":
         speedDialObj.group = group
-    speedDialObj.number = number
+    speedDialObj.dest = number
     speedDialObj.save()
 
 
