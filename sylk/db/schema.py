@@ -519,6 +519,16 @@ def create_calltaker(username, password, fullname, queue_id, psap_id):
     queueMember.save()
 
 
+def add_speed_dial(name, group, number, psap_id):
+    speedDialObj =  SpeedDial()
+    speedDialObj.psap_id = psap_id
+    speedDialObj.name = name
+    if group != "":
+        speedDialObj.group = group
+    speedDialObj.number = number
+    speedDialObj.save()
+
+
 def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3", asterisk_port=5090):
     #ip_address = "192.168.1.3"
     #asterisk_ip_address = ip_address
