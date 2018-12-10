@@ -10,7 +10,8 @@ from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
 from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
-from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary, publish_update_call_events
+from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary, \
+    publish_update_call_events, publish_tty_enabled, publish_tty_updated
 import sylk.db.calls as calls
 
 import sylk.wamp
@@ -588,6 +589,35 @@ class ConferenceData(object):
             log.error("exception in update_hold %r", e)
             log.error(stackTrace)
 
+    def enable_tty(self, room_number):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'enable_tty'
+            conference_event.event_details = 'TTY Enabled'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.save()
+
+            '''
+            todo add an event that participant is on mute
+            conference_event = ConferenceEvent()
+            conference_event.event = 'leave'
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.event_details = 'participant {} left'.format(display_name)
+            conference_event.save()
+            '''
+            conference = Conference.objects.get(room_number=room_number)
+            conference.has_tty = True
+            conference.save()
+            publish_tty_enabled(room_number)
+
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in update_hold %r", e)
+            log.error(stackTrace)
+
+
     def init_observers(self):
         log.info("ConferenceData init_observers")
         notification_center = NotificationCenter()
@@ -608,6 +638,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceMuteUpdated')
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
         notification_center.add_observer(self, name='ConferenceTimedOut')
+        notification_center.add_observer(self, name='ConferenceTTYEnabled')
         #notification_center.add_observer(self, name='ConferenceCallFailed')
 
 
@@ -780,3 +811,11 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceMuteAllUpdated %r", e)
             log.error(stackTrace)
 
+    def _NH_ConferenceTTYEnabled(self, notification):
+        log.info("incoming _NH_ConferenceTTYEnabled")
+        try:
+            self.enable_tty(notification.data.room_number)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceTTYEnabled %r", e)
+            log.error(stackTrace)

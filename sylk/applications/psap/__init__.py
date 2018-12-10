@@ -46,7 +46,7 @@ def get_num_open_files():
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'direction', 'outgoing_calls',
+    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp']
@@ -58,6 +58,7 @@ class RoomData(object):
         self.ringing_duration_timer = None
         self.duration_timer = None
         self.start_timestamp = time.time()
+        self.has_tty = False
 
     @property
     def incoming(self):
@@ -1295,6 +1296,28 @@ class PSAPApplication(SylkApplication):
 
         data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
         NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
+
+    def enable_tty(self, room_number, sip_uri, muted):
+        room_data = self.get_room_data(room_number)
+        room_data.has_tty = True
+
+        data = NotificationData(room_number=room_number)
+        NotificationCenter().post_notification('ConferenceTTYEnabled', '', data)
+
+    def send_tty(self, room_number, sip_uri, muted):
+        room_data = self.get_room_data(room_number)
+        participant = room_data.participants[str(sip_uri)]
+        if participant is None:
+            raise ValueError("invalid participant %r for room %r" % (sip_uri, room_number))
+        if participant.session is not None:
+            if muted:
+                participant.session.mute()
+            else:
+                participant.session.unmute()
+
+        data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
+        NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
+
 
     # this is done by participant joining the call again
     #def remove_calltaker_on_hold(self, room_number, calltaker_name):

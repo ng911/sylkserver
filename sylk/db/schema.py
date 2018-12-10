@@ -289,6 +289,7 @@ class Conference(Document):
     updated_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
     has_text = BooleanField(default=False)
     has_tty = BooleanField(default=False)
+    tty_text = StringField(required=False)
     has_audio = BooleanField(default=True)
     has_video = BooleanField(default=False)
     direction = StringField(required=True, choices=('in', 'out'), default='in')
@@ -366,7 +367,8 @@ class ConferenceParticipant(Document):
 class ConferenceEvent(Document):
     room_number = StringField(required=True)
     event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', \
-                                                'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', 'abandoned', 'cancel', 'failed', 'update_primary', 'timed_out'))
+                                                'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', \
+                                                'abandoned', 'cancel', 'failed', 'update_primary', 'timed_out', 'enable_tty'))
     event_details = StringField()
     event_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     meta = {

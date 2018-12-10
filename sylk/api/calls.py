@@ -431,6 +431,70 @@ def conference_release_on_hold(room_number):
             'reason' : str(e)
         })
 
+@calls.route('/conference/tty/enable/<room_number>', methods=['PUT', 'POST'])
+def conference_tty_enable(room_number):
+    try:
+        psap_app = psap.PSAPApplication()
+        psap_app.enable_tty(room_number)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_tty_enable error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+@calls.route('/conference/tty/send/<room_number', methods=['PUT', 'POST'])
+def conference_tty_send(room_number, data):
+    try:
+        ttyData = get_argument('data')
+        if (ttyData is None) or (ttyData == ''):
+            raise ValueError('missing tty data to send')
+        psap_app = psap.PSAPApplication()
+        psap_app.send_tty(room_number, data)
+
+        return jsonify({
+            'success' : True
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_tty_send error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+@calls.route('/conference/tty/get/<room_number', methods=['PUT', 'POST'])
+def conference_tty_get(room_number, data):
+    try:
+        conf_db_obj = Conference.objects.get(room_number=room_number)
+        if (hasattr(conf_db_obj, 'tty_test')):
+            tty_text = conf_db_obj.tty_text
+        else:
+            tty_text = ''
+
+        return jsonify({
+            'success' : True,
+            'tty_text' : tty_text
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_tty_get error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
 def conference_event_log(room_number):
     event_log_json = db_calls.get_conference_event_log_json(room_number)
