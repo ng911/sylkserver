@@ -18,7 +18,7 @@ from eventlib import api, coros, proc
 from sipsimple.account.bonjour import BonjourPresenceState
 from sipsimple.application import SIPApplication
 from sylk.applications import ApplicationLogger
-from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
+from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder, TTYToneDemodulator
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import SIPCoreError, SIPCoreInvalidStateError, SIPURI
 from sipsimple.core import Header, FromHeader, ToHeader, SubjectHeader
@@ -154,6 +154,7 @@ class Room(object):
         self.participants_counter = Counter()
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
+        self.ttyDemodulator = None
         self.duration_timer = None
         self.beep_player = None
         self.beep_timer = None
@@ -296,6 +297,8 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.recorder = None
+        self.ttyDemodulator.stop()
+        self.ttyDemodulator = None
         self.state = 'stopped'
         if self.duration_timer is not None:
             self.duration_timer.stop()
@@ -509,6 +512,8 @@ class Room(object):
             self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, self._get_recording_file_path(self.room_number))
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
+            self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
+            self.ttyDemodulator.start()
 
         '''
         if ServerConfig.enable_bonjour:
