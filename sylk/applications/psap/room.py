@@ -297,7 +297,7 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.recorder = None
-        self.ttyDemodulator.stop()
+        #self.ttyDemodulator.stop()
         self.ttyDemodulator = None
         self.state = 'stopped'
         if self.duration_timer is not None:
@@ -513,7 +513,7 @@ class Room(object):
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
             self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
-            self.ttyDemodulator.start()
+            #self.ttyDemodulator.start()
 
         '''
         if ServerConfig.enable_bonjour:
