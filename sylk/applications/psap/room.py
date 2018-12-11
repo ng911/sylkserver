@@ -514,6 +514,7 @@ class Room(object):
             self.audio_conference.bridge.add(self.recorder)
             self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
             self.ttyDemodulator.start()
+            self.audio_conference.bridge.add(self.ttyDemodulator)
 
         '''
         if ServerConfig.enable_bonjour:
