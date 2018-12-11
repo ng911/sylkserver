@@ -472,8 +472,8 @@ def conference_tty_send(room_number, data):
             'reason' : str(e)
         })
 
-@calls.route('/conference/tty/get/<room_number', methods=['PUT', 'POST'])
-def conference_tty_get(room_number, data):
+@calls.route('/conference/tty/get/<room_number>', methods=['PUT', 'POST'])
+def conference_tty_get(room_number):
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
         if (hasattr(conf_db_obj, 'tty_test')):
