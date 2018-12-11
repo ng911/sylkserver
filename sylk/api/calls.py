@@ -450,7 +450,7 @@ def conference_tty_enable(room_number):
             'reason' : str(e)
         })
 
-@calls.route('/conference/tty/send/<room_number', methods=['PUT', 'POST'])
+@calls.route('/conference/tty/send/<room_number>', methods=['PUT', 'POST'])
 def conference_tty_send(room_number, data):
     try:
         ttyData = get_argument('data')
