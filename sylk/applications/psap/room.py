@@ -297,7 +297,7 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.recorder = None
-        #self.ttyDemodulator.stop()
+        self.ttyDemodulator.stop()
         self.ttyDemodulator = None
         self.state = 'stopped'
         if self.duration_timer is not None:
