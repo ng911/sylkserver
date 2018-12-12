@@ -638,10 +638,11 @@ class PSAPApplication(SylkApplication):
             session = room_data.incoming_session
             NotificationCenter().post_notification('ConferenceHookFlashTrasnfer', self,
                                                    NotificationData(room_number=room_number,
-                                                                    phone_number=phone_number))
+                                                                    phone_number=phone_number[1:]))
             session.send_dtmf('R')
             digits_to_send = phone_number[1:]
             def send_digits():
+                log.info('hook_flash_transfer send digits %s, %s', room_number, digits_to_send)
                 for dtmf_digit in digits_to_send:
                     session.send_dtmf(dtmf_digit)
             reactor.callLater(3, send_digits)
