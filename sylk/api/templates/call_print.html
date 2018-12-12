@@ -30,14 +30,16 @@
     <button type="button">Print</button>
     <h3>Call Details</h3>
     <table>
+      {% if confernce.direction == 'in' %}
       <tr>
         <td class="title">
           Call From
         </td>
         <td class="details">
-          4153054541
+          conference.
         </td>
       </tr>
+      {% endif %}
       <tr>
         <td class="title">
           Calltakers
