@@ -333,10 +333,11 @@ def parse_ali_30W_wireline(ali_result):
 
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory
 
+# for warren the formats are the same
 ali_parsers = { '30WWireless' : parse_ali_30W_wireless,
                 '30WWireline' : parse_ali_30W_wireline,
                 'WarrenWireless' : parse_warren_wireless,
-                'WarrenWireline': parse_warren_wireline}
+                'WarrenWireline': parse_warren_wireless}
 
 '''
     This class uses Twisted 
