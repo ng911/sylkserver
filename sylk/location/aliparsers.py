@@ -401,6 +401,10 @@ def parse_warren_wireless(raw_ali):
     line = lines[i]
     uncertainty = line[3:10]
     radius = line[12:18]
+    radius = radius.strip()
+    log.info("radius is '%s'", radius)
+    if len(radius) == 0:
+        radius = 0
 
     '''
     380 - 401  22      Law Info 1                                            
