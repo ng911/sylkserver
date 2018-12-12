@@ -465,7 +465,7 @@ def parse_warren_wireless(raw_ali):
     if len(community) > 0: civic_address_xml = "%s<cl:A3>%s</cl:A3>" % (civic_address_xml, community)
     if len(street) > 0: civic_address_xml = "%s<cl:A6>%s</cl:A6>" % (civic_address_xml, street)
     if len(location) > 0: civic_address_xml = "%s<cl:LOC>%s</cl:LOC>" % (civic_address_xml, location)
-    if len(longitude) > 0: civic_address_xml = "%s<cl:CIRCLE><cl:POS>%s %s</cl:POS><cl:RADIUS>%s</cl:RADIUS></cl:CIRCLE>" % (
+    if longitude != 0: civic_address_xml = "%s<cl:CIRCLE><cl:POS>%s %s</cl:POS><cl:RADIUS>%s</cl:RADIUS></cl:CIRCLE>" % (
     civic_address_xml, longitude, latitude, radius)
 
     civic_address_xml = "<cl:civicAddress xmlns:cl='urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr'>%s</cl:civicAddress>" % (
