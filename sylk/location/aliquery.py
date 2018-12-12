@@ -541,7 +541,7 @@ def process_ali_result(result):
 
 
 def check_ali_format_supported(ali_format):
-    return ali_format in ali_factories
+    return (ali_format in ali_factories) or ('all' in ali_factories)
 
 
 def send_ali_request(room_number, number, ali_format):
