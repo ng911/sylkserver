@@ -46,7 +46,7 @@ def get_num_open_files():
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'direction', 'outgoing_calls',
+    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp']
@@ -59,6 +59,7 @@ class RoomData(object):
         self.duration_timer = None
         self.start_timestamp = time.time()
         self.has_tty = False
+        self.tty_text = ''
 
     @property
     def incoming(self):
@@ -1331,10 +1332,15 @@ class PSAPApplication(SylkApplication):
     def send_tty(self, room_number, tty_text):
         log.info('send_tty for room %r, data %s', room_number, tty_text)
         room_data = self.get_room_data(room_number)
+        if tty_text == 'Enter':
+            room_data.tty_text = '{}<CRLF>'.format(room_data.tty_text)
+        elif tty_text == 'Backspace':
+            room_data.tty_text = room_data.tty_text[:-1]
+        else:
+            room_data.tty_text = '{}{}'.format(room_data.tty_text, tty_text)
+        return room_data.tty_text
 
-
-
-    # this is done by participant joining the call again
+            # this is done by participant joining the call again
     #def remove_calltaker_on_hold(self, room_number, calltaker_name):
     #    participant = self._get_calltaker_participant(room_number, calltaker_name)
     #    participant.on_hold = False

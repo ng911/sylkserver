@@ -451,16 +451,17 @@ def conference_tty_enable(room_number):
         })
 
 @calls.route('/conference/tty/send/<room_number>', methods=['PUT', 'POST'])
-def conference_tty_send(room_number, data):
+def conference_tty_send(room_number):
     try:
         ttyData = get_argument('data')
         if (ttyData is None) or (ttyData == ''):
             raise ValueError('missing tty data to send')
         psap_app = psap.PSAPApplication()
-        psap_app.send_tty(room_number, data)
+        tty_text = psap_app.send_tty(room_number, ttyData)
 
         return jsonify({
-            'success' : True
+            'success' : True,
+            'tty_text' : tty_text
         })
     except Exception as e:
         stacktrace = traceback.print_exc()
