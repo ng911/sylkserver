@@ -598,25 +598,29 @@ class ConferenceData(object):
             conference_event.room_number = room_number
             conference_event.save()
 
-            '''
-            todo add an event that participant is on mute
-            conference_event = ConferenceEvent()
-            conference_event.event = 'leave'
-            conference_event.event_time = datetime.datetime.utcnow()
-            conference_event.room_number = room_number
-            conference_event.event_details = 'participant {} left'.format(display_name)
-            conference_event.save()
-            '''
             conference = Conference.objects.get(room_number=room_number)
             conference.has_tty = True
             conference.save()
             publish_tty_enabled(room_number)
-
+            publish_update_call_events(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
-            log.error("exception in update_hold %r", e)
+            log.error("exception in enable_tty %r", e)
             log.error(stackTrace)
 
+    def hook_flash_transferred(self, room_number, phone_number):
+        try:
+            conference_event = ConferenceEvent()
+            conference_event.event = 'transfer'
+            conference_event.event_details = 'Call transfer to {}'.format(phone_number)
+            conference_event.event_time = datetime.datetime.utcnow()
+            conference_event.room_number = room_number
+            conference_event.save()
+            publish_update_call_events(room_number)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in hook_flash_transferred %r", e)
+            log.error(stackTrace)
 
     def init_observers(self):
         log.info("ConferenceData init_observers")
@@ -639,6 +643,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
         notification_center.add_observer(self, name='ConferenceTimedOut')
         notification_center.add_observer(self, name='ConferenceTTYEnabled')
+        notification_center.add_observer(self, name='ConferenceHookFlashTrasnfer')
         #notification_center.add_observer(self, name='ConferenceCallFailed')
 
 
@@ -819,3 +824,15 @@ class ConferenceData(object):
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceTTYEnabled %r", e)
             log.error(stackTrace)
+
+
+    def _NH_ConferenceHookFlashTrasnfer(self, notification):
+        log.info("incoming _NH_ConferenceHookFlashTrasnfer")
+        try:
+            self.hook_flash_transferred(notification.data.room_number, notification.data.phone_number)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceHookFlashTrasnfer %r", e)
+            log.error(stackTrace)
+
+

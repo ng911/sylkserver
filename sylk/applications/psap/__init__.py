@@ -576,6 +576,10 @@ class PSAPApplication(SylkApplication):
 
     def invite_to_conference(self, room_number, call_from, phone_number):
         log.info("invite_to_conference for room %s, phone %s", room_number, phone_number)
+        if phone_number.startswith('R'):
+            self.hook_flash_transfer(room_number, phone_number)
+            return
+
         is_calltaker = False
         calltaker_user = get_calltaker_user(phone_number)
         if calltaker_user != None:
@@ -627,14 +631,32 @@ class PSAPApplication(SylkApplication):
         for session in sessions:
             session.send_dtmf(dtmf_digit)
 
+    def hook_flash_transfer(self, room_number, phone_number):
+        log.info('hook_flash_transfer for %s, %s', room_number, phone_number)
+        room_data = self.get_room_data(room_number)
+        if room_data is not None:
+            session = room_data.incoming_session
+            NotificationCenter().post_notification('ConferenceHookFlashTrasnfer', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    phone_number=phone_number))
+            session.send_dtmf('R')
+            digits_to_send = phone_number[1:]
+            def send_digits():
+                for dtmf_digit in digits_to_send:
+                    session.send_dtmf(dtmf_digit)
+            reactor.callLater(3, send_digits)
+
     def star_code_transfer(self, room_number, star_code):
         log.info('star_code_transfer for %s, %s', room_number, star_code)
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             session = room_data.incoming_session
-            for dtmf_digit in star_code:
-                log.info('star_code_transfer send digit %s', dtmf_digit)
-                session.send_dtmf(dtmf_digit)
+            session.send_dtmf('R')
+            def send_digits():
+                for dtmf_digit in star_code:
+                    log.info('star_code_transfer send digit %s', dtmf_digit)
+                    session.send_dtmf(dtmf_digit)
+            reactor.callLater(3, send_digits)
 
 
     def on_ringing_timeout(self, incoming_session, room_number):
