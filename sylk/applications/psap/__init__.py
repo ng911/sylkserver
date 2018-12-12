@@ -1320,26 +1320,18 @@ class PSAPApplication(SylkApplication):
         data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
         NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
 
-    def enable_tty(self, room_number, sip_uri, muted):
+    def enable_tty(self, room_number):
+        log.info('enable_tty for room %r', room_number)
         room_data = self.get_room_data(room_number)
         room_data.has_tty = True
 
         data = NotificationData(room_number=room_number)
         NotificationCenter().post_notification('ConferenceTTYEnabled', '', data)
 
-    def send_tty(self, room_number, sip_uri, muted):
+    def send_tty(self, room_number, tty_text):
+        log.info('send_tty for room %r, data %s', room_number, tty_text)
         room_data = self.get_room_data(room_number)
-        participant = room_data.participants[str(sip_uri)]
-        if participant is None:
-            raise ValueError("invalid participant %r for room %r" % (sip_uri, room_number))
-        if participant.session is not None:
-            if muted:
-                participant.session.mute()
-            else:
-                participant.session.unmute()
 
-        data = NotificationData(room_number=room_number, sip_uri=participant.uri, muted=muted)
-        NotificationCenter().post_notification('ConferenceMuteUpdated', '', data)
 
 
     # this is done by participant joining the call again
