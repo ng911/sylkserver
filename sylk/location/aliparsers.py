@@ -1,8 +1,14 @@
 import re
+from sylk.applications import ApplicationLogger
+
+global log
+log = ApplicationLogger(__package__)
+
 
 def parse_warren_wireline(raw_ali):
     if (raw_ali == "") or (re.search("NO RECORD FOUND", raw_ali) != None):
         return ({}, "")
+    log.info("raw_ali %s", raw_ali)
     lines = raw_ali.splitlines(True)
     '''
      1          1       CR                                                    
@@ -369,7 +375,12 @@ def parse_warren_wireless(raw_ali):
     i = i+1
     line = lines[i]
     latitude = line[1:12]
+    latitude = latitude.strip()
+    log.info("latitude '%s'", latitude)
+
     longitude = line[15:26]
+    longitude = longitude.strip()
+    log.info("longitude '%s'", longitude)
     confidence = line[29:32]
     '''
     352 - 354  3       Free Text                          UNC                
