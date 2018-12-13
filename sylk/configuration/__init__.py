@@ -42,6 +42,8 @@ class ServerConfig(ConfigSection):
     db_pwd = ""
     from_number = "911"
     alidump_port = 12010
+    alidump_client_host = ""
+    alidump_client_port = ""
     application_map = ConfigSetting(type=StringList, value=['echo:echo'])
     disabled_applications = ConfigSetting(type=StringList, value='')
     extra_applications_dir = ConfigSetting(type=Path, value=None)

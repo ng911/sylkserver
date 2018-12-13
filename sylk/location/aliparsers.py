@@ -256,7 +256,7 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    name = line
+    name = line.strip()
 
     '''
     99 - 108   10      House Number                                          
@@ -270,10 +270,12 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    house_no = line[0:10]
-    house_no_suffix = line[11:14]
-    prefix_directional = line[15:18]
-    class_of_service = line[19:]
+    house_no = line[0:10].strip()
+    house_no_suffix = line[11:14].strip()
+    prefix_directional = line[15:18].strip()
+    class_of_service = line[19:].strip()
+    house = "{} {} {}".format(house_no, house_no_suffix, prefix_directional)
+    house = house.strip()
 
     '''
     131 - 161  31      Street Name                                           
@@ -281,7 +283,7 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    street_name = line
+    street_name = line.strip()
 
     '''
     163 - 171  9       Street Name                                           
@@ -297,11 +299,14 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    street_name_addtl = line[0:9]
-    street_suffix = line[10:14]
-    street = '{} {} {}'.format(street_name, street_name_addtl, street_suffix)
-    post_directional = line[19:22]
-    company_id = line[27:]
+    street_name_addtl = line[0:9].strip()
+    street_suffix = line[10:14].strip()
+    post_directional = line[19:22].strip()
+    street = '{}{} {} {}'.format(street_name, street_name_addtl, street_suffix, post_directional)
+    street = street.strip()
+    location = "{} {}".format(house, street)
+    location = location.strip()
+    company_id = line[20:].strip()
 
     '''
     193 - 220  28      Community Name                                        
@@ -311,8 +316,8 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    community = line[0:28]
-    state = line[29:]
+    community = line[0:28].strip()
+    state = line[29:].strip()
 
     '''
     225 - 254  30      Location                                              
@@ -320,7 +325,7 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    location = line
+    location_addtl = line.strip()
 
     '''
     256 - 275  20      Location                                              
@@ -332,9 +337,9 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    location_extra = line[0:20]
-    location = '{} {}'.format(location, location_extra)
-    esn = line[26:]
+    location_extra = line[0:20].strip()
+    location_extra = '{} {}'.format(location_addtl, location_extra)
+    esn = line[26:].strip()
 
     '''
     288 - 289  2       Free Text                          P#                 
@@ -456,6 +461,7 @@ def parse_warren_wireless(raw_ali):
                           'community': community, 'postal': postal, 'psap_name': psap_name,
                           'class_of_service': class_of_service,
                           'pilot_no': pilot_no, 'service_provider': company_id, 'location': location,
+                          'location_extra' : location_extra,
                           "callback": callback,
                           'fire_no': fire[0], 'ems_no': ems[0], 'police_no': law[0],
                           'agencies_display': agenciesDisplay}

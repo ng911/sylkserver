@@ -14,7 +14,7 @@ import sylk
 import sylk.wamp
 import sylk.api
 from sylk.location.aliquery import init_ali_links
-from sylk.location.alidump import start_alidump_server
+from sylk.location.alidump import start_alidump
 import sylk.data.calltaker as calltaker_data
 
 # noinspection PyUnusedLocal
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     if len(ali_links) > 0:
         init_ali_links(ali_links)
 
-    start_alidump_server()
+    start_alidump()
 
     log.info('starting api server')
     sylk.api.start_server()
