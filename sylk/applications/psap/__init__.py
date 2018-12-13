@@ -1325,6 +1325,13 @@ class PSAPApplication(SylkApplication):
 
     def enable_tty(self, room_number):
         log.info('enable_tty for room %r', room_number)
+        try:
+            room = self.get_room(room_number)
+        except RoomNotFoundError:
+            log.info('in enable_tty RoomNotFoundError')
+            return
+        if not ServerConfig.tty_enabled:
+            room.start_tty()
         room_data = self.get_room_data(room_number)
         room_data.has_tty = True
 
