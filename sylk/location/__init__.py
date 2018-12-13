@@ -27,8 +27,8 @@ else:
 
 def get_location_display(ali_result):
     location_display = ''
-    if ('postal' in ali_result) and (ali_result['postal'] != ''):
-        location_display = ali_result['postal']
+    if ('location' in ali_result) and (ali_result['location'] != ''):
+        location_display = ali_result['location']
     if ('community' in ali_result) and (ali_result['community'] != ''):
         if location_display == '':
             location_display = ali_result['community']
