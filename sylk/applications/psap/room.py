@@ -535,7 +535,7 @@ class Room(object):
             self.audio_conference.bridge.add(self.ttyDemodulator)
 
         if self.ttyModulator == None:
-            self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer)
+            self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer, self.room_number)
             self.ttyModulator.start()
             self.audio_conference.bridge.add(self.ttyModulator)
 
