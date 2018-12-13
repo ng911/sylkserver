@@ -608,6 +608,17 @@ class ConferenceData(object):
             log.error("exception in enable_tty %r", e)
             log.error(stackTrace)
 
+    def update_tty(self, room_number, tty_text):
+        try:
+            conference = Conference.objects.get(room_number=room_number)
+            conference.tty_text = tty_text
+            conference.save()
+            publish_tty_updated(room_number)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in enable_tty %r", e)
+            log.error(stackTrace)
+
     def hook_flash_transferred(self, room_number, phone_number):
         try:
             conference_event = ConferenceEvent()
@@ -643,6 +654,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceMuteAllUpdated')
         notification_center.add_observer(self, name='ConferenceTimedOut')
         notification_center.add_observer(self, name='ConferenceTTYEnabled')
+        notification_center.add_observer(self, name='ConferenceTTYUpdated')
         notification_center.add_observer(self, name='ConferenceHookFlashTrasnfer')
         #notification_center.add_observer(self, name='ConferenceCallFailed')
 
@@ -825,6 +837,14 @@ class ConferenceData(object):
             log.error("exception in _NH_ConferenceTTYEnabled %r", e)
             log.error(stackTrace)
 
+    def _NH_ConferenceTTYUpdated(self, notification):
+        log.info("incoming _NH_ConferenceTTYUpdated")
+        try:
+            self.update_tty(notification.data.room_number, notification.data.tty_text)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceTTYUpdated %r", e)
+            log.error(stackTrace)
 
     def _NH_ConferenceHookFlashTrasnfer(self, notification):
         log.info("incoming _NH_ConferenceHookFlashTrasnfer")

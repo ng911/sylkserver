@@ -37,6 +37,7 @@ class ServerConfig(ConfigSection):
     ali_link4_ip = ""
     ali_link4_port = ""
     ali_link4_format = ""
+    tty_enabled = True
     db_name = "ng911"
     db_user = ""
     db_pwd = ""

@@ -46,7 +46,7 @@ def get_num_open_files():
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'direction', 'outgoing_calls',
+    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'last_tty_0d', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp']
@@ -60,6 +60,7 @@ class RoomData(object):
         self.start_timestamp = time.time()
         self.has_tty = False
         self.tty_text = ''
+        self.last_tty_0d = False
 
     @property
     def incoming(self):
@@ -179,6 +180,7 @@ class PSAPApplication(SylkApplication):
         # this one is used to change the mute, or send status of different media streams
         NotificationCenter().add_observer(self, name='ConferenceParticipantDBUpdated')
         NotificationCenter().add_observer(self, name='CalltakerStatusUpdate')
+        NotificationCenter().add_observer(self, name='TTYReceivedChar')
 
     def start(self):
         log.info(u'PSAPApplication start')
@@ -1331,16 +1333,61 @@ class PSAPApplication(SylkApplication):
 
     def send_tty(self, room_number, tty_text):
         log.info('send_tty for room %r, data %s', room_number, tty_text)
+        try:
+            room = self.get_room(room_number)
+        except RoomNotFoundError:
+            log.info('in send_tty RoomNotFoundError')
+            return
         room_data = self.get_room_data(room_number)
         if tty_text == 'Enter':
             room_data.tty_text = '{}<CRLF>'.format(room_data.tty_text)
+            asciiText = '\x0d' + '\x0a'
+            room.sendTtyText(asciiText)
         elif tty_text == 'Backspace':
             room_data.tty_text = room_data.tty_text[:-1]
+            asciiText = '\x08'
+            room.sendTtyText(asciiText)
         else:
+            tty_text = tty_text.lower()
+            room.sendTtyText(tty_text)
             room_data.tty_text = '{}{}'.format(room_data.tty_text, tty_text)
+        data = NotificationData(room_number=room_number, tty_text=room_data.tty_text)
+        NotificationCenter().post_notification('ConferenceTTYUpdated', '', data)
         return room_data.tty_text
 
-            # this is done by participant joining the call again
+    def recvd_tty(self, room_number, tty_char):
+        log.info("recvd tty %r, %r", room_number, tty_char)
+        if (tty_char is None) or len(tty_char) == 0:
+            log.error("empoty tty chat for room %r", room_number)
+            return
+        hex_char = tty_char[0].encode('hex')
+        try:
+            room = self.get_room(room_number)
+        except RoomNotFoundError:
+            log.info('in send_tty RoomNotFoundError')
+            return
+        room_data = self.get_room_data(room_number)
+
+        if hex_char == '0d' or hex_char == '0a':
+            log.debug("last_tty_chars for room %r is %r", room_number, room_data.last_tty_0d)
+            if room_data.last_tty_0d:
+                room_data.last_tty_0d = False
+                room_data.tty_text = room_data.tty_text + "<CRLF>"
+            else:
+                room_data.last_tty_0d = True
+        elif hex_char == '08':  # backspace handling
+            # remove last character only if its uppercase as it will be received char
+            # received chars are shown in upper case and sent in lower case
+            if room_data.tty_text[-1:].isupper():
+                room_data.tty_text = room_data.tty_text[:-1]
+        else:
+            tty_text = tty_char.upper()
+            room_data.tty_text = '{}{}'.format(room_data.tty_text, tty_text)
+
+        data = NotificationData(room_number=room_number, tty_text=room_data.tty_text)
+        NotificationCenter().post_notification('ConferenceTTYUpdated', '', data)
+
+    # this is done by participant joining the call again
     #def remove_calltaker_on_hold(self, room_number, calltaker_name):
     #    participant = self._get_calltaker_participant(room_number, calltaker_name)
     #    participant.on_hold = False
@@ -1391,6 +1438,11 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = min(filtered_calls, key=lambda call:call[1].start_timestamp)
             return (room_number, room_data)
         return (None, None)
+
+    def _NH_TTYReceivedChar(self, notification):
+        room_number = notification.data.room_number
+        tty_char = notification.data.tty_char
+        self.recvd_tty(room_number, tty_char)
 
     def _NH_CalltakerStatusUpdate(self, notification):
         log.info("incoming _NH_CalltakerStatusUpdate")

@@ -18,8 +18,8 @@ from eventlib import api, coros, proc
 from sipsimple.account.bonjour import BonjourPresenceState
 from sipsimple.application import SIPApplication
 from sylk.applications import ApplicationLogger
-#from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder, TTYToneDemodulator
-from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
+from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder, TTYToneDemodulator, TTYToneModulator
+#from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import SIPCoreError, SIPCoreInvalidStateError, SIPURI
 from sipsimple.core import Header, FromHeader, ToHeader, SubjectHeader
@@ -41,7 +41,7 @@ from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.configuration.datatypes import URL
 from sylk.resources import Resources
 from sylk.session import Session, IllegalStateError
-from sylk.configuration import SIPConfig
+from sylk.configuration import SIPConfig, ServerConfig
 from sylk.wamp import publish_update_call_timer
 #from sylk.web import server as web_server
 
@@ -155,6 +155,7 @@ class Room(object):
         self.participants_counter = Counter()
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
+        self.ttyModulator = None
         self.ttyDemodulator = None
         self.duration_timer = None
         self.beep_player = None
@@ -298,13 +299,20 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.recorder = None
-        #self.ttyDemodulator.stop()
+        if self.ttyDemodulator != None:
+            self.ttyDemodulator.stop()
         self.ttyDemodulator = None
+        if self.ttyModulator != None:
+            self.ttyModulator.stop()
+        self.ttyModulator = None
         self.state = 'stopped'
         if self.duration_timer is not None:
             self.duration_timer.stop()
             self.duration_timer = None
 
+    def sendTtyText(self, text):
+        if (self.ttyModulator != None) and (text != None) and (text != ''):
+            self.ttyModulator.send_text(text)
 
     @run_in_thread('file-io')
     def cleanup_files(self):
@@ -513,14 +521,23 @@ class Room(object):
             self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, self._get_recording_file_path(self.room_number))
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
-            #self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
-            #self.ttyDemodulator.start()
-            #self.audio_conference.bridge.add(self.ttyDemodulator)
-
+        if ServerConfig.tty_enabled:
+            self.start_tty()
         '''
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
         '''
+    def start_tty(self):
+        if self.ttyDemodulator != None:
+            self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
+            self.ttyDemodulator.start()
+            self.audio_conference.bridge.add(self.ttyDemodulator)
+
+        if self.ttyModulator != None:
+            self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer)
+            self.ttyModulator.start()
+            self.audio_conference.bridge.add(self.ttyModulator)
+
 
     def _get_recording_file_path(self, room_number):
         log.info("we started from %s", sys.argv[0])

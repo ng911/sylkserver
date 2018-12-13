@@ -288,7 +288,7 @@ def publish_tty_enabled(room_number):
     try:
         json_data = {}
         json_data['room_number'] = room_number
-        my_wamp_publish(u'com.emergent.call.tty.enabled.%s' % room_number, json_data)
+        my_wamp_publish(u'com.emergent.call.tty.enabled', json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in publish_tty_enabled %s", str(e))
@@ -298,7 +298,7 @@ def publish_tty_updated(room_number):
     try:
         json_data = {}
         json_data['room_number'] = room_number
-        my_wamp_publish(u'com.emergent.call.tty.updated.%s' % room_number, json_data)
+        my_wamp_publish(u'com.emergent.call.tty.updated', json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in publish_tty_updated %s", str(e))

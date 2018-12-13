@@ -473,7 +473,7 @@ def conference_tty_send(room_number):
             'reason' : str(e)
         })
 
-@calls.route('/conference/tty/get/<room_number>', methods=['PUT', 'POST'])
+@calls.route('/conference/tty/get/<room_number>', methods=['GET'])
 def conference_tty_get(room_number):
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
