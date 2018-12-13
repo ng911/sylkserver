@@ -522,6 +522,7 @@ class Room(object):
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
         if ServerConfig.tty_enabled:
+            log.info("starting TTY")
             self.start_tty()
         '''
         if ServerConfig.enable_bonjour:
