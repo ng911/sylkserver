@@ -529,12 +529,12 @@ class Room(object):
             self._update_bonjour_presence()
         '''
     def start_tty(self):
-        if self.ttyDemodulator != None:
+        if self.ttyDemodulator == None:
             self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
             self.ttyDemodulator.start()
             self.audio_conference.bridge.add(self.ttyDemodulator)
 
-        if self.ttyModulator != None:
+        if self.ttyModulator == None:
             self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer)
             self.ttyModulator.start()
             self.audio_conference.bridge.add(self.ttyModulator)
