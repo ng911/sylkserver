@@ -301,7 +301,7 @@ def parse_warren_wireless(raw_ali):
     line = lines[i]
     street_name_addtl = line[0:9].strip()
     street_suffix = line[10:14].strip()
-    post_directional = line[19:22].strip()
+    post_directional = line[16:19].strip()
     street = '{}{} {} {}'.format(street_name, street_name_addtl, street_suffix, post_directional)
     street = street.strip()
     location = "{} {}".format(house, street)
