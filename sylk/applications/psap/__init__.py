@@ -655,6 +655,9 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         if room_data is not None:
             session = room_data.incoming_session
+            NotificationCenter().post_notification('ConferenceHookFlashTrasnfer', self,
+                                                   NotificationData(room_number=room_number,
+                                                                    phone_number=star_code))
             session.send_dtmf('R')
             def send_digits():
                 for dtmf_digit in star_code:
