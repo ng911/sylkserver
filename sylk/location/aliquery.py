@@ -394,9 +394,9 @@ class AliRequestProtocol(Protocol):
         nxx = ali_data[37:40]
         recvd_number = '{}{}{}'.format(npa, nxx, ali_data[41:45])
         log.info("process_ali_data recvd_number %r", recvd_number)
-        npa = ali_data[306:309]
-        nxx = ali_data[310:313]
-        alternate_number = '{}{}{}'.format(npa, nxx, ali_data[314:318])
+        npa = ali_data[305:308]
+        nxx = ali_data[309:312]
+        alternate_number = '{}{}{}'.format(npa, nxx, ali_data[313:317])
         alternate_number = alternate_number.strip()
         if alternate_number != "":
             recvd_number = alternate_number
