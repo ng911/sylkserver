@@ -440,9 +440,21 @@ class PSAPApplication(SylkApplication):
                 room_data.ignore_calltakers = ignore_calltakers
 
             ali_format = ''
+            caller_ani = remote_identity.uri.user
+            caller_name = remote_identity.uri.user
+            called_number = local_identity.uri.user
+            caller_uri = str(remote_identity.uri)
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
-                lookup_number = remote_identity.uri.user
+                # just a temporary change for warren county
+                lookup_number = local_identity.uri.user
+                if lookup_number.startswith("*40"):
+                    lookup_number = lookup_number[3:]
+                caller_ani = lookup_number
+                caller_name = lookup_number
+                called_number = remote_identity.uri.user
+                caller_uri = str(remote_identity.uri)
+                #lookup_number = remote_identity.uri.user
                 # make sure there is no + prefix in the number and it is 10 digits long
                 if lookup_number.startswith('+1'):
                     lookup_number = lookup_number[2:]
@@ -460,9 +472,9 @@ class PSAPApplication(SylkApplication):
                                                                     call_type=call_type, status=room_data.status,
                                                                     primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
                                                                     link_id=incoming_link.link_id,
-                                                                    caller_ani=remote_identity.uri.user, caller_uri=str(remote_identity.uri),
-                                                                    caller_name=remote_identity.uri.user,
-                                                                    called_number=local_identity.uri.user,
+                                                                    caller_ani=caller_ani, caller_uri=caller_uri,
+                                                                    caller_name=caller_name,
+                                                                    called_number=called_number,
                                                                     ali_format=ali_format,
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
@@ -500,7 +512,10 @@ class PSAPApplication(SylkApplication):
             if direction == 'out':
                 caller_identity = "sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip)
             else:
-                caller_identity = str(session.remote_identity.uri)
+                if call_type == 'sos':
+                    caller_identity = lookup_number
+                else:
+                    caller_identity = str(session.remote_identity.uri)
             log.info("outgoing caller is %s", caller_identity)
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
