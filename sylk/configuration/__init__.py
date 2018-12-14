@@ -87,7 +87,7 @@ class RTPConfig(ConfigSection):
     port_range = ConfigSetting(type=PortRange, value=PortRange('50000:50500'))
     srtp_encryption = ConfigSetting(type=SRTPEncryption, value='opportunistic')
     timeout = ConfigSetting(type=NonNegativeInteger, value=30)
-    sample_rate = ConfigSetting(type=SampleRate, value=48000)
+    sample_rate = ConfigSetting(type=SampleRate, value=8000)
 
 
 class WebServerConfig(ConfigSection):
