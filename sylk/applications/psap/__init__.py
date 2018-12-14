@@ -16,6 +16,7 @@ from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader, H
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.configuration.settings import SIPSimpleSettings
+from sipsimple.audio import wave_tty_tone_test
 from sipsimple.session import IllegalStateError
 from sylk.session import Session
 from sylk.accounts import get_user_account
@@ -174,6 +175,7 @@ class PSAPApplication(SylkApplication):
         call_data.CallData()
         conf_data.ConferenceData()
         self._rooms = {}
+        wave_tty_tone_test()
 
     def init_observers(self):
         log.info("ConferenceData init_observers")
