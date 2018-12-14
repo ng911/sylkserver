@@ -108,10 +108,11 @@ def process_ali_success(result):
         location_db_obj.save()
 
         # in case lat and long values are wrong we can safely ignore it
-        log.info("location object created with id %r", str(location_db_obj.location_id))
-        if (ali_result['latitude'] != '') and (ali_result['longitude'] != ''):
-            location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
-        location_db_obj.save()
+        # this is causing problems not needed
+        #log.info("location object created with id %r", str(location_db_obj.location_id))
+        #if (ali_result['latitude'] != '') and (ali_result['longitude'] != ''):
+        #    location_db_obj.location_point = [float(ali_result['longitude']), float(ali_result['latitude'])]
+        #location_db_obj.save()
 
         # update call location in Conference table as well
         location_display = get_location_display(ali_result)
