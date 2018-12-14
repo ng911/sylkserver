@@ -464,7 +464,7 @@ def parse_warren_wireless(raw_ali):
                           'location_extra' : location_extra,
                           "callback": callback,
                           'fire_no': fire[0], 'ems_no': ems[0], 'police_no': law[0],
-                          'agencies_display': agenciesDisplay}
+                          'agencies_display': agenciesDisplay, 'alternate_number' : alternate_number}
 
     civic_address_xml = ""
     if len(name) > 0: civic_address_xml = "<cl:NAME>%s</cl:NAME>" % (name)
