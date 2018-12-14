@@ -448,6 +448,8 @@ class PSAPApplication(SylkApplication):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 # just a temporary change for warren county
                 lookup_number = local_identity.uri.user
+                if lookup_number[-1:] == '#':
+                    lookup_number = lookup_number[:-1]
                 if lookup_number.startswith("*40"):
                     lookup_number = lookup_number[3:]
                 caller_ani = lookup_number
