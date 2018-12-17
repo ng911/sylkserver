@@ -65,6 +65,7 @@ def get_conference_json(conference_db_obj):
     conference_json['duration'] = get_conference_duration(conference_db_obj)
     conference_json['active_calltakers'] = get_active_calltakers(conference_db_obj.room_number)
     conference_json['active_participants'] = get_active_participants(conference_db_obj.room_number)
+    conference_json['participants'] = get_conference_participants_json(conference_db_obj.room_number)
 
     return conference_json
 
