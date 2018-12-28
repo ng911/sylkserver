@@ -477,7 +477,7 @@ def conference_tty_send(room_number):
 def conference_tty_get(room_number):
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
-        if (hasattr(conf_db_obj, 'tty_test')):
+        if (hasattr(conf_db_obj, 'tty_text')):
             tty_text = conf_db_obj.tty_text
         else:
             tty_text = ''
