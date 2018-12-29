@@ -19,7 +19,7 @@ from eventlib import api, coros, proc
 from sipsimple.account.bonjour import BonjourPresenceState
 from sipsimple.application import SIPApplication
 from sylk.applications import ApplicationLogger
-from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder, TTYToneDemodulator, TTYToneModulator
+from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder, TTYTones, TTYToneDemodulator, TTYToneModulator
 #from sipsimple.audio import AudioConference, WavePlayer, WavePlayerError, WaveRecorder
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import SIPCoreError, SIPCoreInvalidStateError, SIPURI
@@ -156,8 +156,9 @@ class Room(object):
         self.participants_counter = Counter()
         self.history = deque(maxlen=ConferenceConfig.history_size)
         self.recorder = None
-        self.ttyModulator = None
-        self.ttyDemodulator = None
+        self.ttyTones = None
+        #self.ttyModulator = None
+        #self.ttyDemodulator = None
         self.duration_timer = None
         self.beep_player = None
         self.beep_timer = None
@@ -300,12 +301,15 @@ class Room(object):
         self.conference_info_payload = None
         self.recorder.stop()
         self.recorder = None
-        if self.ttyDemodulator != None:
-            self.ttyDemodulator.stop()
-        self.ttyDemodulator = None
-        if self.ttyModulator != None:
-            self.ttyModulator.stop()
-        self.ttyModulator = None
+        #if self.ttyDemodulator != None:
+        #    self.ttyDemodulator.stop()
+        #self.ttyDemodulator = None
+        #if self.ttyModulator != None:
+        #    self.ttyModulator.stop()
+        #self.ttyModulator = None
+        if self.ttyTones != None:
+            self.ttyTones.stop()
+            self.ttyTones = None
         self.state = 'stopped'
         if self.duration_timer is not None:
             self.duration_timer.stop()
@@ -532,6 +536,13 @@ class Room(object):
         '''
     def start_tty(self):
         try:
+            if self.ttyTones is None:
+                self.ttyTones = TTYTones(SIPApplication.voice_audio_mixer, self.room_number)
+                self.ttyTones.start()
+                #self.ttyDemodulator.test()
+                self.audio_conference.bridge.add(self.ttyTones)
+                log.info("ttyTones added to audio_conference.bridge")
+            '''
             if self.ttyDemodulator is None:
                 self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
                 self.ttyDemodulator.start()
@@ -544,6 +555,7 @@ class Room(object):
                 self.ttyModulator.start()
                 self.audio_conference.bridge.add(self.ttyModulator)
                 log.info("ttyModulator added to audio_conference.bridge")
+            '''
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error(stacktrace)
