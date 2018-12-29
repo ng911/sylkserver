@@ -317,8 +317,10 @@ class Room(object):
 
     def sendTtyText(self, text):
         log.info("sendTtyText %r", text)
-        if (self.ttyModulator != None) and (text != None) and (text != ''):
-            self.ttyModulator.send_text(text)
+        if (self.ttyTones != None) and (text != None) and (text != ''):
+            self.ttyTones.send_text(text)
+        #if (self.ttyModulator != None) and (text != None) and (text != ''):
+        #    self.ttyModulator.send_text(text)
 
     @run_in_thread('file-io')
     def cleanup_files(self):
