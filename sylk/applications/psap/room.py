@@ -5,6 +5,7 @@ import random
 import shutil
 import string
 import weakref
+import traceback
 
 from collections import Counter, deque
 from glob import glob
@@ -311,6 +312,7 @@ class Room(object):
             self.duration_timer = None
 
     def sendTtyText(self, text):
+        log.info("sendTtyText %r", text)
         if (self.ttyModulator != None) and (text != None) and (text != ''):
             self.ttyModulator.send_text(text)
 
@@ -529,16 +531,24 @@ class Room(object):
             self._update_bonjour_presence()
         '''
     def start_tty(self):
-        if self.ttyDemodulator == None:
-            self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
-            self.ttyDemodulator.start()
-            #self.ttyDemodulator.test()
-            self.audio_conference.bridge.add(self.ttyDemodulator)
+        try:
+            if self.ttyDemodulator is None:
+                self.ttyDemodulator = TTYToneDemodulator(SIPApplication.voice_audio_mixer, self.room_number)
+                self.ttyDemodulator.start()
+                #self.ttyDemodulator.test()
+                self.audio_conference.bridge.add(self.ttyDemodulator)
+                log.info("ttyDemodulator added to audio_conference.bridge")
 
-        if self.ttyModulator == None:
-            self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer, self.room_number)
-            self.ttyModulator.start()
-            self.audio_conference.bridge.add(self.ttyModulator)
+            if self.ttyModulator is None:
+                self.ttyModulator = TTYToneModulator(SIPApplication.voice_audio_mixer, self.room_number)
+                self.ttyModulator.start()
+                self.audio_conference.bridge.add(self.ttyModulator)
+                log.info("ttyModulator added to audio_conference.bridge")
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error(stacktrace)
+            log.error("exception in start_tty %s", str(e))
+        log.info("start_tty done")
 
 
     def _get_recording_file_path(self, room_number):
