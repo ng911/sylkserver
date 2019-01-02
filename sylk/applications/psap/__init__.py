@@ -1506,6 +1506,7 @@ class PSAPApplication(SylkApplication):
 
     def send_msrp_text(self, room_number, sender, text):
         log.debug("sendText %r", text)
+        ''' for testing only
         room_data = self.get_room_data(room_number)
         chat_stream = room_data.chat_stream
         if chat_stream is not None:
@@ -1513,6 +1514,9 @@ class PSAPApplication(SylkApplication):
         else:
             log.error("no chat stream found for conf %r, sender %r, txtMessage %r", room_number, sender, text)
         sender_uri = room_data.get_calltaker_uri(sender)
+        '''
+        # testing only, delete later
+        sender_uri = sender
         message_id = str(bson.ObjectId())
         data = NotificationData(room_number=room_number, sender_uri=sender_uri, text=text, message_id=message_id)
         NotificationCenter().post_notification('ConferenceMSRPText', '', data)
