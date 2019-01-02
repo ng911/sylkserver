@@ -508,7 +508,11 @@ def conference_msrp_text(room_number):
             messages.append(message_data)
         log.debug("/conference/msrp/text messages is %r", messages)
 
-        return { 'success': True, 'messages' : messages, 'room_number' : room_number}
+        return jsonify ({
+            'success': True,
+            'messages' : messages,
+            'room_number' : room_number
+        })
     except Exception as e:
         stacktrace = traceback.print_exc()
         log.error("%r", stacktrace)
