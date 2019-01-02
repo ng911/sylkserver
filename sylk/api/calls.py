@@ -506,7 +506,6 @@ def conference_msrp_text(room_number):
             # should return date, call, type, caller, callback, location, long, lat, notes, status
             message_data = get_json_from_db_obj(db_obj)
             messages.append(message_data)
-        log.debug("/conference/msrp/text messages is %r", messages)
 
         return jsonify ({
             'success': True,
