@@ -182,6 +182,11 @@ class IncomingLink(Document):
     ringback = BooleanField(default=False)
     queue_id = ObjectIdField()
     ali_format = StringField()
+    calling_number_as_called = BooleanField(default=False, required=False)
+    strip_calling_prefix = IntField(default=0, required=False)
+    strip_calling_suffix = IntField(default=0, required=False)
+    strip_called_prefix = IntField(default=0, required=False)
+    strip_called_suffix = IntField(default=0, required=False)
     meta = {
         'indexes': [
             'psap_id',
@@ -315,6 +320,7 @@ class Conference(Document):
     is_ani_pseudo = BooleanField(default=False)
     caller_ani = StringField()
     caller_uri = StringField()
+    called_uri = StringField()      # called uri used by the original caller
     caller_name = StringField()
     recording =  StringField()
     note =  StringField()
@@ -384,6 +390,7 @@ class ConferenceMessage(Document):
     room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
+    message_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'indexes': [
             'sender_uri',

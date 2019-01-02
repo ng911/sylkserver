@@ -304,6 +304,13 @@ def publish_tty_updated(room_number):
         log.error("exception in publish_tty_updated %s", str(e))
         log.error("%s", stackTrace)
 
+def publish_msrp_message(json_data):
+    try:
+        my_wamp_publish(u'com.emergent.call.msrp', json_data)
+    except Exception as e:
+        stackTrace = traceback.format_exc()
+        log.error("exception in publish_msrp_message %s", str(e))
+        log.error("%s", stackTrace)
 
 @comp.on_join
 @inlineCallbacks

@@ -5,7 +5,7 @@ from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue
 import uuid
-from aliparsers import parse_warren_wireless, parse_warren_wireline
+from aliparsers import parse_warren_ali, parse_ali_30W_wireline, parse_ali_30W_wireless
 
 from sylk.applications import ApplicationLogger
 
@@ -64,280 +64,14 @@ def sleep(secs):
     reactor.callLater(secs, d.callback, None)
     return d
 
-def parse_ali_30W_wireless(ali_result):
-    if (ali_result == "") or (re.search("NO RECORD FOUND", ali_result) != None):
-        return ({}, "")
-    lines = ali_result.splitlines(True)
-    if (len(lines) < 8):
-        return ({}, "")
-
-    state = ""
-    customer_name = ""
-    phone_number = ""
-    latitude = ""
-    longitude = ""
-    radius = ""
-    otcfield = ""
-    company_id = ""
-    psap_no = ""
-    esn = ""
-    city = ""
-    postal = ""
-    psap_name = ""
-    class_of_service = ""
-    pilot_no = ""
-    company_id = ""
-    location = ""
-    callback = ""
-    agenciesDisplay = ""
-
-    # line 1
-    parse_line = lines[1]
-    phone_number = parse_line[0:14].strip()
-    class_of_service = parse_line[15:19].strip()
-
-    parse_line = lines[2]
-    customer_name = parse_line.strip()
-
-    parse_line = lines[3]
-    # parse_line = parse_line.strip()
-    house_no = parse_line[0:10].strip()
-    house_sfx = parse_line[11:15].strip()
-    pilot_no = parse_line[19:].strip()
-
-    parse_line = lines[4]
-    # parse_line = parse_line.strip()
-    # print "parse_line is ", parse_line
-    street_direction = parse_line[0:2].strip()
-    street_name1 = parse_line[3:].strip()
-
-    parse_line = lines[5]
-    parse_line = parse_line.strip()
-    street_name2 = parse_line
-
-    parse_line = lines[6]
-    # parse_line = parse_line.strip()
-    if parse_line[:7] == "CALLBK=":
-        npa = parse_line[8:11]
-        nxx = parse_line[12:15]
-        number = parse_line[16:20]
-        callback = npa + nxx + number
-    else:
-        location = parse_line[:21].strip()
-    psap_no = parse_line[22:25].strip()
-    esn = parse_line[26:].strip()
-
-    parse_line = lines[7]
-    # parse_line = parse_line.strip()
-    state = parse_line[0:2].strip()
-    city = parse_line[3:].strip()
-
-    parse_line = lines[8]
-    # parse_line = parse_line.strip()
-    otcfield = parse_line[0:15].strip()
-    company_id = parse_line[22:].strip()
-
-    parse_line = lines[9]
-    # parse_line = parse_line.strip()
-    latitude = parse_line[:11].strip()
-    longitude = parse_line[12:23].strip()
-    radius = parse_line[24:].strip()
-
-    # parse_line = lines[10]
-    # parse_line = parse_line.strip()
-    ##psap_name = parse_line[5:].strip()
-    # agenciesDisplay = parse_line
-
-    i = 10
-    while (i < len(lines)):
-        parse_line = lines[i]
-        parse_line = parse_line.strip()
-        # psap_name = parse_line[5:].strip()
-        agenciesDisplay = "%s, %s" % (agenciesDisplay, parse_line)
-        i = i + 1
-
-    fire_no = ""
-    police_no = ""
-    ems_no = ""
-
-    # for line in lines[11:]:
-    #	line = line.strip()
-    #	if len(line) > 0:
-    #		[name, value] = line.split('=')
-    #		if name.lower() == 'fire':
-    #			fire_no = value.strip()
-    #		if name.lower() == 'police':
-    #			police_no = value.strip()
-    #		if name.lower() == 'ems':
-    #			ems_no = value.strip()
-    street = (street_name1 + ' ' if len(street_name1) > 0 else '') + street_name2
-
-    housenum = house_no + house_sfx
-    if street: street = ((street_direction + ' ') if len(street_direction) > 0 else '') + street
-    streetaddr = ('' if len(housenum) == 0 else housenum + ' ') + street
-    postal = streetaddr
-
-    civic_address_data = {'state': state, 'name': customer_name, 'phone_number': phone_number,
-                          'latitude': latitude, 'longitude': longitude, 'radius': radius,
-                          'otcfield': otcfield, 'service_provider': company_id, 'psap_no': psap_no, 'esn': esn,
-                          'community': city, 'postal': postal, 'psap_name': psap_name,
-                          'class_of_service': class_of_service,
-                          'pilot_no': pilot_no, 'service_provider': company_id, 'location': location,
-                          "callback": callback,
-                          'fire_no': fire_no, 'ems_no': ems_no, 'police_no': police_no,
-                          'agencies_display': agenciesDisplay}
-
-    civic_address_xml = ""
-    if len(customer_name) > 0: civic_address_xml = "<cl:NAME>%s</cl:NAME>" % (customer_name)
-    if len(house_no) > 0: civic_address_xml = "%s<cl:HNO>%s</cl:HNO>" % (civic_address_xml, house_no)
-    if len(house_sfx) > 0: civic_address_xml = "%s<cl:HNS>%s</cl:HNS>" % (civic_address_xml, house_sfx)
-    if len(street_direction) > 0: civic_address_xml = "%s<cl:PRD>%s</cl:PRD>" % (civic_address_xml, street_direction)
-    if len(state) > 0: civic_address_xml = "%s<cl:A1>%s</cl:A1>" % (civic_address_xml, state)
-    if len(city) > 0: civic_address_xml = "%s<cl:A3>%s</cl:A3>" % (civic_address_xml, city)
-    if len(street) > 0: civic_address_xml = "%s<cl:A6>%s</cl:A6>" % (civic_address_xml, street)
-    if len(location) > 0: civic_address_xml = "%s<cl:LOC>%s</cl:LOC>" % (civic_address_xml, location)
-    if len(
-        longitude) > 0: civic_address_xml = "%s<cl:CIRCLE><cl:POS>%s %s</cl:POS><cl:RADIUS>%s</cl:RADIUS></cl:CIRCLE>" % (
-    civic_address_xml, latitude, longitude, radius)
-
-    civic_address_xml = "<cl:civicAddress xmlns:cl='urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr'>%s</cl:civicAddress>" % (
-    civic_address_xml)
-
-    return (civic_address_data, civic_address_xml)
-
-
-def parse_ali_30W_wireline(ali_result):
-    if (ali_result == "") or (re.search("NO RECORD FOUND", ali_result) != None):
-        return ({}, "")
-    state = ""
-    customer_name = ""
-    phone_number = ""
-    latitude = ""
-    longitude = ""
-    radius = ""
-    otcfield = ""
-    company_id = ""
-    psap_no = ""
-    esn = ""
-    city = ""
-    postal = ""
-    psap_name = ""
-    class_of_service = ""
-    pilot_no = ""
-    company_id = ""
-    location = ""
-    callback = ""
-    agenciesDisplay = ""
-
-    lines = ali_result.splitlines(True)
-
-    if (len(lines) < 8):
-        return ({}, "")
-
-    # line 0 or first line is empty line
-    # line 1
-    parse_line = lines[1]
-    phone_number = parse_line[0:14].strip()
-    class_of_service = parse_line[15:19].strip()
-
-    parse_line = lines[2]
-    customer_name = parse_line.strip()
-
-    parse_line = lines[3]
-    # parse_line = parse_line.strip()
-    house_no = parse_line[0:10].strip()
-    house_sfx = parse_line[11:15].strip()
-    pilot_no = parse_line[19:].strip()
-
-    parse_line = lines[4]
-    # parse_line = parse_line.strip()
-    # print "parse_line is ", parse_line
-    street_direction = parse_line[0:2].strip()
-    street_name1 = parse_line[3:].strip()
-
-    parse_line = lines[5]
-    parse_line = parse_line.strip()
-    street_name2 = parse_line
-
-    parse_line = lines[6]
-    # parse_line = parse_line.strip()
-    location = parse_line[0:21].strip()
-    # psap_no = parse_line[22:25].strip()
-    esn = parse_line[26:].strip()
-
-    parse_line = lines[7]
-    # parse_line = parse_line.strip()
-    state = parse_line[0:2].strip()
-    city = parse_line[3:31].strip()
-
-    parse_line = lines[8]
-    parse_line = parse_line.strip()
-    agenciesDisplay = parse_line
-    # we will parse this later, when we have more details
-    # parse_line = lines[8]
-    # parse_line = parse_line.strip()
-    ##otcfield = parse_line[0:15].strip()
-    # company_id = parse_line[22:].strip()
-
-    # parse_line = lines[10]
-    # parse_line = parse_line.strip()
-    # psap_name = parse_line[5:].strip()
-
-    fire_no = ""
-    police_no = ""
-    ems_no = ""
-
-    # for line in lines[11:]:
-    #	line = line.strip()
-    #	if len(line) > 0:
-    #		[name, value] = line.split('=')
-    #		if name.lower() == 'fire':
-    #			fire_no = value.strip()
-    #		if name.lower() == 'police':
-    #			police_no = value.strip()
-    #		if name.lower() == 'ems':
-    #			ems_no = value.strip()
-    street = (street_name1 + ' ' if len(street_name1) > 0 else '') + street_name2
-
-    housenum = house_no + house_sfx
-    if street: street = ((street_direction + ' ') if len(street_direction) > 0 else '') + street
-    streetaddr = ('' if len(housenum) == 0 else housenum + ' ') + street
-    postal = streetaddr
-
-    civic_address_data = {'state': state, 'name': customer_name, 'phone_number': phone_number,
-                          'latitude': latitude, 'longitude': longitude, 'radius': radius,
-                          'otcfield': otcfield, 'service_provider': company_id, 'psap_no': psap_no, 'esn': esn,
-                          'community': city, 'postal': postal, 'psap_name': psap_name,
-                          'class_of_service': class_of_service,
-                          'pilot_no': pilot_no, 'service_provider': company_id, 'location': location,
-                          'fire_no': fire_no, 'ems_no': ems_no, 'police_no': police_no, "callback": callback,
-                          "agencies_display": agenciesDisplay}
-
-    civic_address_xml = ""
-    if len(customer_name) > 0: civic_address_xml = "<cl:NAME>%s</cl:NAME>" % (customer_name)
-    if len(house_no) > 0: civic_address_xml = "%s<cl:HNO>%s</cl:HNO>" % (civic_address_xml, house_no)
-    if len(house_sfx) > 0: civic_address_xml = "%s<cl:HNS>%s</cl:HNS>" % (civic_address_xml, house_sfx)
-    if len(street_direction) > 0: civic_address_xml = "%s<cl:PRD>%s</cl:PRD>" % (civic_address_xml, street_direction)
-    if len(state) > 0: civic_address_xml = "%s<cl:A1>%s</cl:A1>" % (civic_address_xml, state)
-    if len(city) > 0: civic_address_xml = "%s<cl:A3>%s</cl:A3>" % (civic_address_xml, city)
-    if len(street) > 0: civic_address_xml = "%s<cl:A6>%s</cl:A6>" % (civic_address_xml, street)
-    if len(location) > 0: civic_address_xml = "%s<cl:LOC>%s</cl:LOC>" % (civic_address_xml, location)
-    if len(
-        longitude) > 0: civic_address_xml = "%s<cl:CIRCLE><cl:POS>%s %s</cl:POS><cl:RADIUS>%s</cl:RADIUS></cl:CIRCLE>" % (
-    civic_address_xml, latitude, longitude, radius)
-
-    civic_address_xml = "<cl:civicAddress xmlns:cl='urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr'>%s</cl:civicAddress>" % (
-    civic_address_xml)
-
-    return (civic_address_data, civic_address_xml)
 
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory
 
 # for warren the formats are the same
 ali_parsers = { '30WWireless' : parse_ali_30W_wireless,
                 '30WWireline' : parse_ali_30W_wireline,
-                'WarrenWireless' : parse_warren_wireless,
-                'WarrenWireline': parse_warren_wireless}
+                'WarrenWireless' : parse_warren_ali,
+                'WarrenWireline': parse_warren_ali}
 
 '''
     This class uses Twisted 
@@ -417,7 +151,7 @@ class AliRequestProtocol(Protocol):
                 else:
                     log.error("no parser found for format %r", self.ali_format)
 
-    def process_ali_data(self, ali_data):
+    def process_ali_data_franklin(self, ali_data):
         log.info("process_ali_data %r", ali_data)
         # discard the first 3 characters (message_type, pos1 and pos2)
         ali_data = ali_data[3:]
@@ -439,6 +173,12 @@ class AliRequestProtocol(Protocol):
                     d.callback((self.ali_factory, id, number, self.ali_format, ali_result, ali_result_civic_xml, ali_data))
                 else:
                     log.error("no parser found for format %r", self.ali_format)
+
+    def process_ali_data(self, ali_data):
+        if self.ali_format in ['WarrenWireless', 'WarrenWireline']:
+            self.process_ali_data_warren(ali_data)
+        elif self.ali_format in ['30WWireless', '30WWireline']:
+            self.process_ali_data_franklin(ali_data)
 
     def cancel_ali_request(self, id):
         if id in self.pending_ali_requests:
