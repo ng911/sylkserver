@@ -629,6 +629,7 @@ class ConferenceData(object):
             conference_message.message = text
             conference_message.message_time = datetime.datetime.utcnow()
             conference_message.sender_uri = sender_uri
+            conference_message.message_id = message_id
             conference_message.save()
             json_data = get_json_from_db_obj(conference_message)
             publish_msrp_message(json_data)
