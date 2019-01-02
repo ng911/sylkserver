@@ -390,6 +390,7 @@ class ConferenceMessage(Document):
     room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
+    message_id = StringField()
     message_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'indexes': [
