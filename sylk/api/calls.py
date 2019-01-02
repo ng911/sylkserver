@@ -500,6 +500,7 @@ def conference_tty_get(room_number):
 @calls.route('/conference/msrp/text/<room_number>', methods=['GET'])
 def conference_msrp_text(room_number):
     try:
+        log.debug("/conference/msrp/text for room %s", room_number)
         messages = []
         for db_obj in ConferenceMessage.objects(room_number=room_number):
             # should return date, call, type, caller, callback, location, long, lat, notes, status
