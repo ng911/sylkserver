@@ -1417,6 +1417,7 @@ class PSAPApplication(SylkApplication):
 
     def recvd_tty(self, room_number, tty_char):
         log.info("recvd tty %r, %r", room_number, tty_char)
+        tty_char = chr(tty_char)
         if (tty_char is None) or len(tty_char) == 0:
             log.error("empoty tty chat for room %r", room_number)
             return
