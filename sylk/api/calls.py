@@ -6,7 +6,7 @@ from flask_cors import CORS
 from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
 import sylk.applications.psap as psap
-from sylk.db.schema import Conference, ConferenceParticipant, Call, CallTransferLine, IncomingLink
+from sylk.db.schema import Conference, ConferenceParticipant, Call, CallTransferLine, IncomingLink, ConferenceMessage
 from application.notification import NotificationCenter, NotificationData
 from sylk.utils import get_json_from_db_obj, set_db_obj_from_request, copy_request_data_to_object
 from utils import get_argument
@@ -495,6 +495,54 @@ def conference_tty_get(room_number):
             'success' : False,
             'reason' : str(e)
         })
+
+
+@calls.route('/conference/msrp/text/<room_number>', methods=['GET'])
+def conference_msrp_text(room_number):
+    try:
+        messages = []
+        for db_obj in ConferenceMessage.objects(room_number=room_number):
+            # should return date, call, type, caller, callback, location, long, lat, notes, status
+            message_data = get_json_from_db_obj(db_obj)
+            messages.append(message_data)
+
+        return { 'success': True, 'messages' : messages, 'room_number' : room_number}
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_msrp_text error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
+@calls.route('/conference/msrp/send/<room_number>', methods=['PUT', 'POST'])
+def conference_msrp_send(room_number):
+    try:
+        text = get_argument('text')
+        sender = get_argument('sender')
+        if (text is None) or (text == ''):
+            raise ValueError('missing text to send')
+        if (sender is None) or (sender == ''):
+            raise ValueError('missing sender')
+        psap_app = psap.PSAPApplication()
+        message_id = psap_app.send_msrp_text(room_number, sender, text)
+
+        return jsonify({
+            'success' : True,
+            'message_id' : message_id
+        })
+    except Exception as e:
+        stacktrace = traceback.print_exc()
+        log.error("%r", stacktrace)
+        log.error("conference_tty_send error %r", e)
+
+        return jsonify ({
+            'success' : False,
+            'reason' : str(e)
+        })
+
 
 @calls.route('/conference/event_log/<room_number>', methods=['GET'])
 def conference_event_log(room_number):

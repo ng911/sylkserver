@@ -1,6 +1,7 @@
 from collections import namedtuple
 import datetime
 import traceback
+import bson
 
 from sipsimple.core import SIPURI
 from application.python import Null
@@ -9,10 +10,11 @@ from application.notification import IObserver, NotificationCenter
 from sylk.applications import ApplicationLogger
 from zope.interface import implements
 from sylk.configuration import ServerConfig
-from sylk.db.schema import Conference, ConferenceParticipant, ConferenceEvent
+from sylk.db.schema import Conference, ConferenceMessage, ConferenceParticipant, ConferenceEvent
 from sylk.wamp import publish_create_call, publish_update_call, publish_active_call, publish_update_primary, \
-    publish_update_call_events, publish_tty_enabled, publish_tty_updated
+    publish_update_call_events, publish_tty_enabled, publish_tty_updated, publish_msrp_message
 import sylk.db.calls as calls
+from sylk.utils import get_json_from_db_obj
 
 import sylk.wamp
 
@@ -30,7 +32,7 @@ class ConferenceData(object):
         self.init_observers()
 
     def create_conference(self, room_number, direction='in', call_type='sos',
-                          status='init', primary_queue_id=None, link_id=None, caller_ani='', caller_uri='', caller_name='',
+                          status='init', primary_queue_id=None, link_id=None, caller_ani='', caller_uri='', called_uri='', caller_name='',
                           called_number='', ali_format='', has_audio=True, has_text=False, has_video=False, has_tty=False):
         try:
             log.info("inside create_conference")
@@ -51,6 +53,7 @@ class ConferenceData(object):
             conference.link_id = link_id
             conference.caller_ani = caller_ani
             conference.caller_uri = caller_uri
+            conference.called_uri = called_uri
             conference.caller_name = caller_name
             conference.ali_format = ali_format
             conference.start_time = cur_time
@@ -112,7 +115,7 @@ class ConferenceData(object):
             conference_event.save()
         except Exception as e:
             stackTrace = traceback.format_exc()
-            log.error("exception in create_conference %r", e)
+            log.error("exception in outgoing_call %r", e)
             log.error(stackTrace)
 
     def set_conference_active(self, room_number, calltakers):
@@ -619,6 +622,21 @@ class ConferenceData(object):
             log.error("exception in enable_tty %r", e)
             log.error(stackTrace)
 
+    def msrp_add_text(self, room_number, sender_uri, message_id, text):
+        try:
+            conference_message = ConferenceMessage()
+            conference_message.room_number=room_number
+            conference_message.message = text
+            conference_message.message_time = datetime.datetime.utcnow()
+            conference_message.sender_uri = sender_uri
+            conference_message.save()
+            json_data = get_json_from_db_obj(conference_message)
+            publish_msrp_message(json_data)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in msrp_text_sent %r", e)
+            log.error(stackTrace)
+
     def hook_flash_transferred(self, room_number, phone_number):
         try:
             conference_event = ConferenceEvent()
@@ -655,6 +673,7 @@ class ConferenceData(object):
         notification_center.add_observer(self, name='ConferenceTimedOut')
         notification_center.add_observer(self, name='ConferenceTTYEnabled')
         notification_center.add_observer(self, name='ConferenceTTYUpdated')
+        notification_center.add_observer(self, name='ConferenceMSRPText')
         notification_center.add_observer(self, name='ConferenceHookFlashTrasnfer')
         #notification_center.add_observer(self, name='ConferenceCallFailed')
 
@@ -844,6 +863,15 @@ class ConferenceData(object):
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceTTYUpdated %r", e)
+            log.error(stackTrace)
+
+    def _NH_ConferenceMSRPText(self, notification):
+        log.info("incoming _NH_ConferenceMSRPText")
+        try:
+            self.msrp_add_text(notification.data.room_number, notification.data.sender_uri, notification.data.message_id, notification.data.text)
+        except Exception as e:
+            stackTrace = traceback.format_exc()
+            log.error("exception in _NH_ConferenceMSRPText %r", e)
             log.error(stackTrace)
 
     def _NH_ConferenceHookFlashTrasnfer(self, notification):

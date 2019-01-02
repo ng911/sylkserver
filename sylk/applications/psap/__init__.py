@@ -8,10 +8,13 @@ from application.python import Null
 from twisted.internet import reactor
 from twisted.internet import task
 from zope.interface import implements
+from lxml import html
+import bson
 
 from sipsimple.threading.green import run_in_green_thread
 from sylk.applications import SylkApplication, ApplicationLogger
 from sipsimple.streams import MediaStreamRegistry
+from sipsimple.streams.msrp.chat import ChatStream
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader, Header, SubjectHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
@@ -49,7 +52,7 @@ class RoomData(object):
     __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'last_tty_0d', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
-                 'ignore_calltakers', 'start_timestamp']
+                 'ignore_calltakers', 'start_timestamp', 'chat_stream']
     def __init__(self):
         self.ignore_calltakers = []
         self.participants = []
@@ -61,6 +64,7 @@ class RoomData(object):
         self.has_tty = False
         self.tty_text = ''
         self.last_tty_0d = False
+        self.chat_stream = None
 
     @property
     def incoming(self):
@@ -123,6 +127,13 @@ class RoomData(object):
         raise ValueError("caller missing something is wrong with room %s" % self.room_number)
 
     @property
+    def caller_uri(self):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_caller:
+                return participant_data.uri
+        raise ValueError("caller missing something is wrong with room %s" % self.room_number)
+
+    @property
     def primary_calltaker(self):
         for participant_data in self.participants.itervalues():
             if participant_data.is_calltaker and participant_data.is_primary:
@@ -145,6 +156,11 @@ class RoomData(object):
                 return participant_data
         return None
 
+    def get_calltaker_uri(self, display_name):
+        for participant_data in self.participants.itervalues():
+            if participant_data.is_calltaker and (participant_data.display_name == display_name):
+                return participant_data.uri
+        return None
 
 class ParticipantData(object):
     __slots__ = ['display_name', 'uri', 'session', 'direction', 'mute', 'send_audio', 'send_video',
@@ -379,7 +395,7 @@ class PSAPApplication(SylkApplication):
         log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, called_uri %r, from_uri %r, rooms %r",
             peer_address.ip, peer_address.port, local_identity.uri.user, local_identity.uri, remote_identity.uri, rooms)
         # first verify the session
-        (authenticated, call_type, incoming_link, calltaker_obj) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
+        (authenticated, call_type, incoming_link, calltaker_obj, called_number, calling_number) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
 
         if not authenticated:
             log.info("call not authenticated, reject it")
@@ -413,7 +429,7 @@ class PSAPApplication(SylkApplication):
                     session.is_calltaker = True
                     session.calltaker_name = remote_identity.uri.user
                     outgoing_gateway = ServerConfig.outgoing_gateway
-                    e164_number = self._format_number_to_e164(local_identity.uri.user)
+                    e164_number = self._format_number_to_e164(called_number)
                     sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
                     sip_uris = [sip_uri]
                     # clear abandoned calls for this user
@@ -424,7 +440,7 @@ class PSAPApplication(SylkApplication):
                     session.calltaker_name = remote_identity.uri.user
                     forward_to_calltaker=True
                     server = ServerConfig.asterisk_server
-                    sip_uri = 'sip:{}@{}'.format(local_identity.uri.user, server)
+                    sip_uri = 'sip:{}@{}'.format(called_number, server)
                     sip_uris = [sip_uri]
 
             if (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
@@ -440,28 +456,32 @@ class PSAPApplication(SylkApplication):
                 room_data.ignore_calltakers = ignore_calltakers
 
             ali_format = ''
-            caller_ani = remote_identity.uri.user
-            caller_name = remote_identity.uri.user
-            called_number = local_identity.uri.user
+            caller_ani = calling_number
+            #caller_ani = remote_identity.uri.user
+            #caller_name = remote_identity.uri.user
+            #called_number = local_identity.uri.user
             caller_uri = str(remote_identity.uri)
+            called_uri = str(local_identity.uri)
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 # just a temporary change for warren county
-                lookup_number = local_identity.uri.user
-                if lookup_number[-1:] == '#':
-                    lookup_number = lookup_number[:-1]
-                if lookup_number.startswith("*40"):
-                    lookup_number = lookup_number[3:]
-                caller_ani = lookup_number
-                caller_name = lookup_number
-                called_number = remote_identity.uri.user
-                caller_uri = str(remote_identity.uri)
+                #lookup_number = local_identity.uri.user
+                lookup_number = called_number
+                #if lookup_number[-1:] == '#':
+                #    lookup_number = lookup_number[:-1]
+                #if lookup_number.startswith("*40"):
+                #    lookup_number = lookup_number[3:]
+                #caller_ani = lookup_number
+                caller_name = calling_number
+                #called_number = remote_identity.uri.user
+                #caller_uri = str(remote_identity.uri)
                 #lookup_number = remote_identity.uri.user
                 # make sure there is no + prefix in the number and it is 10 digits long
-                if lookup_number.startswith('+1'):
-                    lookup_number = lookup_number[2:]
-                elif lookup_number.startswith('1'):
-                    lookup_number = lookup_number[1:]
+                # this should be done in incoming link
+                #if lookup_number.startswith('+1'):
+                #    lookup_number = lookup_number[2:]
+                #elif lookup_number.startswith('1'):
+                #    lookup_number = lookup_number[1:]
                 log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
                 ali_format = incoming_link.ali_format
 
@@ -474,7 +494,9 @@ class PSAPApplication(SylkApplication):
                                                                     call_type=call_type, status=room_data.status,
                                                                     primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
                                                                     link_id=incoming_link.link_id,
-                                                                    caller_ani=caller_ani, caller_uri=caller_uri,
+                                                                    caller_ani=caller_ani,
+                                                                    caller_uri=caller_uri,
+                                                                    called_uri=called_uri,
                                                                     caller_name=caller_name,
                                                                     called_number=called_number,
                                                                     ali_format=ali_format,
@@ -482,7 +504,7 @@ class PSAPApplication(SylkApplication):
 
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 ali_lookup(room_number, lookup_number, incoming_link.ali_format)
-            self.add_incoming_participant(display_name=remote_identity.uri.user, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
+            self.add_incoming_participant(display_name=calling_number, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
             if direction == 'out':
                 publish_outgoing_call_status(room_number, remote_identity.uri.user, 'ringing')
 
@@ -514,10 +536,11 @@ class PSAPApplication(SylkApplication):
             if direction == 'out':
                 caller_identity = "sip:%s@%s" % (ServerConfig.from_number, SIPConfig.local_ip)
             else:
-                if call_type == 'sos':
-                    caller_identity = lookup_number
-                else:
-                    caller_identity = str(session.remote_identity.uri)
+                caller_identity = calling_number
+                #if call_type == 'sos':
+                #    caller_identity = lookup_number
+                #else:
+                #    caller_identity = str(session.remote_identity.uri)
             log.info("outgoing caller is %s", caller_identity)
             for sip_uri in sip_uris:
                 log.info("create outgoing call to sip_uri %r", sip_uri)
@@ -567,7 +590,7 @@ class PSAPApplication(SylkApplication):
                 if (display_name is not None) and is_calltaker:
                     publish_outgoing_call_status(room_number, display_name, 'active')
             '''
-            reactor.callLater(0, self.accept_session, session)
+            reactor.callLater(0, self.accept_session, session, room_number)
             if room_data.ringing:
                 # also cancel the ringing timer and end ringing call
                 if room_data.ringing_duration_timer is not None:
@@ -585,7 +608,7 @@ class PSAPApplication(SylkApplication):
                     log.info('target %r', target)
                     log.info('outgoing_call_initializer %r', outgoing_call_initializer)
                     outgoing_call_initializer.cancel_call()
-                reactor.callLater(0, self.accept_session, room_data.incoming_session)
+                reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
             self.set_calltaker_busy(username=remote_identity.uri.user)
             NotificationCenter().post_notification('ConferenceAnswered', self,
                                                    NotificationData(room_number=room_number,
@@ -885,7 +908,7 @@ class PSAPApplication(SylkApplication):
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
-            reactor.callLater(0, self.accept_session, room_data.incoming_session)
+            reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
 
             if room_data.ringing_duration_timer is not None:
                 room_data.ringing_duration_timer.stop()
@@ -949,13 +972,23 @@ class PSAPApplication(SylkApplication):
         self.add_participant(session)
     '''
 
-    def accept_session(self, session):
+    def accept_session(self, session, room_number):
+        room_data = self.get_room_data(room_number)
         if session.state == 'incoming':
             audio_streams = [stream for stream in session.proposed_streams if stream.type == 'audio']
             chat_streams = [stream for stream in session.proposed_streams if stream.type == 'chat']
             audio_stream = audio_streams[0] if audio_streams else None
             chat_stream = chat_streams[0] if chat_streams else None
             streams = [stream for stream in (audio_stream, chat_stream) if stream]
+
+            for stream in session.proposed_streams:
+                if stream in streams:
+                    if isinstance(stream, ChatStream):
+                        notification_center = NotificationCenter()
+                        notification_center.add_observer(self, sender=stream)
+                        room_data.chat_stream = stream
+                        stream.room_number = room_number
+
             try:
                 log.info("accept incoming session %r", session)
                 session.accept(streams, is_focus=True)
@@ -1410,6 +1443,10 @@ class PSAPApplication(SylkApplication):
         else:
             tty_text = tty_char.upper()
             room_data.tty_text = '{}{}'.format(room_data.tty_text, tty_text)
+        if not room_data.has_tty:
+            room_data.has_tty = True
+            data = NotificationData(room_number=room_number)
+            NotificationCenter().post_notification('ConferenceTTYEnabled', '', data)
 
         data = NotificationData(room_number=room_number, tty_text=room_data.tty_text)
         NotificationCenter().post_notification('ConferenceTTYUpdated', '', data)
@@ -1465,6 +1502,53 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = min(filtered_calls, key=lambda call:call[1].start_timestamp)
             return (room_number, room_data)
         return (None, None)
+
+    def send_msrp_text(self, room_number, sender, text):
+        log.debug("sendText %r", text)
+        room_data = self.get_room_data(room_number)
+        chat_stream = room_data.chat_stream
+        if chat_stream is not None:
+            chat_stream.send_message(text)
+        else:
+            log.error("no chat stream found for conf %r, sender %r, txtMessage %r", room_number, sender, text)
+        sender_uri = room_data.get_calltaker_uri(sender)
+        message_id = str(bson.ObjectId())
+        data = NotificationData(room_number=room_number, sender_uri=sender_uri, text=text, message_id=message_id)
+        NotificationCenter().post_notification('ConferenceMSRPText', '', data)
+        return message_id
+
+    def _NH_ChatStreamGotMessage(self, notification):
+        log.debug("inside _NH_ChatStreamGotMessage")
+        if not notification.data.message.content_type.startswith("text/"):
+            return
+        #remote_identity = notification.data.message.sender.display_name or notification.data.message.sender.uri
+        #remote_identity = notification.data.message.sender.uri
+        #remoteDisplayName = notification.data.message.sender.display_name
+        #if not remoteDisplayName:
+        #    remoteUri = notification.data.message.sender.uri
+        #    remoteDisplayName = remoteUri.user
+        doc = html.fromstring(notification.data.message.content)
+        if doc.body.text is not None:
+            doc.body.text = doc.body.text.lstrip('\n')
+        for br in doc.xpath('.//br'):
+            br.tail = '\n' + (br.tail or '')
+        '''
+        head = RichText('%s> ' % remote_identity, foreground='blue')
+        ui = UI()
+        ui.writelines([head + line for line in doc.body.text_content().splitlines()])
+        '''
+        session = notification.sender
+        room_number = session.room_number
+        room_data = self.get_room_data(room_number)
+        caller_uri = room_data.caller_uri
+        msrp_text = notification.data.message.content
+        log.debug("recvd chatStreamMessage %r", notification.data.message.content)
+        message_id = str(bson.ObjectId())
+        data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, text=msrp_text)
+        NotificationCenter().post_notification('ConferenceMSRPText', '', data)
+
+        #if self.conf:
+        #    self.conf.receivedMsrpMessage(remoteDisplayName, notification.data.message.content)
 
     def _NH_TTYReceivedChar(self, notification):
         room_number = notification.data.room_number
