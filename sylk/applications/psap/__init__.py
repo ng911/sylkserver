@@ -1674,8 +1674,7 @@ class PSAPApplication(SylkApplication):
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
-        if not room_data.has_text:
-            self.add_session_to_room(session.room_number, session)
+        self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
         '''
         room_number = session.room_number
@@ -1693,8 +1692,7 @@ class PSAPApplication(SylkApplication):
         notification.center.remove_observer(self, sender=session)
 
         room_data = self.get_room_data(session.room_number)
-        if not room_data.has_text:
-            self.remove_session_from_room(session.room_number, session)
+        self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
         room_number = session.room_number
@@ -1735,8 +1733,7 @@ class PSAPApplication(SylkApplication):
         log.info('PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
         log.info('notification.data: %r' % (notification.data))
         room_data = self.get_room_data(session.room_number)
-        if not room_data.has_text:
-            self.remove_session_from_room(session.room_number, session)
+        self.remove_session_from_room(session.room_number, session)
         if int(notification.data.code) == 487:
             # the caller cancelled the call
             is_calltaker = False
