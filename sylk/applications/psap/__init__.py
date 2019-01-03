@@ -977,13 +977,19 @@ class PSAPApplication(SylkApplication):
     '''
 
     def accept_session(self, session, room_number):
+        log.info("accept session for room %r", room_number)
         room_data = self.get_room_data(room_number)
         if session.state == 'incoming':
             audio_streams = [stream for stream in session.proposed_streams if stream.type == 'audio']
             chat_streams = [stream for stream in session.proposed_streams if stream.type == 'chat']
+            log.info("num audio_streams %r ", len(audio_streams))
+            log.info("num chat_streams %r ", len(chat_streams))
             audio_stream = audio_streams[0] if audio_streams else None
             chat_stream = chat_streams[0] if chat_streams else None
             streams = [stream for stream in (audio_stream, chat_stream) if stream]
+            room_data.chat_stream = chat_stream
+            if chat_stream is not None:
+                chat_stream.room_number = room_number
 
             for stream in session.proposed_streams:
                 if stream in streams:
