@@ -532,11 +532,12 @@ def conference_msrp_send(room_number):
         if (sender is None) or (sender == ''):
             raise ValueError('missing sender')
         psap_app = psap.PSAPApplication()
-        message_id = psap_app.send_msrp_text(room_number, sender, text)
+        message_id, sender_uri = psap_app.send_msrp_text(room_number, sender, text)
 
         return jsonify({
             'success' : True,
-            'message_id' : message_id
+            'message_id' : message_id,
+            'sender_uri' : sender_uri
         })
     except Exception as e:
         stacktrace = traceback.print_exc()
