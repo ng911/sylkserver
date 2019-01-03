@@ -505,8 +505,9 @@ class Room(object):
         log.info('check for streams now session is %r, session.streams is %r', session, session.streams)
         for stream in session.streams:
             log.info('adding audio confernce stream')
-            self.audio_conference.add(stream)
-            self.audio_conference.unhold()
+            if stream.type == 'audio':
+                self.audio_conference.add(stream)
+                self.audio_conference.unhold()
 
         #self.dispatch_conference_info()
 
