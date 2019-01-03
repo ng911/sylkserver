@@ -32,10 +32,37 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
     # we first try to match ip address
     log.info("get_incoming_link ip_address %r, port %r, called_number %r", ip_address, port, called_number)
     found_ip_address = False
+
+    # first try to validate with port
+    for incoming_link in IncomingLink.objects(ip_address=ip_address, port=port):
+        found_ip_address = True
+        log.info("get_incoming_link found ip_address %r", ip_address)
+        log.info("get_incoming_link port %r, called_number %r", incoming_link.port, incoming_link.called_no)
+        if incoming_link.called_no is None:
+            log.info("get_incoming_link found link")
+            return incoming_link
+
+        called_number_to_check = called_number
+        if hasattr(incoming_link, "calling_number_as_called") and incoming_link.calling_number_as_called:
+            called_number_to_check = calling_number
+
+        if (incoming_link.called_no is not None):
+            if (not incoming_link.regex):
+                if (incoming_link.called_no == called_number_to_check):
+                    return incoming_link
+            else:
+                # we match by regex
+                p = re.compile(incoming_link.called_no)
+                if p.match(called_number_to_check) is not None:
+                    return incoming_link
+
     for incoming_link in IncomingLink.objects(ip_address=ip_address):
         found_ip_address = True
         log.info("get_incoming_link found ip_address %r", ip_address)
         log.info("get_incoming_link port %r, called_number %r", incoming_link.port, incoming_link.called_no)
+        if incoming_link.port is not None:
+            continue
+
         if (incoming_link.port is None) and (incoming_link.called_no is None):
             log.info("get_incoming_link found link")
             return incoming_link
