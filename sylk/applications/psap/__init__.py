@@ -984,10 +984,11 @@ class PSAPApplication(SylkApplication):
             for stream in session.proposed_streams:
                 if stream in streams:
                     if isinstance(stream, ChatStream):
+                        log.info("adding chatstream for room %s", room_number)
                         notification_center = NotificationCenter()
+                        stream.room_number = room_number
                         notification_center.add_observer(self, sender=stream)
                         room_data.chat_stream = stream
-                        stream.room_number = room_number
 
             try:
                 log.info("accept incoming session %r", session)
@@ -1542,8 +1543,8 @@ class PSAPApplication(SylkApplication):
         ui = UI()
         ui.writelines([head + line for line in doc.body.text_content().splitlines()])
         '''
-        session = notification.sender
-        room_number = session.room_number
+        stream = notification.sender
+        room_number = stream.room_number
         room_data = self.get_room_data(room_number)
         caller_uri = room_data.caller_uri
         msrp_text = notification.data.message.content
