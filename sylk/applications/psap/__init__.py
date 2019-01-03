@@ -990,7 +990,10 @@ class PSAPApplication(SylkApplication):
             room_data.chat_stream = chat_stream
             if chat_stream is not None:
                 chat_stream.room_number = room_number
-
+                notification_center = NotificationCenter()
+                notification_center.add_observer(self, sender=stream)
+                room_data.chat_stream = stream
+            '''
             for stream in session.proposed_streams:
                 if stream in streams:
                     if isinstance(stream, ChatStream):
@@ -999,6 +1002,7 @@ class PSAPApplication(SylkApplication):
                         stream.room_number = room_number
                         notification_center.add_observer(self, sender=stream)
                         room_data.chat_stream = stream
+            '''
 
             try:
                 log.info("accept incoming session %r", session)
