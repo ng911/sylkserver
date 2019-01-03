@@ -83,6 +83,10 @@ class RoomData(object):
         return  self.call_type in ['sos', 'sos_room']
 
     @property
+    def has_text(self):
+        return  self.chat_stream is not None
+
+    @property
     def ringing(self):
         return  self.status in ['init', 'ringing', 'ringing_queued']
 
@@ -1662,7 +1666,10 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
-        self.add_session_to_room(session.room_number, session)
+        # for msrp chat we do not do this
+        room_data = self.get_room_data(session.room_number)
+        if not room_data.has_text:
+            self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
         '''
         room_number = session.room_number
@@ -1679,7 +1686,9 @@ class PSAPApplication(SylkApplication):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
 
-        self.remove_session_from_room(session.room_number, session)
+        room_data = self.get_room_data(session.room_number)
+        if not room_data.has_text:
+            self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
         room_number = session.room_number
@@ -1719,7 +1728,9 @@ class PSAPApplication(SylkApplication):
         notification.center.remove_observer(self, sender=session)
         log.info('PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
         log.info('notification.data: %r' % (notification.data))
-        self.remove_session_from_room(session.room_number, session)
+        room_data = self.get_room_data(session.room_number)
+        if not room_data.has_text:
+            self.remove_session_from_room(session.room_number, session)
         if int(notification.data.code) == 487:
             # the caller cancelled the call
             is_calltaker = False
