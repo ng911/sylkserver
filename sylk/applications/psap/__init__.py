@@ -1398,9 +1398,11 @@ class PSAPApplication(SylkApplication):
         except RoomNotFoundError:
             log.info('in enable_tty RoomNotFoundError')
             return
+        room_data = self.get_room_data(room_number)
+        if room_data.has_text:
+            return
         if not ServerConfig.tty_enabled:
             room.start_tty()
-        room_data = self.get_room_data(room_number)
         room_data.has_tty = True
 
         data = NotificationData(room_number=room_number)

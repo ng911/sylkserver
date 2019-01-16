@@ -503,9 +503,11 @@ class Room(object):
         #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
         #welcome_handler.run()
         log.info('check for streams now session is %r, session.streams is %r', session, session.streams)
+        has_audio_stream=False
         for stream in session.streams:
             log.info('adding audio confernce stream')
             if stream.type == 'audio':
+                has_audio_stream = True
                 self.audio_conference.add(stream)
                 self.audio_conference.unhold()
 
@@ -530,7 +532,7 @@ class Room(object):
             self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, self._get_recording_file_path(self.room_number))
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
-        if ServerConfig.tty_enabled:
+        if ServerConfig.tty_enabled and has_audio_stream:
             log.info("starting TTY")
             self.start_tty()
         '''
