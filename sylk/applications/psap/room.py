@@ -128,7 +128,7 @@ class Room(object):
     """
     implements(IObserver)
 
-    def __init__(self, room_number=None):
+    def __init__(self, room_number=None, text_only=False):
         log.info('Room create room %s', room_number)
         if room_number is None:
             pass
@@ -162,6 +162,7 @@ class Room(object):
         self.duration_timer = None
         self.beep_player = None
         self.beep_timer = None
+        self.text_only = text_only
 
     def get_debug_info(self):
         sessions = []
@@ -503,11 +504,9 @@ class Room(object):
         #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
         #welcome_handler.run()
         log.info('check for streams now session is %r, session.streams is %r', session, session.streams)
-        has_audio_stream=False
         for stream in session.streams:
             log.info('adding audio confernce stream')
             if stream.type == 'audio':
-                has_audio_stream = True
                 self.audio_conference.add(stream)
                 self.audio_conference.unhold()
 
@@ -532,7 +531,7 @@ class Room(object):
             self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, self._get_recording_file_path(self.room_number))
             self.recorder.start()
             self.audio_conference.bridge.add(self.recorder)
-        if ServerConfig.tty_enabled and has_audio_stream:
+        if ServerConfig.tty_enabled and not self.text_only:
             log.info("starting TTY")
             self.start_tty()
         '''

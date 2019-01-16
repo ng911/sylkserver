@@ -256,9 +256,9 @@ class PSAPApplication(SylkApplication):
     def get_rooms(self):
         return list(self._rooms.keys())
 
-    def create_room(self, incoming_session, call_type, direction, acd_strategy=None):
+    def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False):
         room_number = uuid4().hex
-        room = Room(room_number)
+        room = Room(room_number, text_only)
         room_data = RoomData()
         room_data.room = room
         room_data.call_type = call_type
@@ -454,7 +454,7 @@ class PSAPApplication(SylkApplication):
                 direction = 'in'
                 is_call_from_calltaker = False
 
-            (room_number, room_data) = self.create_room(session, call_type, direction=direction, acd_strategy=acd_strategy)
+            (room_number, room_data) = self.create_room(session, call_type, direction=direction, acd_strategy=acd_strategy, text_only=has_text)
             session.room_number = room_number
             if ignore_calltakers is not None:
                 room_data.ignore_calltakers = ignore_calltakers
