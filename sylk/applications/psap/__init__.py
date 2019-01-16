@@ -1560,6 +1560,9 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         caller_uri = room_data.caller_uri
         msrp_text = notification.data.message.content
+        #ignore OTR messages
+        if msrp_text.startswith('?OTR:'):
+            return
         log.debug("recvd chatStreamMessage %r", notification.data.message.content)
         message_id = str(bson.ObjectId())
         data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, text=msrp_text)
