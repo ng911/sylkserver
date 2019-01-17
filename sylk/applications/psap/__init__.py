@@ -470,7 +470,7 @@ class PSAPApplication(SylkApplication):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 # just a temporary change for warren county
                 #lookup_number = local_identity.uri.user
-                lookup_number = called_number
+                #lookup_number = called_number
                 #if lookup_number[-1:] == '#':
                 #    lookup_number = lookup_number[:-1]
                 #if lookup_number.startswith("*40"):
@@ -486,7 +486,7 @@ class PSAPApplication(SylkApplication):
                 #    lookup_number = lookup_number[2:]
                 #elif lookup_number.startswith('1'):
                 #    lookup_number = lookup_number[1:]
-                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, lookup_number, incoming_link.ali_format)
+                log.info('calling ali_lookup for room %r, user %r, format %r', room_number, caller_ani, incoming_link.ali_format)
                 ali_format = incoming_link.ali_format
 
             if (len(sip_uris) == 0) and (call_type == 'sos'):
@@ -507,7 +507,7 @@ class PSAPApplication(SylkApplication):
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
-                ali_lookup(room_number, lookup_number, incoming_link.ali_format)
+                ali_lookup(room_number, caller_ani, incoming_link.ali_format)
             self.add_incoming_participant(display_name=calling_number, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
             if direction == 'out':
                 publish_outgoing_call_status(room_number, remote_identity.uri.user, 'ringing')
