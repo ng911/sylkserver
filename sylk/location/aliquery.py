@@ -119,7 +119,7 @@ class AliRequestProtocol(Protocol):
                 del self.pending_ali_requests[id]
 
     def process_ali_data_warren(self, ali_data):
-        log.info("process_ali_data %r", ali_data)
+        log.info("process_ali_data_warren %r", ali_data)
         # discard the first 3 characters (message_type, pos1 and pos2)
         ali_data = ali_data[3:]
         #recvd_number = ali_data[0:15]
@@ -152,7 +152,7 @@ class AliRequestProtocol(Protocol):
                     log.error("no parser found for format %r", self.ali_format)
 
     def process_ali_data_franklin(self, ali_data):
-        log.info("process_ali_data %r", ali_data)
+        log.info("process_ali_data_franklin %r", ali_data)
         # discard the first 3 characters (message_type, pos1 and pos2)
         ali_data = ali_data[3:]
         recvd_number = ali_data[0:15]
