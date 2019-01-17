@@ -175,6 +175,7 @@ class AliRequestProtocol(Protocol):
                     log.error("no parser found for format %r", self.ali_format)
 
     def process_ali_data(self, ali_data):
+        log.info("process_ali_data self.ali_format is %s", self.ali_format)
         if self.ali_format in ['WarrenWireless', 'WarrenWireline']:
             self.process_ali_data_warren(ali_data)
         elif self.ali_format in ['30WWireless', '30WWireline']:
@@ -296,6 +297,7 @@ def send_ali_request(room_number, number, ali_format):
     log.info("inside send_ali_request for room_number %r, number %r, ali_format %r", room_number, number, ali_format)
     my_d = defer.Deferred()
     id = str(uuid.uuid4())
+    log.info("ali_factories %r", ali_factories)
     if ali_format in ali_factories:
         factories = ali_factories[ali_format]
     elif 'all' in ali_factories:
@@ -306,6 +308,7 @@ def send_ali_request(room_number, number, ali_format):
     g_ali_requests[id] = (my_d, room_number, factories, timer)
     log.info("facories length is %r", len(factories))
     for factory in factories:
+        log.info("factory.send_ali_request format %r, ali_format %s", factory.ali_format, ali_format)
         d = factory.send_ali_request(id, number, ali_format)
         d.addCallback(process_ali_result)
     return my_d, id
