@@ -71,8 +71,8 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
             continue
 
         called_number_to_check = called_number
-        if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
-            called_number_to_check = calling_number
+        #if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
+        #    called_number_to_check = calling_number
 
         if (incoming_link.called_no is not None):
             if (not incoming_link.regex):
