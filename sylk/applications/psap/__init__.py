@@ -400,7 +400,7 @@ class PSAPApplication(SylkApplication):
             peer_address.ip, peer_address.port, local_identity.uri.user, local_identity.uri, remote_identity.uri, rooms)
         # first verify the session
         (authenticated, call_type, incoming_link, calltaker_obj, called_number, calling_number) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
-
+        log.info("authenticate_call called_number %s, calling_number %s", called_number, calling_number)
         if not authenticated:
             log.info("call not authenticated, reject it")
             session.reject(403)
