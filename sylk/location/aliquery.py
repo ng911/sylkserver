@@ -198,7 +198,7 @@ class AliRequestProtocol(Protocol):
             else:
                 if c == '\x03':
                     # we will fix this later for franklin as well
-                    self.process_ali_data_warren(self.recvd_ali_data)
+                    self.process_ali_data(self.recvd_ali_data)
                     self.recvd_ali_data = ''
                     self.start_char_recvd = False
                 else:
