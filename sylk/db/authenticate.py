@@ -93,8 +93,8 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
             continue
         log.info("get_incoming_link check non ip incoming_link.regex %r, incoming_link.called_no %r", incoming_link.regex, incoming_link.called_no)
         called_number_to_check = called_number
-        if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
-            called_number_to_check = calling_number
+        #if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
+        #    called_number_to_check = calling_number
         if (not incoming_link.regex):
             if (incoming_link.called_no == called_number_to_check):
                 return incoming_link
