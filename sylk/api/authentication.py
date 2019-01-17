@@ -110,10 +110,10 @@ def login():
                 # for testing ignore for now
                 #return abort(400)
 
-            try:
-                log.info("Logged in redirecting to %r", url_for('/'))
-            except Exception as e:
-                log.error("error in login redirecting debug %r", e)
+            #try:
+            #    log.info("Logged in redirecting to %r", url_for('/'))
+            #except Exception as e:
+            #    log.error("error in login redirecting debug %r", e)
 
             session['user_id'] = str(form.user.user_id)
 

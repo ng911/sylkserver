@@ -13,11 +13,11 @@ logger = logging.getLogger('psap')
 sample_ali = {
 	'4153054541' :
 "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(415)305-4541      01045\rCA 00070-2-011, SAN FRAN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS",
-	'2037274298' :
+	'5109005542' :
 "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6092    \r      1285       P#515-319-4005\r   113 Pine Str -        \r                    \rCALLBK=(203)727-4298      01046\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS",
-	'2033225119' :
+	'4158180156' :
 "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6093    \r      1285       P#515-319-4005\r   200 University Ave    \r                    \rCALLBK=(203)322-5119      01047\rCA 95109-2-011, PALO ALTO      \r                  TEL=USCC \r+041.657610 -091.273464      47\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS",
-	'2035542777' :
+	'6503833031' :
 "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6094    \r      1285       P#515-319-4005\r   555 Market Str        \r                    \rCALLBK=(203)554-2777      01048\rCA 94108-2-011, SAN FRANCISCO  \r                  TEL=USCC \r+042.657610 -092.273464      42\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS",
 }
 
