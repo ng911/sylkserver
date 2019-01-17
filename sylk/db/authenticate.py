@@ -43,7 +43,7 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
             return incoming_link
 
         called_number_to_check = called_number
-        if hasattr(incoming_link, "calling_number_as_called") and incoming_link.calling_number_as_called:
+        if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
             called_number_to_check = calling_number
 
         if (incoming_link.called_no is not None):
@@ -71,7 +71,7 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
             continue
 
         called_number_to_check = called_number
-        if hasattr(incoming_link, "calling_number_as_called") and incoming_link.calling_number_as_called:
+        if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
             called_number_to_check = calling_number
 
         if (incoming_link.called_no is not None):
@@ -93,7 +93,7 @@ def get_incoming_link(ip_address, port, called_number, calling_number):
             continue
         log.info("get_incoming_link check non ip incoming_link.regex %r, incoming_link.called_no %r", incoming_link.regex, incoming_link.called_no)
         called_number_to_check = called_number
-        if hasattr(incoming_link, "calling_number_as_called") and incoming_link.calling_number_as_called:
+        if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
             called_number_to_check = calling_number
         if (not incoming_link.regex):
             if (incoming_link.called_no == called_number_to_check):
@@ -118,26 +118,26 @@ def authenticate_call(ip_address, port, called_number, calling_uri, conf_rooms):
     incoming_link = get_incoming_link(ip_address, port, called_number, calling_uri.user)
 
     # we may need to transform the called and calling numbers based on link rules (remove prefix, suffix, switch etc.)
-    actual_called_number = called_number
-    actual_calling_number = calling_uri.user
+    to_number = called_number
+    ani = calling_uri.user
     if incoming_link is None:
-        return (False, None, None, None, actual_called_number, actual_calling_number)
+        return (False, None, None, None, ani, to_number)
 
-    if hasattr(incoming_link, "calling_number_as_called") and incoming_link.calling_number_as_called:
-        actual_called_number = calling_uri.user
-        actual_calling_number = called_number
+    if hasattr(incoming_link, "use_called_number_for_ani") and incoming_link.use_called_number_for_ani:
+        ani = called_number
+        to_number = calling_uri.user
 
-    if hasattr(incoming_link, "strip_calling_prefix") and (incoming_link.strip_calling_prefix > 0):
-        actual_calling_number = actual_calling_number[incoming_link.strip_calling_prefix:]
+    if hasattr(incoming_link, "strip_ani_prefix") and (incoming_link.strip_ani_prefix > 0):
+        ani = ani[incoming_link.strip_ani_prefix:]
 
-    if hasattr(incoming_link, "strip_calling_suffix") and (incoming_link.strip_calling_suffix > 0):
-        actual_calling_number = actual_calling_number[0: -incoming_link.strip_calling_suffix]
+    if hasattr(incoming_link, "strip_ani_suffix") and (incoming_link.strip_ani_suffix > 0):
+        ani = ani[0: -incoming_link.strip_ani_suffix]
 
-    if hasattr(incoming_link, "strip_called_prefix") and (incoming_link.strip_called_prefix > 0):
-        actual_called_number = actual_called_number[incoming_link.strip_called_prefix:]
+    if hasattr(incoming_link, "strip_from_prefix") and (incoming_link.strip_from_prefix > 0):
+        to_number = to_number[incoming_link.strip_from_prefix:]
 
-    if hasattr(incoming_link, "strip_called_suffix") and (incoming_link.strip_called_suffix > 0):
-        actual_called_number = actual_called_number[0: -incoming_link.strip_called_suffix]
+    if hasattr(incoming_link, "strip_from_suffix") and (incoming_link.strip_from_suffix > 0):
+        to_number = to_number[0: -incoming_link.strip_from_suffix]
 
     if incoming_link.is_origination_calltaker():
         log.info("authenticate_call incoming link is calltaker gateway")
@@ -148,19 +148,19 @@ def authenticate_call(ip_address, port, called_number, calling_uri, conf_rooms):
             # we need to check if the calltaker tried to join a conference room
             if called_number in conf_rooms:
                 log.info("authenticate_call send to sos_room")
-                return (True, 'sos_room', incoming_link, calltaker_obj, actual_called_number, actual_calling_number)
+                return (True, 'sos_room', incoming_link, calltaker_obj, to_number, ani)
             elif get_calltaker_user(called_number) is not None:
                 log.info("authenticate_call send to outgoing calltaker")
-                return (True, 'outgoing_calltaker', incoming_link, calltaker_obj, actual_called_number, actual_calling_number)
+                return (True, 'outgoing_calltaker', incoming_link, calltaker_obj, to_number, ani)
             else:
                 log.info("authenticate_call send to outgoing number")
-                return (True, 'outgoing', incoming_link, calltaker_obj, actual_called_number, actual_calling_number)
+                return (True, 'outgoing', incoming_link, calltaker_obj, to_number, ani)
 
     if incoming_link.is_origination_sos():
-        return (True, 'sos', incoming_link, None, actual_called_number, actual_calling_number)
+        return (True, 'sos', incoming_link, None, to_number, ani)
 
     if incoming_link.is_origination_admin():
-        return (True, 'admin', incoming_link, None, actual_called_number, actual_calling_number)
+        return (True, 'admin', incoming_link, None, to_number, ani)
 
-    return (False, None, None, None, actual_called_number, actual_calling_number)
+    return (False, None, None, None, to_number, ani)
 

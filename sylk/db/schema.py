@@ -182,11 +182,11 @@ class IncomingLink(Document):
     ringback = BooleanField(default=False)
     queue_id = ObjectIdField()
     ali_format = StringField()
-    calling_number_as_called = BooleanField(default=False, required=False)
-    strip_calling_prefix = IntField(default=0, required=False)
-    strip_calling_suffix = IntField(default=0, required=False)
-    strip_called_prefix = IntField(default=0, required=False)
-    strip_called_suffix = IntField(default=0, required=False)
+    use_called_number_for_ani = BooleanField(default=False, required=False)
+    strip_ani_prefix = IntField(default=0, required=False)
+    strip_ani_suffix = IntField(default=0, required=False)
+    strip_from_prefix = IntField(default=0, required=False)
+    strip_from_suffix = IntField(default=0, required=False)
     meta = {
         'indexes': [
             'psap_id',
