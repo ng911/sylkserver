@@ -462,7 +462,7 @@ class PSAPApplication(SylkApplication):
             ali_format = ''
             caller_ani = calling_number
             #caller_ani = remote_identity.uri.user
-            #caller_name = remote_identity.uri.user
+            caller_name = remote_identity.uri.user
             #called_number = local_identity.uri.user
             caller_uri = str(remote_identity.uri)
             called_uri = str(local_identity.uri)
