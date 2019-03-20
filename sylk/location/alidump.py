@@ -9,6 +9,7 @@ from sylk.configuration import ServerConfig
 from sylk.applications import ApplicationLogger
 
 ali_dump_factory = None
+ali_dump_client_factory = None
 log = ApplicationLogger(__package__)
 
 class AliDumpProtocol(Protocol):
@@ -77,9 +78,10 @@ def start_alidump_server():
     reactor.listenTCP(ServerConfig.alidump_port, ali_dump_factory)
 
 def start_alidump_client():
-    factory = AliDumpClientFactory()
+    global ali_dump_client_factory
+    ali_dump_client_factory = AliDumpClientFactory()
     if (ServerConfig.alidump_client_host != "") and (ServerConfig.alidump_client_host != None):
-        reactor.connectTCP(ServerConfig.alidump_client_host, ServerConfig.alidump_client_port, factory)
+        reactor.connectTCP(ServerConfig.alidump_client_host, ServerConfig.alidump_client_port, ali_dump_client_factory)
 
 
 def dump_ali(station_id, raw_ali_data):
@@ -92,5 +94,13 @@ def dump_ali(station_id, raw_ali_data):
             log.error("dump_ali error for , %s, %s", station_id, str(e))
     else:
         log.error("ali dump server not started?")
+
+    if ali_dump_client_factory is not None:
+        try:
+            ali_dump_client_factory.dumpAli(station_id, raw_ali_data)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error("%s", stacktrace)
+            log.error("dump_ali ali_dump_client_factory error for , %s, %s", station_id, str(e))
 
 
