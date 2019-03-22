@@ -81,7 +81,8 @@ def start_alidump_client():
     global ali_dump_client_factory
     ali_dump_client_factory = AliDumpClientFactory()
     if (ServerConfig.alidump_client_host != "") and (ServerConfig.alidump_client_host != None):
-        reactor.connectTCP(ServerConfig.alidump_client_host, ServerConfig.alidump_client_port, ali_dump_client_factory)
+        port = int(ServerConfig.alidump_client_port)
+        reactor.connectTCP(ServerConfig.alidump_client_host, port, ali_dump_client_factory)
 
 
 def dump_ali(station_id, raw_ali_data):
