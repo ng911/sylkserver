@@ -27,10 +27,10 @@ class ServerConfig(ConfigSection):
     full_db_connection = "mongodb://localhost:27017/"
     ali_link1_ip = "165.227.16.153"
     ali_link1_port = 11010
-    ali_link1_format = "30WWireless"
+    ali_link1_format = "all"
     ali_link2_ip = "159.65.73.31"
     ali_link2_port = 11010
-    ali_link2_format = "30WWireless"
+    ali_link2_format = "all"
     ali_link3_ip = ""
     ali_link3_port = ""
     ali_link3_format = ""
