@@ -100,7 +100,9 @@ class AliSimulator:
 
 	def send_ali_data(self, conn, phone_number, ipAddress):
 		logger.debug("send_ali_data for phone_number %s", phone_number)
-		formatted_phone = "(%s) %s-%s" % (phone_number[:3], phone_number[-7:-4], phone_number[-4:])
+		#formatted_phone = "(%s) %s-%s" % (phone_number[:3], phone_number[-7:-4], phone_number[-4:])
+		# for warren only at the moment
+		formatted_phone = "%s-%s-%s" % (phone_number[:3], phone_number[-7:-4], phone_number[-4:])
 		#sample_ali = "112\r(415) 555-1212 WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(712)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS"
 		if phone_number in sample_ali:
 			#ali_result = "112\r%s WPH2 08/11 13:17\rUS CELLULAR 800-510-6091    \r      1285       P#515-319-4005\r   Quail Ave - 3S        \r                    \rCALLBK=(712)210-0213      01045\rIA 00070-2-011, FRANKLIN       \r                  TEL=USCC \r+042.657610 -093.273464      46\rPSAP= HAMPTON PD\rVerify PD\r\nVerify FD\r\nVerify EMS" % formatted_phone
