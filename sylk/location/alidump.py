@@ -36,8 +36,8 @@ class AliDumpFactory(Factory):
         log.info('dumpAli - for station %s, num clients %d', stationId, len(self.ali_clients))
         for ali_client in self.ali_clients:
             ali_client.transport.write('\x02')
-            ali_client.transport.write(stationId)
-            ali_client.transport.write(rawAliData)
+            ali_client.transport.write(stationId.encode("ascii"))
+            ali_client.transport.write(rawAliData.encode("ascii"))
             ali_client.transport.write('\x03')
 
 
@@ -55,8 +55,8 @@ class AliDumpClientFactory(ReconnectingClientFactory):
         log.info('dumpAli - for station %s, num clients %d', stationId, len(self.ali_clients))
         for ali_client in self.ali_clients:
             ali_client.transport.write('\x02')
-            ali_client.transport.write(stationId)
-            ali_client.transport.write(rawAliData)
+            ali_client.transport.write(stationId.encode("ascii"))
+            ali_client.transport.write(rawAliData.encode("ascii"))
             ali_client.transport.write('\x03')
 
     def clientConnectionLost(self, connector, reason):
