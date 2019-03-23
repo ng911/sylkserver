@@ -86,10 +86,12 @@ def process_ali_success(result):
         location_db_obj.service_provider = ali_result['service_provider']
         location_db_obj.class_of_service = ali_result['class_of_service']
         location_db_obj.community = ali_result['community']
-
-        location_db_obj.latitude = float(ali_result['latitude'])
-        location_db_obj.longitude = float(ali_result['longitude'])
-        location_db_obj.radius = float(ali_result['radius'])
+        if ali_result['latitude'] != '':
+            location_db_obj.latitude = float(ali_result['latitude'])
+        if ali_result['longitude'] != '':
+            location_db_obj.longitude = float(ali_result['longitude'])
+        if ali_result['radius'] != '':
+            location_db_obj.radius = float(ali_result['radius'])
         location_db_obj.location = ali_result['location']
 
         location_db_obj.otcfield = ali_result['otcfield']
