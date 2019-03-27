@@ -176,3 +176,33 @@ def set_profile(user_id):
 
         return jsonify(response)
 
+
+@calltaker.route('/log', methods=['POST', 'PUT'])
+def log_calltaker_console():
+    try:
+        station_id = get_argument('station_id')
+        logs = get_argument('log')
+        if (station_id is None) or (station_id == ''):
+            raise ValueError('missing or invalid station_id')
+        if (logs is None) or (logs == ''):
+            raise ValueError('missing or invalid logs')
+        logFileName = '/var/log/calltaker_{}' % station_id
+        with open(logFileName, "a+") as f:
+            for log in logs:
+                log_time = log['time']
+                log_message = log['message']
+                log_level = log['level']
+                log_line = "{} - {} - {}\n".format(log_time, log_level, log_message)
+                f.write(log_line)
+
+        response = {'success':True}
+        return jsonify(response)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("%s", stacktrace)
+        response = {
+            'success' : False,
+            'reason' : str(e)
+        }
+
+        return jsonify(response)

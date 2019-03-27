@@ -130,6 +130,8 @@ def session_info():
     log.info("session_info")
     user_id = ''
     username = ''
+    station_id = ''
+    log_level = ''
     if 'user_id' in session:
         user_id = session['user_id']
         if (user_id is not None) and (user_id != ''):
@@ -140,10 +142,13 @@ def session_info():
             try:
                 station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
                 user_obj.station_id = station_db_obj.station_id
+                station_id = station_db_obj.station_id
+                if hasattr(station_db_obj, log_level) and (station_db_obj.log_level != None):
+                    log_level = station_db_obj.log_level
                 user_obj.save()
             except:
                 pass
-    return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username})
+    return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username, 'station_id' : station_id, 'log_level' : log_level})
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])

@@ -114,6 +114,7 @@ class CalltakerStation(Document):
     station_id = StringField(required=True, unique=True)
     ip_address = StringField(required=True, unique=True)
     name = StringField(required=True, unique=True)
+    log_level = StringField()
     loud_ring_server = BooleanField()
     meta = {
         'indexes': [
