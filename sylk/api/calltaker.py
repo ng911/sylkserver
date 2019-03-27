@@ -186,7 +186,7 @@ def log_calltaker_console():
             raise ValueError('missing or invalid station_id')
         if (logs is None) or (logs == ''):
             raise ValueError('missing or invalid logs')
-        logFileName = '/var/log/calltaker_{}' % station_id
+        logFileName = '/var/log/calltaker_{}'.format(station_id)
         with open(logFileName, "a+") as f:
             for log_val in logs:
                 log.info("log_val is %r", log_val)
