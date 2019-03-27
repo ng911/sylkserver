@@ -143,7 +143,7 @@ def session_info():
                 station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
                 user_obj.station_id = station_db_obj.station_id
                 station_id = station_db_obj.station_id
-                if hasattr(station_db_obj, log_level) and (station_db_obj.log_level != None):
+                if hasattr(station_db_obj, 'log_level') and (station_db_obj.log_level != None):
                     log_level = station_db_obj.log_level
                 user_obj.save()
             except:
