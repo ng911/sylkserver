@@ -189,6 +189,7 @@ def log_calltaker_console():
         logFileName = '/var/log/calltaker_{}' % station_id
         with open(logFileName, "a+") as f:
             for log_val in logs:
+                log.info("log_val is %r", log_val)
                 log_time = log_val['time']
                 log_message = log_val['message']
                 log_level = log_val['level']
