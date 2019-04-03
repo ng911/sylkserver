@@ -1085,14 +1085,18 @@ class WelcomeHandler(object):
             # No need to remove the bridge from the stream, it's done automatically
             pass
         else:
+            log.info("inside audio_welcome remove player")
             stream.bridge.remove(player)
             self.room.audio_conference.add(stream)
             self.room.audio_conference.unhold()
+            '''
             if len(self.room.audio_conference.streams) == 1:
                 self.room.moh_player.play()
             else:
                 self.room.moh_player.pause()
+            '''
         finally:
+            log.info("inside audio_welcome stop player")
             player.stop()
 
     def chat_welcome(self, stream):
