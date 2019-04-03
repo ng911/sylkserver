@@ -38,6 +38,7 @@ class ServerConfig(ConfigSection):
     ali_link4_port = ""
     ali_link4_format = ""
     tty_enabled = True
+    play_connected_tone = True
     db_name = "ng911"
     db_user = ""
     db_pwd = ""
