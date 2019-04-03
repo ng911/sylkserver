@@ -271,7 +271,7 @@ class Call(Document):
     status = StringField(required=True, choices=('init', 'reject', 'failed', 'ringing', 'queued', 'abandoned', 'active', 'closed', 'cancel'), default='init')
     meta = {
         'indexes': [
-            'psap_id', 'call_id'
+            'psap_id', 'call_id', 'sip_call_id'
         ]
     }
 
