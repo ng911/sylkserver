@@ -661,7 +661,8 @@ def send_recording(path):
     try:
         # todo remove this later
         if os.path.isfile(full_path):
-            return send_file(full_path)
+            with current_app.app_context():
+                return send_file(full_path)
         else:
             abort(404)
     except Exception as e:

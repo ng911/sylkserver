@@ -492,8 +492,8 @@ class Room(object):
                 return
         '''
 
-        #welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
-        #welcome_handler.run()
+        welcome_handler = WelcomeHandler(self, initial=True, session=session, streams=session.streams)
+        welcome_handler.run()
         log.info('check for streams now session is %r, session.streams is %r', session, session.streams)
         for stream in session.streams:
             log.info('adding audio confernce stream')
@@ -858,8 +858,8 @@ class Room(object):
                                                                                        stream.type))
 
         if notification.data.added_streams:
-            #welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
-            #welcome_handler.run()
+            welcome_handler = WelcomeHandler(self, initial=False, session=session, streams=notification.data.added_streams)
+            welcome_handler.run()
             log.info("add stream to audio_conference")
             self.audio_conference.add(stream)
             self.audio_conference.unhold()
@@ -1049,6 +1049,7 @@ class WelcomeHandler(object):
         player = WavePlayer(stream.mixer, '', pause_time=1, initial_delay=1, volume=50)
         stream.bridge.add(player)
         try:
+            '''
             if self.initial:
                 file = Resources.get('sounds/co_welcome_conference.wav')
                 log.info("inside audio_welcome play initial")
@@ -1076,6 +1077,7 @@ class WelcomeHandler(object):
                     self.play_file_in_player(player, file, 0.1)
                 file = Resources.get('sounds/co_more_participants.wav')
                 self.play_file_in_player(player, file, 0)
+            '''
             log.info("inside audio_welcome play connected_tone")
             file = Resources.get('sounds/connected_tone.wav')
             self.play_file_in_player(player, file, 0.1)
