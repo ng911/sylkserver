@@ -1082,6 +1082,7 @@ class WelcomeHandler(object):
             file = Resources.get('sounds/connected_tone.wav')
             self.play_file_in_player(player, file, 0.1)
         except proc.ProcExit:
+            log.info("inside audio_welcome except ProcExit")
             # No need to remove the bridge from the stream, it's done automatically
             pass
         else:
