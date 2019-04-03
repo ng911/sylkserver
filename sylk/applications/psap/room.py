@@ -1078,9 +1078,12 @@ class WelcomeHandler(object):
                 file = Resources.get('sounds/co_more_participants.wav')
                 self.play_file_in_player(player, file, 0)
             '''
-            log.info("inside audio_welcome play connected_tone")
-            file = Resources.get('sounds/connected_tone.wav')
-            self.play_file_in_player(player, file, 0.1)
+            user_count = len({str(s.remote_identity.uri) for s in self.room.sessions if s.remote_identity.uri != self.session.remote_identity.uri and any(stream for stream in s.streams if stream.type == 'audio')})
+            log.info("inside audio_welcome user_count is %r", user_count)
+            if user_count == 2:
+                log.info("inside audio_welcome play connected_tone")
+                file = Resources.get('sounds/connected_tone.wav')
+                self.play_file_in_player(player, file, 0.1)
         except proc.ProcExit:
             log.info("inside audio_welcome except ProcExit")
             # No need to remove the bridge from the stream, it's done automatically
