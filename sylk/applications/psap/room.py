@@ -1080,7 +1080,7 @@ class WelcomeHandler(object):
             '''
             user_count = len({str(s.remote_identity.uri) for s in self.room.sessions if s.remote_identity.uri != self.session.remote_identity.uri and any(stream for stream in s.streams if stream.type == 'audio')})
             log.info("inside audio_welcome user_count is %r", user_count)
-            if user_count >= 1:
+            if user_count == 0:
                 log.info("inside audio_welcome play connected_tone")
                 file = Resources.get('sounds/connected_tone.wav')
                 self.play_file_in_player(player, file, 0.1)
