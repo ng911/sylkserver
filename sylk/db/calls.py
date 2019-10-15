@@ -33,7 +33,7 @@ def get_active_calltakers(room_number):
 def get_active_participants(room_number):
     active_participants = []
     for participant_db_obj in ConferenceParticipant.objects(room_number=room_number):
-        if participant_db_obj.is_active:
+        if participant_db_obj.is_active and not participant_db_obj.is_caller:
             active_participants.append(participant_db_obj.name)
     return active_participants
 

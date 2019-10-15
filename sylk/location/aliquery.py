@@ -3,6 +3,7 @@ import socket, select
 import sys
 from twisted.internet import defer
 from twisted.internet import reactor
+from twisted.internet import task
 from twisted.internet.defer import inlineCallbacks, returnValue
 import uuid
 from aliparsers import parse_warren_wireless, parse_warren_wireline
@@ -345,7 +346,7 @@ ali_parsers = { '30WWireless' : parse_ali_30W_wireless,
 
 ali_factories = {
 }
-
+heartbeat_timer = None
 ali_requests = {}
 
 
@@ -374,6 +375,15 @@ class AliRequestProtocol(Protocol):
         self.transport.write(data_to_send)
         log.info("AliRequestProtocol data_to_send %r", data_to_send)
         self.ali_requests[id] = (number, d)
+
+    # protocol defined in this document
+    # https://cdn.ymaws.com/www.nena.org/resource/collection/6366E817-C855-4776-AF3A-F9F715D1AF12/NENA_04-001-v1_E9-1-1_PSAP_Equipment_Archived_20000823.pdf
+    def send_heartbeat(self):
+        log.info("send_heartbeat H")
+        self.transport.write('\x48')
+        log.info("send_heartbeat 0d")
+        self.transport.write('\x0d')
+        log.info("send_heartbeat done")
 
     def connectionMade(self):
         log.info("inside AliRequestProtocol connectionMade")
@@ -450,6 +460,9 @@ class AliRequestProtocol(Protocol):
         log.info("dataReceived %r", data)
         i = 0
         for c in data:
+            # this is ACK hex 06 or NACK hex 15 response to heartbeat messages and we ignore them for now
+            if (c == '\x06') or (c == '\x15'):
+                continue
             i = i + 1
             if not self.start_char_recvd:
                 if c == '\x02':
@@ -489,6 +502,10 @@ class AliClientFactory(ReconnectingClientFactory):
             self.protocol.send_ali_request(id, number, ali_format, d)
         return d
 
+    def send_heartbeat(self):
+        if self.protocol is not None:
+            self.protocol.send_heartbeat()
+
     def buildProtocol(self, addr):
         log.info('AliClientFactory buildProtocol.')
         log.info('AliClientFactory Resetting reconnection delay')
@@ -510,8 +527,17 @@ class AliClientFactory(ReconnectingClientFactory):
         self.protocol = None
         ReconnectingClientFactory.clientConnectionFailed(self, connector, reason)
 
-def init_ali_links(link_array):
+def heartbeat_timer_cb():
+    log.info('inside heartbeat_timer_cb')
     global ali_factories
+    for ali_format in ali_factories:
+        factories = ali_factories[ali_format]
+        for ali_factory in factories:
+            log.info('inside heartbeat_timer_cb send_heartbeat')
+            ali_factory.send_heartbeat()
+
+def init_ali_links(link_array):
+    global ali_factories, heartbeat_timer
     for link in link_array:
         (host, port, ali_format) = link
         log.info("init_ali_links host %r, port %r, ali_format %r", host, port, ali_format)
@@ -520,6 +546,10 @@ def init_ali_links(link_array):
             ali_factories[ali_format] = []
         ali_factories[ali_format].append(ali_factory)
         reactor.connectTCP(host, port, ali_factory)
+    if heartbeat_timer is None:
+        heartbeat_timer = task.LoopingCall(heartbeat_timer_cb)
+        heartbeat_timer.start(60)
+
 
 g_ali_requests = {}
 

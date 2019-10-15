@@ -379,17 +379,17 @@ def parse_warren_wireless(raw_ali):
     '''
     i = i+1
     line = lines[i]
-    latitude = line[1:12]
-    latitude = latitude.strip()
-    log.info("latitude '%s'", latitude)
-    if len(latitude) == 0:
-        latitude = 0
-
-    longitude = line[15:26]
+    longitude = line[1:12]
     longitude = longitude.strip()
+    log.info("longitude '%s'", longitude)
     if len(longitude) == 0:
         longitude = 0
-    log.info("longitude '%s'", longitude)
+
+    latitude = line[14:26]
+    latitude = latitude.strip()
+    if len(latitude) == 0:
+        latitude = 0
+    log.info("latitude '%s'", latitude)
     confidence = line[29:32]
     '''
     352 - 354  3       Free Text                          UNC                
