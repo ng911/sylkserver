@@ -101,7 +101,7 @@ def list_routes():
 def calltaker():
     pass
 
-@app.route('/convert3gpp/to/mp4', methods=['POST'])
+@app.route('/convert3gpp/to/mp4', methods=['GET', 'POST'])
 def convertFileTo3gpp():
     media_url = get_argument("media_url")
 
