@@ -635,7 +635,7 @@ class ConferenceData(object):
         with open(fileNameWithDir, 'wb') as f:
             shutil.copyfileobj(resp.raw, f)
         subprocess.call(["ffmpeg", "-i", origFileNameWithDir, mp4FileNameWithDir])
-        return mp4FileNameWithDir
+        return "call/media/%s.mp4" % fileName
 
     def msrp_add(self, room_number, sender_uri, message_id, message, content_type="text/plain"):
         try:
