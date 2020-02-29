@@ -1560,13 +1560,13 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         caller_uri = room_data.caller_uri
         msrp_text = notification.data.message.content
-        contentType = notification.data.message.content_type
+        content_type = notification.data.message.content_type
         #ignore OTR messages
         if msrp_text.startswith('?OTRv3?'):
             return
         log.debug("recvd chatStreamMessage %r", notification.data.message.content)
         message_id = str(bson.ObjectId())
-        data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, message=msrp_text, content_type=contentType)
+        data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, message=msrp_text, content_type=content_type)
         NotificationCenter().post_notification('ConferenceMSRPText', '', data)
 
         #if self.conf:

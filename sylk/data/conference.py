@@ -626,7 +626,7 @@ class ConferenceData(object):
         try:
             if content_type == "text/json":
                 jsonData = json.loads(message)
-                content_type = jsonData["contentType"]
+                content_type = jsonData["content_type"]
                 message = jsonData["mediaUrl"]
             conference_message = ConferenceMessage()
             conference_message.room_number=room_number
