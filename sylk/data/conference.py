@@ -628,8 +628,8 @@ class ConferenceData(object):
                 log.info("message is %r", message)
                 jsonData = json.loads(message)
                 log.info("jsonData is %r", jsonData)
-                content_type = jsonData["contentType"]
-                message = jsonData["mediaUrl"]
+                content_type = jsonData["content_type"]
+                message = jsonData["media_url"]
             conference_message = ConferenceMessage()
             conference_message.room_number=room_number
             conference_message.message = message
