@@ -1531,7 +1531,7 @@ class PSAPApplication(SylkApplication):
             log.error("no chat stream found for conf %r, sender %r, txtMessage %r", room_number, sender, text)
         sender_uri = room_data.get_calltaker_uri(sender)
         message_id = str(bson.ObjectId())
-        data = NotificationData(room_number=room_number, sender_uri=sender_uri, text=text, message_id=message_id)
+        data = NotificationData(room_number=room_number, sender_uri=sender_uri, message=text, message_id=message_id, content_type="text/plain")
         NotificationCenter().post_notification('ConferenceMSRPText', '', data)
         return message_id, sender_uri
 
@@ -1560,12 +1560,13 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         caller_uri = room_data.caller_uri
         msrp_text = notification.data.message.content
+        contentType = notification.data.message.content_type
         #ignore OTR messages
         if msrp_text.startswith('?OTRv3?'):
             return
         log.debug("recvd chatStreamMessage %r", notification.data.message.content)
         message_id = str(bson.ObjectId())
-        data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, text=msrp_text)
+        data = NotificationData(room_number=room_number, sender_uri=caller_uri, message_id=message_id, message=msrp_text, content_type=contentType)
         NotificationCenter().post_notification('ConferenceMSRPText', '', data)
 
         #if self.conf:

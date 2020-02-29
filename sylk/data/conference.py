@@ -622,14 +622,19 @@ class ConferenceData(object):
             log.error("exception in enable_tty %r", e)
             log.error(stackTrace)
 
-    def msrp_add_text(self, room_number, sender_uri, message_id, text):
+    def msrp_add(self, room_number, sender_uri, message_id, message, content_type="text/plain"):
         try:
+            if content_type == "text/json":
+                jsonData = message
+                contentType = jsonData["contentType"]
+                message = jsonData["mediaUrl"]
             conference_message = ConferenceMessage()
             conference_message.room_number=room_number
-            conference_message.message = text
+            conference_message.message = message
             conference_message.message_time = datetime.datetime.utcnow()
             conference_message.sender_uri = sender_uri
             conference_message.message_id = message_id
+            conference_message.content_type = content_type
             conference_message.save()
             json_data = get_json_from_db_obj(conference_message)
             publish_msrp_message(json_data)
@@ -869,7 +874,7 @@ class ConferenceData(object):
     def _NH_ConferenceMSRPText(self, notification):
         log.info("incoming _NH_ConferenceMSRPText")
         try:
-            self.msrp_add_text(notification.data.room_number, notification.data.sender_uri, notification.data.message_id, notification.data.text)
+            self.msrp_add(notification.data.room_number, notification.data.sender_uri, notification.data.message_id, notification.data.message, notification.data.content_type)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceMSRPText %r", e)

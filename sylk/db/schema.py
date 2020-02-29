@@ -392,6 +392,7 @@ class ConferenceMessage(Document):
     message = StringField()
     message_id = StringField()
     message_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    content_type = StringField()
     meta = {
         'indexes': [
             'sender_uri',
