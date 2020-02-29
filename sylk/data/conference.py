@@ -626,17 +626,6 @@ class ConferenceData(object):
             log.error("exception in enable_tty %r", e)
             log.error(stackTrace)
 
-    def convert_3gpp_url_to_mp4(self, media_url):
-        fileName = "%s" % str(uuid.uuid4())
-        fileNameWithDir = "../media/%s" % fileName
-        origFileNameWithDir = "%s.3gpp" % fileNameWithDir
-        mp4FileNameWithDir = "%s.mp4" % fileNameWithDir
-        resp = requests.get(media_url, stream=True)
-        with open(fileNameWithDir, 'wb') as f:
-            shutil.copyfileobj(resp.raw, f)
-        subprocess.call(["ffmpeg", "-i", origFileNameWithDir, mp4FileNameWithDir])
-        return "call/media/%s.mp4" % fileName
-
     def msrp_add(self, room_number, sender_uri, message_id, message, content_type="text/plain"):
         try:
             if content_type == "text/json":
@@ -645,10 +634,6 @@ class ConferenceData(object):
                 log.info("jsonData is %r", jsonData)
                 content_type = jsonData["content_type"]
                 message = jsonData["media_url"]
-                if content_type == "video/3gpp":
-                    # we need to convert it to mp4
-                    message = self.convert_3gpp_url_to_mp4(message)
-                    content_type = "video/mp4"
             conference_message = ConferenceMessage()
             conference_message.room_number=room_number
             conference_message.message = message
