@@ -625,7 +625,9 @@ class ConferenceData(object):
     def msrp_add(self, room_number, sender_uri, message_id, message, content_type="text/plain"):
         try:
             if content_type == "text/json":
+                log.info("message is %r", message)
                 jsonData = json.loads(message)
+                log.info("jsonData is %r", jsonData)
                 content_type = jsonData["contentType"]
                 message = jsonData["mediaUrl"]
             conference_message = ConferenceMessage()
