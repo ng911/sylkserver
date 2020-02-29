@@ -724,6 +724,25 @@ def send_recording(path):
         log.error("%s", stacktrace)
         abort(503)
 
+@calls.route('/media/<path:path>')
+def send_media(path):
+    log.info("send_media for %s, app.root_path %s", path, current_app.root_path)
+    recording_dir = os.path.join(current_app.root_path, '../../media')
+    recording_dir = os.path.abspath(recording_dir)
+    full_path = os.path.join(recording_dir, path)
+    log.info('media path is %s', full_path)
+    try:
+        # todo remove this later
+        if os.path.isfile(full_path):
+            return send_file(full_path)
+        else:
+            abort(404)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("send_media for file %s, error %s", path, str(e))
+        log.error("%s", stacktrace)
+        abort(503)
+
 '''
 sample current calls
 calls = [
