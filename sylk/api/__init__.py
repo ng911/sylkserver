@@ -11,10 +11,6 @@ from flask_session import Session
 import urllib
 from pymongo import MongoClient
 from functools import wraps
-import uuid
-import requests
-import subprocess
-import shutil
 
 from sylk.applications import ApplicationLogger
 from sylk.db.schema import Grant, Client, Token, User
@@ -101,36 +97,6 @@ def list_routes():
 def calltaker():
     pass
 
-@app.route('/convert3gpp/to/mp4', methods=['GET', 'POST'])
-def convertFileTo3gpp():
-    media_url = get_argument("media_url")
-
-    file_name = "%s" % str(uuid.uuid4())
-    file_name_3gpp = "%s.3gpp" % file_name
-    file_name_mp4 = "%s.mp4" % file_name
-    resp = requests.get(media_url, stream=True)
-
-    media_dir = os.path.join(app.root_path, '../../media')
-    media_dir = os.path.abspath(media_dir)
-    file_path_3gpp = os.path.join(media_dir, file_name_3gpp)
-    file_path_mp4 = os.path.join(media_dir, file_name_mp4)
-
-    error = True
-    with open(file_path_3gpp, 'wb') as f:
-        shutil.copyfileobj(resp.raw, f)
-        out = subprocess.call(["ffmpeg", "-i", file_path_3gpp, file_path_mp4])
-        if out == 0:
-            error = False
-    if not error:
-        response = {
-            "success" : True,
-            "media_url" : "calls/media/%s" % file_name_mp4
-        }
-    else:
-        response = {
-            "success" : False
-        }
-    return jsonify(response)
 
 '''
 # Serve React App
