@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <title>Emergent PSAP - Calltaker Login</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png">
+  <!-- Bootstrap 3.3.6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/call_print.css">
+
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+   <!--<script src="plugins/plupload-2.3.1/js/plupload.full.min.js"></script>-->
+
+  <!-- Bootstrap 3.3.6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+   <body class="hold-transition skin-blue-light sidebar-mini" style="height: 100%">
+    <button type="button">Print</button>
+    <h3>Call Details</h3>
+    <table>
+      {% if confernce.direction == 'in' %}
+      <tr>
+        <td class="title">
+          Call From
+        </td>
+        <td class="details">
+          conference.
+        </td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td class="title">
+          Calltakers
+        </td>
+        <td class="details">
+          Tarun
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Call Type
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Response Time
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Call Status
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Start Time
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          End Time
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Duration
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Notes
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Emergency Type
+        </td>
+      </tr>
+      <tr>
+        <td class="title">
+          Secondary Type
+        </td>
+      </tr>
+    </table>
+    <h3>Call Events</h3>
+    <h3>Location Data</h3>
+
+
+
+   </body>
+</html>
+

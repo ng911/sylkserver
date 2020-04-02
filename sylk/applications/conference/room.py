@@ -38,7 +38,7 @@ from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.configuration.datatypes import URL
 from sylk.resources import Resources
 from sylk.session import Session, IllegalStateError
-from sylk.web import server as web_server
+#from sylk.web import server as web_server
 
 
 def format_identity(identity):
@@ -55,8 +55,8 @@ class ScreenImage(object):
         self.room_uri = room.uri
         self.sender = sender
         self.filename = os.path.join(ConferenceConfig.screensharing_images_dir, room.uri, '%s@%s_%s.jpg' % (sender.uri.user, sender.uri.host, ''.join(random.sample(string.letters+string.digits, 10))))
-        self.url = URL(web_server.url + '/conference/' + room.uri + '/screensharing')
-        self.url.query_items['image'] = os.path.basename(self.filename)
+        #self.url = URL(web_server.url + '/conference/' + room.uri + '/screensharing')
+        #self.url.query_items['image'] = os.path.basename(self.filename)
         self.state = None
         self.timer = None
 
@@ -95,9 +95,9 @@ class ScreenImage(object):
             self.timer = reactor.callLater(10, self.stop_advertising)
             room = self.room() or Null
             room.dispatch_conference_info()
-            txt = 'Room %s - %s is sharing the screen at %s' % (self.room_uri, format_identity(self.sender), self.url)
-            room.dispatch_server_message(txt)
-            log.info(txt)
+            #txt = 'Room %s - %s is sharing the screen at %s' % (self.room_uri, format_identity(self.sender), self.url)
+            #room.dispatch_server_message(txt)
+            #log.info(txt)
 
     @run_in_twisted_thread
     def stop_advertising(self):
@@ -144,6 +144,10 @@ class Room(object):
     @property
     def empty(self):
         return len(self.sessions) == 0
+
+    @property
+    def length(self):
+        return len(self.sessions)
 
     @property
     def started(self):
@@ -456,11 +460,19 @@ class Room(object):
         if ServerConfig.enable_bonjour:
             self._update_bonjour_presence()
 
-    def terminate_sessions(self, uri):
+    def terminate_sessions(self, uri=None):
+        log.info('inside terminating sessions %r', self.started)
         if not self.started:
             return
-        for session in (session for session in self.sessions if session.remote_identity.uri == uri):
-            session.end()
+        # we terminate all sessions if uri is none
+        if uri is None:
+            for session in self.sessions:
+                log.info('terminating session %r', session)
+                session.end()
+        else:
+            for session in (session for session in self.sessions if session.remote_identity.uri == uri):
+                session.end()
+
 
     def handle_incoming_subscription(self, subscribe_request, data):
         log.info('Room %s - subscription from %s' % (self.uri, data.headers['From'].uri))

@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"ng911.location"},{"v":1,"key":{"location_point":"2dsphere"},"name":"location_point_2dsphere","ns":"ng911.location","background":false,"2dsphereIndexVersion":3}]}

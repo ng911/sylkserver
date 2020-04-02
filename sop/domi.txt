@@ -1,0 +1,43 @@
+LAW DOMI DOMESTIC - IN PROGRESS
+----
+Police
+----
+Panic Alarms
+
+These are the highest priority alarms.  By the nature of these alarms there is usually a victim at the scene, and/or a crime in progress.  Personnel will:
+
+21. Acknowledge the system alert.
+
+22. Begin an incident record.
+
+23. Immediately dispatch two officers to the alarm location to check the area and relay all alarm information to the responding officers.
+
+24. Make notifications as requested by the officers on the scene.
+
+25. Record all actions taken and pertinent information. Pertinent information will include but not be limited to telephone and radio notifications and information received from units at the scene.
+
+
+
+B.	Burglar Alarms
+
+These alarms come from an intrusion to a secured location, and may be door contacts, or motion detectors among others.  Personnel will
+
+21. Acknowledge the system alert.
+
+22. Begin an incident record.
+
+23. Dispatch per agency guidelines
+
+24. Make notifications as requested by personnel on the scene.
+
+25. Record all actions taken and pertinent information. Pertinent information will include but not be limited to telephone and radio notifications and information received from units at the scene.
+----
+Is anyone injured?
+
+How many victims are involved?
+
+How many actors are involved?
+
+Are there any weapon being used?
+
+Is there a protection order in place?

@@ -38,6 +38,6 @@ setup(
 
     packages=find_packages('sylk'),
     scripts=['sylk-server'],
-    data_files=[('/etc/sylkserver', glob.glob('*.ini.sample')),
-                ('/etc/sylkserver/tls', glob.glob('resources/tls/*.crt'))] + list_resources('resources', destination_directory='share/sylkserver')
+    data_files=[('/usr/local/etc/sylkserver', glob.glob('*.ini.sample')),
+                ('/usr/local/etc/sylkserver/tls', glob.glob('resources/tls/*.crt'))] + list_resources('resources', destination_directory='share/sylkserver')
 )

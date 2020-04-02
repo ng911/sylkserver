@@ -28,6 +28,7 @@ from zope.interface import implements
 from sylk.accounts import DefaultAccount
 from sylk.configuration import SIPConfig
 
+from sylk.utils import dump_object_member_vars
 
 class InvitationDisconnectedError(Exception):
     def __init__(self, invitation, data):
@@ -191,6 +192,7 @@ class ConferenceHandler(object):
                 uri = SIPURI.new(self.session.remote_identity.uri)
             lookup = DNSLookup()
             try:
+                routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
                 routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
             except DNSLookupError as e:
                 timeout = random.uniform(15, 30)
@@ -381,7 +383,48 @@ class Session(object):
         self._remote_identity = None
         self._lock = RLock()
 
+    def debug_info(self):
+        streams_data = []
+        for stream in self.streams:
+            stream_data = {'type' : stream.type, 'on_hold' : stream.on_hold,
+                           'muted' : stream.muted, 'hold_supported' : stream.hold_supported,
+                           'on_hold_by_local' : stream.on_hold_by_local, 'on_hold_by_remote' : stream.on_hold_by_remote,
+                           'consumer_slot' : stream.consumer_slot, 'producer_slot' : stream.producer_slot,
+                           'codec': stream.codec,
+                           'sample_rate': stream.sample_rate,
+                           'statistics': stream.statistics,
+                           'local_rtp_address': stream.local_rtp_address,
+                           'local_rtp_port': stream.local_rtp_port,
+                           'local_rtp_candidate': stream.local_rtp_candidate,
+                           'remote_rtp_address': stream.remote_rtp_address,
+                           'remote_rtp_port': stream.remote_rtp_port,
+                           'remote_rtp_candidate': stream.remote_rtp_candidate,
+                           'ice_active': stream.ice_active,
+                           'on_hold': stream.on_hold
+                           }
+            streams_data.append(stream_data)
+
+        return {
+            'streams': streams_data,
+            'direction': self.direction,
+            'on_hold': self.on_hold,
+            '_hold_in_progress' : self._hold_in_progress,
+            '_local_identity' : self._local_identity,
+            '_remote_identity': self._remote_identity,
+            'local_identity': self.local_identity,
+            'remote_identity': self.remote_identity,
+            '_invitation': self._invitation,
+            'peer_address': self.peer_address,
+            'request_uri': self.request_uri,
+            'remote_user_agent' : self.remote_user_agent,
+            'call_id' : self.call_id
+        }
+
     def init_incoming(self, invitation, data):
+        log.info("init_incoming with invitation")
+        dump_object_member_vars(log, invitation)
+        log.info("init_incoming with invitation headers")
+
         remote_sdp = invitation.sdp.proposed_remote
         if not remote_sdp:
             invitation.send_response(488)
@@ -414,7 +457,7 @@ class Session(object):
         self.state = 'incoming'
         self.transport = invitation.transport
         self._invitation = invitation
-        self.conference = ConferenceHandler(self)
+        #self.conference = ConferenceHandler(self)
         if 'isfocus' in invitation.remote_contact_header.parameters:
             self.remote_focus = True
         notification_center = NotificationCenter()
@@ -902,6 +945,10 @@ class Session(object):
             notification_center.remove_observer(self, sender=self._invitation)
             self.greenlet = None
             self.state = 'terminated'
+            for stream in self.proposed_streams:
+                stream.deactivate()
+                stream.end()
+
             self.proposed_streams = None
             notification_center.post_notification('SIPSessionDidFail', self, NotificationData(originator='local', code=code, reason=sip_status_messages[code], failure_reason='user request', redirect_identities=None))
 
@@ -1333,6 +1380,35 @@ class Session(object):
             stream.unhold()
         if self.state == 'connected':
             self._send_unhold()
+
+    @run_in_green_thread
+    def mute(self):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if stream.type == 'audio':
+                log.info('set stream %r to mute', stream)
+                stream.muted = True
+
+    @run_in_green_thread
+    def send_dtmf(self, dtmf_digit):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if stream.type == 'audio':
+                stream.send_dtmf(dtmf_digit)
+
+    @run_in_green_thread
+    def unmute(self):
+        streams = (self.streams or []) + (self.proposed_streams or [])
+        if not streams:
+            return
+        for stream in streams:
+            if stream.type == 'audio':
+                log.info('set stream %r to unmute', stream)
+                stream.muted = False
 
     @run_in_green_thread
     def end(self):

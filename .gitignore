@@ -1,3 +1,10 @@
+*.pyc
+
 *.swp
 .idea/
-*.pyc
+
+build/
+notebook/
+design notes/
+.idea/vcs.xml
+testali.log

@@ -1,0 +1,39 @@
+MED CHOKA CHOKING AMBULANCE
+----
+EMS
+----
+The following locations/conditions will always have law enforcement dispatched on medical calls:
+
+* Bars
+
+* Known trouble spots
+
+* Known large crowds
+
+* Suspected crime involved
+
+* Any time the dispatcher feels there is a need
+
+* When requested by EMS unit at scene
+
+
+
+Initial Dispatch will include the following information:
+
+* Units to respond
+
+* Location
+
+* Chief Complaint
+
+* Case Entry Information
+
+* Other Pertinent Information from the Call
+
+* MPDS Determinant Code
+----
+Is the person able to talk, cough, or breath?
+
+Is the person Conscious?
+
+Do you know how to perform abdominal thrusts?

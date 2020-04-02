@@ -4,9 +4,11 @@ from sipsimple.account import Account, AccountManager
 from sipsimple.configuration import SettingsObject
 from sipsimple.configuration.datatypes import SIPAddress
 from sipsimple.core import Engine, Route, SIPURI
+from sylk.applications import ApplicationLogger
 
 from sylk.configuration import SIPConfig
 
+log = ApplicationLogger(__package__)
 
 __all__ = 'DefaultAccount',
 
@@ -65,11 +67,49 @@ class DefaultAccount(Account):
 
     @property
     def uri(self):
-        return SIPURI(user='sylkserver', host=SIPConfig.local_ip.normalized)
+        return SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)
 
     def _activate(self):
         pass
 
     def _deactivate(self):
         pass
+
+
+@classmethod
+def new_account_func(cls, test):
+    log.info("new_account_func test is %r", test)
+    with AccountManager.load.lock:
+        if not AccountManager.load.called:
+            raise RuntimeError("cannot instantiate %s before calling AccountManager.load" % cls.__name__)
+        return SettingsObject.__new__(cls)
+
+def get_user_account_class(username):
+    def constructor(self):
+        Account.__init__(self, self.sip_address)
+        self.contact = DefaultContactURIFactory()
+
+    def _activate(self):
+        pass
+
+    def _deactivate(self):
+        pass
+
+    sip_address = "%r@sylkserver" % username
+    return type(username + "UserAccountClass", (Account,), {
+        "sip_address" : sip_address,
+        'user' : username,
+        "__id__": SIPAddress(sip_address),
+        "id": property(lambda self: self.__id__),
+        "__init__": constructor,
+        "uri":property(lambda self: SIPURI(user=self.user, host=SIPConfig.local_ip.normalized)),
+        "enabled": True,
+        "_activate": _activate,
+        "_deactivate": _deactivate,
+        "__new__": new_account_func
+    })
+
+def get_user_account(username):
+    UserAccountClass = get_user_account_class(username)
+    return UserAccountClass()
 

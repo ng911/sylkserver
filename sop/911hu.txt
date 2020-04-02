@@ -1,0 +1,15 @@
+FIRE 911HU 911 HANG-UP
+----
+Fire Police
+----
+Abandoned Calls
+
+An abandoned call is a call placed to a PSAP in which the caller disconnects before the call can be answered.
+
+1. The Calltaker shall call back the caller utilizing the Automatic Number Identification furnished with the call.
+
+2. The Calltaker shall solicit sufficient information to determine what type of response is necessary.
+
+3. If the call back results in no answer, a police response shall be initiated for an incomplete call.
+----
+NONE

@@ -18,6 +18,33 @@ class ServerConfig(ConfigSection):
     verify_server = False
     enable_bonjour = False
     default_application = 'conference'
+    psap_id = ""
+    sop_dir = "sop"
+    asterisk_server = "127.0.0.1:5090"
+    outgoing_gateway = "127.0.0.1:5090"
+    wamp_crossbar_server = u"ws://127.0.0.1:8080/ws"
+    db_connection = "mongodb://localhost:27017/"
+    full_db_connection = "mongodb://localhost:27017/"
+    ali_link1_ip = "165.227.16.153"
+    ali_link1_port = 11010
+    ali_link1_format = "30WWireless"
+    ali_link2_ip = "159.65.73.31"
+    ali_link2_port = 11010
+    ali_link2_format = "30WWireless"
+    ali_link3_ip = ""
+    ali_link3_port = ""
+    ali_link3_format = ""
+    ali_link4_ip = ""
+    ali_link4_port = ""
+    ali_link4_format = ""
+    tty_enabled = True
+    db_name = "ng911"
+    db_user = ""
+    db_pwd = ""
+    from_number = "911"
+    alidump_port = 12010
+    alidump_client_host = ""
+    alidump_client_port = ""
     application_map = ConfigSetting(type=StringList, value=['echo:echo'])
     disabled_applications = ConfigSetting(type=StringList, value='')
     extra_applications_dir = ConfigSetting(type=Path, value=None)
@@ -60,7 +87,7 @@ class RTPConfig(ConfigSection):
     port_range = ConfigSetting(type=PortRange, value=PortRange('50000:50500'))
     srtp_encryption = ConfigSetting(type=SRTPEncryption, value='opportunistic')
     timeout = ConfigSetting(type=NonNegativeInteger, value=30)
-    sample_rate = ConfigSetting(type=SampleRate, value=48000)
+    sample_rate = ConfigSetting(type=SampleRate, value=8000)
 
 
 class WebServerConfig(ConfigSection):

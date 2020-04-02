@@ -20,11 +20,12 @@ from sylk.applications import SylkApplication
 from sylk.applications.conference.configuration import get_room_config, ConferenceConfig
 from sylk.applications.conference.logger import log
 from sylk.applications.conference.room import Room
-from sylk.applications.conference.web import ConferenceWeb
+#from sylk.applications.conference.web import ConferenceWeb
 from sylk.bonjour import BonjourService
 from sylk.configuration import ServerConfig, ThorNodeConfig
 from sylk.session import Session, IllegalStateError
-from sylk.web import server as web_server
+from sylk.configuration import SIPConfig
+#from sylk.web import server as web_server
 
 
 class ACLValidationError(Exception): pass
@@ -40,11 +41,11 @@ class ConferenceApplication(SylkApplication):
         self.invited_participants_map = {}
         self.bonjour_focus_service = Null
         self.bonjour_room_service = Null
-        self.web = Null
+        #self.web = Null
 
     def start(self):
-        self.web = ConferenceWeb(self)
-        web_server.register_resource('conference', self.web.resource)
+        #self.web = ConferenceWeb(self)
+        #web_server.register_resource('conference', self.web.resource)
 
         # cleanup old files
         for path in (ConferenceConfig.file_transfer_dir, ConferenceConfig.screensharing_images_dir):
@@ -66,8 +67,12 @@ class ConferenceApplication(SylkApplication):
         self.bonjour_focus_service.stop()
         self.bonjour_room_service.stop()
 
-    def get_room(self, uri, create=False):
-        room_uri = '%s@%s' % (uri.user, uri.host)
+    def get_rooms(self):
+        return list(self._rooms.keys())
+
+    def get_room(self, uri=None, create=False, room_number=None):
+        room_uri = self.get_room_uri_str(uri, room_number)
+
         try:
             room = self._rooms[room_uri]
         except KeyError:
@@ -79,6 +84,21 @@ class ConferenceApplication(SylkApplication):
                 raise RoomNotFoundError
         else:
             return room
+
+    def get_room_uri_str(self, uri=None, room_number=None):
+        if room_number is None:
+            room_uri = '%s@%s' % (uri.user, uri.host)
+        else:
+            #todo fix this
+            local_ip = SIPConfig.local_ip.normalized
+            room_uri = '%s@%s' % (room_number, local_ip)
+        return room_uri
+
+    def get_room_uri(self, uri=None, room_number=None):
+        room_uri_str = self.get_room_uri_str(uri, room_number)
+        if not room_uri_str.startswith("sip:"):
+            room_uri_str = "sip:%s" % room_uri_str
+        return SIPURI.parse(room_uri_str)
 
     def remove_room(self, uri):
         room_uri = '%s@%s' % (uri.user, uri.host)
@@ -95,7 +115,21 @@ class ConferenceApplication(SylkApplication):
             if cfg.deny.match(from_uri) and not cfg.allow.match(from_uri):
                 raise ACLValidationError
 
-    def incoming_session(self, session):
+    def add_outgoing_session(self, session):
+        log.info(u'add_outgoing_session for session %r', session)
+        NotificationCenter().add_observer(self, sender=session)
+        room_number=None
+        if hasattr(session, 'room_number'):
+            room_number = session.room_number
+        log.info(u'add_outgoing_session for room_number %s' % room_number)
+        log.info(u'add_outgoing_session for session.room_number %s' % session.room_number)
+        room = self.get_room(None, True, room_number=room_number)
+        room.start()
+        room.add_session(session)
+        room_uri = self.get_room_uri(uri=None, room_number=room_number)
+        self.add_participant(session, room_uri)
+
+    def incoming_session(self, session, room_number=None):
         log.info('New session from %s to %s' % (session.remote_identity.uri, session.local_identity.uri))
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
@@ -117,7 +151,7 @@ class ConferenceApplication(SylkApplication):
 
         if transfer_stream is not None:
             try:
-                room = self.get_room(session.request_uri)
+                room = self.get_room(session.request_uri, room_number=room_number)
             except RoomNotFoundError:
                 log.info(u'Session rejected: room not found')
                 session.reject(404)
@@ -142,8 +176,9 @@ class ConferenceApplication(SylkApplication):
         NotificationCenter().add_observer(self, sender=session)
         if audio_stream:
             session.send_ring_indication()
-        streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
-        reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
+            #streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
+        #reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
+        #reactor.callLater(0, self.accept_session, session, streams)
 
     def incoming_subscription(self, subscribe_request, data):
         from_header = data.headers.get('From', Null)
@@ -242,31 +277,50 @@ class ConferenceApplication(SylkApplication):
 
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
-        room = self.get_room(session.request_uri, True)
+        room_number = None
+        if hasattr(session, 'room_number'):
+            room_number = session.room_number
+        room = self.get_room(session.request_uri, True, room_number=room_number)
         room.start()
         room.add_session(session)
 
     @run_in_green_thread
     def _NH_SIPSessionDidEnd(self, notification):
+        log.info('got _NH_SIPSessionDidEnd')
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
-        if session.direction == 'incoming':
-            room_uri = session.request_uri
-        else:
+        room_uri = self.get_room_uri(uri=None, room_number=session.room_number)
+        '''
+        #if session.direction != 'incoming':
+        #    room_uri = session.request_uri
+        #else:
+        '''
+        if session.direction != 'incoming':
             # Clear invited participants mapping
-            room_uri_str = '%s@%s' % (session.local_identity.uri.user, session.local_identity.uri.host)
+            #room_uri_str = '%s@%s' % (session.local_identity.uri.user, session.local_identity.uri.host)
+            #room_uri_str = '%s@%s' % (session.room_number, '192.168.1.2')
+            room_uri_str = self.get_room_uri_str(uri=None, room_number=session.room_number)
             d = self.invited_participants_map[room_uri_str]
             d[str(session.remote_identity.uri)] -= 1
             if d[str(session.remote_identity.uri)] == 0:
                 del d[str(session.remote_identity.uri)]
-            room_uri = session.local_identity.uri
+            #room_uri = session.local_identity.uri
         # We could get this notifiction even if we didn't get SIPSessionDidStart
         try:
             room = self.get_room(room_uri)
         except RoomNotFoundError:
+            log.info('in _NH_SIPSessionDidEnd RoomNotFoundError')
             return
+
         if session in room.sessions:
             room.remove_session(session)
+
+        # 2 because the other participant is the music server
+        if room.length == 2:
+            # we need to stop the remaining session
+            log.info('terminate all sessions')
+            room.terminate_sessions()
+
         if not room.stopping and room.empty:
             self.remove_room(room_uri)
             room.stop()
