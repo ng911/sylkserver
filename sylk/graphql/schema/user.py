@@ -3,7 +3,7 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..utiils import update_params_with_args
-from ...applications. import User as UserModel
+from ...db.schema import User as UserModel
 from .connection import DeviceConnectionNode
 from .company import CompanyNode
 
