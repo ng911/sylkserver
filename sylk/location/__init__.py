@@ -1,28 +1,19 @@
-import sys
 import datetime
-from sylk.applications import ApplicationLogger
-from aliquery import send_ali_request, check_ali_format_supported
-from sylk.db.schema import Location, Conference, ConferenceParticipant, User
-import sylk.wamp as wamp
-import sylk.db.calls as calls
 import traceback
 from twisted.internet import reactor
-import alidump
 
-if __name__ == '__main__':  # parse command line options, and set the high level properties
-    import logging
-    global log
-    handler = logging.StreamHandler(stream=sys.stdout)
+from .aliquery import send_ali_request, check_ali_format_supported
+from ..db.schema import Location, Conference, ConferenceParticipant, User
+from ..wamp import publish_update_call, publish_update_location_success
+from ..db.calls import get_conference_json
+from .alidump import dump_ali
 
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(
-        logging.Formatter('%(asctime)s.%(msecs)d %(name)s %(levelname)s - %(message)s', datefmt='%d-%m %H:%M:%S'))
-    log = logging.getLogger()
-    log.addHandler(handler)
-    log.setLevel(logging.DEBUG or logging.INFO)
-else:
-    global log
+try:
+    from sylk.applications import ApplicationLogger
     log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 
 def get_location_display(ali_result):
@@ -125,9 +116,9 @@ def process_ali_success(result):
         if conference_db_obj.status in ['init', 'ringing', 'ringing_queued', 'queued', 'active']:
             dump_ali(room_number, raw_ali_data)
 
-        call_data = calls.get_conference_json(conference_db_obj)
-        wamp.publish_update_call(room_number, call_data)
-        wamp.publish_update_location_success(room_number, ali_result, location_display)
+        call_data = get_conference_json(conference_db_obj)
+        publish_update_call(room_number, call_data)
+        publish_update_location_success(room_number, ali_result, location_display)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
@@ -161,12 +152,12 @@ def dump_ali(room_number, ali_data=None, calltaker=None):
                 log.error("error in getting calltaker data %s", e)
         for station_id in station_ids:
             log.info("send ali data to station_id  %s", station_id)
-            alidump.dump_ali(station_id, ali_data)
+            dump_ali(station_id, ali_data)
     else:
         try:
             calltaker_db_obj = User.objects.get(username=calltaker)
             if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
-                alidump.dump_ali(calltaker_db_obj.station_id, ali_data)
+                dump_ali(calltaker_db_obj.station_id, ali_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("%s", stacktrace)
@@ -190,8 +181,8 @@ def ali_lookup(room_number, number, ali_format, station_id=''):
             conf_db_obj.ali_result = 'none'
         conf_db_obj.save()
 
-        call_data = calls.get_conference_json(conf_db_obj)
-        wamp.publish_update_call(room_number, call_data)
+        call_data = get_conference_json(conf_db_obj)
+        publish_update_call(room_number, call_data)
     except:
         # if the room does not exist we ignore this
         pass
@@ -206,8 +197,8 @@ def ali_lookup(room_number, number, ali_format, station_id=''):
             conference_db_obj = Conference.objects.get(room_number=room_number)
             conference_db_obj.ali_result = "failed"
             conference_db_obj.save()
-            call_data = calls.get_conference_json(conference_db_obj)
-            wamp.publish_update_call(room_number, call_data)
+            call_data = get_conference_json(conference_db_obj)
+            publish_update_call(room_number, call_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)

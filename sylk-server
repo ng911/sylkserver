@@ -111,7 +111,7 @@ if __name__ == '__main__':
     start_alidump()
 
     log.info('starting api server')
-    sylk.api.start_server()
+    sylk.api.start_calls_api_server()
     log.info('starting api server done')
 
     soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)

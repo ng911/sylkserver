@@ -1,30 +1,25 @@
-import datetime
-import bson
-import os
-import traceback
-from flask import Flask, send_from_directory, url_for, blueprints, request, jsonify, \
-    render_template, flash, abort, session, redirect
-from flask_cors import CORS, cross_origin
-from flask_oauthlib.provider import OAuth2Provider
-from flask_login import LoginManager, login_user
-from flask_session import Session
+import logging
 import urllib
+from flask import Flask, send_from_directory, url_for, jsonify
+from flask_cors import CORS
+from flask_login import LoginManager
+from flask_session import Session
 from pymongo import MongoClient
-from functools import wraps
-
-from sylk.applications import ApplicationLogger
-from sylk.db.schema import Grant, Client, Token, User
-from sylk.configuration import ServerConfig
-from utils import get_argument
-
-log = ApplicationLogger(__package__)
-
+from flask_jwt_extended import JWTManager
 from twisted.internet import reactor
-from twisted.web.proxy import ReverseProxyResource
-from twisted.web.resource import Resource
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
-from werkzeug.contrib.fixers import ProxyFix
+try:
+    from werkzeug.contrib.fixers import ProxyFix
+except:
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+#from ..configuration import ServerConfig
+from ..config import MONGODB_DB, MONGODB_URI, FLASK_SERVER_PORT
+from ..db.schema import Grant, Client, Token, User
+from .utils import get_argument
+
+log = None
 
 app = Flask(__name__)
 # from https://stackoverflow.com/questions/23347387/x-forwarded-proto-and-flask
@@ -33,11 +28,11 @@ app.secret_key = 'best psap available, supercharged with webrtc'
 app.config['SESSION_TYPE'] = 'mongodb'
 #mongo_uri = 'mongodb://ws:kingfisher94108@ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903'
 #mongo_uri = 'mongodb://localhost:27017/ng911'
-mongo_uri = ServerConfig.full_db_connection
+mongo_uri = MONGODB_URI
 mongo_client = MongoClient(mongo_uri)
 app.config['SESSION_MONGODB'] = mongo_client
 #app.config['SESSION_MONGODB_DB'] = 'ng911'
-app.config['SESSION_MONGODB_DB'] = ServerConfig.db_name
+app.config['SESSION_MONGODB_DB'] = MONGODB_DB
 app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
 
 Session(app)
@@ -46,29 +41,18 @@ CORS(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-oauth = OAuth2Provider(app)
+jwt = JWTManager(app)
+jwt._set_error_handler_callbacks(app)
+from .authentication import setjwt
+setjwt(jwt)
+
+#oauth = OAuth2Provider(app)
 
 
-import authentication
-import calltaker
-import calls
-import psap
-import location
-
-app.register_blueprint(authentication.authentication, url_prefix='/auth')
-app.register_blueprint(calltaker.calltaker, url_prefix='/calltaker')
-app.register_blueprint(calls.calls, url_prefix='/calls')
-app.register_blueprint(psap.psap, url_prefix='/psap')
-app.register_blueprint(location.location, url_prefix='/location')
-
-
-log = ApplicationLogger(__package__)
-
-'''
 @app.route('/')
 def index():
     return 'My Twisted Flask root'
-'''
+
 
 @app.route('/example')
 def example():
@@ -124,7 +108,6 @@ def send_static(path):
     return send_from_directory('static', path)
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     try:
@@ -134,8 +117,8 @@ def load_user(user_id):
 
 
 '''
-start ouath related functions
-'''
+removed ouath related functions
+
 @oauth.clientgetter
 def load_client(client_key):
     try:
@@ -317,6 +300,7 @@ def revoke_token():
     pass
 
 '''
+'''
 @app.route('/getOauthUserData', methods=['GET', 'POST'])
 @oauth.require_oauth('admin')
 def getOauthUserData():
@@ -347,13 +331,46 @@ def getOauthUserData():
 end ouath related functions
 '''
 
-
 def start_server():
     flask_resource = WSGIResource(reactor, reactor.getThreadPool(), app)
     flask_site = Site(flask_resource)
+    port = int(FLASK_SERVER_PORT)
+    log.info("start flask server on port %d", port)
+    reactor.listenTCP(port, flask_site, interface="0.0.0.0")
+    log.info("start flask server done")
 
-    reactor.listenTCP(8081, flask_site, interface="0.0.0.0")
+
+def start_rest_api_server():
+    global log
+    log = logging.getLogger("emergent-ng911")
+    from .authentication import authentication
+    from .calltaker import calltaker
+    from .calls import calls
+    from .psap import psap
+    from .location import location
+    from .speed_dial import speed_dial
+    from .queue import queue
+
+    app.register_blueprint(authentication, url_prefix='/auth')
+    app.register_blueprint(calltaker, url_prefix='/calltaker')
+    app.register_blueprint(calls, url_prefix='/calls')
+    app.register_blueprint(psap, url_prefix='/psap')
+    app.register_blueprint(location, url_prefix='/location')
+    app.register_blueprint(speed_dial, url_prefix='/speed_dial')
+    app.register_blueprint(queue, url_prefix='/queue')
+
+    log.info("start rest_api_server")
+    start_server()
 
 
+def start_calls_api_server():
+    global log
 
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+
+    from .conference import conference
+
+    app.register_blueprint(conference, url_prefix='/conference')
+    start_server()
 

@@ -1,21 +1,31 @@
 import traceback
-from flask import session, app, redirect, url_for, request, flash, render_template, abort, Blueprint
+import logging
+
+from flask import session, app, redirect, url_for, request, flash, render_template, abort, Blueprint, jsonify
 from flask_login import LoginManager, login_user
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, HiddenField, BooleanField
 from wtforms import validators, ValidationError
 
-from utils import get_argument, is_safe_url
-from mongoengine import DoesNotExist
-from sylk.applications import ApplicationLogger
+from .utils import get_argument, is_safe_url
 from sylk.db.schema import Grant, Client, Token, User, CalltakerStation
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token, create_refresh_token, jwt_refresh_token_required,
+    get_jwt_identity
+)
 
 authentication = Blueprint('authentication', __name__,
                         template_folder='templates')
 
 
-log = ApplicationLogger(__package__)
+log = logging.getLogger("emergent-ng911")
 
+jwt = None
+
+def setjwt(value):
+    print(value)
+    global jwt
+    jwt = value
 
 
 '''
@@ -80,6 +90,14 @@ class LoginForm(Form):
         return True
 
 
+@authentication.route('/refresh', methods = ['POST'])
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    log.info('current user %r', current_user)
+    access_token = create_access_token(identity = current_user)
+    return (jsonify({'access_token':access_token}))
+
 
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
@@ -115,6 +133,11 @@ def login():
             #except Exception as e:
             #    log.error("error in login redirecting debug %r", e)
 
+            userObj = {'email': form.user.username, 'roles': form.user.roles}
+            access_token = create_access_token(identity=userObj)
+            refresh_token = create_refresh_token(identity=userObj)
+            session['access_token'] = access_token
+            session['refresh_token'] = refresh_token
             session['user_id'] = str(form.user.user_id)
 
             # we create an oauth access tokem and store it in the session to be used by the client
@@ -143,7 +166,14 @@ def session_info():
                 user_obj.save()
             except:
                 pass
-    return render_template('session-info.js', initial_data={'user_id' : user_id, 'username' : username})
+    initial_data = {'user_id': user_id, 'username': username}
+    if 'access_token' in session:
+        log.debug("found access_token in session")
+        initial_data['access_token'] = session['access_token']
+    if 'refresh_token' in session:
+        log.debug("found refresh_token in session")
+        initial_data['refresh_token'] = session['refresh_token']
+    return render_template('session-info.js', initial_data=initial_data)
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
@@ -155,6 +185,10 @@ def logout():
             del session['user_id']
         if 'username' in session:
             del session['username']
+        if 'access_token' in session:
+            del session['access_token']
+        if 'refresh_token' in session:
+            del session['refresh_token']
         redirect_uri = url_for('.login', _external=True, next=next)
         log.info("inside logout done , redirect to %r", redirect_uri)
         return redirect(redirect_uri)

@@ -1,15 +1,20 @@
 import traceback
 import datetime
+
 from bson import ObjectId
 import arrow
-from sylk.applications import ApplicationLogger
-from sylk.db.schema import ConferenceEvent, ConferenceParticipant, Location, Conference
-from sylk.utils import get_json_from_db_obj
-import location
-from sylk.configuration import ServerConfig
-from sylk.wamp import publish_clear_abandoned_call
 
-log = ApplicationLogger(__package__)
+from .schema import ConferenceEvent, ConferenceParticipant, Location, Conference
+from ..utils import get_json_from_db_obj
+from .location import get_location_display
+from ..wamp import publish_clear_abandoned_call
+
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 ignore_conference_fields = [
     'psap_id', 'type1', 'type2', 'pictures', 'primary_queue_id', 'secondary_queue_id', 'link_id'
@@ -74,7 +79,7 @@ def get_location_for_call(room_number):
     try:
         location_db_obj = Location.objects(room_number=room_number).order_by('-updated_at').first()
         if location_db_obj is not None:
-            return location.get_location_display(location_db_obj)
+            return get_location_display(location_db_obj)
         return ''
     except Exception as e:
         stacktrace = traceback.format_exc()
@@ -83,8 +88,8 @@ def get_location_for_call(room_number):
         return ""
 
 
-def clear_abandoned_calls(callback_number=None, caller_ani=None):
-    filters = {'psap_id': ObjectId(ServerConfig.psap_id),
+def clear_abandoned_calls(psap_id, callback_number=None, caller_ani=None):
+    filters = {'psap_id': ObjectId(psap_id),
                'callback' : False,
                'status' : 'abandoned',
                'call_type' : 'sos'}

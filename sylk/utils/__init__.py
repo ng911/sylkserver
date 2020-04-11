@@ -1,10 +1,15 @@
 import bson
 import arrow
 import datetime
-from mongoengine import fields
-from sylk.applications import ApplicationLogger
 
-log = ApplicationLogger(__package__)
+from mongoengine import fields
+
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 
 def dump_var(log, data):

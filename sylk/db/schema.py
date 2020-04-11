@@ -1,17 +1,19 @@
+import datetime, logging, traceback
+from collections import namedtuple
+
 import arrow
 import bson
 import bcrypt
-import datetime
+import six
 from pymongo import ReadPreference
 from mongoengine import *
-import time, datetime, logging, re, sys, traceback
+
 # from werkzeug.security import generate_password_hash, check_password_hash
-from collections import namedtuple
-from sylk.configuration import ServerConfig
+from ..config import MONGODB_DB, MONGODB_HOST, MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_REPLICASET, \
+    CREATE_DB
 
-from sylk.applications import ApplicationLogger
+log = logging.getLogger("emergent-ng911")
 
-log = ApplicationLogger(__package__)
 
 def getIsoFormat(dateTimeObj):
     arrowDateTimeObj = arrow.get(dateTimeObj)
@@ -31,13 +33,13 @@ client = connect(username="ws", password="Ecomm@911",
                  host='mongodb://localhost:33903/psap?replicaSet=rs-psap')
 '''
 #client = connect(host='mongodb://localhost:27107/ng911')
-if len(ServerConfig.db_user) > 0:
-    log.info("connect to mongodb user %r, db %s, connections %r", ServerConfig.db_user, ServerConfig.db_name, ServerConfig.db_connection)
-    connect(ServerConfig.db_name, username=ServerConfig.db_user, password=ServerConfig.db_pwd, host=ServerConfig.db_connection,
-            replicaSet="emergent911rs", read_preference=ReadPreference.SECONDARY_PREFERRED)
+if len(MONGODB_REPLICASET) > 0:
+    log.info("connect to mongodb user %r, db %s, connections %r", MONGODB_USERNAME, MONGODB_DB, MONGODB_HOST)
+    connect(MONGODB_DB, username=MONGODB_USERNAME, password=MONGODB_PASSWORD, host=MONGODB_HOST,
+            replicaSet=MONGODB_REPLICASET, read_preference=ReadPreference.SECONDARY_PREFERRED)
 else:
-    log.info("connect to mongodb db name %r, connections %r", ServerConfig.db_name, ServerConfig.db_connection)
-    connect(ServerConfig.db_name, host=ServerConfig.db_connection)
+    log.info("connect to mongodb db name %r, connections %r", MONGODB_DB, MONGODB_HOST)
+    connect(MONGODB_DB, host=MONGODB_HOST, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
 
 #connect('ng911')
 #db = client.ng911
@@ -49,7 +51,8 @@ class Psap(Document):
     psap_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     name = StringField()
     time_to_autorebid = IntField(default=30)
-    ip_address = StringField(default="127.0.0.1")
+    domain_name = StringField()
+    ip_address = StringField()
     auto_rebid = BooleanField(default=True)
     default_profile_id = ObjectIdField()
     meta = {
@@ -58,9 +61,9 @@ class Psap(Document):
         ]
     }
 
-
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
+    status = StringField(required=True, default='offline')
     username = StringField(required=True, unique=True)
     fullname = StringField(required=False)
     password_hash = StringField(required=True, unique=True)
@@ -68,8 +71,9 @@ class User(Document):
     psap_id = ObjectIdField()
     secondary_psap_id = ObjectIdField()
     is_active = BooleanField(default=True)
+    extension = StringField()
     station_id = StringField(required=False)
-    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')))
+    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
     meta = {
         'indexes': [
             'user_id',
@@ -82,30 +86,29 @@ class User(Document):
         return str(self.user_id)
 
     def check_password(self, password):
-        if isinstance(password, unicode):
-            password = password.encode('ascii')
+        password = password.encode('utf-8')
         password_hash = self.password_hash
-
-        if isinstance(password_hash, unicode):
-            password_hash = password_hash.encode('ascii')
+        password_hash = password_hash.encode('utf-8')
 
         return bcrypt.checkpw(password, password_hash)
 
     @classmethod
     def generate_password_hash(cls, password):
-        if isinstance(password, unicode):
-            password = password.encode('ascii')
-        return bcrypt.hashpw(password, bcrypt.gensalt(10))
+        password = password.encode('utf-8')
+        return bcrypt.hashpw(password, bcrypt.gensalt(10)).decode('utf-8')
 
     @classmethod
     def add_user(cls, username, password):
         user = User()
         user.username = username
-        if isinstance(password, unicode):
+        #if isinstance(password, unicode):
+        # py3 compatible replacement below
+        if isinstance(password, six.text_type):
             password = password.encode('ascii')
         user.password_hash = User.generate_password_hash(password)
         user.is_active = True
         user.roles = ['admin', 'calltaker']
+        log.info("user.password_hash is %r", user.password_hash)
         user.save()
         return  user
 
@@ -155,16 +158,40 @@ class CalltakerActivity(Document):
     }
 
 
+class SpeedDialGroup(Document):
+    group_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
+    psap_id = ObjectIdField(required=True)
+    user_id = ObjectIdField()
+    group_name = StringField(required=True)
+    meta = {
+        'indexes': [
+            'psap_id',
+            'group_name',
+            {
+                'fields': ['psap_id', 'group_name'],
+                'unique': True
+            }
+        ]
+    }
+
+
 class SpeedDial(Document):
+    speed_dial_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField()
     user_id = ObjectIdField()
     dest = StringField(required=True)
     name = StringField(required=True)
-    group = StringField(required=False)
+    group_id = ObjectIdField()
+    group = LazyReferenceField(document_type=SpeedDialGroup)
     meta = {
         'indexes': [
             'psap_id',
-            'user_id'
+            'user_id',
+            'group_id',
+            {
+                'fields': ['psap_id', 'name', "group_id", "user_id"],
+                'unique': True
+            }
         ]
     }
 
@@ -285,6 +312,25 @@ class Agency(EmbeddedDocument):
     data = StringField()
 
 
+class Conference1(Document):
+    psap_id = ObjectIdField(required=True)
+    room_number = StringField(required=True)
+    start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    answer_time = ComplexDateTimeField(required=False)
+    end_time = ComplexDateTimeField(required=False)
+    updated_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
+    has_text = BooleanField(default=False)
+    has_tty = BooleanField(default=False)
+    tty_text = StringField(required=False)
+    has_audio = BooleanField(default=True)
+    has_video = BooleanField(default=False)
+    direction = StringField(required=True, choices=('in', 'out'), default='in')
+    duration = IntField(default=0)
+    type1 = StringField()   # not sure what this is, copied from old schema
+    type2 = StringField()   # not sure what this is, copied from old schema
+    pictures = ListField()
+
+
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
@@ -301,7 +347,7 @@ class Conference(Document):
     duration = IntField(default=0)
     type1 = StringField()   # not sure what this is, copied from old schema
     type2 = StringField()   # not sure what this is, copied from old schema
-    pictures = ListField(field=StringField)
+    pictures = ListField()
     call_type = StringField(required=True, choices=('normal', 'sos', 'admin', 'sos_text', 'outgoing', 'outgoing_calltaker'))
     partial_mute = BooleanField(default=False)
     hold = BooleanField(default=False)
@@ -777,6 +823,10 @@ class Token(Document):
 '''
 End of OAuth related db models
 '''
+
+if CREATE_DB:
+    if (Psap.objects().count() == 0):
+        create_test_data()
 
 
 

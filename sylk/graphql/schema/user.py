@@ -1,52 +1,42 @@
 import graphene
+import logging
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..utiils import update_params_with_args
 from ...db.schema import User as UserModel
-from .connection import DeviceConnectionNode
-from .company import CompanyNode
+from ...db.schema import CalltakerProfile as CalltakerProfileModel
+from ...db.schema import Queue as QueueModel
+from ...db.schema import QueueMember as QueueMemberModel
+
+log = logging.getLogger("emergent-ng911")
+
+
+class UserProfileNode(MongoengineObjectType):
+    class Meta:
+        model = CalltakerProfileModel
+        interfaces = (Node,)
 
 
 class UserNode(MongoengineObjectType):
     class Meta:
         model = UserModel
         interfaces = (Node,)
-    device_connections = MongoengineConnectionField(DeviceConnectionNode)
 
-    def resolve_device_connections(parent, info, **args):
+    from .queue import QueueNode
+    queues = MongoengineConnectionField(QueueNode)
+    profile = MongoengineObjectType()
+
+    def resolve_queues(parent, info, **args):
+        queue_ids = []
+        for queue in QueueMemberModel.objects(user_id = parent.user_id):
+            queue_ids.append(str(queue.queue_id))
+        return QueueModel.objects(queue_id__in = queue_ids)
+
+    def resolve_profile(parent, info, **args):
         params = {
-            "userId" : parent.userId
+            "user_id" : parent.user_id
         }
-        params = update_params_with_args(params, args)
-        return DeviceConnectionModel.objects(**params)
+        return CalltakerProfileModel.objects.get(**params)
 
-
-
-
-# Mutation to change bot name  and bot photo-url company specific
-class RelayUserProfileMutation(graphene.relay.ClientIDMutation):
-    company = graphene.Field(CompanyNode)
-
-    class Input:
-        profilePhoto = graphene.String()
-        profileName = graphene.String()
-        companyId = graphene.String()
-        initialMessage = graphene.String()
-    @classmethod
-    def mutate_and_get_payload(cls, root, info, **input):
-        companyId = input.get('companyId')
-        profileName = input.get('profileName')
-        profilePhoto = input.get('profilePhoto')
-        initialMessage = input.get('initialMessage')
-        CompanyObj = CompanyModel.objects.get(companyId=companyId)
-        CompanyObj.profileName = profileName
-        CompanyObj.profilePhoto = profilePhoto
-        CompanyObj.initialMessage = initialMessage
-        CompanyObj.save()
-
-        return RelayUserProfileMutation(company=CompanyObj)
-
-class UserProfileMutation(graphene.AbstractType):
-    relay_user_profile = RelayUserProfileMutation.Field()
 

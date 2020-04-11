@@ -1,26 +1,27 @@
 import traceback
 import json
 import time
-import uuid
+
 from autobahn.twisted.component import Component
-from sylk.applications import ApplicationLogger
 from autobahn.wamp.types import PublishOptions
-from application.notification import IObserver, NotificationCenter, NotificationData
-from sipsimple.threading import run_in_twisted_thread
-from sylk.utils import dump_object_member_vars, dump_object_member_funcs
-log = ApplicationLogger(__package__)
+#from application.notification import IObserver, NotificationCenter, NotificationData
 from twisted.internet.defer import inlineCallbacks, returnValue
-#import sylk.data.calltaker as calltaker_data
-from sylk.configuration import ServerConfig
-#import txaio
-#txaio.use_twisted()
-#txaio.start_logging(level='debug')
-#my_log = txaio.make_logger(level='debug')
+from twisted.internet import reactor
+
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
+
+from ..config import WAMP_CROSSBAR_SERVER
+
 log.info("wamp session start")
 
 comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
-    transports=ServerConfig.wamp_crossbar_server,
+    transports=WAMP_CROSSBAR_SERVER,
     realm=u"realm1",
     extra="tarun"
 )
@@ -69,8 +70,12 @@ def send_one_request(request):
     yield wamp_session.publish(request.topic, json_data, options=PublishOptions(acknowledge=True))
 '''
 
-@run_in_twisted_thread
+
 def my_wamp_publish(topic, json_data=None):
+    reactor.callFromThread(wamp_publish, topic, json_data)
+
+
+def wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
             #log.debug("my_wamp_publish %s, json %r",topic, json_data)
@@ -325,6 +330,8 @@ def joined(session, details):
         log.info("event on_calltaker_status received")
         log.info("event on_calltaker_status received: %r", data)
         log.info("event on_calltaker_status received: %r", data['command'])
+        # todo - fix , update database here
+        '''
         if data['command'] == 'status':
             log.info("process status command")
             notification_center = NotificationCenter()
@@ -336,12 +343,16 @@ def joined(session, details):
             }
             session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
+        '''
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
         log.info("on_session_leave event received: %r", data)
+        # todo - fix , update database here
+        '''
         notification_center = NotificationCenter()
         notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
+        '''
         '''
         out = {
             'command': 'status_updated'
@@ -397,9 +408,6 @@ def on_disconnect(session):
     wamp_session = None
 
 
-
-
-@run_in_twisted_thread
 def start():
-     comp.start()
+    reactor.callFromThread(comp.start())
 

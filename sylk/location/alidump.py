@@ -4,12 +4,16 @@ from twisted.internet.protocol import Protocol, Factory
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory
 
-from sipsimple.threading import run_in_twisted_thread
-from sylk.configuration import ServerConfig
-from sylk.applications import ApplicationLogger
+from ..config import ALIDUMP_PORT, ALIDUMP_CLIENT_HOST, ALIDUMP_CLIENT_PORT
 
 ali_dump_factory = None
-log = ApplicationLogger(__package__)
+
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 class AliDumpProtocol(Protocol):
     def __init__(self, factory):
@@ -71,15 +75,17 @@ def start_alidump():
     start_alidump_server()
     start_alidump_client()
 
+
 def start_alidump_server():
     global ali_dump_factory
     ali_dump_factory = AliDumpFactory()
-    reactor.listenTCP(ServerConfig.alidump_port, ali_dump_factory)
+    reactor.listenTCP(ALIDUMP_PORT, ali_dump_factory)
+
 
 def start_alidump_client():
     factory = AliDumpClientFactory()
-    if (ServerConfig.alidump_client_host != "") and (ServerConfig.alidump_client_host != None):
-        reactor.connectTCP(ServerConfig.alidump_client_host, ServerConfig.alidump_client_port, factory)
+    if (ALIDUMP_CLIENT_HOST != "") and (ALIDUMP_CLIENT_HOST != None):
+        reactor.connectTCP(ALIDUMP_CLIENT_HOST, ALIDUMP_CLIENT_PORT, factory)
 
 
 def dump_ali(station_id, raw_ali_data):

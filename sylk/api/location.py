@@ -1,19 +1,22 @@
 import traceback
 import datetime
+import logging
+
 from flask import Blueprint, jsonify, request
 from flask_cors import CORS
-from sylk.applications import ApplicationLogger
-from sylk.db.schema import Location, Conference
-from sylk.db.location import get_location_display
-from utils import get_argument
-from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
+
+from ..db.schema import Location, Conference
+from ..db.location import get_location_display
+from .utils import get_argument
+from ..utils import get_json_from_db_obj, set_db_obj_from_request
 import sylk.location
 
 location = Blueprint('location', __name__,
                         template_folder='templates')
 
 CORS(location)
-log = ApplicationLogger(__package__)
+
+log = logging.getLogger("emergent-ng911")
 
 @location.route('/<room_number>', methods=['GET'])
 def get_location(room_number):

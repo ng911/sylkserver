@@ -1,14 +1,12 @@
 import re
 import socket, select
 import sys
+import uuid
+
 from twisted.internet import defer
 from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue
-import uuid
-from aliparsers import parse_warren_ali, parse_ali_30W_wireline, parse_ali_30W_wireless
 
-from sylk.applications import ApplicationLogger
-
+from .aliparsers import parse_warren_ali, parse_ali_30W_wireline, parse_ali_30W_wireless
 
 '''
 gevent is not being used here, replaced with twisted
@@ -22,21 +20,13 @@ monkey.patch_socket()
 '''
 
 
-
-if __name__ == '__main__':  # parse command line options, and set the high level properties
-    import logging
-    global log
-    handler = logging.StreamHandler(stream=sys.stdout)
-
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(
-        logging.Formatter('%(asctime)s.%(msecs)d %(name)s %(levelname)s - %(message)s', datefmt='%d-%m %H:%M:%S'))
-    log = logging.getLogger()
-    log.addHandler(handler)
-    log.setLevel(logging.DEBUG or logging.INFO)
-else:
-    global log
+try:
+    from sylk.applications import ApplicationLogger
     log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger("emergent-ng911")
+
 
 def make_string_divisible_by_8(string):
     sum = 0

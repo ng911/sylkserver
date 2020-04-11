@@ -1,5 +1,10 @@
+try:
+    from urllib.parse import urlparse, urljoin
+except ImportError:
+    from urlparse import urlparse, urljoin
+
 from flask import request, url_for
-from urlparse import urlparse, urljoin
+
 
 def get_argument(arg_name, default=None):
     if (request.content_type is not None) and request.content_type.startswith('application/json'):
