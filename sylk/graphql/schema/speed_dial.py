@@ -7,14 +7,14 @@ from ..utiils import update_params_with_args
 from ...db.schema import SpeedDial as SpeedDialModel
 from ...db.schema import SpeedDialGroup as SpeedDialGroupModel
 from ...db.schema import User as UserModel
-
+from .user import UserNode
 
 class SpeedDialNode(MongoengineObjectType):
     class Meta:
         model = SpeedDialModel
         interfaces = (Node,)
 
-    user = MongoengineObjectType(UserModel)
+    user = Field(UserNode)
 
     def resolve_user(parent, info, **args):
         return UserModel.objects.get(user_id = parent.user_id)
