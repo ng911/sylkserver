@@ -3,6 +3,7 @@ import logging
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
+from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import User as UserModel
 from ...db.schema import CalltakerProfile as CalltakerProfileModel
@@ -22,6 +23,7 @@ class UserNode(MongoengineObjectType):
     class Meta:
         model = UserModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
     from .queue import QueueNode
     queues = MongoengineConnectionField(QueueNode)
