@@ -21,7 +21,7 @@ def get_speed_dials(psap_id, group_name=None):
         params["group_id"] = group.id
 
     for speedDial in SpeedDial.objects(**params):
-        speedDials.append(get_json_from_db_obj(speedDial))
+        speedDials.append(get_json_from_db_obj(speedDial, ignore_fields=['group']))
 
     return speedDials
 
@@ -66,7 +66,7 @@ def remove_speed_dial(speed_dial_id):
 
 def get_speed_dial(speed_dial_id):
     return get_json_from_db_obj(
-        SpeedDial.objects.get(speed_dial_id=speed_dial_id)
+        SpeedDial.objects.get(speed_dial_id=speed_dial_id), ignore_fields=['group']
     )
 
 
