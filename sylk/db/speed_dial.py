@@ -57,7 +57,7 @@ def add_speed_dial(psap_id, dest, name, group_id=None):
     speedDial.psap_id = psap_id
     speedDial.dest = dest
     speedDial.save()
-    return get_json_from_db_obj(speedDial)
+    return get_json_from_db_obj(speedDial, ignore_fields=['group'])
 
 
 def remove_speed_dial(speed_dial_id):
