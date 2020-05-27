@@ -22,7 +22,7 @@ class ConferenceNode(MongoengineObjectType):
     class Meta:
         model = ConferenceModel
         interfaces = (Node,)
-        #connection_class = EnhancedConnection
+        connection_class = EnhancedConnection
 
     '''
     participants = MongoengineConnectionField(ConferenceParticipantNode)

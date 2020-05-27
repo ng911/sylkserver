@@ -3,6 +3,7 @@ from graphene import Field, String, List
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
+from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import Psap as PsapModel
 from ...db.schema import User as UserModel
@@ -19,6 +20,7 @@ class PsapNode(MongoengineObjectType):
     class Meta:
         model = PsapModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
     users = MongoengineConnectionField(UserNode)
     default_profile = Field(UserProfileNode)

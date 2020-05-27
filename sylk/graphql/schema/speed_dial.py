@@ -3,6 +3,7 @@ from graphene import Field, String
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
+from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import SpeedDial as SpeedDialModel
 from ...db.schema import SpeedDialGroup as SpeedDialGroupModel
@@ -13,6 +14,7 @@ class SpeedDialNode(MongoengineObjectType):
     class Meta:
         model = SpeedDialModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
     user = Field(UserNode)
 
@@ -24,6 +26,7 @@ class SpeedDialGroupNode(MongoengineObjectType):
     class Meta:
         model = SpeedDialGroupModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
     speed_dials = MongoengineConnectionField(SpeedDialNode)
 

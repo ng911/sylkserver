@@ -3,6 +3,7 @@ from graphene import Field, List, String
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
+from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import Queue as QueueModel
 from ...db.schema import QueueMember
@@ -19,6 +20,7 @@ class QueueNode(MongoengineObjectType):
     class Meta:
         model = QueueModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
     members = MongoengineConnectionField(UserDataNode)
 
