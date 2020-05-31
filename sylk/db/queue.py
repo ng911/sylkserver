@@ -27,7 +27,7 @@ def get_queue_members(queue_id):
 
 
 def add_queue(psap_id, queue_name, user_ids=[]):
-    log.add_queue("add_queue psap_id %r, queue_name %r, user_ids %r", psap_id, queue_name, user_ids)
+    log.info("add_queue psap_id %r, queue_name %r, user_ids %r", psap_id, queue_name, user_ids)
     queue = Queue()
     queue.name = queue_name
     queue.psap_id = psap_id
@@ -35,7 +35,7 @@ def add_queue(psap_id, queue_name, user_ids=[]):
     queue_id = str(queue.queue_id)
     if user_ids != None:
         for user_id in user_ids:
-            log.add_queue("add_queue adding user_id %r, queue_id %r", user_id, queue_id)
+            log.info("add_queue adding user_id %r, queue_id %r", user_id, queue_id)
             add_calltaker_to_queue(user_id, queue_id)
     return {
         "queue_id" : queue_id
@@ -56,10 +56,10 @@ def edit_queue(queue_id, queue_name, user_ids=None):
             else:
                 delete_user_ids.append(user_id)
             for user_id in add_user_ids:
-                log.add_queue("add_queue adding user_id %r, queue_id %r", user_id, queue_id)
+                log.info("add_queue adding user_id %r, queue_id %r", user_id, queue_id)
                 add_calltaker_to_queue(user_id, queue_id)
             for user_id in add_user_ids:
-                log.add_queue("remove_calltaker_from_queue user_id %r, queue_id %r", user_id, queue_id)
+                log.info("remove_calltaker_from_queue user_id %r, queue_id %r", user_id, queue_id)
                 remove_calltaker_from_queue(user_id, queue_id)
 
 
