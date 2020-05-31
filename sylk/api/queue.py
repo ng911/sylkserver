@@ -31,8 +31,9 @@ def api_add_queue():
     parser = reqparse.RequestParser()
     parser.add_argument('queue_name', required=True)
     parser.add_argument('psap_id', required=True)
+    parser.add_argument('user_ids', required=False)
     payload = parser.parse_args()
-    return add_queue(payload['psap_id'], payload["queue_name"])
+    return add_queue(payload['psap_id'], payload["queue_name"], payload["user_ids"])
 
 
 @queue.route('/delete/<queue_id>', methods=['POST', 'PUT'])
@@ -46,8 +47,9 @@ def api_delete_queue(queue_id):
 def api_edit_queue(queue_id):
     parser = reqparse.RequestParser()
     parser.add_argument('queue_name', required=True)
+    parser.add_argument('user_ids', required=False)
     payload = parser.parse_args()
-    edit_queue(queue_id, payload["queue_name"])
+    edit_queue(queue_id, payload["queue_name"], payload["user_ids"])
 
 
 @queue.route('/<queue_id>', methods=['GET'])
