@@ -7,7 +7,7 @@ from flask_restful import reqparse
 from ..db.queue import add_calltaker_to_queue, add_queue, get_queue_details, get_queue_members, \
     remove_calltaker_from_queue, remove_queue, edit_queue, get_queues
 from .decorators import check_exceptions
-
+from .utils import get_argument
 
 queue = Blueprint('queue', __name__,
                         template_folder='templates')
@@ -28,12 +28,10 @@ def all(psap_id):
 @queue.route('/add', methods=['POST', 'PUT'])
 @check_exceptions
 def api_add_queue():
-    parser = reqparse.RequestParser()
-    parser.add_argument('queue_name', required=True)
-    parser.add_argument('psap_id', required=True)
-    parser.add_argument('user_ids', required=False)
-    payload = parser.parse_args()
-    return add_queue(payload['psap_id'], payload["queue_name"], payload["user_ids"])
+    queue_name = get_argument('queue_name')
+    psap_id = get_argument('psap_id')
+    user_ids = get_argument('user_ids')
+    return add_queue(psap_id, queue_name, user_ids)
 
 
 @queue.route('/delete/<queue_id>', methods=['POST', 'PUT'])
@@ -45,11 +43,9 @@ def api_delete_queue(queue_id):
 @queue.route('/<queue_id>', methods=['POST', 'PUT'])
 @check_exceptions
 def api_edit_queue(queue_id):
-    parser = reqparse.RequestParser()
-    parser.add_argument('queue_name', required=True)
-    parser.add_argument('user_ids', required=False)
-    payload = parser.parse_args()
-    edit_queue(queue_id, payload["queue_name"], payload["user_ids"])
+    queue_name = get_argument('queue_name')
+    user_ids = get_argument('user_ids')
+    edit_queue(queue_id, queue_name, user_ids)
 
 
 @queue.route('/<queue_id>', methods=['GET'])
