@@ -90,7 +90,7 @@ def active_events():
             }
         },
         {
-            "$sort": {"total": -1}
+            "$sort": {"_id": 1 }
         }
     ]
     active_events = ConferenceEvent.objects().aggregate(active_line_chart)
@@ -148,7 +148,7 @@ def abandoned_events():
             }
         },
         {
-            "$sort": {"total": -1}
+            "$sort": {"_id": 1 }
         }
     ]
     abandoned_events = ConferenceEvent.objects().aggregate(abandoned_line_chart)
