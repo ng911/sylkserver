@@ -1,10 +1,12 @@
 import logging
+import arrow
+from datetime import datetime, timedelta
 from flask import Blueprint, jsonify
 from flask_cors import CORS
 from flask_restful import reqparse
 
 from .decorators import check_exceptions
-from ..db.schema import ConferenceEvent
+from ..db.schema import ConferenceEvent, Conference
 dashboard = Blueprint('dashboard', __name__,
                         template_folder='templates')
 
@@ -12,32 +14,21 @@ CORS(dashboard)
 
 log = logging.getLogger('emergent-ng911')
 
+def get_complex_time(dateval):
+    return dateval.strftime("%Y,%m,%d,%H,%M,%S,%f")
+
+
 
 @dashboard.route('/events', methods=['GET'])
 @check_exceptions
 def events():
-    bar_chart_pipeline = [
-        {
-            "$lookup": {
-                "from": "conference",
-                "localField": "room_number",
-                "foreignField": "room_number",
-                "as": "conference_items"
-            }
-        },
-        {
-            "$group" : {
-                "_id" : "$event",
-                "total" : { "$sum" : 1 }
-            }
-        },
-        {
-            "$sort": { "total": -1 }
-        }
-    ]
-    events = ConferenceEvent.objects().aggregate(bar_chart_pipeline)
+    num_active_calls = Conference.objects(status__in=['ringing', 'ringing_queued', 'queued', 'active', 'on_hold']).count()
+    start_time = datetime.utcnow() - timedelta(hours=1)
+    start_time_db = get_complex_time(start_time)
+    num_abandoned_calls = Conference.objects(status='abandoned', start_time__gte = start_time_db).count()
     return {
-        'events': list(events),
+        'num_abandoned_calls': num_abandoned_calls,
+        'num_active_calls' : num_active_calls
     }
 
 @dashboard.route('/active_events', methods=['GET'])
