@@ -24,8 +24,8 @@ def get_complex_time(dateval):
 def events():
     num_active_calls = Conference.objects(status__in=['ringing', 'ringing_queued', 'queued', 'active', 'on_hold']).count()
     start_time = datetime.utcnow() - timedelta(hours=1)
-    start_time_db = get_complex_time(start_time)
-    num_abandoned_calls = Conference.objects(status='abandoned', start_time__gte = start_time_db).count()
+    #start_time_db = get_complex_time(start_time)
+    num_abandoned_calls = Conference.objects(status='abandoned', start_time__gte = start_time).count()
     return {
         'num_abandoned_calls': num_abandoned_calls,
         'num_active_calls' : num_active_calls
@@ -118,7 +118,8 @@ def abandoned_events():
         }
     ]
     '''
-    abandoned_line_chart = [
+    current_dt = arrow.get()
+    pipeline = [
         {
             "$addFields": {
                 "year": {"$substr": ["$event_time", 0, 4]},
@@ -130,7 +131,12 @@ def abandoned_events():
             }
         },
         {
-            "$match": {"event": "abandoned"}
+            "$match": {
+                "event": "abandoned",
+                "year": current_dt.format('YYYY'),
+                "month": current_dt.format('MM'),
+                "day": current_dt.format('DD')
+            }
         },
         {
             "$group": {
@@ -139,11 +145,9 @@ def abandoned_events():
             }
         },
         {
-            "$sort": {"_id": 1 }
+            "$sort": {"_id": 1}
         }
     ]
-    abandoned_events = ConferenceEvent.objects().aggregate(abandoned_line_chart)
-    return {
-        'abandoned_events': list(abandoned_events)
-    }
+    events = ConferenceEvent.objects().aggregate(pipeline)
+    return {'abandoned_events': list(events)}
 
