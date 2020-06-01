@@ -43,6 +43,7 @@ def events():
 @dashboard.route('/active_events', methods=['GET'])
 @check_exceptions
 def active_events():
+    '''
     active_line_chart = [
         {
             "$addFields": {
@@ -67,6 +68,31 @@ def active_events():
             "$sort": { "total": -1 }
         }
     ]
+    '''
+    active_line_chart = [
+        {
+            "$addFields": {
+                "year": {"$substr": ["$event_time", 0, 4]},
+                "month": {"$substr": ["$event_time", 5, 2]},
+                "day": {"$substr": ["$event_time", 8, 2]},
+                "hour": {"$substr": ["$event_time", 11, 2]},
+                "minute": {"$substr": ["$event_time", 14, 2]},
+                "second": {"$substr": ["$event_time", 17, 2]}
+            }
+        },
+        {
+            "$match": {"event": "active"}
+        },
+        {
+            "$group": {
+                "_id": "$hour",
+                "total": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {"total": -1}
+        }
+    ]
     active_events = ConferenceEvent.objects().aggregate(active_line_chart)
     return {
         'active_events': list(active_events),
@@ -75,6 +101,7 @@ def active_events():
 @dashboard.route('/abandoned_events', methods=['GET'])
 @check_exceptions
 def abandoned_events():
+    '''
     abandoned_line_chart = [
         {
             "$addFields": {
@@ -97,6 +124,31 @@ def abandoned_events():
         },
         {
             "$sort": { "total": -1 }
+        }
+    ]
+    '''
+    abandoned_line_chart = [
+        {
+            "$addFields": {
+                "year": {"$substr": ["$event_time", 0, 4]},
+                "month": {"$substr": ["$event_time", 5, 2]},
+                "day": {"$substr": ["$event_time", 8, 2]},
+                "hour": {"$substr": ["$event_time", 11, 2]},
+                "minute": {"$substr": ["$event_time", 14, 2]},
+                "second": {"$substr": ["$event_time", 17, 2]}
+            }
+        },
+        {
+            "$match": {"event": "abandoned"}
+        },
+        {
+            "$group": {
+                "_id": "$hour",
+                "total": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {"total": -1}
         }
     ]
     abandoned_events = ConferenceEvent.objects().aggregate(abandoned_line_chart)
