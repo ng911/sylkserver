@@ -60,7 +60,8 @@ def active_events():
         }
     ]
     '''
-    active_line_chart = [
+    current_dt = arrow.get()
+    pipeline = [
         {
             "$addFields": {
                 "year": {"$substr": ["$event_time", 0, 4]},
@@ -71,9 +72,10 @@ def active_events():
                 "second": {"$substr": ["$event_time", 17, 2]}
             }
         },
-        {
-            "$match": {"event": "active"}
-        },
+        {"$match": {"event": "active"}},
+        {"$match": {"year": current_dt.format('YYYY')}},
+        {"$match": {"month": current_dt.format('MM')}},
+        {"$match": {"day": current_dt.format('DD')}},
         {
             "$group": {
                 "_id": "$hour",
@@ -81,13 +83,11 @@ def active_events():
             }
         },
         {
-            "$sort": {"_id": 1 }
+            "$sort": {"_id": 1}
         }
     ]
-    active_events = ConferenceEvent.objects().aggregate(active_line_chart)
-    return {
-        'active_events': list(active_events),
-    }
+    events = ConferenceEvent.objects().aggregate(pipeline)
+    return {'active_events': list(events)}
 
 @dashboard.route('/abandoned_events', methods=['GET'])
 @check_exceptions
