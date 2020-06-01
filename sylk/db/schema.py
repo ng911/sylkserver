@@ -331,6 +331,65 @@ class Conference1(Document):
     pictures = ListField()
 
 
+class CallReport(Document):
+    report_id = ObjectIdField(required=True, default=bson.ObjectId)
+    type = StringField(required=True, choices=('completed', 'abandoned'), default='completed')
+    psap_id = ObjectIdField(required=True)
+    report_name = StringField()
+    start_time = ComplexDateTimeField()
+    end_time = ComplexDateTimeField()
+    pdf_file = StringField()
+    csv_file = StringField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id',
+            'type',
+            'report_name',
+            'start_time',
+            'end_time'
+        ]
+    }
+
+
+class CompletedCallReportDetails(Document):
+    report_id = ObjectIdField(required=True)
+    psap_id = ObjectIdField(required=True)
+    orig_type = StringField()
+    start_time = StringField()
+    caller_ani = StringField()
+    name_calltaker = StringField()
+    response_time = FloatField()
+    avg_response_time= FloatField()
+    duration = IntField()
+    avg_duration = FloatField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id'
+        ]
+    }
+
+class AbandonedCallReportDetails(Document):
+    report_id = ObjectIdField(required=True)
+    psap_id = ObjectIdField(required=True)
+    orig_type = StringField()
+    start_time = StringField()
+    caller_ani = StringField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id'
+        ]
+    }
+
+
+
+class AbandonedCallReport(Document):
+    psap_id = ObjectIdField(required=True)
+    report_name = StringField()
+
+
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)

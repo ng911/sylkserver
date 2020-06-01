@@ -350,6 +350,7 @@ def start_rest_api_server():
     from .location import location
     from .speed_dial import speed_dial
     from .queue import queue
+    from .dashboard import dashboard
 
     app.register_blueprint(authentication, url_prefix='/auth')
     app.register_blueprint(calltaker, url_prefix='/calltaker')
@@ -358,6 +359,7 @@ def start_rest_api_server():
     app.register_blueprint(location, url_prefix='/location')
     app.register_blueprint(speed_dial, url_prefix='/speed_dial')
     app.register_blueprint(queue, url_prefix='/queue')
+    app.register_blueprint(dashboard, url_prefix='/dashboard')
 
     log.info("start rest_api_server")
     start_server()

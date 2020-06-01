@@ -8,8 +8,9 @@ MONGODB_DB = "ng911"
 MONGODB_USERNAME = "ws"
 MONGODB_PASSWORD = "emergent94108"
 MONGODB_REPLICASET = ""
-MONGODB_URI = 'mongodb://%s:%s@%s/%s' % \
-              (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB)
+#MONGODB_URI = 'mongodb://%s:%s@%s/%s' % \
+#              (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB)
+MONGODB_URI = 'mongodb://localhost:27017/ng911'
 
 #MONGODB_REPLICASET = "emergent911rs"
 CREATE_DB = True
@@ -36,7 +37,7 @@ def updateConfigFromEnv():
         #print("%s = %s" % (gdef, globals()[gdef]))
 
 
-if __name__ == '__main__':
-    updateConfigFromEnv()
+#if __name__ == '__main__':
+updateConfigFromEnv()
 
 
