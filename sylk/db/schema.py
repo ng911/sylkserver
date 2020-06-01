@@ -38,8 +38,10 @@ if len(MONGODB_REPLICASET) > 0:
     connect(MONGODB_DB, username=MONGODB_USERNAME, password=MONGODB_PASSWORD, host=MONGODB_HOST,
             replicaSet=MONGODB_REPLICASET, read_preference=ReadPreference.SECONDARY_PREFERRED)
 else:
-    log.info("connect to mongodb db name %r, connections %r", MONGODB_DB, MONGODB_HOST)
-    connect(MONGODB_DB, host=MONGODB_HOST, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
+#    log.info("connect to mongodb db name %r, connections %r", MONGODB_DB, MONGODB_HOST)
+#    connect(MONGODB_DB, host=MONGODB_HOST, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
+    log.info("connect to mongodb")
+    connect("ng911", host="localhost")
 
 #connect('ng911')
 #db = client.ng911
