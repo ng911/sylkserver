@@ -147,10 +147,11 @@ class CalltakerProfile(DynamicDocument):
 
 class CalltakerActivity(Document):
     user_id = ObjectIdField(required=True)
-    event = StringField(required=True, choices=('login', 'made_busy', 'answer_call', 'hang_up', 'logout', 'rebid'))
+    event = StringField(required=True, choices=('login', 'made_busy', 'dial_out', 'join_call', 'answer_call', 'hang_up', 'logout', 'rebid'))
     event_details = StringField()
+    event_num_data = FloatField()
     start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
-    end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    #end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'indexes': [
             'user_id',

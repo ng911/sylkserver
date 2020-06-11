@@ -13,6 +13,7 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, create_refresh_token, jwt_refresh_token_required,
     get_jwt_identity
 )
+from ..db.calltaker_activity import add_logged_in, add_logged_out
 
 authentication = Blueprint('authentication', __name__,
                         template_folder='templates')
@@ -142,6 +143,8 @@ def login():
 
             # we create an oauth access tokem and store it in the session to be used by the client
             # the client can access it using the session cookie
+
+            add_logged_in(str(form.user.user_id))
             return redirect(next or url_for('/'))
     return render_template('login.html', form=form)
 
@@ -181,7 +184,9 @@ def logout():
     try:
         log.info("inside logout for user")
         next = get_argument('next', '')
+        user_id = None
         if 'user_id' in session:
+            user_id = session['user_id']
             del session['user_id']
         if 'username' in session:
             del session['username']
@@ -191,6 +196,8 @@ def logout():
             del session['refresh_token']
         redirect_uri = url_for('.login', _external=True, next=next)
         log.info("inside logout done , redirect to %r", redirect_uri)
+        if user_id != None:
+            add_logged_out(user_id)
         return redirect(redirect_uri)
     except Exception as e:
         stackTrace = traceback.format_exc()

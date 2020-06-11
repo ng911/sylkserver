@@ -2,6 +2,7 @@ from collections import namedtuple
 import datetime
 import traceback
 import json
+import arrow
 
 from sipsimple.core import SIPURI
 from application.python import Null
@@ -15,6 +16,7 @@ from sylk.wamp import publish_create_call, publish_update_call, publish_active_c
     publish_update_call_events, publish_tty_enabled, publish_tty_updated, publish_msrp_message
 import sylk.db.calls as calls
 from sylk.utils import get_json_from_db_obj
+from ..db.calltaker_activity import add_call_pickup_by_name, add_call_hangup
 import subprocess
 import uuid
 import requests
@@ -130,6 +132,9 @@ class ConferenceData(object):
             conference.updated_at = utcnow
             conference.answer_time = utcnow
             conference.save()
+            arrow_answer_time = arrow.utcnow()
+            arrow_start_time = arrow.get(conference.start_time, 'YYYY,MM,DD,HH,mm,ss,SSSSSS')
+            response_time = arrow_answer_time - arrow_start_time
 
             '''
             conference_event = ConferenceEvent()
@@ -147,6 +152,8 @@ class ConferenceData(object):
             # todo- check, this one doesnt seem to be used by the calltaker. might remove it in future
             for calltaker in calltakers:
                 publish_active_call(calltaker, room_number)
+                add_call_pickup_by_name(calltaker, response_time)
+
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_conference_status %r", e)
@@ -184,6 +191,7 @@ class ConferenceData(object):
             conference_event.room_number = room_number
             if is_calltaker:
                 conference_event.event_details = 'Calltaker {} released the call'.format(display_name)
+                add_call_pickup_by_name(display_name)
             else:
                 conference_event.event_details = '{} hung up'.format(display_name)
 
