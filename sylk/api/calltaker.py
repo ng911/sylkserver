@@ -230,6 +230,7 @@ def get_layout(user_id):
 @calltaker.route('/layout/<user_id>', methods=['POST', 'PUT'])
 @check_exceptions
 def update_layout(user_id):
+    log.info('update_layout for %r', user_id)
     layout = get_argument('layout')
     userObj = User.objects.get(user_id=user_id)
     userObj.layout = layout
@@ -245,6 +246,7 @@ def update_layout(user_id):
 @calltaker.route('/layout/all/<psap_id>', methods=['POST', 'PUT'])
 @check_exceptions
 def update_layout_all(psap_id):
+    log.info('update_layout all for %r', psap_id)
     layout = get_argument('layout')
     for userObj in User.objects(psap_id=psap_id):
         userObj.layout = layout
