@@ -152,7 +152,7 @@ def get_profile(user_id):
     log.info("inside get_profile for %r", user_id)
     if (user_id is None) or (user_id == ''):
         raise ValueError('missing or invalid user_id')
-
+    profile_obj = None
     try:
         profile_obj = CalltakerProfile.objects.get(user_id=user_id)
     except:
