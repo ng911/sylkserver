@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:18.04
 RUN apt-get -y update
 RUN apt-get -y install python-pip
 RUN apt-get -y install cython git
@@ -9,6 +9,7 @@ RUN apt-get -y install libswscale-dev libswresample-dev libx264-dev libvpx-dev l
 RUN apt-get -y install libgmp3-dev libmpfr-dev libmpc-dev pkg-config libsqlite3-dev python-pip darcs
 RUN apt-get -y install libswresample-dev
 RUN apt-get -y install libgmp3-dev
+RUN apt-get -y install openssl 
 RUN apt-get -y install libssl1.0-dev
 
 RUN pip install -U pyopenssl
