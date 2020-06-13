@@ -65,6 +65,7 @@ class Psap(Document):
         ]
     }
 
+
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     status = StringField(required=True, default='offline')
@@ -75,9 +76,11 @@ class User(Document):
     psap_id = ObjectIdField()
     secondary_psap_id = ObjectIdField()
     is_active = BooleanField(default=True)
+    is_available = BooleanField(default=False)
     extension = StringField()
     station_id = StringField(required=False)
     roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
+    layout = DictField(required=False)
     meta = {
         'indexes': [
             'user_id',

@@ -192,3 +192,49 @@ def set_profile(user_id):
     response = {'success':True, 'profile_id':str(profile_obj.profile_id)}
     return response
 
+@calltaker.route('/layout/<user_id>', methods=['GET'])
+@check_exceptions
+def get_layout(user_id):
+    userObj = User.objects.get(user_id=user_id)
+    if hasattr(userObj, "layout") and userObj.layout != None and userObj.layout != {}:
+        response = {
+            'success': True,
+            'layout' : userObj.layout
+        }
+    else:
+        response = {
+            'success': True,
+            'layout': None
+        }
+    return response
+
+
+@calltaker.route('/layout/<user_id>', methods=['POST', 'PUT'])
+@check_exceptions
+def update_layout(user_id):
+    layout = get_argument('layout')
+    userObj = User.objects.get(user_id=user_id)
+    userObj.layout = layout
+    userObj.save()
+
+    response = {
+        'success' : True,
+        'update_time' : time.time()
+    }
+
+    return response
+
+@calltaker.route('/layout/all/<psap_id>', methods=['POST', 'PUT'])
+@check_exceptions
+def update_layout_all(psap_id):
+    layout = get_argument('layout')
+    for userObj in User.objects(psap_id=psap_id):
+        userObj.layout = layout
+        userObj.save()
+
+    response = {
+        'success' : True,
+        'update_time' : time.time()
+    }
+
+    return response
