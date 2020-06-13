@@ -151,7 +151,7 @@ def login():
     try:
         out = render_template('login.html', form=form)
         log.info("out is %r", out)
-        out = "<html><body>Hello There</body></html>"
+        out = "<html><body>Hello There</body></html>\n\n\n"
 
         return out
     except Exception as e:
