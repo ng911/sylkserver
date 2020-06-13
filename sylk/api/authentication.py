@@ -148,7 +148,10 @@ def login():
 
             add_logged_in(str(form.user.user_id))
             return redirect(next or url_for('/'))
-    return render_template('login.html', form=form)
+    try:
+        return render_template('login.html', form=form)
+    except Exception as e:
+        log.error("error in rendering %r", str(e))
 
 @authentication.route('/session-info.js', methods=['GET'])
 @check_exceptions
