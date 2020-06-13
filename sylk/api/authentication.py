@@ -157,7 +157,6 @@ def login():
         log.error("error in rendering %r", str(e))
 
 @authentication.route('/session-info.js', methods=['GET'])
-@check_exceptions
 def session_info():
     # Here we use a class of some kind to represent and validate our
     # client-side form data. For example, WTForms is a library that will
@@ -195,7 +194,6 @@ def session_info():
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
-@check_exceptions
 def logout():
     try:
         log.info("inside logout for user")
