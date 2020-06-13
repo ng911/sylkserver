@@ -149,10 +149,12 @@ def login():
             add_logged_in(str(form.user.user_id))
             return redirect(next or url_for('/'))
     try:
-        out = render_template('login.html', form=form)
-        log.info("out is %r", out)
-        out = "<html><body>Hello There</body></html>\n\n\n"
-
+        #out = render_template('login.html', form=form)
+        #log.info("out is %r", out)
+        #out = "<html><body>Hello There</body></html>\n\n\n"
+        out = {
+            "success" : True
+        }
         return out
     except Exception as e:
         log.error("error in rendering %r", str(e))
