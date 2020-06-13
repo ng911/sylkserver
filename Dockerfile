@@ -27,8 +27,11 @@ WORKDIR /usr/src/python-xcaplib
 RUN python setup.py install
 
 WORKDIR /usr/src
-RUN darcs get http://devel.ag-projects.com/repositories/python-msrplib
-WORKDIR /usr/src/python-msrplib
+#RUN darcs get http://devel.ag-projects.com/repositories/python-msrplib
+RUN apt -y install wget unzip
+RUN wget https://github.com/AGProjects/python-msrplib/archive/release-0.19.2.zip
+RUN unzip release-0.19.2.zip
+WORKDIR /usr/src/python-msrplib-release-0.19.2
 RUN python setup.py install
 
 WORKDIR /usr/src
