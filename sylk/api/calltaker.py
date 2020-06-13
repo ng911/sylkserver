@@ -149,21 +149,31 @@ def update_status(user_id):
 @check_exceptions
 def get_profile(user_id):
     psap_id = get_argument('psap_id')
-    log.info("inside get_profile for %r", user_id)
+    log.info("inside get_profile for %r, psap_id %r", user_id, psap_id)
     if (user_id is None) or (user_id == ''):
         raise ValueError('missing or invalid user_id')
     profile_obj = None
     try:
+        log.info("inside get_profile 1")
         profile_obj = CalltakerProfile.objects.get(user_id=user_id)
+        log.info("inside get_profile 1.1")
     except:
+        log.info("inside get_profile 2")
         psap_db_obj = Psap.objects.get(psap_id=psap_id)
+        log.info("inside get_profile 2.1")
         try:
+            log.info("inside get_profile 2.2")
             profile_obj = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
+            log.info("inside get_profile 2.3")
         except:
+            log.info("inside get_profile 2.4")
             pass
+    log.info("inside get_profile 3")
     if profile_obj != None:
+        log.info("inside get_profile 3.1")
         profile_json = get_json_from_db_obj(profile_obj, ignore_fields=['psap_id', 'user_id', 'profile_id'])
     else:
+        log.info("inside get_profile 3.2")
         profile_json = CalltakerProfile.get_default_profile()
 
     response = {'success':True, 'profile':profile_json}
