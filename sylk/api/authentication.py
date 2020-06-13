@@ -8,6 +8,7 @@ from wtforms import StringField, PasswordField, SubmitField, HiddenField, Boolea
 from wtforms import validators, ValidationError
 
 from .utils import get_argument, is_safe_url
+from .decorators import check_exceptions
 from sylk.db.schema import Grant, Client, Token, User, CalltakerStation
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, create_refresh_token, jwt_refresh_token_required,
@@ -93,6 +94,7 @@ class LoginForm(Form):
 
 @authentication.route('/refresh', methods = ['POST'])
 @jwt_refresh_token_required
+@check_exceptions
 def refresh():
     current_user = get_jwt_identity()
     log.info('current user %r', current_user)
@@ -101,6 +103,7 @@ def refresh():
 
 
 @authentication.route('/login', methods=['GET', 'POST'])
+@check_exceptions
 def login():
     # Here we use a class of some kind to represent and validate our
     # client-side form data. For example, WTForms is a library that will
@@ -149,6 +152,7 @@ def login():
     return render_template('login.html', form=form)
 
 @authentication.route('/session-info.js', methods=['GET'])
+@check_exceptions
 def session_info():
     # Here we use a class of some kind to represent and validate our
     # client-side form data. For example, WTForms is a library that will
@@ -186,6 +190,7 @@ def session_info():
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
+@check_exceptions
 def logout():
     try:
         log.info("inside logout for user")
