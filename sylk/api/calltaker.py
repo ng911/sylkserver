@@ -152,6 +152,9 @@ def get_profile(user_id):
     log.info("inside get_profile for %r, psap_id %r", user_id, psap_id)
     if (user_id is None) or (user_id == ''):
         raise ValueError('missing or invalid user_id')
+    if psap_id == None:
+        userObj = User.objects.get(user_id=user_id)
+        psap_id = str(userObj.psap_id)
     profile_obj = None
     try:
         log.info("inside get_profile 1")
