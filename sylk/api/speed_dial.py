@@ -5,7 +5,7 @@ from flask_restful import reqparse
 
 from ..db.speed_dial import get_speed_dial_groups, get_speed_dials, add_speed_dial_group, \
     remove_speed_dial_group, edit_speed_dial_group, add_speed_dial, remove_speed_dial, \
-    get_speed_dial, edit_speed_dial
+    get_speed_dial, edit_speed_dial, get_user_speed_dials
 from .decorators import check_exceptions
 
 speed_dial = Blueprint('speed_dial', __name__,
@@ -26,6 +26,12 @@ def all(psap_id):
         "speed_dials" : get_speed_dials(psap_id, payload['group_name'])
     }
 
+@speed_dial.route('/user/<psap_id>', methods=['GET'])
+@check_exceptions
+def user_speed_dials(user_id):
+    return {
+        "speed_dials" : get_user_speed_dials(user_id)
+    }
 
 @speed_dial.route('/<speed_dial_id>', methods=['GET'])
 @check_exceptions

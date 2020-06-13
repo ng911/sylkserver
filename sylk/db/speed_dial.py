@@ -1,4 +1,4 @@
-from .schema import SpeedDial, SpeedDialGroup
+from .schema import SpeedDial, SpeedDialGroup, User
 from ..utils import get_json_from_db_obj
 
 
@@ -9,7 +9,6 @@ def get_speed_dial_groups(psap_id):
             get_json_from_db_obj(speedDialGroup)
         )
     return groups
-
 
 def get_speed_dials(psap_id, group_name=None):
     speedDials = []
@@ -25,6 +24,10 @@ def get_speed_dials(psap_id, group_name=None):
 
     return speedDials
 
+def get_user_speed_dials(user_id):
+    userObj = User.objects.get(user_id = user_id)
+    psap_id = str(userObj.psap_id)
+    return get_speed_dials(psap_id)
 
 def add_speed_dial_group(psap_id, group_name):
     # make sure the group does not exist first
