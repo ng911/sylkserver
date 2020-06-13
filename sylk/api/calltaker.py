@@ -36,12 +36,6 @@ def all(psap_id):
         'users' : users
     }
 
-@calltaker.route('/test', methods=['GET'])
-def test():
-    return {
-        'test' : "hello"
-    }
-
 
 @calltaker.route('/online/<psap_id>', methods=['GET'])
 @check_exceptions
