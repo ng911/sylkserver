@@ -6,6 +6,7 @@ from flask_login import LoginManager, login_user
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, HiddenField, BooleanField
 from wtforms import validators, ValidationError
+from flask_cors import CORS
 
 from .utils import get_argument, is_safe_url
 from .decorators import check_exceptions
@@ -18,6 +19,7 @@ from ..db.calltaker_activity import add_logged_in, add_logged_out
 
 authentication = Blueprint('authentication', __name__,
                         template_folder='templates')
+CORS(authentication)
 
 
 log = logging.getLogger("emergent-ng911")
