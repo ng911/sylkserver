@@ -161,13 +161,17 @@ def get_profile(user_id):
             return { "success" : False }
     profile_obj = None
     try:
+        log.info("get_profile 1")
         profile_obj = CalltakerProfile.objects.get(user_id=user_id)
     except:
+        log.info("get_profile 2, psap_id %r", psap_id)
         psap_db_obj = Psap.objects.get(psap_id=psap_id)
+        log.info("get_profile 3")
         try:
             profile_obj = CalltakerProfile.objects.get(profile_id=psap_db_obj.default_profile_id)
         except:
             pass
+    log.info("get_profile 4")
     if profile_obj != None:
         profile_json = get_json_from_db_obj(profile_obj, ignore_fields=['psap_id', 'user_id', 'profile_id'])
     else:
