@@ -167,6 +167,8 @@ def login():
         return out
     except Exception as e:
         log.error("error in rendering %r", str(e))
+    log.info("add done /login")
+
 
 @authentication.route('/session-info.js', methods=['GET'])
 def session_info():
