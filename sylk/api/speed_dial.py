@@ -26,7 +26,7 @@ def all(psap_id):
         "speed_dials" : get_speed_dials(psap_id, payload['group_name'])
     }
 
-@speed_dial.route('/user/<psap_id>', methods=['GET'])
+@speed_dial.route('/user/<user_id>', methods=['GET'])
 @check_exceptions
 def user_speed_dials(user_id):
     return {
