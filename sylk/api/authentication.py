@@ -103,7 +103,6 @@ def refresh():
 
 
 @authentication.route('/login', methods=['GET', 'POST'])
-@check_exceptions
 def login():
     # Here we use a class of some kind to represent and validate our
     # client-side form data. For example, WTForms is a library that will
