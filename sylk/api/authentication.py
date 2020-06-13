@@ -102,6 +102,13 @@ def refresh():
     return (jsonify({'access_token':access_token}))
 
 
+
+@authentication.route('/test', methods=['GET', 'POST'])
+def test_me():
+    return jsonify({
+        "success" : True
+    })
+
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
     # Here we use a class of some kind to represent and validate our
