@@ -149,6 +149,17 @@ class CalltakerProfile(DynamicDocument):
         ]
     }
 
+    @classmethod
+    def get_default_profile(cls):
+        return {
+            "incoming_ring" : True,
+            "ringing_server_volume" : 50,
+            "incoming_ring_level" : 50,
+            "ring_delay" : 0,
+            "auto_respond" : False,
+            "auto_respond_after" : 10
+        }
+
 
 class CalltakerActivity(Document):
     user_id = ObjectIdField(required=True)
