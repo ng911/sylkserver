@@ -169,6 +169,7 @@ def session_info():
             try:
                 user_obj = User.objects.get(user_id=user_id)
                 username = user_obj.username
+                psap_id = str(user_obj.psap_id)
                 ip_address = request.remote_addr
                 if hasattr(user_obj, 'layout'):
                     layout = user_obj.layout
@@ -181,7 +182,7 @@ def session_info():
                     pass
             except:
                 pass
-    initial_data = {'user_id': user_id, 'username': username, 'layout' : layout}
+    initial_data = {'user_id': user_id, 'username': username, 'psap_id' : psap_id, 'layout' : layout}
     if 'access_token' in session:
         log.debug("found access_token in session")
         initial_data['access_token'] = session['access_token']
