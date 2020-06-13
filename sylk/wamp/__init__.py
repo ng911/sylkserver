@@ -409,5 +409,10 @@ def on_disconnect(session):
 
 
 def start():
-    reactor.callFromThread(comp.start())
+    try:
+        #reactor.callFromThread(comp.start())
+        comp.start()
+    except Exception as e:
+        log.error ("error in wamo start")
+        log.error (str(e))
 
