@@ -156,12 +156,15 @@ def session_info():
     log.info("session_info")
     user_id = ''
     username = ''
+    layout = None
     if 'user_id' in session:
         user_id = session['user_id']
         if (user_id is not None) and (user_id != ''):
             user_obj = User.objects.get(user_id=user_id)
             username = user_obj.username
             ip_address = request.remote_addr
+            if hasattr(user_obj, 'layout'):
+                layout = user_obj.layout
             log.info("session_info ip_address is %r", ip_address)
             try:
                 station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
@@ -169,7 +172,7 @@ def session_info():
                 user_obj.save()
             except:
                 pass
-    initial_data = {'user_id': user_id, 'username': username}
+    initial_data = {'user_id': user_id, 'username': username, 'layout' : layout}
     if 'access_token' in session:
         log.debug("found access_token in session")
         initial_data['access_token'] = session['access_token']
