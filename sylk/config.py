@@ -1,7 +1,6 @@
 import os
 import sys
 
-WAMP_CONNECTION = six.text_type("wss://webservice.emergent911.com/ws")
 WAMP_REALM = "realm1"
 
 MONGODB_HOST = "mongodb:27017"
@@ -24,7 +23,7 @@ if (sys.version_info > (3, 0)):
 else:
     WAMP_CROSSBAR_SERVER = u"wss://webservice.emergent911.com/ws"
 #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
-
+WAMP_CONNECTION = WAMP_CROSSBAR_SERVER
 SOP_DIR = "sop"
 
 ALIDUMP_PORT = 12010
