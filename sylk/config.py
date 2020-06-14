@@ -1,5 +1,5 @@
 import os
-import six
+import sys
 
 WAMP_CONNECTION = six.text_type("wss://webservice.emergent911.com/ws")
 WAMP_REALM = "realm1"
@@ -18,7 +18,11 @@ CREATE_DB = True
 
 FLASK_SERVER_PORT = 7070
 
-WAMP_CROSSBAR_SERVER = six.text_type("wss://webservice.emergent911.com/ws")
+
+if (sys.version_info > (3, 0)):
+    WAMP_CROSSBAR_SERVER = "wss://webservice.emergent911.com/ws"
+else:
+    WAMP_CROSSBAR_SERVER = u"wss://webservice.emergent911.com/ws"
 #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 
 SOP_DIR = "sop"
