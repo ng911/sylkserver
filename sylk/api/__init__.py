@@ -26,7 +26,6 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 app.secret_key = 'best psap available, supercharged with webrtc'
 app.config['SESSION_TYPE'] = 'mongodb'
-#mongo_uri = 'mongodb://ws:kingfisher94108@ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903'
 #mongo_uri = 'mongodb://localhost:27017/ng911'
 mongo_uri = MONGODB_URI
 mongo_client = MongoClient(mongo_uri)

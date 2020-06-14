@@ -26,8 +26,6 @@ def getIsoMaxFormat(dateTimeObj):
     return arrowDateTimeObj.format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ")
 
 
-#client = connect(username="ws", password="Ecomm@911",
-#                 host='mongodb://ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903')
 '''
 client = connect(username="ws", password="Ecomm@911",
                  host='mongodb://localhost:33903/psap?replicaSet=rs-psap')
@@ -803,9 +801,7 @@ class Client(Document):
 
     @classmethod
     def getDefaultRedirectUris(cls):
-        return ['https://portal.supportgenie.io', 'https://portal.supportgenie.io', 'https://localhost:9000', 'https://localhost:9000/',
-                'https://supportgenie.io/', 'https://supportgenie.io', 'https://www.supportgenie.io', 'https://www.supportgenie.io/',
-                'https://localhost:3000', 'https://localhost:3000/']
+        return ['https://localhost:9000', 'https://localhost:9000/', 'https://localhost:3000', 'https://localhost:3000/']
 
 
 

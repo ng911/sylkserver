@@ -1,6 +1,6 @@
 import os
 
-WAMP_CONNECTION = "wss://staging-webservice.supportgenie.io/ws"
+WAMP_CONNECTION = "wss://webservice.emergent911.com/ws"
 WAMP_REALM = "realm1"
 
 MONGODB_HOST = "mongodb:27017"
