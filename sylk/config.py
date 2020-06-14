@@ -17,7 +17,8 @@ CREATE_DB = True
 
 FLASK_SERVER_PORT = 7070
 
-WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
+WAMP_CROSSBAR_SERVER = "wss://webservice.emergent911.com/ws"
+#WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 
 SOP_DIR = "sop"
 
