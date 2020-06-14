@@ -449,6 +449,7 @@ def on_disconnect(session):
 
 def start():
     try:
+        log.info("connecting wamp to %r", WAMP_CROSSBAR_SERVER)
         #reactor.callFromThread(comp.start())
         comp.start()
     except Exception as e:
