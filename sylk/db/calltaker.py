@@ -97,3 +97,10 @@ def inactivate_calltaker(user_id):
     userObj = User.objects.get(user_id=user_id)
     userObj.is_active = False
     userObj.save()
+
+
+def get_all_calltakers(psap_id):
+    calltakers = []
+    for userObj in User.object(psap_id=psap_id):
+        calltakers.append(str(userObj.user_id))
+    return calltakers

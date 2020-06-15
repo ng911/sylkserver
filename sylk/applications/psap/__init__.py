@@ -28,6 +28,7 @@ from uuid import uuid4
 from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call, get_calltaker_user
 from sylk.db.queue import get_queue_details, get_queue_members
+from sylk.db.calltaker import get_all_calltakers
 from sylk.db.calls import clear_abandoned_calls
 from acd import get_calltakers
 import sylk.data.call as call_data
@@ -356,6 +357,24 @@ class PSAPApplication(SylkApplication):
         log.info(u'New incoming request_uri %r' % (session.request_uri))
         log.info(u'New incoming request_uri user %s, domain %s' % (session.request_uri.user, session.request_uri.host))
 
+        remote_identity = session.remote_identity
+        local_identity = session.local_identity
+        peer_address = session.peer_address
+        called_number = ""
+        calling_number = ""
+        authenticated = False
+        is_emergency = False
+        incoming_link = None
+        call_type = ''
+        if session.request_uri.user == "sos":
+            authenticated = True
+            is_emergency = True
+            called_number = local_identity.uri.user
+            calling_number = remote_identity.uri.user
+            call_type = 'sos'
+            direction = 'incoming'
+            queue_id = ''
+
         log.info(u'num open files is %d', get_num_open_files())
         #from mem_top import mem_top
         #log.info(mem_top())
@@ -393,16 +412,13 @@ class PSAPApplication(SylkApplication):
         if chat_streams:
             has_text = True
 
-        remote_identity = session.remote_identity
-        local_identity = session.local_identity
-        peer_address = session.peer_address
-
         rooms = self.get_rooms()
 
         log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, called_uri %r, from_uri %r, rooms %r",
             peer_address.ip, peer_address.port, local_identity.uri.user, local_identity.uri, remote_identity.uri, rooms)
         # first verify the session
-        (authenticated, call_type, incoming_link, calltaker_obj, called_number, calling_number) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
+        if not authenticated:
+            (authenticated, call_type, incoming_link, calltaker_obj, called_number, calling_number) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
         log.info("authenticate_call called_number %s, calling_number %s", called_number, calling_number)
         if not authenticated:
             log.info("call not authenticated, reject it")
@@ -419,11 +435,15 @@ class PSAPApplication(SylkApplication):
 
             if call_type == 'sos':
                 session.is_calltaker = False
-                queue_details = get_queue_details(incoming_link.queue_id)
-                queue_members = get_queue_members(incoming_link.queue_id)
-                acd_strategy = queue_details.acd_strategy
+                if incoming_link != None:
+                    queue_details = get_queue_details(incoming_link.queue_id)
+                    queue_members = get_queue_members(incoming_link.queue_id)
+                    acd_strategy = queue_details.acd_strategy
+                else:
+                    acd_strategy = 'ring_all'
+                    queue_members = get_all_calltakers(ServerConfig.psap_id)
 
-                calltakers = get_calltakers(queue_details, queue_members)
+                calltakers = get_calltakers(acd_strategy, queue_members)
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
