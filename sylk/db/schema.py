@@ -436,7 +436,7 @@ class Conference(Document):
     hold_start = ComplexDateTimeField()
     primary_queue_id = ObjectIdField()
     secondary_queue_id = ObjectIdField()
-    link_id = ObjectIdField(required=True)
+    link_id = ObjectIdField(required=False)
     #todo this should be moved to location?
     #agencies = EmbeddedDocumentListField(document_type=Agency)
     is_ani_pseudo = BooleanField(default=False)
