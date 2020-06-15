@@ -22,8 +22,8 @@ if (sys.version_info > (3, 0)):
     WAMP_CROSSBAR_SERVER = "wss://webservice.emergent911.com/ws"
 else:
     WAMP_REALM = u"realm1"
-    #WAMP_CROSSBAR_SERVER = u"ws://webservice.emergent911.com/ws"
-    WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
+    WAMP_CROSSBAR_SERVER = u"ws://localhost:8080/ws"
+    #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 WAMP_CONNECTION = WAMP_CROSSBAR_SERVER
 SOP_DIR = "sop"
