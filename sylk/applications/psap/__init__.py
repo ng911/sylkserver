@@ -354,6 +354,7 @@ class PSAPApplication(SylkApplication):
     def incoming_session(self, session, headers):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
         log.info(u'New incoming request_uri %r' % (session.request_uri))
+        log.info(u'New incoming request_uri user %s, domain %s' % (session.request_uri.user, session.request_uri.host))
 
         log.info(u'num open files is %d', get_num_open_files())
         #from mem_top import mem_top
