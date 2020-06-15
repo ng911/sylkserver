@@ -5,10 +5,9 @@ from sylk.applications import ApplicationLogger
 
 log = ApplicationLogger(__package__)
 
-def get_calltakers(acd_strategy, queue_members):
+def get_calltakers(acd_strategy, user_ids):
     if acd_strategy == 'ring_all':
         # for now we return all queue_members
-        user_ids = [str(queue_member.user_id) for queue_member in queue_members]
         log.info("get_calltakers user_ids %r", user_ids)
         calltaker_data = CalltakerData()
         available_calltakers = calltaker_data.available_calltakers

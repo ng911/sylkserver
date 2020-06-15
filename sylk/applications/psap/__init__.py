@@ -438,12 +438,13 @@ class PSAPApplication(SylkApplication):
                 if incoming_link != None:
                     queue_details = get_queue_details(incoming_link.queue_id)
                     queue_members = get_queue_members(incoming_link.queue_id)
+                    user_ids = [str(queue_member.user_id) for queue_member in queue_members]
                     acd_strategy = queue_details.acd_strategy
                 else:
                     acd_strategy = 'ring_all'
-                    queue_members = get_all_calltakers(ServerConfig.psap_id)
+                    user_ids = get_all_calltakers(ServerConfig.psap_id)
 
-                calltakers = get_calltakers(acd_strategy, queue_members)
+                calltakers = get_calltakers(acd_strategy, user_ids)
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
