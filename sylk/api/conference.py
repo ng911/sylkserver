@@ -36,6 +36,15 @@ def conference_debug_info(room_number):
     return jsonify(debug_info)
 
 
+@conference.route('/testme/', methods=['GET'])
+def conference_test():
+    response = {
+        'success' : True
+    }
+
+    return jsonify(response)
+
+
 @conference.route('/<room_number>', methods=['GET'])
 def conference_info(room_number):
     conference_db_obj = Conference.objects.get(room_number=room_number)
