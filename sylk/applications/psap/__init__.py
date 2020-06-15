@@ -517,11 +517,14 @@ class PSAPApplication(SylkApplication):
                 room_data.status = 'ringing_queued'
             else:
                 room_data.status = 'ringing'
+            link_id = None
+            if incoming_link != None:
+                link_id = incoming_link.link_id
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status=room_data.status,
                                                                     primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
-                                                                    link_id=incoming_link.link_id,
+                                                                    link_id=link_id,
                                                                     caller_ani=caller_ani,
                                                                     caller_uri=caller_uri,
                                                                     called_uri=called_uri,
