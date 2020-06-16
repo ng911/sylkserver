@@ -61,33 +61,26 @@ def active_events():
     ]
     '''
     current_dt = arrow.get()
+    day_before = current_dt.shift(days=-1)
     pipeline = [
         {
             "$addFields": {
-                "year": {"$substr": ["$event_time", 0, 4]},
-                "month": {"$substr": ["$event_time", 5, 2]},
-                "day": {"$substr": ["$event_time", 8, 2]},
-                "hour": {"$substr": ["$event_time", 11, 2]},
-                "minute": {"$substr": ["$event_time", 14, 2]},
-                "second": {"$substr": ["$event_time", 17, 2]}
+                "hour": { "$substr": [ "$event_time", 11, 2 ] },
             }
         },
-        {"$match": {"event": "active"}},
-        {"$match": {"year": current_dt.format('YYYY')}},
-        {"$match": {"month": current_dt.format('MM')}},
-        {"$match": {"day": current_dt.format('DD')}},
+        { "$match": {"event": "active" }},
         {
-            "$group": {
-                "_id": "$hour",
-                "total": {"$sum": 1}
+            "$group" : {
+                "_id" : "$hour",
+                "total" : { "$sum" : 1 }
             }
         },
         {
-            "$sort": {"_id": 1}
+            "$sort": { "_id": 1 }
         }
     ]
-    events = ConferenceEvent.objects().aggregate(pipeline)
-    return {'active_events': list(events)}
+    events = ConferenceEvent.objects().filter(event_time__gte=day_before).aggregate(pipeline)
+    return { 'active_events': list(events) }
 
 @dashboard.route('/abandoned_events', methods=['GET'])
 @check_exceptions
