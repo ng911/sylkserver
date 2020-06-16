@@ -92,6 +92,20 @@ def add_update_calltaker(payload, user_id):
         'user_id' : user_id
     }
 
+def update_calltaker_status(status, username=None, user_id=None):
+    try:
+        if username != None:
+            calltaker_obj = User.objects.get(username=username)
+        elif username != None:
+            calltaker_obj = User.objects.get(user_id=user_id)
+        else:
+            log.error("error calling update_calltaker_status no username or user_id")
+            return
+        calltaker_obj.status = status
+        calltaker_obj.save()
+    except Exception as e:
+        log.error("error in update_calltaker_status %r", str(e))
+
 
 def inactivate_calltaker(user_id):
     userObj = User.objects.get(user_id=user_id)
@@ -99,9 +113,9 @@ def inactivate_calltaker(user_id):
     userObj.save()
 
 
-def get_all_calltakers(psap_id):
+def get_available_calltakers(psap_id):
     calltakers = []
-    for userObj in User.objects(psap_id=psap_id):
+    for userObj in User.objects(psap_id=psap_id, is_active=True):
         calltakers.append(str(userObj.user_id))
     log.info("get_all_calltakers psap_id %r, calltakers %r", psap_id, calltakers)
     return calltakers

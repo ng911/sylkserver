@@ -371,7 +371,9 @@ def start_calls_api_server():
     log = ApplicationLogger(__package__)
 
     from .conference import conference
+    from .status import status
 
     app.register_blueprint(conference, url_prefix='/conference')
+    app.register_blueprint(status, url_prefix='/status')
     start_server()
 

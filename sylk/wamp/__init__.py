@@ -4,7 +4,7 @@ import time
 
 from autobahn.twisted.component import Component
 from autobahn.wamp.types import PublishOptions
-#from application.notification import IObserver, NotificationCenter, NotificationData
+from application.notification import IObserver, NotificationCenter, NotificationData
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet import reactor
 
@@ -330,13 +330,17 @@ def joined(session, details):
     #calltaker_data.CalltakerData()
     wamp_session = session
 
-    def update_is_available(user_id):
+    def update_is_available(user_id, status="available"):
         from ..db.schema import User
         is_available = False
         if user_id in user_wamp_sessions:
             is_available = True
         userObj = User.objects.get(user_id=user_id)
         userObj.is_available = is_available
+        if is_available:
+            userObj.status = status
+        else:
+            userObj.status = "offline"
         userObj.save()
 
     def on_calltaker_status(data):
@@ -345,20 +349,21 @@ def joined(session, details):
         log.info("event on_calltaker_status received: %r", data['command'])
         # todo - fix , update database here
         global  wamp_session_client_data, user_wamp_sessions
-        wamp_session_id = data['wamp_session_id']
-        user_id = data['user_id']
-        wamp_session_client_data[wamp_session_id] = {
-            "user_id" : user_id
-        }
-        if user_id in user_wamp_sessions:
-            user_id_wamp_sessions_data = user_wamp_sessions[user_id]
-            if wamp_session_id not in user_id_wamp_sessions_data:
-                user_id_wamp_sessions_data.append(wamp_session_id)
-        else:
-            user_wamp_sessions[user_id] = [wamp_session_id]
-        update_is_available(user_id)
-        '''
         if data['command'] == 'status':
+            wamp_session_id = data['wamp_session_id']
+            user_id = data['user_id']
+            wamp_session_client_data[wamp_session_id] = {
+                "user_id" : user_id
+            }
+            if user_id in user_wamp_sessions:
+                user_id_wamp_sessions_data = user_wamp_sessions[user_id]
+                if wamp_session_id not in user_id_wamp_sessions_data:
+                    user_id_wamp_sessions_data.append(wamp_session_id)
+            else:
+                user_wamp_sessions[user_id] = [wamp_session_id]
+            status = data['status']
+            update_is_available(user_id, status)
+
             log.info("process status command")
             notification_center = NotificationCenter()
             notification_data = NotificationData(username=data['username'], \
@@ -369,7 +374,6 @@ def joined(session, details):
             }
             session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
-        '''
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
@@ -388,10 +392,8 @@ def joined(session, details):
                 if len(user_wamp_sessions) == 0:
                     del user_wamp_sessions[user_id]
             update_is_available(user_id)
-        '''
-        notification_center = NotificationCenter()
-        notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
-        '''
+            notification_center = NotificationCenter()
+            notification_center.post_notification('CalltakerSessionLeave', session, NotificationData(wamp_session_id=data))
         '''
         out = {
             'command': 'status_updated'

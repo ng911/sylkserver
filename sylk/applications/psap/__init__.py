@@ -28,7 +28,7 @@ from uuid import uuid4
 from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call, get_calltaker_user
 from sylk.db.queue import get_queue_details, get_queue_members
-from sylk.db.calltaker import get_all_calltakers
+from sylk.db.calltaker import get_available_calltakers, update_calltaker_status
 from sylk.db.calls import clear_abandoned_calls
 from acd import get_calltakers
 import sylk.data.call as call_data
@@ -39,7 +39,8 @@ from sylk.configuration import ServerConfig, SIPConfig
 from sylk.notifications.call import send_call_update_notification, send_call_active_notification, send_call_failed_notification
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup, dump_ali
-from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, publish_update_call_ringing, my_wamp_publish
+from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, \
+    publish_update_call_ringing, my_wamp_publish, publish_update_calltaker_status
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
@@ -440,11 +441,12 @@ class PSAPApplication(SylkApplication):
                     queue_members = get_queue_members(incoming_link.queue_id)
                     user_ids = [str(queue_member.user_id) for queue_member in queue_members]
                     acd_strategy = queue_details.acd_strategy
+                    calltakers = get_calltakers(acd_strategy, user_ids)
                 else:
                     acd_strategy = 'ring_all'
-                    user_ids = get_all_calltakers(ServerConfig.psap_id)
+                    user_ids = get_available_calltakers(ServerConfig.psap_id)
+                    calltakers = get_calltakers(acd_strategy, user_ids)
 
-                calltakers = get_calltakers(acd_strategy, user_ids)
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
@@ -1519,6 +1521,14 @@ class PSAPApplication(SylkApplication):
         self.set_calltaker_status(user_id=user_id, username=username, status='available')
 
     def set_calltaker_status(self, username=None, user_id=None, status='available'):
+        update_calltaker_status(status, username=username, user_id=user_id)
+        '''
+        publish_update_calltaker_status(user_id, username, status)
+        notification_data = NotificationData(username=username, \
+                                             status=status, \
+                                             user_id=user_id)
+        NotificationCenter().post_notification('CalltakerStatusUpdate', self, notification_data)
+        '''
         calltaker_data = CalltakerData()
         if user_id is None:
             calltaker_db_obj = get_calltaker_user(username)

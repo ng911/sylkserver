@@ -129,22 +129,6 @@ def get_status(user_id):
     return response
 
 
-@calltaker.route('/status/<user_id>', methods=['POST', 'PUT'])
-@check_exceptions
-def update_status(user_id):
-    status = get_argument('status')
-    userObj = User.objects.get(user_id=user_id)
-    userObj.status = status
-    userObj.save()
-
-    response = {
-        'success' : True,
-        'update_time' : time.time()
-    }
-
-    return response
-
-
 @calltaker.route('/profile/<user_id>', methods=['GET'])
 @check_exceptions
 def get_profile(user_id):
