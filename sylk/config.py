@@ -20,6 +20,8 @@ FLASK_SERVER_PORT = 7070
 if (sys.version_info > (3, 0)):
     WAMP_REALM = "realm1"
     WAMP_CROSSBAR_SERVER = "ws://rdffg.emergent911.com/ws"
+    #just temp for now
+    MONGODB_HOST = "mongodb:27017"
 else:
     WAMP_REALM = u"realm1"
     WAMP_CROSSBAR_SERVER = u"ws://rdffg.emergent911.com/ws"
