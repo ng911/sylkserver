@@ -19,7 +19,7 @@ def check_exceptions(func):
             json_response = func(*args, **kwargs)
             if json_response is None:
                 json_response = {}
-            log.info("json_response is %r", json_response)
+            #log.info("json_response is %r", json_response)
         except mongoengine.ValidationError as e:
             stacktrace = format_exc()
             log.error(stacktrace)
@@ -84,7 +84,7 @@ def check_exceptions(func):
             }
         finally:
             log.info("check_exceptions in finally")
-            log.info("check_exceptions finally json_response is %r, status_code is %r", json_response, status_code)
+            #log.info("check_exceptions finally json_response is %r, status_code is %r", json_response, status_code)
             return json_response, status_code
 
     return wrapper
