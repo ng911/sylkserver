@@ -29,7 +29,6 @@ from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call, get_calltaker_user
 from sylk.db.queue import get_queue_details, get_queue_members
 from sylk.db.calltaker import get_available_calltakers, update_calltaker_status
-from sylk.db.calls import clear_abandoned_calls
 from acd import get_calltakers
 import sylk.data.call as call_data
 import sylk.data.conference as conf_data

@@ -7,7 +7,6 @@ import arrow
 from .schema import ConferenceEvent, ConferenceParticipant, Location, Conference
 from ..utils import get_json_from_db_obj
 from .location import get_location_display
-from ..wamp import publish_clear_abandoned_call
 
 try:
     from sylk.applications import ApplicationLogger
@@ -109,8 +108,7 @@ def clear_abandoned_calls(psap_id, callback_number=None, caller_ani=None):
         calls_cleared.append(conf_db_obj.room_number)
         conf_db_obj.save()
 
-    publish_clear_abandoned_call(calls_cleared)
-    return len(calls_cleared)
+    return calls_cleared, len(calls_cleared)
 
 '''
 def clear_abandoned_calls(called_number):
