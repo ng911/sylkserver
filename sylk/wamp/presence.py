@@ -20,6 +20,7 @@ wamp_session_client_data = {}
 # wamp sessions for each user
 user_wamp_sessions = {}
 
+@inlineCallbacks
 def start_presence_listeners(wamp_session):
     def update_is_available(user_id, status="available"):
         from ..db.schema import User
