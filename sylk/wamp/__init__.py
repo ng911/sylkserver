@@ -399,7 +399,7 @@ def joined(session, details):
                     log.info("found wamp_session_id in user_id_wamp_sessions_data")
                     user_id_wamp_sessions_data.remove(wamp_session_id)
                 log.info("len(user_wamp_sessions) %r", len(user_wamp_sessions))
-                if len(user_wamp_sessions) == 0:
+                if len(user_id_wamp_sessions_data) == 0:
                     del user_wamp_sessions[user_id]
             update_is_available(user_id)
             notification_center = NotificationCenter()
