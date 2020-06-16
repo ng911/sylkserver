@@ -16,6 +16,7 @@ from ..db.schema import Conference, Call
 from ..utils import get_json_from_db_obj, set_db_obj_from_request
 from .utils import get_argument
 from ..db.calls import get_conference_json, clear_abandoned_calls
+from .decorators import check_exceptions
 
 calls = Blueprint('calls', __name__,
                         template_folder='templates')
@@ -211,8 +212,10 @@ def search_calls():
         return jsonify(response)
 
 @calls.route('/abandoned/clear/<psap_id>', methods=['GET', 'PUT', 'POST'])
+@check_exceptions
 def api_clear_abandoned_calls(psap_id):
     try:
+        log.info("inside api_clear_abandoned_calls")
         callback_number = get_argument('callback_number')
         caller_ani = get_argument('caller_ani')
         calls_cleared = clear_abandoned_calls(psap_id, callback_number=callback_number, caller_ani=caller_ani)
@@ -220,7 +223,7 @@ def api_clear_abandoned_calls(psap_id):
         return jsonify(response)
     except Exception as e:
         stacktrace = traceback.format_exc()
-        log.error('exception in search %s', str(e))
+        log.error('exception in api_clear_abandoned_calls %s', str(e))
         log.error("%s", stacktrace)
         response = {
             'success': False,
