@@ -15,6 +15,7 @@ import sylk.wamp
 import sylk.api
 from sylk.location.aliquery import init_ali_links
 from sylk.location.alidump import start_alidump
+from sylk.db.calltaker import reset_calltakers_status
 import sylk.data.calltaker as calltaker_data
 
 # noinspection PyUnusedLocal
@@ -121,6 +122,7 @@ if __name__ == '__main__':
     try:
         # make sure calltaker_data is initialized
         calltaker_data.CalltakerData()
+        reset_calltakers_status(ServerConfig.psap_id)
         sylk.wamp.start(status_listner_enabled=True)
         log.info('wamp.start done')
         server.run(options)

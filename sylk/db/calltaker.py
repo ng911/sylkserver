@@ -119,3 +119,10 @@ def get_available_calltakers(psap_id):
         calltakers.append(str(userObj.user_id))
     log.info("get_all_calltakers psap_id %r, calltakers %r", psap_id, calltakers)
     return calltakers
+
+# make all calltakers offline
+def reset_calltakers_status(psap_id):
+    for userObj in User.objects(psap_id=psap_id):
+        userObj.status = "offline"
+        userObj.is_available = False
+        userObj.save()
