@@ -384,13 +384,18 @@ def joined(session, details):
         from application.notification import IObserver, NotificationCenter, NotificationData
         wamp_session_id = data
         if wamp_session_id in wamp_session_client_data:
+            log.info("found wamp_session_id in wamp_session_client_data")
             client_data = wamp_session_client_data[wamp_session_id]
             user_id = client_data["user_id"]
+            log.info("found user_id %r", user_id)
             del wamp_session_client_data[wamp_session_id]
             if user_id in user_wamp_sessions:
+                log.info("found user_id %r in user_wamp_sessions", user_id)
                 user_id_wamp_sessions_data = user_wamp_sessions[user_id]
                 if wamp_session_id in user_id_wamp_sessions_data:
+                    log.info("found wamp_session_id in user_id_wamp_sessions_data")
                     user_wamp_sessions.remove(wamp_session_id)
+                log.info("len(user_wamp_sessions) %r", len(user_wamp_sessions))
                 if len(user_wamp_sessions) == 0:
                     del user_wamp_sessions[user_id]
             update_is_available(user_id)
