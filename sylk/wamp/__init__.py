@@ -375,6 +375,8 @@ def joined(session, details):
             }
             wamp_session.publish(u'com.emergent.calltakers', out)
             log.info("sent status_updated")
+            log.info("user_wamp_sessions %r", user_wamp_sessions)
+            log.info("wamp_session_client_data %r", wamp_session_client_data)
 
     def on_session_leave(data):
         log.info("on_session_leave event received")
@@ -383,6 +385,7 @@ def joined(session, details):
         global  wamp_session_client_data, user_wamp_sessions
         from application.notification import IObserver, NotificationCenter, NotificationData
         wamp_session_id = data
+        log.info("on_session_leave event received: wamp_session_client_data %r", wamp_session_client_data)
         if wamp_session_id in wamp_session_client_data:
             log.info("found wamp_session_id in wamp_session_client_data")
             client_data = wamp_session_client_data[wamp_session_id]
