@@ -397,7 +397,7 @@ def joined(session, details):
                 user_id_wamp_sessions_data = user_wamp_sessions[user_id]
                 if wamp_session_id in user_id_wamp_sessions_data:
                     log.info("found wamp_session_id in user_id_wamp_sessions_data")
-                    user_wamp_sessions.remove(wamp_session_id)
+                    user_id_wamp_sessions_data.remove(wamp_session_id)
                 log.info("len(user_wamp_sessions) %r", len(user_wamp_sessions))
                 if len(user_wamp_sessions) == 0:
                     del user_wamp_sessions[user_id]
