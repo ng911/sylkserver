@@ -351,8 +351,8 @@ def joined(session, details):
         from application.notification import IObserver, NotificationCenter, NotificationData
         global  wamp_session_client_data, user_wamp_sessions
         if data['command'] == 'status':
-            wamp_session_id = data['wamp_session_id']
-            user_id = data['user_id']
+            wamp_session_id = str(data['wamp_session_id'])
+            user_id = str(data['user_id'])
             wamp_session_client_data[wamp_session_id] = {
                 "user_id" : user_id
             }
@@ -362,7 +362,7 @@ def joined(session, details):
                     user_id_wamp_sessions_data.append(wamp_session_id)
             else:
                 user_wamp_sessions[user_id] = [wamp_session_id]
-            status = data['status']
+            status = str(data['status'])
             update_is_available(user_id, status)
 
             log.info("process status command")
@@ -384,7 +384,7 @@ def joined(session, details):
         # todo - fix , update database here
         global  wamp_session_client_data, user_wamp_sessions
         from application.notification import IObserver, NotificationCenter, NotificationData
-        wamp_session_id = data
+        wamp_session_id = str(data)
         log.info("on_session_leave event received: wamp_session_client_data %r", wamp_session_client_data)
         if wamp_session_id in wamp_session_client_data:
             log.info("found wamp_session_id in wamp_session_client_data")
