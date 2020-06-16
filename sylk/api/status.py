@@ -1,5 +1,5 @@
 import logging
-from datetime import time
+import time
 from flask import Blueprint, jsonify
 from flask_cors import CORS
 
