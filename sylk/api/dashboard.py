@@ -112,25 +112,14 @@ def abandoned_events():
     ]
     '''
     current_dt = arrow.get()
+    day_before = current_dt.shift(days=-1)
     pipeline = [
         {
             "$addFields": {
-                "year": {"$substr": ["$event_time", 0, 4]},
-                "month": {"$substr": ["$event_time", 5, 2]},
-                "day": {"$substr": ["$event_time", 8, 2]},
                 "hour": {"$substr": ["$event_time", 11, 2]},
-                "minute": {"$substr": ["$event_time", 14, 2]},
-                "second": {"$substr": ["$event_time", 17, 2]}
             }
         },
-        {
-            "$match": {
-                "event": "abandoned",
-                "year": current_dt.format('YYYY'),
-                "month": current_dt.format('MM'),
-                "day": current_dt.format('DD')
-            }
-        },
+        {"$match": {"event": "abandoned"}},
         {
             "$group": {
                 "_id": "$hour",
@@ -141,6 +130,6 @@ def abandoned_events():
             "$sort": {"_id": 1}
         }
     ]
-    events = ConferenceEvent.objects().aggregate(pipeline)
+    events = ConferenceEvent.objects().filter(event_time__gte=day_before).aggregate(pipeline)
     return {'abandoned_events': list(events)}
 

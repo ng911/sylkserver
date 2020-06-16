@@ -2,7 +2,7 @@ import os
 import sys
 
 
-MONGODB_HOST = "mongodb:27017"
+MONGODB_HOST = "rdffg.emergent911.com:27017"
 MONGODB_DB = "ng911"
 MONGODB_USERNAME = "ws"
 MONGODB_PASSWORD = "emergent94108"
