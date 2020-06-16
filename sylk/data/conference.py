@@ -133,9 +133,10 @@ class ConferenceData(object):
             conference.answer_time = utcnow
             conference.save()
             arrow_answer_time = arrow.utcnow()
-            arrow_start_time = arrow.get(conference.start_time, 'YYYY,MM,DD,HH,mm,ss,SSSSSS')
+            log.info("conference.start_time is %r", conference.start_time)
+            arrow_start_time = arrow.get(conference.start_time)
             response_time = arrow_answer_time - arrow_start_time
-
+            response_time = response_time.seconds
             '''
             conference_event = ConferenceEvent()
             conference_event.event = 'active'
