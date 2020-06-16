@@ -28,7 +28,7 @@ from uuid import uuid4
 from sylk.accounts import DefaultAccount
 from sylk.db.authenticate import authenticate_call, get_calltaker_user
 from sylk.db.queue import get_queue_details, get_queue_members
-from sylk.db.calltaker import get_available_calltakers, update_calltaker_status
+from sylk.db.calltaker import get_available_calltakers, update_calltaker_status, get_user_id
 from acd import get_calltakers
 import sylk.data.call as call_data
 import sylk.data.conference as conf_data
@@ -366,12 +366,30 @@ class PSAPApplication(SylkApplication):
         is_emergency = False
         incoming_link = None
         call_type = ''
+        admin_user = ''
         if session.request_uri.user == "sos":
             authenticated = True
             is_emergency = True
             called_number = local_identity.uri.user
             calling_number = remote_identity.uri.user
             call_type = 'sos'
+            direction = 'incoming'
+            queue_id = ''
+        elif session.request_uri.user == "100":
+            authenticated = True
+            is_emergency = False
+            called_number = local_identity.uri.user
+            calling_number = remote_identity.uri.user
+            call_type = 'admin'
+            direction = 'incoming'
+            queue_id = ''
+            admin_user = 'mike'
+        elif session.request_uri.user == "600":
+            authenticated = True
+            is_emergency = False
+            called_number = local_identity.uri.user
+            calling_number = remote_identity.uri.user
+            call_type = 'admin'
             direction = 'incoming'
             queue_id = ''
 
@@ -428,7 +446,7 @@ class PSAPApplication(SylkApplication):
 
         NotificationCenter().add_observer(self, sender=session)
 
-        if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker'):
+        if (call_type == 'sos') or (call_type == 'outgoing') or (call_type == 'outgoing_calltaker') or (call_type == 'admin'):
             queue_details = None
             acd_strategy = None
             ignore_calltakers = None
@@ -453,6 +471,20 @@ class PSAPApplication(SylkApplication):
                 forward_to_calltaker=True
                 # add these calltakers to ignore list so we do not bother them again
                 ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
+            elif call_type == 'admin':
+                if admin_user != '':
+                    server = ServerConfig.asterisk_server
+                    sip_uris = ["sip:%s@%s" % (admin_user, server)]
+                    user_id = get_user_id(admin_user)
+                    log.info("sip_uris is %r", sip_uris)
+                    self.set_calltaker_busy(self, user_id=user_id)
+                    forward_to_calltaker = True
+                    # add these calltakers to ignore list so we do not bother them again
+                    ignore_calltakers = [admin_user]
+                else:
+                    sip_uris = []
+                    forward_to_calltaker = True
+                    ignore_calltakers = []
             else:
                 if call_type == 'outgoing':
                     session.is_calltaker = True
@@ -491,7 +523,7 @@ class PSAPApplication(SylkApplication):
             #called_number = local_identity.uri.user
             caller_uri = str(remote_identity.uri)
             called_uri = str(local_identity.uri)
-            if (call_type == 'sos') and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
+            if (call_type == 'sos') and (incoming_link != None) and hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                 log.info('inoming_link.ali_format is %r', incoming_link.ali_format)
                 # just a temporary change for warren county
                 #lookup_number = local_identity.uri.user
@@ -646,8 +678,6 @@ class PSAPApplication(SylkApplication):
                                                    NotificationData(room_number=room_number,
                                                                     display_name=str(remote_identity.uri.user),
                                                                     is_calltaker=True, status=room_data.status))
-        elif call_type == 'admin':
-            pass
 
     def invite_to_conference(self, room_number, call_from, phone_number):
         log.info("invite_to_conference for room %s, phone %s", room_number, phone_number)

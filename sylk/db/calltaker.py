@@ -126,3 +126,8 @@ def reset_calltakers_status(psap_id):
         userObj.status = "offline"
         userObj.is_available = False
         userObj.save()
+
+def get_user_id(username, psap_id):
+    userObj = User.objects(psap_id=psap_id, username=username)
+    return str(userObj.user_id)
+
