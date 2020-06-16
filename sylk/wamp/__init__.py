@@ -4,7 +4,6 @@ import time
 
 from autobahn.twisted.component import Component
 from autobahn.wamp.types import PublishOptions
-from application.notification import IObserver, NotificationCenter, NotificationData
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet import reactor
 
