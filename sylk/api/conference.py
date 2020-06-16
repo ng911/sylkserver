@@ -19,8 +19,6 @@ from .utils import get_argument
 from bson.objectid import ObjectId
 from mongoengine import Q
 from ..db.calls import get_conference_json, get_conference_participants_json, get_conference_event_log_json
-from ..db.calls import get_conference_json, clear_abandoned_calls
-from ..wamp import publish_clear_abandoned_call
 
 conference = Blueprint('conference', __name__,
                         template_folder='templates')
@@ -38,24 +36,13 @@ def conference_debug_info(room_number):
     return jsonify(debug_info)
 
 
-@conference.route('/abandoned/clear/<psap_id>', methods=['GET', 'PUT', 'POST'])
-def api_clear_abandoned_calls(psap_id):
-    try:
-        callback_number = get_argument('callback_number')
-        caller_ani = get_argument('caller_ani')
-        calls_cleared, total_calls_cleared = clear_abandoned_calls(psap_id, callback_number=callback_number, caller_ani=caller_ani)
-        publish_clear_abandoned_call(calls_cleared)
-        response = {'success': True, 'calls_cleared' : total_calls_cleared}
-        return jsonify(response)
-    except Exception as e:
-        stacktrace = traceback.format_exc()
-        log.error('exception in search %s', str(e))
-        log.error("%s", stacktrace)
-        response = {
-            'success': False,
-            'error' : str(e)
-        }
-        return jsonify(response)
+@conference.route('/testme/', methods=['GET'])
+def conference_test():
+    response = {
+        'success' : True
+    }
+
+    return jsonify(response)
 
 
 @conference.route('/<room_number>', methods=['GET'])

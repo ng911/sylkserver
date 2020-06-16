@@ -34,7 +34,9 @@ if __name__ == '__main__':
 
     try:
         from sylk.api import start_rest_api_server
+        from sylk.wamp import start as start_wamp
 
+        start_wamp()
         start_rest_api_server()
         reactor.run()
     except Exception as e:
