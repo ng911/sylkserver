@@ -256,6 +256,9 @@ class IncomingLink(Document):
     def is_origination_sos_text(self):
         return self.orig_type == 'sos_text'
 
+def add_calltaker_gateway(ip_addr, psap_id):
+    IncomingLink(psap_id=psap_id, name="calltaker gateway", orig_type='calltaker_gateway', ip_address=ip_addr).save()
+
 
 class OutgoingLink(Document):
     link_id = ObjectIdField(required=True)
