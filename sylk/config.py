@@ -7,8 +7,6 @@ MONGODB_DB = "ng911"
 MONGODB_USERNAME = "ws"
 MONGODB_PASSWORD = "emergent94108"
 MONGODB_REPLICASET = ""
-MONGODB_URI = 'mongodb://%s:%s@%s/%s' % \
-              (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB)
 #MONGODB_URI = 'mongodb://localhost:27017/ng911'
 
 #MONGODB_REPLICASET = "emergent911rs"
@@ -26,6 +24,10 @@ else:
     WAMP_REALM = u"realm1"
     WAMP_CROSSBAR_SERVER = u"ws://rdffg.emergent911.com/ws"
     #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
+
+MONGODB_URI = 'mongodb://%s:%s@%s/%s' % \
+              (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB)
+
 #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 WAMP_CONNECTION = WAMP_CROSSBAR_SERVER
 SOP_DIR = "sop"
