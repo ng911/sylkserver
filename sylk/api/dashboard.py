@@ -65,22 +65,33 @@ def active_events():
     pipeline = [
         {
             "$addFields": {
-                "hour": { "$substr": [ "$event_time", 11, 2 ] },
+                "hour": {"$substr": ["$event_time", 11, 2]},
+                "day": {"$substr": ["$event_time", 8, 2]},
+                "month": {"$substr": ["$event_time", 5, 2]},
+                "dateStr": {"$substr": ["$event_time", 5, 8]},
             }
         },
-        { "$match": {"event": "active" }},
+        {"$match": {"event": "active"}},
         {
-            "$group" : {
-                "_id" : "$hour",
-                "total" : { "$sum" : 1 }
+            "$group": {
+                "_id": "$dateStr",
+                "total": {"$sum": 1}
             }
         },
-        {
-            "$sort": { "_id": 1 }
-        }
+        {"$sort": {"_id": 1}}
     ]
-    events = ConferenceEvent.objects().filter(event_time__gte=day_before).aggregate(pipeline)
-    return { 'active_events': list(events) }
+    events = list(ConferenceEvent.objects().filter(event_time__gte=day_before).aggregate(pipeline))
+    data = []
+    for r in arrow.Arrow.span_range('hour', day_before, current_dt):
+        start = r[0]
+        data.append({'time': start.isoformat(), 'total': 0})
+    for event in events:
+        event_dt = arrow.get(event['_id'], 'MM,DD,HH').replace(year=current_dt.year)
+        for d in data:
+            if d['time'] == event_dt.isoformat():
+                d['total'] = event['total']
+    return {'active_events': data}
+
 
 @dashboard.route('/abandoned_events', methods=['GET'])
 @check_exceptions
