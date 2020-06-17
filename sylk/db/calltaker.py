@@ -1,3 +1,4 @@
+import traceback
 from mongoengine import DoesNotExist
 from .schema import User, Psap, CalltakerProfile, Queue, QueueMember
 
@@ -105,7 +106,9 @@ def update_calltaker_status(status, username=None, user_id=None):
         calltaker_obj.status = status
         calltaker_obj.save()
     except Exception as e:
-        log.error("error in update_calltaker_status %r", str(e))
+        stacktrace = traceback.format_exc()
+        log.error("error in update_calltaker_status %s", e.message)
+        log.error(stacktrace)
 
 
 def inactivate_calltaker(user_id):
