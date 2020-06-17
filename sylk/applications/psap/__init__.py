@@ -570,7 +570,11 @@ class PSAPApplication(SylkApplication):
                 if hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                     ali_lookup(room_number, caller_ani, incoming_link.ali_format)
                 else:
-                    ali_lookup(room_number, caller_ani, "30WWireless")
+                    lookup_number = caller_ani
+                    if len(lookup_number) > 0 and lookup_number[0] == '+':
+                        lookup_number = caller_ani[1:]
+                    log.info("do lookup for room_number %r, lookup_number %r", room_number, lookup_number)
+                    ali_lookup(room_number, lookup_number, "30WWireless")
 
             self.add_incoming_participant(display_name=calling_number, sip_uri=str(remote_identity.uri), session=session, is_caller=True, is_calltaker=is_call_from_calltaker)
             if direction == 'out':
