@@ -83,7 +83,7 @@ def check_exceptions(func):
                 "error_code": "general_errpr",
             }
         finally:
-            log.info("check_exceptions in finally")
+            #log.info("check_exceptions in finally")
             #log.info("check_exceptions finally json_response is %r, status_code is %r", json_response, status_code)
             return json_response, status_code
 
