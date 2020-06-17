@@ -461,16 +461,18 @@ class PSAPApplication(SylkApplication):
                     acd_strategy = queue_details.acd_strategy
                     calltakers = get_calltakers(acd_strategy, user_ids)
                     sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
+                    [self.set_calltaker_busy(user_id=user_id) for user_id in user_ids]
+                    ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
                 else:
                     acd_strategy = 'ring_all'
-                    calltakers = get_available_calltakers(ServerConfig.psap_id)
+                    calltakers, user_ids = get_available_calltakers(ServerConfig.psap_id)
                     sip_uris = ["sip:%s@%s" % (calltaker, server) for calltaker in calltakers]
+                    [self.set_calltaker_busy(user_id=user_id) for user_id in user_ids]
+                    ignore_calltakers = [calltaker for calltaker in calltakers]
 
                 log.info("sip_uris is %r", sip_uris)
-                [self.set_calltaker_busy(user_id=user_id) for user_id in calltakers]
                 forward_to_calltaker=True
                 # add these calltakers to ignore list so we do not bother them again
-                ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
             elif call_type == 'admin':
                 if admin_user != '':
                     server = ServerConfig.asterisk_server
