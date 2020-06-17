@@ -467,7 +467,7 @@ class PSAPApplication(SylkApplication):
                 server = ServerConfig.asterisk_server
                 sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                 log.info("sip_uris is %r", sip_uris)
-                [self.set_calltaker_busy(self, user_id=user_id) for user_id in calltakers]
+                [self.set_calltaker_busy(user_id=user_id) for user_id in calltakers]
                 forward_to_calltaker=True
                 # add these calltakers to ignore list so we do not bother them again
                 ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
@@ -477,7 +477,7 @@ class PSAPApplication(SylkApplication):
                     sip_uris = ["sip:%s@%s" % (admin_user, server)]
                     user_id = get_user_id(admin_user)
                     log.info("sip_uris is %r", sip_uris)
-                    self.set_calltaker_busy(self, user_id=user_id)
+                    self.set_calltaker_busy(user_id=user_id)
                     forward_to_calltaker = True
                     # add these calltakers to ignore list so we do not bother them again
                     ignore_calltakers = [admin_user]
@@ -1543,6 +1543,7 @@ class PSAPApplication(SylkApplication):
         return None
 
     def set_calltaker_busy(self, username=None, user_id=None):
+        log.info('set_calltaker_busy for username %r, user_id %r', username, user_id)
         self.set_calltaker_status(user_id=user_id, username=username, status='busy')
 
     def set_calltaker_available(self, username=None, user_id=None):
@@ -1550,6 +1551,7 @@ class PSAPApplication(SylkApplication):
         self.set_calltaker_status(user_id=user_id, username=username, status='available')
 
     def set_calltaker_status(self, username=None, user_id=None, status='available'):
+        log.info('psap set_calltaker_status for status %r, username %r, user_id %r', status, username, user_id)
         update_calltaker_status(status, username=username, user_id=user_id)
         '''
         publish_update_calltaker_status(user_id, username, status)
