@@ -94,9 +94,10 @@ def add_update_calltaker(payload, user_id):
 
 def update_calltaker_status(status, username=None, user_id=None):
     try:
+        log.info("inside update_calltaker_status status %r, username %r, user_id %r", status, username, user_id)
         if username != None:
             calltaker_obj = User.objects.get(username=username)
-        elif username != None:
+        elif user_id != None:
             calltaker_obj = User.objects.get(user_id=user_id)
         else:
             log.error("error calling update_calltaker_status no username or user_id")
