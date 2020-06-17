@@ -673,7 +673,7 @@ class PSAPApplication(SylkApplication):
                     log.info('outgoing_call_initializer %r', outgoing_call_initializer)
                     outgoing_call_initializer.cancel_call()
                 reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
-            self.set_calltaker_busy(username=remote_identity.uri.user)
+            self.set_calltaker_busy(username=str(remote_identity.uri.user))
             NotificationCenter().post_notification('ConferenceAnswered', self,
                                                    NotificationData(room_number=room_number,
                                                                     display_name=str(remote_identity.uri.user),
