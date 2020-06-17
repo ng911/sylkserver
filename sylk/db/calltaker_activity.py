@@ -18,7 +18,7 @@ def add_call_pickup_by_name(username, response_time):
     add_call_pickup(str(userObj.user_id), response_time)
 
 def add_call_hangup(user_id):
-    activityObj = CalltakerActivity(user_id=user_id, event='hangup')
+    activityObj = CalltakerActivity(user_id=user_id, event='hang_up')
     activityObj.save()
 
 def add_call_hangup_by_name(username):
