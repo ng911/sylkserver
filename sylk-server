@@ -123,6 +123,7 @@ if __name__ == '__main__':
         # make sure calltaker_data is initialized
         calltaker_data.CalltakerData()
         reset_calltakers_status(ServerConfig.psap_id)
+        log.info("start wamp now")
         sylk.wamp.start(status_listner_enabled=True)
         log.info('wamp.start done')
         server.run(options)
