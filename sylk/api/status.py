@@ -14,6 +14,16 @@ CORS(status)
 
 log = logging.getLogger('emergent-ng911')
 
+@status.route('/test', methods=['GET'])
+@check_exceptions
+def test():
+    response = {
+        'success' : True,
+        'message' : "hello tarun"
+    }
+
+    return jsonify(response)
+
 
 @status.route('/<user_id>', methods=['POST', 'PUT'])
 @check_exceptions
