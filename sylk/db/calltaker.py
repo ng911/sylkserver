@@ -124,7 +124,7 @@ def get_available_calltakers(psap_id):
         calltakers.append(str(userObj.username))
         user_ids.append(str(userObj.user_id))
     log.info("get_all_calltakers psap_id %r, calltakers %r, user_ids %r", psap_id, calltakers, user_ids)
-    return calltakers
+    return calltakers, user_ids
 
 # make all calltakers offline
 def reset_calltakers_status(psap_id):
