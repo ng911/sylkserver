@@ -4,7 +4,7 @@ from twisted.internet import reactor
 
 from .aliquery import send_ali_request, check_ali_format_supported
 from ..db.schema import Location, Conference, ConferenceParticipant, User
-from ..wamp import publish_update_call, publish_update_location_success
+from ..wamp import publish_update_call, publish_update_location_success, publish_update_location_failed
 from ..db.calls import get_conference_json
 from .alidump import dump_ali
 
@@ -203,7 +203,7 @@ def ali_lookup(room_number, number, ali_format, station_id=''):
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)
             log.error('process_ali_failed %s', str(e))
-        wamp.publish_update_location_failed(room_number)
+        publish_update_location_failed(room_number)
 
     if d is not None:
         d.addErrback(process_ali_failed)
