@@ -16,7 +16,7 @@ from sylk.wamp import publish_create_call, publish_update_call, publish_active_c
     publish_update_call_events, publish_tty_enabled, publish_tty_updated, publish_msrp_message
 import sylk.db.calls as calls
 from sylk.utils import get_json_from_db_obj
-from ..db.calltaker_activity import add_call_pickup_by_name, add_call_hangup
+from ..db.calltaker_activity import add_call_pickup_by_name, add_call_hangup, add_call_hangup_by_name
 import subprocess
 import uuid
 import requests
@@ -192,7 +192,7 @@ class ConferenceData(object):
             conference_event.room_number = room_number
             if is_calltaker:
                 conference_event.event_details = 'Calltaker {} released the call'.format(display_name)
-                add_call_pickup_by_name(display_name)
+                add_call_hangup_by_name(display_name)
             else:
                 conference_event.event_details = '{} hung up'.format(display_name)
 
