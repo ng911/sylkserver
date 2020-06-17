@@ -17,11 +17,17 @@ def get_speed_dials(psap_id, group_name=None):
     }
     if group_name != None and group_name != "":
         group = SpeedDialGroup.objects.get(group_name=group_name)
-        params["group_id"] = group.id
-        params["group_name"] = group.group_name
+        params["group_id"] = group.group_id
+
+    speedDialGroups = {}
+    for dbObj in SpeedDialGroup.objects(psap_id=psap_id):
+        speedDialGroups[str(dbObj.group_id)] = dbObj.group_name
 
     for speedDial in SpeedDial.objects(**params):
-        speedDials.append(get_json_from_db_obj(speedDial, ignore_fields=['group']))
+        jsonSpeedDial = get_json_from_db_obj(speedDial, ignore_fields=['group'])
+        if hasattr(speedDial, "group_id") and (speedDial.group_id != None):
+            jsonSpeedDial["group"] = speedDialGroups[str(speedDial.group_id)]
+        speedDials.append(jsonSpeedDial)
 
     return speedDials
 
