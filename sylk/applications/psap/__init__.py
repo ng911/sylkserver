@@ -572,7 +572,9 @@ class PSAPApplication(SylkApplication):
                 else:
                     lookup_number = caller_ani
                     if len(lookup_number) > 0 and lookup_number[0] == '+':
-                        lookup_number = caller_ani[1:]
+                        lookup_number = lookup_number[1:]
+                    if len(lookup_number) > 0 and lookup_number[0] == '1':
+                        lookup_number = lookup_number[1:]
                     log.info("do lookup for room_number %r, lookup_number %r", room_number, lookup_number)
                     ali_lookup(room_number, lookup_number, "30WWireless")
 
