@@ -197,7 +197,7 @@ class PSAPApplication(SylkApplication):
         self._rooms = {}
 
     def init_observers(self):
-        log.info("ConferenceData init_observers")
+        log.info("PSAPApplication init_observers")
         # this one is used to change the mute, or send status of different media streams
         NotificationCenter().add_observer(self, name='ConferenceParticipantDBUpdated')
         NotificationCenter().add_observer(self, name='CalltakerStatusUpdate')
