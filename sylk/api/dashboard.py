@@ -133,7 +133,7 @@ def abandoned_events():
                 "dateStr": {"$substr": ["$event_time", 5, 8]},
             }
         },
-        {"$match": {"event": "abandoned"}},
+        {"$match": {"event": "timed_out"}},
         {
             "$group": {
                 "_id": "$dateStr",
