@@ -99,7 +99,7 @@ def do_ali_query(room_number):
         response = {'success' : False, 'reason' : str(e)}
         return jsonify(response)
 
-@location.route('/test_pidf_lo', methods=['GET', 'POST', 'PUT'])
+@location.route('/test', methods=['GET', 'POST', 'PUT'])
 def send_sample_pidflo(room_number):
     log.info("inside send_sample_pidflo")
     try:
