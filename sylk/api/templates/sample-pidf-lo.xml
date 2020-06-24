@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locationResponse xmlns="urn:ietf:params:xml:ns:geopriv:held"
+                  xmlns:ca="urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr"
+                  xmlns:pdm="urn:ietf:params:xml:ns:pidf:data-model"
+                  xmlns:gp="urn:ietf:params:xml:ns:pidf:geopriv10"
+                  xmlns:gml="http://www.opengis.net/gml"
+                  xmlns:p="urn:ietf:params:xml:ns:pidf" xmlns:ali="http://www.nena9-1-1.org/schemas/2003/ali" xmlns:gbp="urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <p:presence xmlns="urn:ietf:params:xml:ns:pidf" entity="sip:2152588920@rtt.nga911.com">
+    <tuple id="b650sf789nd">
+      <status>
+        <gp:geopriv>
+          <gp:location-info>
+            <ca:civicAddress>
+              <ca:country>US</ca:country>
+              <ca:A1>Colorado</ca:A1>
+              <ca:A2>Boulder County</ca:A2>
+              <ca:A3>Lafayette</ca:A3>
+              <ca:RD>Waneka Lake Trl</ca:RD>
+              <ca:HNO>2417</ca:HNO>
+              <ca:PC>80026</ca:PC>
+            </ca:civicAddress>
+            <gml:Point gml:id="point" srsName="urn:ogc:def:crs:EPSG::4326">
+              <gml:pos>39.998882 -105.126778 0.000000</gml:pos>
+            </gml:Point>
+          </gp:location-info>
+          <gp:location-info><ca:civicAddress><ca:country>US</ca:country><ca:A1>Colorado</ca:A1><ca:A2>Boulder County</ca:A2><ca:A3>Lafayette</ca:A3><ca:RD>Waneka Lake Trl</ca:RD><ca:HNO>2417</ca:HNO><ca:PC>80026</ca:PC></ca:civicAddress>
+            <gml:Point gml:id="point" srsName="urn:ogc:def:crs:EPSG::4326">
+              <gml:pos>39.998882 -105.126778 0.000000</gml:pos>
+            </gml:Point>
+          </gp:location-info>
+          <gp:usage-rules>
+            <retention-expiry>2020-06-22T16:10:51Z</retention-expiry>
+          </gp:usage-rules>
+          <gp:accuracy>92.151505</gp:accuracy>
+          <ali:ALIBody schemaVersion="0.0">
+            <ali:CallInfo>
+              <ali:CallbackNum>+17203846158</ali:CallbackNum>
+              <ali:CallingPartyNum>+17203846158</ali:CallingPartyNum>
+              <ali:ClassOfService code="1">VoIP Wireless</ali:ClassOfService>
+              <ali:TypeOfService code="0">FX in 911 serving area</ali:TypeOfService>
+              <ali:SourceOfService>V</ali:SourceOfService>
+              <ali:MainTelNum>+17203846158</ali:MainTelNum>
+              <ali:CustomerName>Edmond Vea</ali:CustomerName>
+              <ali:CustomerCode>670</ali:CustomerCode>
+              <ali:AttentionIndicator code="1">None</ali:AttentionIndicator>
+              <ali:SpecialMessage>a</ali:SpecialMessage>
+              <ali:AlsoRingsAtAddress>a</ali:AlsoRingsAtAddress>
+            </ali:CallInfo>
+            <ali:LocationInfo>
+              <ali:StreetAddress>
+                <ali:HouseNum>2417</ali:HouseNum>
+                <ali:HouseNumSuffix/>
+                <ali:PrefixDirectional/>
+                <ali:StreetName>Waneka Lake Trl</ali:StreetName>
+                <ali:StreetSuffix/>
+                <ali:PostDirectional>S</ali:PostDirectional>
+                <ali:TextualAddress>2417, Waneka Lake Trl, Lafayette, Boulder County, Colorado, 80026, USA</ali:TextualAddress>
+                <ali:MSAGCommunity>a</ali:MSAGCommunity>
+                <ali:PostalCommunity>a</ali:PostalCommunity>
+                <ali:StateProvince>Colorado</ali:StateProvince>
+                <ali:CountyID>Boulder County</ali:CountyID>
+                <ali:Country>United States of America</ali:Country>
+                <ali:TARCode>a</ali:TARCode>
+                <ali:PostalZipCode>80026</ali:PostalZipCode>
+                <ali:Building>a</ali:Building>
+                <ali:Floor>a</ali:Floor>
+                <ali:UnitNum>a</ali:UnitNum>
+                <ali:UnitType>unknown</ali:UnitType>
+                <ali:LocationDescription>a</ali:LocationDescription>
+                <ali:LandmarkAddress>a</ali:LandmarkAddress>
+              </ali:StreetAddress>
+              <ali:GeoLocation>
+                <ali:Latitude>39.998882</ali:Latitude>
+                <ali:Longitude>-105.126778</ali:Longitude>
+                <ali:Elevation/>
+                <ali:Datum/>
+                <ali:Heading>0</ali:Heading>
+                <ali:Speed/>
+                <ali:PositionSource code="0">String</ali:PositionSource>
+                <ali:Uncertainty>1</ali:Uncertainty>
+                <ali:Confidence>92.151505</ali:Confidence>
+                <ali:DateStamp>2020-06-20T02:45:47.0Z</ali:DateStamp>
+                <ali:LocationDescription>a</ali:LocationDescription>
+              </ali:GeoLocation>
+              <ali:CellSite>
+                <ali:CellID>6881087</ali:CellID>
+                <ali:SectorID/>
+                <ali:LocationDescription>AT%26T AT%26T</ali:LocationDescription>
+              </ali:CellSite>
+              <ali:Comment>a</ali:Comment>
+            </ali:LocationInfo>
+            <ali:Agencies>
+              <ali:Police>
+                <ali:Name>a</ali:Name>
+                <ali:TN>0000000</ali:TN>
+              </ali:Police>
+              <ali:Fire>
+                <ali:Name>a</ali:Name>
+                <ali:TN>0000000</ali:TN>
+              </ali:Fire>
+              <ali:EMS>
+                <ali:Name>a</ali:Name>
+                <ali:TN>0000000</ali:TN>
+              </ali:EMS>
+              <ali:OtherAgencies>
+                <ali:Agency kind="NMTOKEN">
+                  <ali:Name>a</ali:Name>
+                  <ali:TN>0000000</ali:TN>
+                </ali:Agency>
+                <ali:Agency kind="NMTOKEN">
+                  <ali:Name>a</ali:Name>
+                  <ali:TN>0000000</ali:TN>
+                </ali:Agency>
+              </ali:OtherAgencies>
+              <ali:AdditionalInfo>a</ali:AdditionalInfo>
+              <ali:ESN>000</ali:ESN>
+            </ali:Agencies>
+            <ali:SourceInfo>
+              <ali:DataProvider>
+                <ali:DataProviderID>a</ali:DataProviderID>
+                <ali:TN>0000000000</ali:TN>
+                <ali:Name>a</ali:Name>
+              </ali:DataProvider>
+              <ali:AccessProvider>
+                <ali:AccessProviderID>a</ali:AccessProviderID>
+                <ali:TN>0000000000</ali:TN>
+                <ali:Name>a</ali:Name>
+              </ali:AccessProvider>
+              <ali:ALIUpdateGMT>2020-06-22T15:10:52.0Z</ali:ALIUpdateGMT>
+              <ali:ALIRetrievalGMT>2020-06-22T15:10:52.0Z</ali:ALIRetrievalGMT>
+              <ali:GeneralUses>
+                <ali:GeneralUse ID="String">String</ali:GeneralUse>
+                <ali:GeneralUse ID="String">String</ali:GeneralUse>
+              </ali:GeneralUses>
+            </ali:SourceInfo>
+            <ali:NetworkInfo>
+              <ali:PSAPALIHost>a</ali:PSAPALIHost>
+              <ali:RespALIHost>a</ali:RespALIHost>
+              <ali:PSAPID>aaaa</ali:PSAPID>
+              <ali:PSAPName>a</ali:PSAPName>
+              <ali:RouterID>a</ali:RouterID>
+              <ali:Exchange>a</ali:Exchange>
+              <ali:CLLI>a</ali:CLLI>
+            </ali:NetworkInfo>
+            <ali:Extension version="0.0" source="String" name="String"/>
+            <ali:Extension version="0.0" source="String" name="String"/>
+          </ali:ALIBody>
+        </gp:geopriv>
+      </status>
+      <pdm:timestamp>2020-06-22T15:10:51Z</pdm:timestamp>
+    </tuple>
+  </p:presence>
+</locationResponse>
+
