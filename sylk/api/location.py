@@ -2,7 +2,7 @@ import traceback
 import datetime
 import logging
 
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, Response
 from flask_cors import CORS
 
 from ..db.schema import Location, Conference
@@ -101,4 +101,7 @@ def do_ali_query(room_number):
 
 @location.route('/test_pidf_lo', methods=['GET', 'POST', 'PUT'])
 def send_sample_pidflo(room_number):
-    return render_template('sample-pidf-lo.xml')
+    body = render_template('sample-pidf-lo.xml')
+    r = Response(response=body, status=200, mimetype="application/xml")
+    r.headers["Content-Type"] = "application/held+xml; charset=utf-8"
+    return r
