@@ -101,6 +101,7 @@ def do_ali_query(room_number):
 
 @location.route('/test_pidf_lo', methods=['GET', 'POST', 'PUT'])
 def send_sample_pidflo(room_number):
+    log.info("inside send_sample_pidflo")
     try:
         body = render_template('sample-pidf-lo.xml')
         r = Response(response=body, status=200, mimetype="application/xml")
