@@ -100,7 +100,7 @@ def do_ali_query(room_number):
         return jsonify(response)
 
 @location.route('/test', methods=['GET', 'POST', 'PUT'])
-def send_sample_pidflo(room_number):
+def test():
     log.info("inside send_sample_pidflo")
     try:
         body = render_template('sample-pidf-lo.xml')
@@ -113,4 +113,3 @@ def send_sample_pidflo(room_number):
         log.error(stacktrace)
         response = {'success' : False, 'reason' : str(e)}
         return jsonify(response)
-
