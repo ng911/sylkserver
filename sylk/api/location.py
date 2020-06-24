@@ -101,7 +101,15 @@ def do_ali_query(room_number):
 
 @location.route('/test_pidf_lo', methods=['GET', 'POST', 'PUT'])
 def send_sample_pidflo(room_number):
-    body = render_template('sample-pidf-lo.xml')
-    r = Response(response=body, status=200, mimetype="application/xml")
-    r.headers["Content-Type"] = "application/held+xml; charset=utf-8"
-    return r
+    try:
+        body = render_template('sample-pidf-lo.xml')
+        r = Response(response=body, status=200, mimetype="application/xml")
+        r.headers["Content-Type"] = "application/held+xml; charset=utf-8"
+        return r
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("api location %r", e)
+        log.error(stacktrace)
+        response = {'success' : False, 'reason' : str(e)}
+        return jsonify(response)
+
