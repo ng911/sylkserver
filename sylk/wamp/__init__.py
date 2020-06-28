@@ -360,6 +360,7 @@ def joined(session, details):
                 user_id_wamp_sessions_data = user_wamp_sessions[user_id]
                 if wamp_session_id not in user_id_wamp_sessions_data:
                     user_id_wamp_sessions_data.append(wamp_session_id)
+                    user_wamp_sessions[user_id] = user_id_wamp_sessions_data
             else:
                 user_wamp_sessions[user_id] = [wamp_session_id]
             status = str(data['status'])
@@ -401,18 +402,26 @@ def joined(session, details):
                 log.info("len(user_wamp_sessions) %r", len(user_wamp_sessions))
                 if len(user_id_wamp_sessions_data) == 0:
                     del user_wamp_sessions[user_id]
+                else:
+                    user_wamp_sessions[user_id] = user_id_wamp_sessions_data
             update_is_available(user_id)
             notification_center = NotificationCenter()
             notification_center.post_notification('CalltakerSessionLeave', wamp_session, NotificationData(wamp_session_id=data))
-        '''
-        out = {
-            'command': 'status_updated'
-        }
-        session.publish(u'com.emergent.calltakers', out)
-        '''
+            out = {
+                'command': 'status_updated'
+            }
+            session.publish(u'com.emergent.calltakers', out)
 
     if start_status_listener:
         try:
+            # clear sessions and update is_available in database
+            global wamp_session_client_data, user_wamp_sessions
+            wamp_session_client_data = {}
+            user_wamp_sessions = {}
+            from ..db.calltaker import reset_calltakers_status
+            from ..configuration import ServerConfig
+            reset_calltakers_status(ServerConfig.psap_id)
+
             yield wamp_session.subscribe(on_session_leave, u'wamp.session.on_leave')
             log.info("subscribed to wamp.session.on_leave")
 
