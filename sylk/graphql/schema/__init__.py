@@ -17,10 +17,8 @@ class Query(graphene.ObjectType):
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
-                                                        psap_id=graphene.String(required=True), \
                                                         calling_number=graphene.String(required=False), \
-                                                        location=graphene.String(required=False),
-                                                        note=graphene.String(required=False))
+                                                        location=graphene.String(required=False))
 
     def resolve_all_conferences(parent, info, **args):
         return resolveCalls(parent, info, **args)
