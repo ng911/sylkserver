@@ -101,7 +101,7 @@ def resolveCalls(parent, info, **args):
     if 'end_time' in args:
         end_time = args['end_time']
 
-    filters = {'psap_id': ObjectId(parent.psap_id),
+    filters = {'psap_id': ObjectId(psap_id),
                'status': {'$nin': ['active', 'init', 'ringing', 'on_hold', 'queued', 'ringing_queued']}}
     if (calling_number != None) and (len(calling_number) > 0):
         log.info('inside search calling_number %s', calling_number)

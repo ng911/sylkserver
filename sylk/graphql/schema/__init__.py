@@ -19,8 +19,6 @@ class Query(graphene.ObjectType):
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         psap_id=graphene.String(required=True), \
                                                         calling_number=graphene.String(required=False), \
-                                                        start_time=graphene.String(required=False), \
-                                                        end_time=graphene.String(required=False), \
                                                         location=graphene.String(required=False),
                                                         note=graphene.String(required=False))
 
