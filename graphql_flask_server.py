@@ -37,7 +37,7 @@ if __name__ == '__main__':
         reactor.run()
     except Exception as e:
         log.fatal('Failed to start {name}: {exception!s}'.format(name=fullname, exception=e))
-        log.exception(e.message)
+        log.exception(str(e))
         sys.exit(1)
 
 
