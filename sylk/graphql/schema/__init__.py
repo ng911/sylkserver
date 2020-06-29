@@ -14,6 +14,7 @@ class Query(graphene.ObjectType):
     all_users = OrderedMongoengineConnectionField(UserNode)
     '''
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
+    '''
     all_queues = OrderedMongoengineConnectionField(QueueNode)
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
@@ -27,7 +28,6 @@ class Query(graphene.ObjectType):
 
     def resolve_all_conferences(parent, info, **args):
         return resolveCalls(parent, info, **args)
-    '''
 
 graphql_schema = graphene.Schema(query=Query, types=[])
 
