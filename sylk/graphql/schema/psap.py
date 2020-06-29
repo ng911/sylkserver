@@ -13,12 +13,17 @@ from .user import UserNode, UserProfileNode
 from .speed_dial import SpeedDialNode
 from .calls import ConferenceNode
 from ...db.schema import Conference as ConferenceModel
-from ...db.schema import Conference1 as Conference1Model
+from ...db.schema import CallTransferLine as CallTransferLineModel
 
+class CallTransferLine(MongoengineObjectType):
+    class Meta:
+        model = PsapModel
+        interfaces = (Node,)
+        connection_class = EnhancedConnection
 
 class PsapNode(MongoengineObjectType):
     class Meta:
-        model = PsapModel
+        model = CallTransferLineModel
         interfaces = (Node,)
         connection_class = EnhancedConnection
 
@@ -27,6 +32,7 @@ class PsapNode(MongoengineObjectType):
     speed_dials = MongoengineConnectionField(SpeedDialNode)
     speed_dial_groups = List(String)
     conferences = MongoengineConnectionField(ConferenceNode)
+    transfer_lines = MongoengineConnectionField(CallTransferLineModel)
 
     def resolve_users(parent, info, **args):
         params = {
@@ -52,7 +58,7 @@ class PsapNode(MongoengineObjectType):
             "psap_id" : parent.psap_id
         }
         params = update_params_with_args(params, args)
-        return Conference1Model.objects(**params)
+        return ConferenceModel.objects(**params)
 
     def resolve_speed_dial_groups(parent, info, **args):
         params = {
@@ -65,3 +71,9 @@ class PsapNode(MongoengineObjectType):
 
         return speed_dial_groups
 
+    def resolve_transfer_lines(parent, info, **args):
+        params = {
+            "psap_id" : parent.psap_id
+        }
+        params = update_params_with_args(params, args)
+        return CallTransferLine.objects(**params)
