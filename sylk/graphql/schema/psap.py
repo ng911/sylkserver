@@ -25,7 +25,7 @@ class CallTransferLineNode(MongoengineObjectType):
 
 class PsapNode(MongoengineObjectType):
     class Meta:
-        model = CallTransferLineModel
+        model = PsapModel
         interfaces = (Node,)
         connection_class = EnhancedConnection
 
