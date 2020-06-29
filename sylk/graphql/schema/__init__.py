@@ -11,7 +11,7 @@ from .calls import ConferenceNode, resolveCalls
 
 class Query(graphene.ObjectType):
     node = Node.Field()
-
+    '''
     all_users = OrderedMongoengineConnectionField(UserNode)
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
     all_queues = OrderedMongoengineConnectionField(QueueNode)
@@ -27,7 +27,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_conferences(parent, info, **args):
         return resolveCalls(parent, info, **args)
-
+    '''
 
 graphql_schema = graphene.Schema(query=Query, types=[])
 
