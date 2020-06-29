@@ -12,9 +12,7 @@ from .calls import ConferenceNode, resolveCalls
 class Query(graphene.ObjectType):
     node = Node.Field()
     all_users = OrderedMongoengineConnectionField(UserNode)
-    '''
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
-    '''
     all_queues = OrderedMongoengineConnectionField(QueueNode)
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
