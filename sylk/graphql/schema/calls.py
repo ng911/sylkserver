@@ -89,7 +89,8 @@ def resolveCalls(parent, info, **args):
     note = None
     start_time = None
     end_time = None
-    psap_id = args['psap_id']
+    if 'psap_id' in args:
+        psap_id = args['psap_id']
     if 'calling_number' in args:
         calling_number = args['calling_number']
     if 'location' in args:

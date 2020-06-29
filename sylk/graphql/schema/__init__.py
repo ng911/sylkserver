@@ -20,8 +20,8 @@ class Query(graphene.ObjectType):
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
 
-    def resolve_all_conferences(parent, info, **args):
-        return resolveCalls(parent, info, **args)
+    #def resolve_all_conferences(parent, info, **args):
+    #    return resolveCalls(parent, info, **args)
 
 graphql_schema = graphene.Schema(query=Query, types=[])
 
