@@ -82,6 +82,12 @@ class ConferenceNode(MongoengineObjectType):
         params = update_params_with_args(params, args)
         return LocationModel.objects(**params).order_by('-updated_at')
 
+def resolveActiveCall(parent, info, **args):
+    username = args['username']
+    dbObj = ConferenceParticipantModel.objects.get(is_calltaker=True, is_active=True, name=username)
+    room_number = dbObj.room_number
+    return ConferenceModel.objects.get(room_number=room_number)
+
 def resolveCalls(parent, info, **args):
     from bson import ObjectId
     calling_number = None
