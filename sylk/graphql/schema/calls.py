@@ -84,9 +84,11 @@ class ConferenceNode(MongoengineObjectType):
 
 def resolveActiveCall(parent, info, **args):
     username = args['username']
-    dbObj = ConferenceParticipantModel.objects.get(is_calltaker=True, is_active=True, name=username)
-    room_number = dbObj.room_number
-    return ConferenceModel.objects.get(room_number=room_number)
+    # there should only be 1 value in rooms but there is some bug in the code, that is why the logic below
+    rooms = []
+    for dbObj in ConferenceParticipantModel.objects(is_calltaker=True, is_active=True, name=username):
+        rooms.append(dbObj.room_number)
+    return ConferenceModel.objects(room_number__in=[rooms], status="active").first()
 
 def resolveCalls(parent, info, **args):
     from bson import ObjectId
