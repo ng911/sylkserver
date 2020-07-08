@@ -6,7 +6,7 @@ from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import Conference as ConferenceModel
-from ...db.schema import Conference1 as Conference1Model
+from ...db.schema import ConferenceEvent as EventLogModel
 from ...db.schema import ConferenceParticipant as ConferenceParticipantModel
 from ...db.schema import Location as LocationModel
 from .location import LocationNode
@@ -49,7 +49,7 @@ class ConferenceNode(MongoengineObjectType):
             "room_number" : parent.room_number
         }
         params = update_params_with_args(params, args)
-        return EventLogNode.objects(**params)
+        return EventLogModel.objects(**params)
 
     def resolve_caller(parent, info):
         params = {
