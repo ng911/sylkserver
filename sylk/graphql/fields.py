@@ -1,10 +1,10 @@
+import re
 import graphene
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 
-def camelCase(st):
-    output = ''.join(x for x in st.title() if x.isalnum())
-    return output[0].lower() + output[1:]
+def snakeCase(st):
+    return re.sub('(?!^)([A-Z]+)', r'_\1', st).lower()
 
 
 class EnhancedConnection(graphene.Connection):
@@ -32,7 +32,7 @@ class OrderedMongoengineConnectionField(MongoengineConnectionField):
         order = args.pop('orderBy', None)
         qs = super(OrderedMongoengineConnectionField, self).get_queryset(model, info, **args)
         if order:
-            order = camelCase(order)
+            order = snakeCase(order)
             qs = qs.order_by(order)
         self.count = qs.count()
         return qs
