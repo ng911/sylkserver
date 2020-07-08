@@ -2,8 +2,8 @@ import graphene
 from graphene.relay import Node
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
-from .user import UserNode
-from .psap import PsapNode
+from .user import UserNode, UpdateUserMutation
+from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
@@ -27,7 +27,14 @@ class Query(graphene.ObjectType):
     #def resolve_all_conferences(parent, info, **args):
     #    return resolveCalls(parent, info, **args)
 
-graphql_schema = graphene.Schema(query=Query, types=[])
+
+class Mutations(graphene.ObjectType):
+    update_user = UpdateUserMutation.Field()
+    create_psap = CreatePsapMutation.Field()
+    update_psap = UpdatePsapMutation.Field()
+
+
+graphql_schema = graphene.Schema(query=Query, mutation=Mutations, types=[])
 
 __all__ = [ 'graphql_schema']
 

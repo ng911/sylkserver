@@ -9,6 +9,7 @@ from ...db.schema import User as UserModel
 from ...db.schema import CalltakerProfile as CalltakerProfileModel
 from ...db.schema import Queue as QueueModel
 from ...db.schema import QueueMember as QueueMemberModel
+from ..mutations import create_update_mutation, EnhancedClientIDMutation
 
 log = logging.getLogger("emergent-ng911")
 
@@ -40,5 +41,11 @@ class UserNode(MongoengineObjectType):
             "user_id" : parent.user_id
         }
         return CalltakerProfileModel.objects.get(**params)
+
+
+class UpdateUserMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __create_custom__(cls):
+        create_update_mutation(cls, UserModel, UserNode, 'user_id')
 
 

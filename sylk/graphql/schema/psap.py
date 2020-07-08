@@ -79,3 +79,41 @@ class PsapNode(MongoengineObjectType):
         }
         params = update_params_with_args(params, args)
         return CallTransferLineModel.objects(**params)
+
+
+class CreatePsapMutation(graphene.relay.ClientIDMutation):
+    psap = graphene.Field(PsapNode)
+
+    class Input:
+        name = graphene.String(required=True)
+        domain_prefix = graphene.String(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        name = input.get('companyId')
+        domain_prefix = input.get('domain_prefix')
+        psapObj = PsapModel(name=name, domain_name=domain_prefix)
+        psapObj.save()
+        return CreatePsapMutation(psap=psapObj)
+
+
+class UpdatePsapMutation(graphene.relay.ClientIDMutation):
+    psap = graphene.Field(PsapNode)
+
+    class Input:
+        psap_id = graphene.String(required=True)
+        name = graphene.String()
+        domain_prefix = graphene.String()
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        psap_id = input.get('psap_id')
+        name = input.get('domain_prefix')
+        domain_prefix = input.get('domain_prefix')
+        psapObj = PsapModel.objects.get(psap_id=psap_id)
+        if name != None:
+            psapObj.name = name
+        if domain_prefix != None:
+            psapObj.domain_name = domain_prefix
+        psapObj.save()
+        return UpdatePsapMutation(psap=psapObj)
