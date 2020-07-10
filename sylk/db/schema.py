@@ -51,8 +51,9 @@ else:
 def post_save(sender, document, **kwargs):
     from ..wamp import publish_relay_node_update, publish_relay_node_add
     log.info("inside graphql_node_notifications post_save ")
-    node_name = "%sNode" % document._meta['collection']
+    node_name = "%sNode" % document.__name__
     log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)
+    log.info("inside graphql_node_notifications kwargs %r", kwargs)
     if 'created' in kwargs:
         publish_relay_node_add(document.psap_id, document.id, node_name)
     else:
@@ -97,6 +98,7 @@ class Psap(Document):
     }
 
 
+@graphql_node_notifications
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     status = StringField(required=True, default='offline')
@@ -150,7 +152,7 @@ class User(Document):
         user.save()
         return  user
 
-add_graphql_node_notifications(User)
+# add_graphql_node_notifications(User)
 
 @graphql_node_notifications
 class CalltakerStation(Document):
