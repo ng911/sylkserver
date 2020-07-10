@@ -52,6 +52,7 @@ def add_update_calltaker(payload, user_id):
         log.info("got psapObj default_profile_id is %r", default_profile_id)
         log.info("got psapObj got defaultProfile")
         userProfile = CalltakerProfile()
+        userProfile.psap_id = userObj.psap_id
         if default_profile_id != None:
             log.info("got psapObj got defaultProfile process")
             defaultProfile = CalltakerProfile.objects.get(profile_id=default_profile_id)
