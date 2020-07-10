@@ -74,7 +74,7 @@ def graphql_node_notifications(cls):
 
 def post_init(sender, document, **kwargs):
     from ..wamp import publish_relay_node_add
-    node_name = "%sNode" % document.name
+    node_name = "%sNode" % document.name()
     log.info("inside graphql_node_notifications post_init %r", node_name)
     publish_relay_node_add(document.psap_id, document.id, node_name)
 
@@ -82,7 +82,7 @@ def post_init(sender, document, **kwargs):
 def post_save(sender, document, **kwargs):
     from ..wamp import publish_relay_node_update
     log.info("inside graphql_node_notifications post_save ")
-    node_name = "%sNode" % document.name
+    node_name = "%sNode" % document.name()
     log.info("inside graphql_node_notifications post_save %r", node_name)
     publish_relay_node_update(document.psap_id, document.id, node_name)
 
