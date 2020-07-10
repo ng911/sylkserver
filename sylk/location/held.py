@@ -1,5 +1,5 @@
 import sys
-import urllib2
+import urllib3
 #import simplexml
 from xml.dom.minidom import parseString
 try:
@@ -22,11 +22,11 @@ def held_client(options):
         missing = [attr for attr in 'held_url accept timeout response_time location_type exact'.split() if
                    not hasattr(options, attr)]
         if missing: raise RuntimeError('missing options: %s' % (', '.join(missing),))
-        req = urllib2.Request(options.held_url)
+        req = urllib3.Request(options.held_url)
         if options.accept:
             req.add_header('Accept', options.accept)
         if options.method == 'GET':
-            f = urllib2.urlopen(req, timeout=options.timeout)
+            f = urllib3.urlopen(req, timeout=options.timeout)
         else:  # POST
             req.add_header('Content-Type', 'application/held+xml')
             xml = parseString('<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"/>')
@@ -46,7 +46,7 @@ def held_client(options):
             data = xml.toprettyxml()
             log.debug('sending XML\n%s', data)
             req.add_data(data)
-            f = urllib2.urlopen(req, timeout=options.timeout)
+            f = urllib3.urlopen(req, timeout=options.timeout)
         if f:
             response = f.read()
             f.close()
@@ -56,7 +56,7 @@ def held_client(options):
                 return xml.toprettyxml()
             except:
                 log.exception('cannot parse the received XML\n%s', response)
-    except urllib2.URLError:
+    except urllib3.URLError:
         log.error('connecting to %r: %s', options.held_url, sys.exc_info()[1])
     except:
         log.exception('exception')
