@@ -83,9 +83,7 @@ def add_update_calltaker(payload, user_id):
             try:
                 QueueMember.objects.get(queue_id=queue_id, user_id=user_id)
             except:
-                queueMember = QueueMember()
-                queueMember.user_id = user_id
-                queueMember.queue_id = queue_id
+                queueMember = QueueMember(user_id=user_id, queue_id= queue_id, psap_id=psap_id)
                 queueMember.save()
 
     log.info("got queues done user_id is %r", user_id)

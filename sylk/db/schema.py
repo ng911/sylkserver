@@ -7,11 +7,11 @@ import bcrypt
 import six
 from pymongo import ReadPreference
 from mongoengine import *
+from mongoengine import signals
 
 # from werkzeug.security import generate_password_hash, check_password_hash
 from ..config import MONGODB_DB, MONGODB_HOST, MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_REPLICASET, \
     CREATE_DB
-
 log = logging.getLogger("emergent-ng911")
 
 
@@ -48,7 +48,28 @@ else:
 #db.authenticate("ws", "Ecomm@911")
 
 
+def graphql_node_notifications(cls):
+    '''
+    decorator for generating graphql notifications
+    :param key:
+    :return:
+    '''
+    def post_init(sender, document, **kwargs):
+        from ..wamp import publish_relay_node_add
+        node_name = "%sNode" % document.name
+        publish_relay_node_add(document.psap_id, document.id, node_name)
 
+    def post_save(sender, document, **kwargs):
+        from ..wamp import publish_relay_node_update
+        node_name = "%sNode" % document.name
+        publish_relay_node_update(document.psap_id, document.id, node_name)
+
+    signals.post_init.connect(post_init, sender=cls)
+    signals.post_save.connect(post_save, sender=cls)
+    return cls
+
+
+@graphql_node_notifications
 class Psap(Document):
     psap_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     name = StringField()
@@ -64,6 +85,7 @@ class Psap(Document):
     }
 
 
+@graphql_node_notifications
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     status = StringField(required=True, default='offline')
@@ -118,7 +140,9 @@ class User(Document):
         return  user
 
 
+@graphql_node_notifications
 class CalltakerStation(Document):
+    psap_id = ObjectIdField(required=True)
     station_id = StringField(required=True, unique=True)
     ip_address = StringField(required=True, unique=True)
     name = StringField(required=True, unique=True)
@@ -131,7 +155,9 @@ class CalltakerStation(Document):
     }
 
 
+@graphql_node_notifications
 class CalltakerProfile(DynamicDocument):
+    psap_id = ObjectIdField(required=True)
     profile_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     user_id = ObjectIdField(required=False)
     incoming_ring = BooleanField(default=True)
@@ -159,7 +185,9 @@ class CalltakerProfile(DynamicDocument):
         }
 
 
+@graphql_node_notifications
 class CalltakerActivity(Document):
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField(required=True)
     event = StringField(required=True, choices=('login', 'made_busy', 'dial_out', 'join_call', 'answer_call', 'hang_up', 'logout', 'rebid'))
     event_details = StringField()
@@ -175,6 +203,7 @@ class CalltakerActivity(Document):
     }
 
 
+@graphql_node_notifications
 class SpeedDialGroup(Document):
     group_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField(required=True)
@@ -192,6 +221,7 @@ class SpeedDialGroup(Document):
     }
 
 
+@graphql_node_notifications
 class SpeedDial(Document):
     speed_dial_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField()
@@ -278,6 +308,7 @@ class DialPlan(Document):
     pass
 
 
+@graphql_node_notifications
 class Queue(Document):
     queue_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField(required=True)
@@ -293,7 +324,9 @@ class Queue(Document):
     }
 
 
+@graphql_node_notifications
 class QueueMember(Document):
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField(required=True)
     queue_id = ObjectIdField(required=True)
     meta = {
@@ -410,6 +443,7 @@ class AbandonedCallReport(Document):
     report_name = StringField()
 
 
+@graphql_node_notifications
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
@@ -467,7 +501,9 @@ class Conference(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceParticipant(Document):
+    psap_id = ObjectIdField()
     room_number = StringField(required=True)
     sip_uri = StringField()
     name = StringField()
@@ -495,7 +531,9 @@ class ConferenceParticipant(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceEvent(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', \
                                                 'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', \
@@ -511,7 +549,9 @@ class ConferenceEvent(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceMessage(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
@@ -526,7 +566,9 @@ class ConferenceMessage(Document):
     }
 
 
+@graphql_node_notifications
 class Location(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     location_id = ObjectIdField(required=True, default=bson.ObjectId)
     time = ComplexDateTimeField(default=datetime.datetime.utcnow)
@@ -592,7 +634,7 @@ class Location(Document):
 
 
 class AliServer(Document):
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     type = StringField(required=True, choices=('wireless', 'wireline'))
     format = StringField()
     ip1  = StringField()
@@ -611,7 +653,7 @@ class AliServer(Document):
 
 class CallTransferLine(Document):
     line_id = ObjectIdField(required=True, default=bson.ObjectId)
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     type = StringField(required=True, choices=('wireless', 'wireline'))
     name = StringField(required=True)
     star_code = StringField(required=True)
@@ -626,7 +668,7 @@ class CallTransferLine(Document):
 
 class Greeting(Document):
     greeting_id = ObjectIdField(required=True, default=bson.ObjectId)
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField()
     desc = StringField(required=True)
     group = StringField()
@@ -651,6 +693,7 @@ def create_calltaker(username, password, fullname, queue_id, psap_id):
     user.save()
 
     queueMember = QueueMember()
+    queueMember.psap_id = psap_id
     queueMember.queue_id = queue_id
     queueMember.user_id = user.user_id
     queueMember.save()
@@ -692,24 +735,28 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     # create call takers and add to queue
     user_obj = User.add_user("tarun", "tarun")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("mike", "mike")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("nate", "nate")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("matt", "matt")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()

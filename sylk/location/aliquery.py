@@ -74,9 +74,10 @@ ali_requests = {}
 
 
 class AliRequestTimeout(Exception):
-    def __init__(self, room_number, reason):
+    def __init__(self, room_number, psap_id, reason):
         self.room_number = room_number
         self.reason = reason
+        self.psap_id = psap_id
 
 
 class AliRequestProtocol(Protocol):
@@ -258,17 +259,17 @@ def on_timeout(id):
     log.info("ali request timedout for id %r", id)
     global g_ali_requests
     if id in g_ali_requests:
-        (my_d, room_number, protocols, timer) = g_ali_requests[id]
+        (my_d, room_number, psap_id, protocols, timer) = g_ali_requests[id]
         del g_ali_requests[id]
         for protocol in protocols:
             protocol.cancel_ali_request(id)
-        my_d.errback(AliRequestTimeout(room_number, "request timedout"))
+        my_d.errback(AliRequestTimeout(room_number, psap_id, "request timedout"))
 
 def process_ali_result(result):
     log.info("aliquery process_ali_result %r", result)
     (factory, id, number, ali_format, ali_result, ali_result_civic_xml, ali_data) = result
     if id in g_ali_requests:
-        (my_d, room_number, factories, timer) = g_ali_requests[id]
+        (my_d, room_number, psap_id, factories, timer) = g_ali_requests[id]
         del g_ali_requests[id]
         timer.cancel()
 
@@ -276,14 +277,14 @@ def process_ali_result(result):
             if _factory != factory:
                 factory.cancel_ali_request(id)
         log.info("aliquery do my_d.callback")
-        my_d.callback((room_number, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
+        my_d.callback((room_number, psap_id, number, ali_format, ali_result, ali_result_civic_xml, ali_data))
 
 
 def check_ali_format_supported(ali_format):
     return (ali_format in ali_factories) or ('all' in ali_factories)
 
 
-def send_ali_request(room_number, number, ali_format):
+def send_ali_request(room_number, psap_id, number, ali_format):
     log.info("inside send_ali_request for room_number %r, number %r, ali_format %r", room_number, number, ali_format)
     my_d = defer.Deferred()
     id = str(uuid.uuid4())
@@ -295,7 +296,7 @@ def send_ali_request(room_number, number, ali_format):
     else:
         return None, None
     timer = reactor.callLater(20, on_timeout, id)
-    g_ali_requests[id] = (my_d, room_number, factories, timer)
+    g_ali_requests[id] = (my_d, room_number, psap_id, factories, timer)
     log.info("facories length is %r", len(factories))
     for factory in factories:
         log.info("factory.send_ali_request format %r, ali_format %s", factory.ali_format, ali_format)

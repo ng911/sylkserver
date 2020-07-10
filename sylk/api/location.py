@@ -86,10 +86,11 @@ def get_call_location_display(room_number):
 @location.route('/query/<room_number>', methods=['GET', 'POST', 'PUT'])
 def do_ali_query(room_number):
     try:
+        psap_id = get_argument('psap_id')
         ali_format = get_argument('ali_format')
         lookup_number = get_argument('lookup_number')
 
-        trans_id = sylk.location.ali_lookup(room_number, str(lookup_number), ali_format)
+        trans_id = sylk.location.ali_lookup(room_number, psap_id, str(lookup_number), ali_format)
         response = {'success' : True, 'trans_id' : trans_id}
         return jsonify(response)
     except Exception as e:

@@ -68,6 +68,7 @@ class ConferenceData(object):
 
             conference_event = ConferenceEvent()
             conference_event.event = 'init'
+            conference_event.psap_id = psap_id
             conference_event.event_time = cur_time
             if direction == 'in':
                 conference_event.event_details = 'Incoming call from {}'.format(caller_ani)
@@ -105,12 +106,13 @@ class ConferenceData(object):
             log.error("exception in create_conference %r", e)
             log.error(stackTrace)
 
-    def outgoing_call(self, room_number, display_name, is_calltaker):
+    def outgoing_call(self, room_number, display_name, is_calltaker, psap_id):
         try:
             log.info("inside outgoing_call")
             cur_time = datetime.datetime.utcnow()
             conference_event = ConferenceEvent()
             conference_event.event = 'init'
+            conference_event.psap_id = psap_id
             conference_event.event_time = cur_time
             if is_calltaker:
                 conference_event.event_details = 'Calling calltaker {} '.format(display_name)
@@ -127,6 +129,7 @@ class ConferenceData(object):
     def set_conference_active(self, room_number, calltakers):
         try:
             conference = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference.psap_id)
             conference.status = 'active'
             utcnow = datetime.datetime.utcnow()
             conference.updated_at = utcnow
@@ -153,16 +156,17 @@ class ConferenceData(object):
             # todo- check, this one doesnt seem to be used by the calltaker. might remove it in future
             for calltaker in calltakers:
                 publish_active_call(calltaker, room_number)
-                add_call_pickup_by_name(calltaker, response_time)
+                add_call_pickup_by_name(calltaker, response_time, psap_id)
 
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_conference_status %r", e)
             log.error(stackTrace)
 
-    def on_conference_answered(self, room_number, display_name, is_calltaker, status):
+    def on_conference_answered(self, room_number, display_name, is_calltaker, status, psap_id):
         try:
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event = 'active'
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
@@ -184,15 +188,16 @@ class ConferenceData(object):
             log.error("exception in on_conference_answered %r", e)
             log.error(stackTrace)
 
-    def on_conference_leave(self, room_number, display_name, is_calltaker, status):
+    def on_conference_leave(self, room_number, display_name, is_calltaker, status, psap_id):
         try:
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event = 'leave'
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             if is_calltaker:
                 conference_event.event_details = 'Calltaker {} released the call'.format(display_name)
-                add_call_hangup_by_name(display_name)
+                add_call_hangup_by_name(display_name, psap_id)
             else:
                 conference_event.event_details = '{} hung up'.format(display_name)
 
@@ -203,10 +208,11 @@ class ConferenceData(object):
             log.error("exception in on_conference_leave %r", e)
             log.error(stackTrace)
 
-    def on_conference_timedout(self, room_number):
+    def on_conference_timedout(self, room_number, status, psap_id):
         try:
             conference_event = ConferenceEvent()
-            conference_event.event = 'timed_out'
+            conference_event.event = status
+            conference_event.psap_id = psap_id
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             conference_event.event_details = 'Call timed out'
@@ -285,8 +291,9 @@ class ConferenceData(object):
             log.error("exception in update_conference_status %r", e)
             log.error(stackTrace)
 
-    def add_participant_ringing(self, room_number, display_name):
+    def add_participant_ringing(self, room_number, display_name, psap_id):
         conference_event = ConferenceEvent()
+        conference_event.psap_id = psap_id
         conference_event.event = 'ringing'
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.event_details = 'ringing {}'.format(display_name)
@@ -294,17 +301,19 @@ class ConferenceData(object):
         conference_event.save()
         publish_update_call_events(room_number)
 
-    def add_participant_timedout(self, room_number, display_name):
+    def add_participant_timedout(self, room_number, display_name, psap_id):
         conference_event = ConferenceEvent()
-        conference_event.event = 'ringing'
+        conference_event.psap_id = psap_id
+        conference_event.event = 'timed_out'
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.event_details = 'timed out ringing to {} '.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
         publish_update_call_events(room_number)
 
-    def add_participant_failed(self, room_number, display_name):
+    def add_participant_failed(self, room_number, display_name, psap_id):
         conference_event = ConferenceEvent()
+        conference_event.psap_id = psap_id
         conference_event.event = 'failed'
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.event_details = 'call to {} failed'.format(display_name)
@@ -312,7 +321,7 @@ class ConferenceData(object):
         conference_event.save()
         publish_update_call_events(room_number)
 
-    def add_participant(self, room_number, display_name, sip_uri, mute_audio, direction, is_caller, is_calltaker, is_primary):
+    def add_participant(self, room_number, display_name, sip_uri, mute_audio, direction, is_caller, is_calltaker, is_primary, psap_id):
         try:
             log.info('add_participant %r for room %r, display_name %r', sip_uri, room_number, display_name)
 
@@ -331,6 +340,7 @@ class ConferenceData(object):
 
             if participant is None:
                 participant = ConferenceParticipant()
+                participant.psap_id = psap_id
             participant.room_number = room_number
             participant.name = display_name
             participant.direction = direction
@@ -398,7 +408,7 @@ class ConferenceData(object):
             log.error("exception in update_participant_active_status %r", e)
             log.error(stackTrace)
 
-    def update_primary_calltaker(self, room_number, old_primary_uri, new_primary_uri):
+    def update_primary_calltaker(self, room_number, old_primary_uri, new_primary_uri, psap_id):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=old_primary_uri)
             participant.is_primary = False
@@ -411,6 +421,7 @@ class ConferenceData(object):
             participant.save()
 
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event = 'update_primary'
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
@@ -442,7 +453,7 @@ class ConferenceData(object):
 
     # this should only be called if participant hold status is changed without call hold status being changed
     # todo - we prob need to remove this bad logic and combine with function below
-    def update_participant_hold_status(self, room_number, calltaker, on_hold):
+    def update_participant_hold_status(self, room_number, calltaker, on_hold, psap_id):
         log.info("inside update_participant_hold_status for room_number {}, calltaker {}, on_hold {}".format(room_number, calltaker, on_hold))
         participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
         participant.is_primary = False
@@ -454,6 +465,7 @@ class ConferenceData(object):
         participant.save()
 
         conference_event = ConferenceEvent()
+        conference_event.psap_id = psap_id
         conference_event.event_time = datetime.datetime.utcnow()
         conference_event.room_number = room_number
         if on_hold:
@@ -487,7 +499,7 @@ class ConferenceData(object):
         participants_data = calls.get_conference_participants_json(room_number)
         publish_update_call(room_number, call_data, participants_data)
 
-    def update_call_hold(self, room_number, calltaker, on_hold):
+    def update_call_hold(self, room_number, calltaker, on_hold, psap_id):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, name=calltaker, is_calltaker=True)
             if on_hold:
@@ -510,6 +522,7 @@ class ConferenceData(object):
             '''
             conference = Conference.objects.get(room_number=room_number)
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             if on_hold:
@@ -541,13 +554,14 @@ class ConferenceData(object):
             log.error("exception in update_hold %r", e)
             log.error(stackTrace)
 
-    def mute_participant(self, room_number, sip_uri, muted):
+    def mute_participant(self, room_number, sip_uri, muted, psap_id):
         try:
             participant = ConferenceParticipant.objects.get(room_number=room_number, sip_uri=sip_uri)
             participant.mute = muted
             participant.save()
 
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             sip_uri_parsed = SIPURI.parse(str(sip_uri))
             username = sip_uri_parsed.user
             if muted:
@@ -570,12 +584,13 @@ class ConferenceData(object):
             log.error("exception in update_hold %r", e)
             log.error(stackTrace)
 
-    def mute_all_participants(self, room_number, muted):
+    def mute_all_participants(self, room_number, muted, psap_id):
         try:
             for participant in ConferenceParticipant.objects(room_number=room_number, is_active=True):
                 participant.muted = muted
                 participant.save()
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             if muted:
                 conference_event.event = 'mute'
                 conference_event.event_details = 'all participants muted'
@@ -605,9 +620,10 @@ class ConferenceData(object):
             log.error("exception in update_hold %r", e)
             log.error(stackTrace)
 
-    def enable_tty(self, room_number):
+    def enable_tty(self, room_number, psap_id):
         try:
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event = 'enable_tty'
             conference_event.event_details = 'TTY Enabled'
             conference_event.event_time = datetime.datetime.utcnow()
@@ -632,10 +648,10 @@ class ConferenceData(object):
             publish_tty_updated(room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
-            log.error("exception in enable_tty %r", e)
+            log.error("exception in update_tty %r", e)
             log.error(stackTrace)
 
-    def msrp_add(self, room_number, sender_uri, message_id, message, content_type="text/plain"):
+    def msrp_add(self, room_number, sender_uri, message_id, message, psap_id, content_type="text/plain"):
         try:
             if content_type == "text/json":
                 log.info("message is %r", message)
@@ -644,6 +660,7 @@ class ConferenceData(object):
                 content_type = jsonData["content_type"]
                 message = jsonData["media_url"]
             conference_message = ConferenceMessage()
+            conference_message.psap_id=psap_id
             conference_message.room_number=room_number
             conference_message.message = message
             conference_message.message_time = datetime.datetime.utcnow()
@@ -658,9 +675,10 @@ class ConferenceData(object):
             log.error("exception in msrp_text_sent %r", e)
             log.error(stackTrace)
 
-    def hook_flash_transferred(self, room_number, phone_number):
+    def hook_flash_transferred(self, room_number, phone_number, psap_id):
         try:
             conference_event = ConferenceEvent()
+            conference_event.psap_id = psap_id
             conference_event.event = 'transfer'
             conference_event.event_details = 'Call transfer to {}'.format(phone_number)
             conference_event.event_time = datetime.datetime.utcnow()
@@ -781,7 +799,8 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantRinging(self, notification):
         log.info("incoming _NH_ConferenceParticipantRinging")
         try:
-            self.add_participant_ringing(notification.data.room_number, notification.data.display_name)
+            self.add_participant_ringing(notification.data.room_number, notification.data.display_name,
+                                         notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantRinging %r", e)
@@ -790,7 +809,8 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantFailed(self, notification):
         log.info("incoming _NH_ConferenceParticipantFailed")
         try:
-            self.add_participant_failed(notification.data.room_number, notification.data.display_name)
+            self.add_participant_failed(notification.data.room_number, notification.data.display_name,
+                                        notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in ConferenceParticipantFailed %r", e)
@@ -799,7 +819,8 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantTimedout(self, notification):
         log.info("incoming _NH_ConferenceParticipantTimedout")
         try:
-            self.add_participant_timedout(notification.data.room_number, notification.data.display_name)
+            self.add_participant_timedout(notification.data.room_number, notification.data.display_name,
+                                          notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in ConferenceParticipantTimedout %r", e)
@@ -826,7 +847,8 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantNewPrimary(self, notification):
         log.info("incoming _NH_ConferenceParticipantNewPrimary")
         try:
-            self.update_primary_calltaker(notification.data.room_number, notification.data.old_primary_uri, notification.data.new_primary_uri)
+            self.update_primary_calltaker(notification.data.room_number, notification.data.old_primary_uri, \
+                                          notification.data.new_primary_uri, notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
@@ -835,7 +857,8 @@ class ConferenceData(object):
     def _NH_ConferenceParticipantHoldUpdated(self, notification):
         log.info("incoming _NH_ConferenceParticipantHoldUpdated")
         try:
-            self.update_participant_hold_status(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
+            self.update_participant_hold_status(notification.data.room_number, notification.data.calltaker, \
+                                                notification.data.on_hold, notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
@@ -844,7 +867,8 @@ class ConferenceData(object):
     def _NH_ConferenceHoldUpdated(self, notification):
         log.info("incoming _NH_ConferenceHoldUpdated")
         try:
-            self.update_call_hold(notification.data.room_number, notification.data.calltaker, notification.data.on_hold)
+            self.update_call_hold(notification.data.room_number, notification.data.calltaker, \
+                                  notification.data.on_hold, notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceParticipantNewPrimary %r", e)
@@ -853,7 +877,8 @@ class ConferenceData(object):
     def _NH_ConferenceMuteUpdated(self, notification):
         log.info("incoming _NH_ConferenceMuteUpdated")
         try:
-            self.mute_participant(notification.data.room_number, notification.data.sip_uri, notification.data.muted)
+            self.mute_participant(notification.data.room_number, notification.data.sip_uri, notification.data.muted, \
+                                  notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceMuteUpdated %r", e)
@@ -862,7 +887,8 @@ class ConferenceData(object):
     def _NH_ConferenceMuteAllUpdated(self, notification):
         log.info("incoming _NH_ConferenceMuteAllUpdated")
         try:
-            self.mute_all_participants(notification.data.room_number, notification.data.muted)
+            self.mute_all_participants(notification.data.room_number, notification.data.muted, \
+                                       notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceMuteAllUpdated %r", e)
@@ -871,7 +897,7 @@ class ConferenceData(object):
     def _NH_ConferenceTTYEnabled(self, notification):
         log.info("incoming _NH_ConferenceTTYEnabled")
         try:
-            self.enable_tty(notification.data.room_number)
+            self.enable_tty(notification.data.room_number, notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceTTYEnabled %r", e)
@@ -889,7 +915,8 @@ class ConferenceData(object):
     def _NH_ConferenceMSRPText(self, notification):
         log.info("incoming _NH_ConferenceMSRPText")
         try:
-            self.msrp_add(notification.data.room_number, notification.data.sender_uri, notification.data.message_id, notification.data.message, notification.data.content_type)
+            self.msrp_add(notification.data.room_number, notification.data.sender_uri, notification.data.message_id, \
+                          notification.data.message, notification.data.psap_id, notification.data.content_type)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceMSRPText %r", e)
@@ -898,7 +925,8 @@ class ConferenceData(object):
     def _NH_ConferenceHookFlashTrasnfer(self, notification):
         log.info("incoming _NH_ConferenceHookFlashTrasnfer")
         try:
-            self.hook_flash_transferred(notification.data.room_number, notification.data.phone_number)
+            self.hook_flash_transferred(notification.data.room_number, notification.data.phone_number, \
+                                        notification.data.psap_id)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in _NH_ConferenceHookFlashTrasnfer %r", e)

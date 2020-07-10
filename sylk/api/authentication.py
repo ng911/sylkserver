@@ -10,7 +10,9 @@ from flask_cors import CORS
 
 from .utils import get_argument, is_safe_url
 from .decorators import check_exceptions
-from sylk.db.schema import Grant, Client, Token, User, CalltakerStation
+from ..db.schema import Grant, Client, Token, User, CalltakerStation
+from ..db.psap import get_psap_from_domain
+
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, create_refresh_token, jwt_refresh_token_required,
     get_jwt_identity
@@ -73,7 +75,11 @@ class LoginForm(Form):
 
         try:
             log.info("inside Form.validate for username %r", self.username.data)
-            user = User.objects.get(username = self.username.data)
+
+            domain_name = request["Host"]
+            psap_id = get_psap_from_domain(domain_name)
+
+            user = User.objects.get(username = self.username.data, psap_id=psap_id)
             if user is None:
                 self.username.errors.append('Unknown username')
                 return False
@@ -138,17 +144,18 @@ def login():
             #except Exception as e:
             #    log.error("error in login redirecting debug %r", e)
 
-            userObj = {'email': form.user.username, 'roles': form.user.roles}
+            userObj = {'email': form.user.username, 'psap_id' : form.user.psap_id, 'roles': form.user.roles}
             access_token = create_access_token(identity=userObj)
             refresh_token = create_refresh_token(identity=userObj)
             session['access_token'] = access_token
             session['refresh_token'] = refresh_token
             session['user_id'] = str(form.user.user_id)
+            session['psap_id'] = str(form.user.psap_id)
 
             # we create an oauth access tokem and store it in the session to be used by the client
             # the client can access it using the session cookie
 
-            add_logged_in(str(form.user.user_id))
+            add_logged_in(str(form.user.user_id), str(form.user.psap_id))
             return redirect(next or url_for('/'))
 
     return render_template('login.html', form=form)
@@ -198,9 +205,13 @@ def logout():
         log.info("inside logout for user")
         next = get_argument('next', '')
         user_id = None
+        psap_id = None
         if 'user_id' in session:
             user_id = session['user_id']
             del session['user_id']
+        if 'psap_id' in session:
+            psap_id = session['psap_id']
+            del session['psap_id']
         if 'username' in session:
             del session['username']
         if 'access_token' in session:
@@ -209,8 +220,8 @@ def logout():
             del session['refresh_token']
         redirect_uri = url_for('.login', _external=True, next=next)
         log.info("inside logout done , redirect to %r", redirect_uri)
-        if user_id != None:
-            add_logged_out(user_id)
+        if user_id != None and psap_id != None:
+            add_logged_out(user_id, psap_id)
         return redirect(redirect_uri)
     except Exception as e:
         stackTrace = traceback.format_exc()
