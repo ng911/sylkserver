@@ -39,7 +39,7 @@ from sylk.notifications.call import send_call_update_notification, send_call_act
 from sylk.applications.psap.room import Room
 from sylk.location import ali_lookup, dump_ali
 from sylk.wamp import publish_update_call_timer, publish_outgoing_call_status, publish_active_call, \
-    publish_update_call_ringing, my_wamp_publish, publish_update_calltaker_status
+    publish_update_call_ringing, wamp_publish, publish_update_calltaker_status
 from sylk.utils import dump_object_member_vars, dump_object_member_funcs
 
 log = ApplicationLogger(__package__)
@@ -251,7 +251,7 @@ class PSAPApplication(SylkApplication):
                        'caller_name': u'+14153054541', 'callback': False, 'end_time': u'2018-08-30T19:10:35.224+0000',
                        'partial_mute': False}}
         log.info("inside sendTestWampMessages do publish")
-        my_wamp_publish(u'com.emergent.call', message)
+        wamp_publish(u'com.emergent.call', message)
         log.info("inside sendTestWampMessages done")
 
     def get_rooms(self):

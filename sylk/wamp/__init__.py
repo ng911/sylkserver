@@ -1,4 +1,4 @@
-from .core import start
+from .core import start, wamp_publish
 from .call import publish_update_primary, publish_outgoing_call_status, publish_update_call_events, \
     publish_update_call_ringing, publish_update_call, publish_update_call_timer, \
     publish_clear_abandoned_call, publish_active_call, publish_create_call, \
@@ -10,7 +10,7 @@ from .tty import publish_tty_enabled, publish_tty_updated
 from .graphql import publish_relay_node_add, publish_relay_node_update
 
 __all__ = [
-    'start',
+    'start', 'wamp_publish',
     'publish_update_primary', 'publish_outgoing_call_status', 'publish_update_call_events',
     'publish_update_call_ringing', 'publish_update_call', 'publish_update_call_timer',
     'publish_clear_abandoned_call', 'publish_active_call', 'publish_create_call', 'publish_update_calls',
