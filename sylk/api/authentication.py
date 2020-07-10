@@ -76,7 +76,7 @@ class LoginForm(Form):
         try:
             log.info("inside Form.validate for username %r", self.username.data)
 
-            domain_name = request["Host"]
+            domain_name = request.host
             log.info("domain_name is %r", domain_name)
             psap_id = get_psap_from_domain(domain_name)
 
@@ -94,6 +94,8 @@ class LoginForm(Form):
             self.user = user
             log.info("inside Form.validate all good")
         except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error(stacktrace)
             log.error("inside Form.validate exception %r", e)
             self.username.errors.append('invalid username or password')
             return False
