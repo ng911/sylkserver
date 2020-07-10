@@ -74,7 +74,7 @@ class Psap(Document):
     psap_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     name = StringField()
     time_to_autorebid = IntField(default=30)
-    domain_name = StringField()
+    domain = StringField()
     ip_address = StringField()
     auto_rebid = BooleanField(default=True)
     default_profile_id = ObjectIdField()
