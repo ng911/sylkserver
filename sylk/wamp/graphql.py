@@ -24,7 +24,7 @@ def publish_relay_node_add(psap_id, id_, nodeSchemaName):
         topic = u'com.emergent911.nodeId.added.%s' % psap_id
         log.info('publishRelayNodeAdd, topic %s, data %r', topic, jsonData)
 
-        wamp_publish(topic, **jsonData)
+        wamp_publish(topic, jsonData)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error(stacktrace)
@@ -42,7 +42,7 @@ def publish_relay_node_update(psap_id, id_, nodeSchemaName):
         topic = u'com.emergent911.nodeId.updated.%s' % psap_id
         log.info('publishRelayNodeUpdate, topic %s, data %r', topic, jsonData)
 
-        wamp_publish(topic, **jsonData)
+        wamp_publish(topic, jsonData)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error(stacktrace)
