@@ -48,43 +48,26 @@ else:
 #db.authenticate("ws", "Ecomm@911")
 
 
+def post_save(sender, document, **kwargs):
+    from ..wamp import publish_relay_node_update, publish_relay_node_add
+    log.info("inside graphql_node_notifications post_save ")
+    node_name = "%sNode" % document._meta['collection']
+    log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)
+    if 'created' in kwargs:
+        publish_relay_node_add(document.psap_id, document.id, node_name)
+    else:
+        publish_relay_node_update(document.psap_id, document.id, node_name)
+
 def graphql_node_notifications(cls):
     '''
     decorator for generating graphql notifications
     :param key:
     :return:
     '''
-    def post_init(sender, document, **kwargs):
-        from ..wamp import publish_relay_node_add
-        node_name = "%sNode" % document._meta['collection']
-        publish_relay_node_add(document.psap_id, document.id, node_name)
-
-    def post_save(sender, document, **kwargs):
-        from ..wamp import publish_relay_node_update
-        log.info("inside graphql_node_notifications post_save ")
-        node_name = "%sNode" % document._meta['collection']
-        log.info("inside graphql_node_notifications post_save %r", node_name)
-        publish_relay_node_update(document.psap_id, document.id, node_name)
-
     log.info("inside graphql_node_notifications add signals %r", cls.__name__)
-    signals.post_init.connect(post_init, sender=cls)
     signals.post_save.connect(post_save, sender=cls)
     return cls
 
-
-def post_init(sender, document, **kwargs):
-    from ..wamp import publish_relay_node_add
-    node_name = "%sNode" % document._meta['collection']
-    log.info("inside graphql_node_notifications post_init %r, id %r", node_name, document.id)
-    publish_relay_node_add(document.psap_id, document.id, node_name)
-
-
-def post_save(sender, document, **kwargs):
-    from ..wamp import publish_relay_node_update
-    log.info("inside graphql_node_notifications post_save ")
-    node_name = "%sNode" % document._meta['collection']
-    log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)
-    publish_relay_node_update(document.psap_id, document.id, node_name)
 
 def add_graphql_node_notifications(cls):
     '''
@@ -93,7 +76,7 @@ def add_graphql_node_notifications(cls):
     :return:
     '''
     log.info("inside graphql_node_notifications add signals %r", cls.__name__)
-    signals.post_init.connect(post_init, sender=cls)
+    #signals.post_init.connect(post_init, sender=cls)
     signals.post_save.connect(post_save, sender=cls)
     return cls
 
