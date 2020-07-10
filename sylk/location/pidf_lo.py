@@ -11,7 +11,6 @@ It also provides high-level classes for HELD, PIDF and PIDF-LO data.
 
 All rights reserved by Emergent Communications Inc.
 '''
-import os, sys, re, time, traceback, logging, urllib2, hashlib, random
 from xml.dom.minidom import parseString
 try:
     from sylk.applications import ApplicationLogger
