@@ -124,42 +124,47 @@ def login():
     if request.method == 'POST':
         log.info("validate login form")
         if form.validate_on_submit():
-            log.info("login form validated")
-            # Login and validate the user.
-            # user should be an instance of your `User` class
-            login_user(form.user, remember=form.rememberMe.data)
+            try:
+                log.info("login form validated")
+                # Login and validate the user.
+                # user should be an instance of your `User` class
+                login_user(form.user, remember=form.rememberMe.data)
 
-            log.info("Logged in successfully")
-            log.info("remember me is %r", form.rememberMe.data)
+                log.info("Logged in successfully")
+                log.info("remember me is %r", form.rememberMe.data)
 
-            next = form.next.data
-            log.info("next is %r", next)
-            flash('Logged in successfully.')
-            # is_safe_url should check if the url is safe for redirects.
-            # See http://flask.pocoo.org/snippets/62/ for an example.
-            if not is_safe_url(next):
-                log.info("url not safe %r", next)
-                # for testing ignore for now
-                #return abort(400)
+                next = form.next.data
+                log.info("next is %r", next)
+                flash('Logged in successfully.')
+                # is_safe_url should check if the url is safe for redirects.
+                # See http://flask.pocoo.org/snippets/62/ for an example.
+                if not is_safe_url(next):
+                    log.info("url not safe %r", next)
+                    # for testing ignore for now
+                    #return abort(400)
 
-            #try:
-            #    log.info("Logged in redirecting to %r", url_for('/'))
-            #except Exception as e:
-            #    log.error("error in login redirecting debug %r", e)
+                #try:
+                #    log.info("Logged in redirecting to %r", url_for('/'))
+                #except Exception as e:
+                #    log.error("error in login redirecting debug %r", e)
 
-            userObj = {'email': form.user.username, 'psap_id' : form.user.psap_id, 'roles': form.user.roles}
-            access_token = create_access_token(identity=userObj)
-            refresh_token = create_refresh_token(identity=userObj)
-            session['access_token'] = access_token
-            session['refresh_token'] = refresh_token
-            session['user_id'] = str(form.user.user_id)
-            session['psap_id'] = str(form.user.psap_id)
+                userObj = {'email': form.user.username, 'psap_id' : form.user.psap_id, 'roles': form.user.roles}
+                access_token = create_access_token(identity=userObj)
+                refresh_token = create_refresh_token(identity=userObj)
+                session['access_token'] = access_token
+                session['refresh_token'] = refresh_token
+                session['user_id'] = str(form.user.user_id)
+                session['psap_id'] = str(form.user.psap_id)
 
-            # we create an oauth access tokem and store it in the session to be used by the client
-            # the client can access it using the session cookie
+                # we create an oauth access tokem and store it in the session to be used by the client
+                # the client can access it using the session cookie
 
-            add_logged_in(str(form.user.user_id), str(form.user.psap_id))
-            return redirect(next or url_for('/'))
+                add_logged_in(str(form.user.user_id), str(form.user.psap_id))
+                return redirect(next or url_for('/'))
+            except Exception as e:
+                stacktrace = traceback.format_exc()
+                log.error(str(e))
+                log.error(stacktrace)
 
     return render_template('login.html', form=form)
 
