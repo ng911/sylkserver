@@ -77,6 +77,7 @@ class LoginForm(Form):
             log.info("inside Form.validate for username %r", self.username.data)
 
             domain_name = request["Host"]
+            log.info("domain_name is %r", domain_name)
             psap_id = get_psap_from_domain(domain_name)
 
             user = User.objects.get(username = self.username.data, psap_id=psap_id)
