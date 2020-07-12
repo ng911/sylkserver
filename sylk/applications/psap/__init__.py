@@ -370,7 +370,7 @@ class PSAPApplication(SylkApplication):
         admin_user = ''
         log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
-            log.info(u'session.request_uri.user is sos')
+            log.info(u'call is sos')
             authenticated = True
             is_emergency = True
             called_number = local_identity.uri.user
@@ -383,6 +383,7 @@ class PSAPApplication(SylkApplication):
                 if geo_location != None:
                     geoloc_ref = geo_location.body
                     log.info("geoloc_ref is %r", geoloc_ref)
+            log.info("authenticated is %r", authenticated)
             direction = 'incoming'
             queue_id = ''
         elif session.request_uri.user == "100":
@@ -442,12 +443,13 @@ class PSAPApplication(SylkApplication):
 
         rooms = self.get_rooms()
 
-        log.info(u"calling authenticate_call with ip %r, port %r, called_number %r, called_uri %r, from_uri %r, rooms %r",
+        log.info("ip %r, port %r, called_number %r, called_uri %r, from_uri %r, rooms %r",
             peer_address.ip, peer_address.port, local_identity.uri.user, local_identity.uri, remote_identity.uri, rooms)
         # first verify the session
         if not authenticated:
+            log.info("call not authenticated")
             (authenticated, call_type, incoming_link, calltaker_obj, called_number, calling_number) = authenticate_call(peer_address.ip, peer_address.port, local_identity.uri.user, remote_identity.uri, rooms)
-        log.info("authenticate_call called_number %s, calling_number %s", called_number, calling_number)
+        log.info("called_number %s, calling_number %s", called_number, calling_number)
         if not authenticated:
             log.info("call not authenticated, reject it")
             session.reject(403)
