@@ -15,7 +15,8 @@ def add_call_pickup(user_id, response_time, psap_id):
 
 def add_call_pickup_by_name(username, response_time, psap_id):
     userObj = User.objects.get(username=username, psap_id=psap_id)
-    add_call_pickup(str(userObj.user_id,psap_id), response_time, psap_id)
+    user_id = str(userObj.user_id)
+    add_call_pickup(user_id, response_time, psap_id)
 
 def add_call_hangup(user_id, psap_id):
     activityObj = CalltakerActivity(user_id=user_id, event='hang_up', psap_id=psap_id)
@@ -23,7 +24,8 @@ def add_call_hangup(user_id, psap_id):
 
 def add_call_hangup_by_name(username, psap_id):
     userObj = User.objects.get(username=username, psap_id=psap_id)
-    add_call_hangup(str(userObj.user_id, psap_id))
+    user_id = str(userObj.user_id)
+    add_call_hangup(user_id, psap_id)
 
 
 
