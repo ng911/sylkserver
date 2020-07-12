@@ -368,7 +368,9 @@ class PSAPApplication(SylkApplication):
         incoming_link = None
         call_type = ''
         admin_user = ''
+        log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
+            log.info(u'session.request_uri.user is sos')
             authenticated = True
             is_emergency = True
             called_number = local_identity.uri.user
