@@ -382,6 +382,7 @@ class PSAPApplication(SylkApplication):
                 geo_location = headers.get('Geolocation', None)
                 if geo_location != None:
                     geoloc_ref = geo_location.body
+                    log.info("geoloc_ref is %r", geoloc_ref)
                     if geoloc_ref[0] == '<' and geoloc_ref[-1] == '>':
                         geoloc_ref = geoloc_ref[1:-1]
                     log.info("geoloc_ref is %r", geoloc_ref)
