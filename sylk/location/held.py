@@ -49,6 +49,7 @@ def held_client(options):
             '''
             data = xml.toprettyxml()
             log.debug('sending XML\n%s', data)
+            log.info("makeing http post to %s", held_url)
             r = http.request('POST', held_url, timeout=options.timeout, headers=headers, body=data)
             #req.add_data(data)
             #f = urllib3.urlopen(req, timeout=options.timeout)
