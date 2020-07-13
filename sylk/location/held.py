@@ -1,5 +1,6 @@
 import sys
 import urllib3
+from urllib3 import H
 #import simplexml
 from xml.dom.minidom import parseString
 try:
@@ -22,13 +23,16 @@ def held_client(options):
         missing = [attr for attr in 'held_url accept timeout response_time location_type exact'.split() if
                    not hasattr(options, attr)]
         if missing: raise RuntimeError('missing options: %s' % (', '.join(missing),))
-        req = urllib3.Request(options.held_url)
+        http = urllib3.PoolManager()
+        #req = urllib3.Request(options.held_url)
+        held_url = options.held_url
+        headers = {}
         if options.accept:
-            req.add_header('Accept', options.accept)
+            headers['Accept'] = options.accept
         if options.method == 'GET':
-            f = urllib3.urlopen(req, timeout=options.timeout)
+            r = http.request('GET', held_url, timeout=options.timeout, headers=headers)
         else:  # POST
-            req.add_header('Content-Type', 'application/held+xml')
+            headers['Content-Type'] = 'application/held+xml'
             xml = parseString('<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"/>')
             '''
             if options.response_time:
@@ -45,21 +49,20 @@ def held_client(options):
             '''
             data = xml.toprettyxml()
             log.debug('sending XML\n%s', data)
-            req.add_data(data)
-            f = urllib3.urlopen(req, timeout=options.timeout)
-        if f:
-            response = f.read()
-            f.close()
-            log.debug('received XML')
-            try:
-                xml = parseString(response)
-                return xml.toprettyxml()
-            except:
-                log.exception('cannot parse the received XML\n%s', response)
-    except urllib3.URLError:
+            r = http.request('POST', held_url, timeout=options.timeout, headers=headers, body=data)
+            #req.add_data(data)
+            #f = urllib3.urlopen(req, timeout=options.timeout)
+        response = r.data.decode('utf-8')
+        try:
+            xml = parseString(response)
+            return xml.toprettyxml()
+        except:
+            log.exception('cannot parse the received XML\n%s', response)
+    except urllib3.exceptions.NewConnectionError:
         log.error('connecting to %r: %s', options.held_url, sys.exc_info()[1])
     except:
         log.exception('exception')
+    return None
 
 def test_pidf(geolocation_url):
     class Options(object):
