@@ -1,6 +1,5 @@
 import sys
 import urllib3
-from urllib3 import H
 #import simplexml
 from xml.dom.minidom import parseString
 try:
