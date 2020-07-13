@@ -29,6 +29,7 @@ def held_client(options):
         if options.accept:
             headers['Accept'] = options.accept
         if options.method == 'GET':
+            log.info("makeing http get to %s", held_url)
             r = http.request('GET', held_url, timeout=options.timeout, headers=headers)
         else:  # POST
             headers['Content-Type'] = 'application/held+xml'
@@ -52,6 +53,7 @@ def held_client(options):
             #req.add_data(data)
             #f = urllib3.urlopen(req, timeout=options.timeout)
         response = r.data.decode('utf-8')
+        log.info("response is %s", response)
         try:
             xml = parseString(response)
             return xml.toprettyxml()
