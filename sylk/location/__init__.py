@@ -342,6 +342,18 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
                 "state" : state
             }
             update_new_location(room_number, location_result)
+    else:
+        try:
+            conference_db_obj = Conference.objects.get(room_number=room_number)
+            conference_db_obj.ali_result = "failed"
+            conference_db_obj.save()
+            call_data = get_conference_json(conference_db_obj)
+            publish_update_call(room_number, call_data)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error('%s', stacktrace)
+            log.error('process_ali_failed %s', str(e))
+        publish_update_location_failed(room_number)
 
 
 def runTests():

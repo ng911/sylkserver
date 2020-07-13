@@ -590,7 +590,7 @@ class PSAPApplication(SylkApplication):
                 from ...location import derefLocation
                 if geoloc_ref != None:
                     derefLocation(room_number, psap_id, geoloc_ref, caller_name)
-                if hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
+                elif hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                     ali_lookup(room_number, psap_id, caller_ani, incoming_link.ali_format)
                 else:
                     lookup_number = caller_ani
