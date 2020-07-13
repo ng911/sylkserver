@@ -202,6 +202,8 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().add_observer(self, name='ConferenceParticipantDBUpdated')
         NotificationCenter().add_observer(self, name='CalltakerStatusUpdate')
         NotificationCenter().add_observer(self, name='TTYReceivedChar')
+        NotificationCenter().add_observer(self, name='HeldLookup')
+
 
     def start(self):
         log.info(u'PSAPApplication start')
@@ -587,9 +589,14 @@ class PSAPApplication(SylkApplication):
                                                                     has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
 
             if (call_type == 'sos'):
-                from ...location import derefLocation
                 if geoloc_ref != None:
-                    derefLocation(room_number, psap_id, geoloc_ref, caller_name)
+                    # do this in the background
+                    # and also after conf room is created
+                    NotificationCenter().post_notification('HeldLookup', self,
+                                                           NotificationData(room_number=room_number,
+                                                                            psap_id=psap_id,
+                                                                            geoloc_ref=geoloc_ref,
+                                                                            caller_name=caller_name))
                 elif hasattr(incoming_link, 'ali_format') and (incoming_link.ali_format != ''):
                     ali_lookup(room_number, psap_id, caller_ani, incoming_link.ali_format)
                 else:
@@ -1718,6 +1725,14 @@ class PSAPApplication(SylkApplication):
         room_number = notification.data.room_number
         tty_char = notification.data.tty_char
         self.recvd_tty(room_number, tty_char)
+
+    def _NH_HeldLookup(self, notification):
+        from ...location import derefLocation
+        psap_id = notification.data.psap_id
+        geoloc_ref = notification.data.geoloc_ref
+        caller_name = notification.data.caller_name
+        room_number = notification.data.room_number
+        derefLocation(room_number,psap_id, geoloc_ref, caller_name)
 
     def _NH_CalltakerStatusUpdate(self, notification):
         log.info("incoming _NH_CalltakerStatusUpdate")
