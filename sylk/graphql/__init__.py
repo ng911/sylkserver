@@ -14,7 +14,7 @@ from ..config import FLASK_SERVER_PORT
 from .schema import graphql_schema
 
 
-logger = logging.getLogger('kingfisher')
+log = logging.getLogger('emergent-ng911')
 
 
 def create_app():
@@ -49,10 +49,10 @@ def send_static(path):
 
 
 def start_server():
-    logger.info("start graphql api server")
+    log.info("start graphql api server")
     flask_resource = WSGIResource(reactor, reactor.getThreadPool(), app)
     flask_site = Site(flask_resource)
-    logger.info("api server listening on port %d", int(FLASK_SERVER_PORT))
+    log.info("api server listening on port %d", int(FLASK_SERVER_PORT))
     reactor.listenTCP(int(FLASK_SERVER_PORT), flask_site, interface="0.0.0.0")
 
 

@@ -15,6 +15,7 @@ import sylk.wamp
 import sylk.api
 from sylk.location.aliquery import init_ali_links
 from sylk.location.alidump import start_alidump
+from sylk.db.calltaker import reset_calltakers_status
 import sylk.data.calltaker as calltaker_data
 
 # noinspection PyUnusedLocal
@@ -111,7 +112,7 @@ if __name__ == '__main__':
     start_alidump()
 
     log.info('starting api server')
-    sylk.api.start_server()
+    sylk.api.start_calls_api_server()
     log.info('starting api server done')
 
     soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
@@ -121,7 +122,9 @@ if __name__ == '__main__':
     try:
         # make sure calltaker_data is initialized
         calltaker_data.CalltakerData()
-        sylk.wamp.start()
+        reset_calltakers_status(ServerConfig.psap_id)
+        log.info("start wamp now")
+        sylk.wamp.start(status_listner_enabled=True)
         log.info('wamp.start done')
         server.run(options)
     except Exception as e:

@@ -5,7 +5,7 @@ import graphene
 from ..db.schema import Company
 from graphene_mongo.registry import get_global_registry
 
-logger = logging.getLogger('kingfisher')
+logger = logging.getLogger('emergent-ng911')
 
 
 def resolve_full_name(parent, info):

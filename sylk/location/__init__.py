@@ -1,28 +1,21 @@
-import sys
 import datetime
-from sylk.applications import ApplicationLogger
-from aliquery import send_ali_request, check_ali_format_supported
-from sylk.db.schema import Location, Conference, ConferenceParticipant, User
-import sylk.wamp as wamp
-import sylk.db.calls as calls
 import traceback
 from twisted.internet import reactor
-import alidump
 
-if __name__ == '__main__':  # parse command line options, and set the high level properties
-    import logging
-    global log
-    handler = logging.StreamHandler(stream=sys.stdout)
+from .aliquery import send_ali_request, check_ali_format_supported
+from ..db.schema import Location, Conference, ConferenceParticipant, User
+from ..wamp import publish_update_call, publish_update_location_success, publish_update_location_failed
+from ..db.calls import get_conference_json
+from .alidump import dump_ali
+from .held import held_client
+from .pidf_lo import xml2display
 
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(
-        logging.Formatter('%(asctime)s.%(msecs)d %(name)s %(levelname)s - %(message)s', datefmt='%d-%m %H:%M:%S'))
-    log = logging.getLogger()
-    log.addHandler(handler)
-    log.setLevel(logging.DEBUG or logging.INFO)
-else:
-    global log
+try:
+    from sylk.applications import ApplicationLogger
     log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 
 def get_location_display(ali_result):
@@ -65,7 +58,7 @@ def process_ali_success(result):
     if result is  None:
         log.error("process_ali_success error result is %r", result)
         return
-    (room_number, number, ali_format, ali_result, ali_result_xml, raw_ali_data) = result
+    (room_number, psap_id, number, ali_format, ali_result, ali_result_xml, raw_ali_data) = result
     log.info("aliResult %r, aliResultXml %r, rawAliData %r", ali_result, ali_result_xml, raw_ali_data)
     # store the ali result in database and send a updated message
     if len(ali_result) == 0:
@@ -77,6 +70,7 @@ def process_ali_success(result):
     try:
         location_db_obj = Location()
         location_db_obj.room_number = room_number
+        location_db_obj.psap_id = psap_id
         location_db_obj.ali_format = ali_format
         location_db_obj.raw_format = raw_ali_data
         location_db_obj.state = ali_result['state']
@@ -115,23 +109,29 @@ def process_ali_success(result):
         #location_db_obj.save()
 
         # update call location in Conference table as well
-        location_display = get_location_display(ali_result)
-        conference_db_obj = Conference.objects.get(room_number=room_number)
-        conference_db_obj.location_display = location_display
-        conference_db_obj.callback_number = location_db_obj.callback
-        conference_db_obj.ali_result = "success"
-        conference_db_obj.save()
-
-        if conference_db_obj.status in ['init', 'ringing', 'ringing_queued', 'queued', 'active']:
-            dump_ali(room_number, raw_ali_data)
-
-        call_data = calls.get_conference_json(conference_db_obj)
-        wamp.publish_update_call(room_number, call_data)
-        wamp.publish_update_location_success(room_number, ali_result, location_display)
+        update_new_location(room_number, ali_result, raw_ali_data, location_db_obj.callback)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error("error in process_ali_success %r",e)
         log.error(stacktrace)
+
+
+def update_new_location(room_number, location_result, raw_ali_data=None, callback=None):
+    location_display = get_location_display(location_result)
+    conference_db_obj = Conference.objects.get(room_number=room_number)
+    conference_db_obj.location_display = location_display
+    if callback != None:
+        conference_db_obj.callback_number = callback
+    conference_db_obj.ali_result = "success"
+    conference_db_obj.save()
+
+    if conference_db_obj.status in ['init', 'ringing', 'ringing_queued', 'queued', 'active']:
+        if raw_ali_data != None:
+            dump_ali(room_number, raw_ali_data)
+
+    call_data = get_conference_json(conference_db_obj)
+    publish_update_call(room_number, call_data)
+    publish_update_location_success(room_number, location_result, location_display)
 
 
 def dump_ali(room_number, ali_data=None, calltaker=None):
@@ -161,19 +161,19 @@ def dump_ali(room_number, ali_data=None, calltaker=None):
                 log.error("error in getting calltaker data %s", e)
         for station_id in station_ids:
             log.info("send ali data to station_id  %s", station_id)
-            alidump.dump_ali(station_id, ali_data)
+            dump_ali(station_id, ali_data)
     else:
         try:
             calltaker_db_obj = User.objects.get(username=calltaker)
             if hasattr(calltaker_db_obj, 'station_id') and (calltaker_db_obj.station_id != ''):
-                alidump.dump_ali(calltaker_db_obj.station_id, ali_data)
+                dump_ali(calltaker_db_obj.station_id, ali_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error("%s", stacktrace)
             log.error("error in getting calltaker data %s", e)
 
 
-def ali_lookup(room_number, number, ali_format, station_id=''):
+def ali_lookup(room_number, psap_id, number, ali_format, station_id=''):
     log.info("inside ali_lookup for room %r, number %r, format %r", room_number, number, ali_format)
 
     ali_available = check_ali_format_supported(ali_format)
@@ -190,15 +190,15 @@ def ali_lookup(room_number, number, ali_format, station_id=''):
             conf_db_obj.ali_result = 'none'
         conf_db_obj.save()
 
-        call_data = calls.get_conference_json(conf_db_obj)
-        wamp.publish_update_call(room_number, call_data)
+        call_data = get_conference_json(conf_db_obj)
+        publish_update_call(room_number, call_data)
     except:
         # if the room does not exist we ignore this
         pass
 
     # to do add psap location update wamp
 
-    d, request_id = send_ali_request(room_number, number, ali_format)
+    d, request_id = send_ali_request(room_number, psap_id, number, ali_format)
 
     def process_ali_failed(failure):
         log.info("ali_failed number %r, %r", room_number, number)
@@ -206,13 +206,13 @@ def ali_lookup(room_number, number, ali_format, station_id=''):
             conference_db_obj = Conference.objects.get(room_number=room_number)
             conference_db_obj.ali_result = "failed"
             conference_db_obj.save()
-            call_data = calls.get_conference_json(conference_db_obj)
-            wamp.publish_update_call(room_number, call_data)
+            call_data = get_conference_json(conference_db_obj)
+            publish_update_call(room_number, call_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)
             log.error('process_ali_failed %s', str(e))
-        wamp.publish_update_location_failed(room_number)
+        publish_update_location_failed(room_number)
 
     if d is not None:
         d.addErrback(process_ali_failed)
@@ -292,6 +292,69 @@ def aliRebid(self):
 
     self.rebidPending = False
 '''
+
+def derefLocation(room_number, psap_id, geolocation, callerName):
+    class Options(object):
+        pass
+
+    log.debug('location dereference %r', geolocation)
+    opt = Options();
+    opt.__dict__ = dict(held_url=geolocation, method='POST', accept='', timeout=5, response_time='', location_type=(),
+                        exact='', device='')
+    str_pidf = held_client(opt)
+    if str_pidf:
+        #log.debug('received HELD XML\n%s', held.toprettyxml())
+        # TODO: prefer HTTP over HTTPS for now.
+        '''
+        locref = \
+        ([child.cdata for child in held('locationUriSet')('locationURI') if child.cdata.startswith('http:')] + [None])[
+            0]
+        if not locref: locref = \
+        ([child.cdata for child in held('locationUriSet')('locationURI') if child.cdata.startswith('https:')] + [None])[
+            0]
+        log.debug('found loc ref %r', locref)
+        pidf = held('presence')[0]
+        self.location.append(pidf)
+        '''
+        postal, community, state, latitude, longitude, radius, name = xml2display(str_pidf)
+        if (name == None) or (len(name) == 0):
+            name = callerName
+        print("postal, community, state, latitude, longitude, radius, name", postal, community, state, latitude, longitude, radius, name)
+        # this check is for testing with room number not set
+        if room_number != "" and room_number != None:
+            location_db_obj = Location()
+            location_db_obj.room_number = room_number
+            location_db_obj.psap_id = psap_id
+            location_db_obj.ali_format = 'pidf-lo'
+            location_db_obj.raw_format = str_pidf
+            location_db_obj.state = state
+            location_db_obj.name = name
+            location_db_obj.community = community
+            location_db_obj.latitude = float(latitude)
+            location_db_obj.longitude = float(longitude)
+            location_db_obj.radius = float(radius)
+            location_db_obj.postal = postal
+            location_db_obj.time = location_db_obj.updated_at = datetime.datetime.utcnow()
+            location_db_obj.save()
+            location_result = {
+                "community" : community,
+                "location" : postal,
+                "state" : state
+            }
+            update_new_location(room_number, location_result)
+    else:
+        try:
+            conference_db_obj = Conference.objects.get(room_number=room_number)
+            conference_db_obj.ali_result = "failed"
+            conference_db_obj.save()
+            call_data = get_conference_json(conference_db_obj)
+            publish_update_call(room_number, call_data)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error('%s', stacktrace)
+            log.error('process_ali_failed %s', str(e))
+        publish_update_location_failed(room_number)
+
 
 def runTests():
     from aliquery import init_ali_links

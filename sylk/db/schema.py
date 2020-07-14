@@ -1,17 +1,19 @@
+import datetime, logging, traceback
+from collections import namedtuple
+
 import arrow
 import bson
 import bcrypt
-import datetime
+import six
 from pymongo import ReadPreference
 from mongoengine import *
-import time, datetime, logging, re, sys, traceback
+from mongoengine import signals
+
 # from werkzeug.security import generate_password_hash, check_password_hash
-from collections import namedtuple
-from sylk.configuration import ServerConfig
+from ..config import MONGODB_DB, MONGODB_HOST, MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_REPLICASET, \
+    CREATE_DB
+log = logging.getLogger("emergent-ng911")
 
-from sylk.applications import ApplicationLogger
-
-log = ApplicationLogger(__package__)
 
 def getIsoFormat(dateTimeObj):
     arrowDateTimeObj = arrow.get(dateTimeObj)
@@ -24,32 +26,57 @@ def getIsoMaxFormat(dateTimeObj):
     return arrowDateTimeObj.format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ")
 
 
-#client = connect(username="ws", password="Ecomm@911",
-#                 host='mongodb://ds133903-a1.mlab.com:33903/supportgenie_ws?replicaSet=rs-ds133903')
 '''
 client = connect(username="ws", password="Ecomm@911",
                  host='mongodb://localhost:33903/psap?replicaSet=rs-psap')
 '''
 #client = connect(host='mongodb://localhost:27107/ng911')
-if len(ServerConfig.db_user) > 0:
-    log.info("connect to mongodb user %r, db %s, connections %r", ServerConfig.db_user, ServerConfig.db_name, ServerConfig.db_connection)
-    connect(ServerConfig.db_name, username=ServerConfig.db_user, password=ServerConfig.db_pwd, host=ServerConfig.db_connection,
-            replicaSet="emergent911rs", read_preference=ReadPreference.SECONDARY_PREFERRED)
+if len(MONGODB_REPLICASET) > 0:
+    log.info("connect to mongodb user %r, db %s, connections %r", MONGODB_USERNAME, MONGODB_DB, MONGODB_HOST)
+    connect(MONGODB_DB, username=MONGODB_USERNAME, password=MONGODB_PASSWORD, host=MONGODB_HOST,
+            replicaSet=MONGODB_REPLICASET, read_preference=ReadPreference.SECONDARY_PREFERRED)
 else:
-    log.info("connect to mongodb db name %r, connections %r", ServerConfig.db_name, ServerConfig.db_connection)
-    connect(ServerConfig.db_name, host=ServerConfig.db_connection)
+#    log.info("connect to mongodb db name %r, connections %r", MONGODB_DB, MONGODB_HOST)
+#    connect(MONGODB_DB, host=MONGODB_HOST, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
+    log.info("connect to mongodb")
+    #connect("ng911", host="localhost")
+    connect(MONGODB_DB, username=MONGODB_USERNAME, password=MONGODB_PASSWORD, host=MONGODB_HOST)
+
 
 #connect('ng911')
 #db = client.ng911
 #db.authenticate("ws", "Ecomm@911")
 
 
+def post_save(sender, document, **kwargs):
+    from ..wamp import publish_relay_node_update, publish_relay_node_add
+    log.info("inside graphql_node_notifications post_save ")
+    node_name = "%sNode" % document.__class__.__name__
+    log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)
+    log.info("inside graphql_node_notifications kwargs %r", kwargs)
+    if 'created' in kwargs and kwargs['created']:
+        publish_relay_node_add(document.psap_id, document.id, node_name)
+    else:
+        publish_relay_node_update(document.psap_id, document.id, node_name)
 
+def graphql_node_notifications(cls):
+    '''
+    decorator for generating graphql notifications
+    :param key:
+    :return:
+    '''
+    log.info("inside graphql_node_notifications add signals %r", cls.__name__)
+    signals.post_save.connect(post_save, sender=cls)
+    return cls
+
+
+@graphql_node_notifications
 class Psap(Document):
     psap_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     name = StringField()
     time_to_autorebid = IntField(default=30)
-    ip_address = StringField(default="127.0.0.1")
+    domain = StringField()
+    ip_address = StringField()
     auto_rebid = BooleanField(default=True)
     default_profile_id = ObjectIdField()
     meta = {
@@ -59,8 +86,10 @@ class Psap(Document):
     }
 
 
+@graphql_node_notifications
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
+    status = StringField(required=True, default='offline')
     username = StringField(required=True, unique=True)
     fullname = StringField(required=False)
     password_hash = StringField(required=True, unique=True)
@@ -68,8 +97,11 @@ class User(Document):
     psap_id = ObjectIdField()
     secondary_psap_id = ObjectIdField()
     is_active = BooleanField(default=True)
+    is_available = BooleanField(default=False)
+    extension = StringField()
     station_id = StringField(required=False)
-    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')))
+    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
+    layout = DictField(required=False)
     meta = {
         'indexes': [
             'user_id',
@@ -82,35 +114,36 @@ class User(Document):
         return str(self.user_id)
 
     def check_password(self, password):
-        if isinstance(password, unicode):
-            password = password.encode('ascii')
+        password = password.encode('utf-8')
         password_hash = self.password_hash
-
-        if isinstance(password_hash, unicode):
-            password_hash = password_hash.encode('ascii')
+        password_hash = password_hash.encode('utf-8')
 
         return bcrypt.checkpw(password, password_hash)
 
     @classmethod
     def generate_password_hash(cls, password):
-        if isinstance(password, unicode):
-            password = password.encode('ascii')
-        return bcrypt.hashpw(password, bcrypt.gensalt(10))
+        password = password.encode('utf-8')
+        return bcrypt.hashpw(password, bcrypt.gensalt(10)).decode('utf-8')
 
     @classmethod
     def add_user(cls, username, password):
         user = User()
         user.username = username
-        if isinstance(password, unicode):
+        #if isinstance(password, unicode):
+        # py3 compatible replacement below
+        if isinstance(password, six.text_type):
             password = password.encode('ascii')
         user.password_hash = User.generate_password_hash(password)
         user.is_active = True
         user.roles = ['admin', 'calltaker']
+        log.info("user.password_hash is %r", user.password_hash)
         user.save()
         return  user
 
 
+@graphql_node_notifications
 class CalltakerStation(Document):
+    psap_id = ObjectIdField(required=True)
     station_id = StringField(required=True, unique=True)
     ip_address = StringField(required=True, unique=True)
     name = StringField(required=True, unique=True)
@@ -123,7 +156,9 @@ class CalltakerStation(Document):
     }
 
 
+@graphql_node_notifications
 class CalltakerProfile(DynamicDocument):
+    psap_id = ObjectIdField(required=True)
     profile_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     user_id = ObjectIdField(required=False)
     incoming_ring = BooleanField(default=True)
@@ -139,13 +174,27 @@ class CalltakerProfile(DynamicDocument):
         ]
     }
 
+    @classmethod
+    def get_default_profile(cls):
+        return {
+            "incoming_ring" : True,
+            "ringing_server_volume" : 50,
+            "incoming_ring_level" : 50,
+            "ring_delay" : 0,
+            "auto_respond" : False,
+            "auto_respond_after" : 10
+        }
 
+
+@graphql_node_notifications
 class CalltakerActivity(Document):
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField(required=True)
-    event = StringField(required=True, choices=('login', 'made_busy', 'answer_call', 'hang_up', 'logout', 'rebid'))
+    event = StringField(required=True, choices=('login', 'made_busy', 'dial_out', 'join_call', 'answer_call', 'hang_up', 'logout', 'rebid'))
     event_details = StringField()
+    event_num_data = FloatField()
     start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
-    end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    #end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'indexes': [
             'user_id',
@@ -155,16 +204,42 @@ class CalltakerActivity(Document):
     }
 
 
+@graphql_node_notifications
+class SpeedDialGroup(Document):
+    group_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
+    psap_id = ObjectIdField(required=True)
+    user_id = ObjectIdField()
+    group_name = StringField(required=True)
+    meta = {
+        'indexes': [
+            'psap_id',
+            'group_name',
+            {
+                'fields': ['psap_id', 'group_name'],
+                'unique': True
+            }
+        ]
+    }
+
+
+@graphql_node_notifications
 class SpeedDial(Document):
+    speed_dial_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField()
     user_id = ObjectIdField()
     dest = StringField(required=True)
     name = StringField(required=True)
-    group = StringField(required=False)
+    group_id = ObjectIdField()
+    group = LazyReferenceField(document_type=SpeedDialGroup)
     meta = {
         'indexes': [
             'psap_id',
-            'user_id'
+            'user_id',
+            'group_id',
+            {
+                'fields': ['psap_id', 'name', "group_id", "user_id"],
+                'unique': True
+            }
         ]
     }
 
@@ -212,6 +287,9 @@ class IncomingLink(Document):
     def is_origination_sos_text(self):
         return self.orig_type == 'sos_text'
 
+def add_calltaker_gateway(ip_addr, psap_id):
+    IncomingLink(psap_id=psap_id, name="calltaker gateway", orig_type='calltaker_gateway', ip_address=ip_addr).save()
+
 
 class OutgoingLink(Document):
     link_id = ObjectIdField(required=True)
@@ -231,6 +309,7 @@ class DialPlan(Document):
     pass
 
 
+@graphql_node_notifications
 class Queue(Document):
     queue_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField(required=True)
@@ -246,7 +325,9 @@ class Queue(Document):
     }
 
 
+@graphql_node_notifications
 class QueueMember(Document):
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField(required=True)
     queue_id = ObjectIdField(required=True)
     meta = {
@@ -285,6 +366,85 @@ class Agency(EmbeddedDocument):
     data = StringField()
 
 
+class Conference1(Document):
+    psap_id = ObjectIdField(required=True)
+    room_number = StringField(required=True)
+    start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    answer_time = ComplexDateTimeField(required=False)
+    end_time = ComplexDateTimeField(required=False)
+    updated_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
+    has_text = BooleanField(default=False)
+    has_tty = BooleanField(default=False)
+    tty_text = StringField(required=False)
+    has_audio = BooleanField(default=True)
+    has_video = BooleanField(default=False)
+    direction = StringField(required=True, choices=('in', 'out'), default='in')
+    duration = IntField(default=0)
+    type1 = StringField()   # not sure what this is, copied from old schema
+    type2 = StringField()   # not sure what this is, copied from old schema
+    pictures = ListField()
+
+
+class CallReport(Document):
+    report_id = ObjectIdField(required=True, default=bson.ObjectId)
+    type = StringField(required=True, choices=('completed', 'abandoned'), default='completed')
+    psap_id = ObjectIdField(required=True)
+    report_name = StringField()
+    start_time = ComplexDateTimeField()
+    end_time = ComplexDateTimeField()
+    pdf_file = StringField()
+    csv_file = StringField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id',
+            'type',
+            'report_name',
+            'start_time',
+            'end_time'
+        ]
+    }
+
+
+class CompletedCallReportDetails(Document):
+    report_id = ObjectIdField(required=True)
+    psap_id = ObjectIdField(required=True)
+    orig_type = StringField()
+    start_time = StringField()
+    caller_ani = StringField()
+    name_calltaker = StringField()
+    response_time = FloatField()
+    avg_response_time= FloatField()
+    duration = IntField()
+    avg_duration = FloatField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id'
+        ]
+    }
+
+class AbandonedCallReportDetails(Document):
+    report_id = ObjectIdField(required=True)
+    psap_id = ObjectIdField(required=True)
+    orig_type = StringField()
+    start_time = StringField()
+    caller_ani = StringField()
+    meta = {
+        'indexes': [
+            'report_id',
+            'psap_id'
+        ]
+    }
+
+
+
+class AbandonedCallReport(Document):
+    psap_id = ObjectIdField(required=True)
+    report_name = StringField()
+
+
+@graphql_node_notifications
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
@@ -301,7 +461,7 @@ class Conference(Document):
     duration = IntField(default=0)
     type1 = StringField()   # not sure what this is, copied from old schema
     type2 = StringField()   # not sure what this is, copied from old schema
-    pictures = ListField(field=StringField)
+    pictures = ListField()
     call_type = StringField(required=True, choices=('normal', 'sos', 'admin', 'sos_text', 'outgoing', 'outgoing_calltaker'))
     partial_mute = BooleanField(default=False)
     hold = BooleanField(default=False)
@@ -314,7 +474,7 @@ class Conference(Document):
     hold_start = ComplexDateTimeField()
     primary_queue_id = ObjectIdField()
     secondary_queue_id = ObjectIdField()
-    link_id = ObjectIdField(required=True)
+    link_id = ObjectIdField(required=False)
     #todo this should be moved to location?
     #agencies = EmbeddedDocumentListField(document_type=Agency)
     is_ani_pseudo = BooleanField(default=False)
@@ -342,7 +502,9 @@ class Conference(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceParticipant(Document):
+    psap_id = ObjectIdField()
     room_number = StringField(required=True)
     sip_uri = StringField()
     name = StringField()
@@ -370,7 +532,9 @@ class ConferenceParticipant(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceEvent(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     event = StringField(required=True, choices=('join', 'leave', 'init', 'ringing', 'ringing_queued', \
                                                 'queued', 'active', 'closed', 'start_hold', 'end_hold', 'mute', 'end_mute', \
@@ -386,7 +550,9 @@ class ConferenceEvent(Document):
     }
 
 
+@graphql_node_notifications
 class ConferenceMessage(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     sender_uri = StringField()
     message = StringField()
@@ -401,7 +567,9 @@ class ConferenceMessage(Document):
     }
 
 
+@graphql_node_notifications
 class Location(Document):
+    psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
     location_id = ObjectIdField(required=True, default=bson.ObjectId)
     time = ComplexDateTimeField(default=datetime.datetime.utcnow)
@@ -467,7 +635,7 @@ class Location(Document):
 
 
 class AliServer(Document):
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     type = StringField(required=True, choices=('wireless', 'wireline'))
     format = StringField()
     ip1  = StringField()
@@ -486,7 +654,7 @@ class AliServer(Document):
 
 class CallTransferLine(Document):
     line_id = ObjectIdField(required=True, default=bson.ObjectId)
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     type = StringField(required=True, choices=('wireless', 'wireline'))
     name = StringField(required=True)
     star_code = StringField(required=True)
@@ -501,7 +669,7 @@ class CallTransferLine(Document):
 
 class Greeting(Document):
     greeting_id = ObjectIdField(required=True, default=bson.ObjectId)
-    psap_id = ObjectIdField()
+    psap_id = ObjectIdField(required=True)
     user_id = ObjectIdField()
     desc = StringField(required=True)
     group = StringField()
@@ -526,6 +694,7 @@ def create_calltaker(username, password, fullname, queue_id, psap_id):
     user.save()
 
     queueMember = QueueMember()
+    queueMember.psap_id = psap_id
     queueMember.queue_id = queue_id
     queueMember.user_id = user.user_id
     queueMember.save()
@@ -567,24 +736,28 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     # create call takers and add to queue
     user_obj = User.add_user("tarun", "tarun")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("mike", "mike")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("nate", "nate")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
 
     user_obj = User.add_user("matt", "matt")
     queue_memeber_obj = QueueMember()
+    queue_memeber_obj.psap_id = psap_obj.psap_id
     queue_memeber_obj.queue_id = queue_obj.queue_id
     queue_memeber_obj.user_id = user_obj.user_id
     queue_memeber_obj.save()
@@ -679,9 +852,7 @@ class Client(Document):
 
     @classmethod
     def getDefaultRedirectUris(cls):
-        return ['https://portal.supportgenie.io', 'https://portal.supportgenie.io', 'https://localhost:9000', 'https://localhost:9000/',
-                'https://supportgenie.io/', 'https://supportgenie.io', 'https://www.supportgenie.io', 'https://www.supportgenie.io/',
-                'https://localhost:3000', 'https://localhost:3000/']
+        return ['https://localhost:9000', 'https://localhost:9000/', 'https://localhost:3000', 'https://localhost:3000/']
 
 
 
@@ -777,6 +948,10 @@ class Token(Document):
 '''
 End of OAuth related db models
 '''
+
+if CREATE_DB:
+    if (Psap.objects().count() == 0):
+        create_test_data()
 
 
 

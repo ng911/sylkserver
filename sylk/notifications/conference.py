@@ -21,7 +21,8 @@ def send_conference_add_participant_notification(sender, room, participant_sessi
     notification_center = NotificationCenter()
     notification_center.post_notification('DataConferenceAddParticipant', sender, NotificationData(session=participant_session, room=room))
 
-def send_conference_leave_participant_notification(sender, room, participant_session):
+def send_conference_leave_participant_notification(sender, room, participant_session, psap_id):
     notification_center = NotificationCenter()
-    notification_center.post_notification('DataConferenceLeaveParticipant', sender, NotificationData(session=participant_session, room=room))
+    notification_center.post_notification('DataConferenceLeaveParticipant', sender, NotificationData(session=participant_session,
+                                                                                                     psap_id=psap_id, room=room))
 

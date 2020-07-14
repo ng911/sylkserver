@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h2 style="font-size:18px;">{{ title }}</h2>
+    {% if avg_response_time is defined %}
+    <p><b>Average Response Time : </b>{{ avg_response_time }} secs</p>
+    <p><b>Average Duration : </b>{{ avg_duration }}</p>
+    {% endif %}
+    <div style="font-size:12px;">
+     {{ calls_pivot_table }}
+    </div>
+    {% if avg_response_time is defined %}
+    <p><b>Average Response Time : </b>{{ avg_response_time }} secs</p>
+    <p><b>Average Duration : </b>{{ avg_duration }}</p>
+    {% endif %}
+</body>
+</html>
+

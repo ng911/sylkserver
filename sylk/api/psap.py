@@ -1,28 +1,31 @@
-import traceback
+import logging
 import os
-from sylk.configuration import ServerConfig
+import traceback
+
 from flask import Blueprint, jsonify
-from flask_cors import CORS, cross_origin
-from sylk.applications import ApplicationLogger
-from sylk.db.schema import SpeedDial, Greeting, CallTransferLine
-from sylk.utils import get_json_from_db_obj
-from utils import get_argument
+from flask_cors import CORS
+
+from ..db.schema import SpeedDial, Greeting, CallTransferLine, Psap
+from ..utils import get_json_from_db_obj
+from .utils import get_argument
+from ..config import SOP_DIR
 
 psap = Blueprint('psap', __name__,
                         template_folder='templates')
 
 CORS(psap)
-log = ApplicationLogger(__package__)
+
+log = logging.getLogger("emergent-ng911")
 
 
 # read SOP files and create the data structure for the client
 def read_sops():
     mapping, type1, type2 = {}, [''], {}
-    for name in os.listdir(ServerConfig.sop_dir):
-        path = os.path.join(ServerConfig.sop_dir, name)
+    for name in os.listdir(SOP_DIR):
+        path = os.path.join(SOP_DIR, name)
         if os.path.exists(path) and os.path.isfile(path):
             try:
-                with open(os.path.join(ServerConfig.sop_dir, name), 'r') as fp:
+                with open(os.path.join(SOP_DIR, name), 'r') as fp:
                     # logger.debug('sop file %r', fp)
                     parts = fp.read().split('----')
                     t1, t2, description = parts[0].strip().split(' ', 2)
@@ -55,6 +58,45 @@ def sops():
     return jsonify(sops)
 
 
+@psap.route('/', methods=['GET'])
+def getPsaps():
+    try:
+        log.info("inside getPsaps")
+
+        psaps = []
+        for psapObj in Psap.objects():
+            psaps.append(
+                get_json_from_db_obj(psapObj)
+            )
+
+        log.info("inside getPsaps psaps is %r", psaps)
+        return jsonify({
+            "psaps" : psaps
+        })
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.info("inside getPsaps got exception")
+        log.error(stacktrace)
+        log.error(e.message)
+
+
+@psap.route('/<psap_id>', methods=['GET'])
+def getPsap(psap_id):
+    try:
+        log.info("inside getPsaps for psap %r", psap_id)
+
+        return jsonify(
+            get_json_from_db_obj(
+                Psap.objects.get(psap_id=psap_id)
+            )
+        )
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.info("inside getPsap got exception")
+        log.error(stacktrace)
+        log.error(e.message)
+
+'''
 @psap.route('/speed_dial', methods=['GET'])
 def speed_dial():
     try:
@@ -123,13 +165,13 @@ def delete_speed_dial():
     except Exception as e:
         result = {'success' : False, 'reason' : str(e)}
         return jsonify(result)
+'''
 
-
-@psap.route('/greetings', methods=['GET'])
-def greetings():
+@psap.route('/greetings/<psap_id>', methods=['GET'])
+def greetings(psap_id):
     try:
         user_id = get_argument('user_id')
-        params = {'psap_id' : ServerConfig.psap_id}
+        params = {'psap_id' : psap_id}
         if user_id is None:
             params['user_id__exists'] = False
         else:
@@ -147,11 +189,11 @@ def greetings():
         return jsonify(result)
 
 
-@psap.route('/call_transfer_lines', methods=['GET'])
-def call_transfer_lines():
+@psap.route('/call_transfer_lines/<psap_id>', methods=['GET'])
+def call_transfer_lines(psap_id):
     try:
         call_transfer_lines = []
-        for call_transfer_line_obj in CallTransferLine.objects(psap_id=ServerConfig.psap_id):
+        for call_transfer_line_obj in CallTransferLine.objects(psap_id=psap_id):
             call_transfer_line = get_json_from_db_obj(call_transfer_line_obj, ignore_fields=['psap_id'])
             call_transfer_lines.append(call_transfer_line)
 

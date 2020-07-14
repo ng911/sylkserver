@@ -1,19 +1,22 @@
 import traceback
 import datetime
-from flask import Blueprint, jsonify, request
+import logging
+
+from flask import Blueprint, jsonify, request, render_template, Response
 from flask_cors import CORS
-from sylk.applications import ApplicationLogger
-from sylk.db.schema import Location, Conference
-from sylk.db.location import get_location_display
-from utils import get_argument
-from sylk.utils import get_json_from_db_obj, set_db_obj_from_request
+
+from ..db.schema import Location, Conference
+from ..db.location import get_location_display
+from .utils import get_argument
+from ..utils import get_json_from_db_obj, set_db_obj_from_request
 import sylk.location
 
 location = Blueprint('location', __name__,
                         template_folder='templates')
 
 CORS(location)
-log = ApplicationLogger(__package__)
+
+log = logging.getLogger("emergent-ng911")
 
 @location.route('/<room_number>', methods=['GET'])
 def get_location(room_number):
@@ -83,10 +86,11 @@ def get_call_location_display(room_number):
 @location.route('/query/<room_number>', methods=['GET', 'POST', 'PUT'])
 def do_ali_query(room_number):
     try:
+        psap_id = get_argument('psap_id')
         ali_format = get_argument('ali_format')
         lookup_number = get_argument('lookup_number')
 
-        trans_id = sylk.location.ali_lookup(room_number, str(lookup_number), ali_format)
+        trans_id = sylk.location.ali_lookup(room_number, psap_id, str(lookup_number), ali_format)
         response = {'success' : True, 'trans_id' : trans_id}
         return jsonify(response)
     except Exception as e:
@@ -96,3 +100,17 @@ def do_ali_query(room_number):
         response = {'success' : False, 'reason' : str(e)}
         return jsonify(response)
 
+@location.route('/test', methods=['GET', 'POST', 'PUT'])
+def test():
+    log.info("inside send_sample_pidflo")
+    try:
+        body = render_template('sample-pidf-lo.xml')
+        r = Response(response=body, status=200, mimetype="application/xml")
+        r.headers["Content-Type"] = "application/held+xml; charset=utf-8"
+        return r
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error("api location %r", e)
+        log.error(stacktrace)
+        response = {'success' : False, 'reason' : str(e)}
+        return jsonify(response)

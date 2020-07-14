@@ -1,8 +1,12 @@
 import re
-from sylk.applications import ApplicationLogger
 
-global log
-log = ApplicationLogger(__package__)
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
+
 
 def parse_warren_ali(raw_ali):
     if (raw_ali == "") or (re.search("NO RECORD FOUND", raw_ali) != None):
