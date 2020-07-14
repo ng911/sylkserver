@@ -56,6 +56,19 @@ def held_client_async(options):
                   headers=headers, data=data, timeout=options.timeout)
     d.addCallback(process_response)
 
+locationRequest = """ 
+    <locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held">
+        <locationType exact="true">
+            any
+            civic
+            geodetic
+            locationURI
+        </locationType>
+        <device xmlns="urn:ietf:params:xml:ns:geopriv:held:id">
+            <uri>sip:7757535912@nv.nga911.com</uri>
+        </device>
+    </locationRequest>
+"""
 
 def held_client(options):
     '''Send GET or POST request to an HELD URI to retrieve the location data or dereference a location URI.
@@ -80,7 +93,8 @@ def held_client(options):
             r = http.request('GET', held_url, timeout=options.timeout, headers=headers)
         else:  # POST
             headers['Content-Type'] = 'application/held+xml'
-            xml = parseString('<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"/>')
+            xml = parseString(locationRequest)
+            #xml = parseString('<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"/>')
             '''
             if options.response_time:
                 xml._.responseTime = options.response_time
