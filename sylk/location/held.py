@@ -56,7 +56,7 @@ def held_client_async(options):
                   headers=headers, data=data, timeout=options.timeout)
     d.addCallback(process_response)
 
-locationRequest = '<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"><locationType exact="true">any civic geodetic locationURI</locationType><device xmlns="urn:ietf:params:xml:ns:geopriv:held:id"><uri>sip:sos@138.68.235.210</uri></device></locationRequest>'
+locationRequest = '<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"><locationType exact="true">any civic geodetic locationURI</locationType><device xmlns="urn:ietf:params:xml:ns:geopriv:held:id"><uri>sip:%s@sip.telnyx.com</uri></device></locationRequest>'
 
 def held_client(options):
     '''Send GET or POST request to an HELD URI to retrieve the location data or dereference a location URI.
@@ -81,7 +81,7 @@ def held_client(options):
             r = http.request('GET', held_url, timeout=options.timeout, headers=headers)
         else:  # POST
             headers['Content-Type'] = 'application/held+xml'
-            xml = parseString(locationRequest)
+            xml = parseString(locationRequest % options.device)
             #xml = parseString('<locationRequest xmlns="urn:ietf:params:xml:ns:geopriv:held"/>')
             '''
             if options.response_time:
@@ -98,7 +98,7 @@ def held_client(options):
             '''
             data = xml.toxml().encode('utf-8')
             log.info('sending XML\n%s', data)
-            log.info("makeing http post to %s", held_url)
+            log.info("makeing http post to device %s, urrl %s", options.device, held_url)
             r = http.request('POST', held_url, timeout=options.timeout, headers=headers, body=data)
             #req.add_data(data)
             #f = urllib3.urlopen(req, timeout=options.timeout)

@@ -300,7 +300,7 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
     log.debug('location dereference %r', geolocation)
     opt = Options();
     opt.__dict__ = dict(held_url=geolocation, method='POST', accept='', timeout=5, response_time='', location_type=(),
-                        exact='', device='')
+                        exact='', device=callerName)
     str_pidf = held_client(opt)
     if str_pidf:
         #log.debug('received HELD XML\n%s', held.toprettyxml())
