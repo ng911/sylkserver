@@ -41,7 +41,7 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=gra
 app = web.Application()
 
 # Optional, for adding batch query support (used in Apollo-Client)
-GraphQLView.attach(app, schema=graphql_schema, batch=True, graphiql=True)
+GraphQLView.attach(app, schema=graphql_schema, batch=True, enable_async=True, graphiql=True, subscriptions='/subscriptions')
 
 subscription_server = AiohttpSubscriptionServer(schema)
 
