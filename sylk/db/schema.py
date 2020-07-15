@@ -49,7 +49,11 @@ else:
 
 
 def post_save(sender, document, **kwargs):
-    from ..wamp import publish_relay_node_update, publish_relay_node_add
+    import sys
+    if (sys.version_info > (3, 0)):
+        from ..wamp_asyncio import publish_relay_node_update, publish_relay_node_add
+    else:
+        from ..wamp import publish_relay_node_update, publish_relay_node_add
     log.info("inside graphql_node_notifications post_save ")
     node_name = "%sNode" % document.__class__.__name__
     log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)

@@ -1,0 +1,19 @@
+version: "3.3"
+services :
+  graphql-server:
+    build:
+      context: .
+      dockerfile: Dockerfile_py3
+    command: python graphql_flask_server.py
+    ports:
+      - "9090:7070"
+  
+  # rest-api-server:
+  #   build:
+  #     context: ${WEBSERVICE_DIR}
+  #     dockerfile: Dockerfile_py3
+  #   command: python rest_flask_server.py
+  #   ports:
+  #     - "9092:7070"    
+  #   depends_on: 
+  #     - mongodb    
