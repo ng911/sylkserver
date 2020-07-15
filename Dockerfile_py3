@@ -29,6 +29,7 @@ WORKDIR /usr/src/webservice-graphql
 COPY requirements3.txt .
 
 RUN pip3 install -r requirements3.txt
+RUN pip3 install autobahn[asyncio,encryption,serialization,xbr]
 
 COPY . .
 

@@ -578,6 +578,7 @@ class PSAPApplication(SylkApplication):
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status=room_data.status,
+                                                                    psap_id=room_data.psap_id,
                                                                     primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
                                                                     link_id=link_id,
                                                                     caller_ani=caller_ani,

@@ -1,18 +1,13 @@
+import logging
 import traceback
 import json
-import time
+from six import u
 
-from autobahn.twisted.component import Component
+from autobahn.asyncio.component import Component
+from autobahn.asyncio.component import run
 from autobahn.wamp.types import PublishOptions
-from twisted.internet.defer import inlineCallbacks, returnValue
-from twisted.internet import reactor
 
-try:
-    from sylk.applications import ApplicationLogger
-    log = ApplicationLogger(__package__)
-except:
-    import logging
-    log = logging.getLogger('emergent-ng911')
+log = logging.getLogger('emergent-ng911')
 
 from ..config import WAMP_CROSSBAR_SERVER
 
@@ -20,8 +15,9 @@ log.info("wamp session start")
 
 comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
-    transports=WAMP_CROSSBAR_SERVER,
-    realm=u"realm1",
+    #transports=WAMP_CROSSBAR_SERVER,
+    transports=u("wss://staging-webservice.supportgenie.io/ws"),
+    realm=u("realm1"),
     extra="tarun"
 )
 #comp.log = my_log
@@ -32,16 +28,6 @@ start_status_listener = False
 wamp_session_client_data = {}
 # wamp sessions for each user
 user_wamp_sessions = {}
-
-def on_wamp_success(result):
-    #log.debug("my_wamp_publish deferred on_success %r, %s", result, result)
-    pass
-
-
-def on_wamp_error(failure):
-    log.error("my_wamp_publish deferred on_error")
-    log.error("my_wamp_publish deferred on_error %r", failure)
-
 
 '''
 cur_wamp_request = {
@@ -75,11 +61,7 @@ def send_one_request(request):
 '''
 
 
-def wamp_publish(topic, json_data=None):
-    reactor.callFromThread(_wamp_publish, topic, json_data)
-
-
-def _wamp_publish(topic, json_data=None):
+async def wamp_publish(topic, json_data=None):
     try:
         if wamp_session is not None:
             #log.debug("my_wamp_publish %s, json %r",topic, json_data)
@@ -87,11 +69,10 @@ def _wamp_publish(topic, json_data=None):
             if json_data is not None:
                 json_obj = json.dumps(json_data)
                 json_size = len(json_obj)
-                deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
+                await wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
             else:
-                deferred = wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
+                await wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
 
-            deferred.addCallbacks(on_wamp_success, on_wamp_error)
             #deferred.addCallback(on_success)
             #deferred.addErrback(on_error)
         else:
@@ -106,31 +87,15 @@ def _wamp_publish(topic, json_data=None):
 
 
 @comp.on_join
-@inlineCallbacks
-def joined(session, details):
+async def joined(session, details):
     global wamp_session
+    log.info("wamp joined")
     log.info("wamp session ready %r, id %r", session, session._session_id)
-    # make sure calltaker is initialized
-    #calltaker_data.CalltakerData()
     wamp_session = session
 
-    if start_status_listener:
-        from .presence import start_presence
-        start_presence(session)
-
-    '''
-    dump_object_member_vars(log, session)
-    dump_object_member_funcs(log, session)
-    log.info("wamp session id %r" % session._session_id)
-    log.info("wamp confog %r" % session.config)
-    dump_object_member_vars(log, session.config)
-    dump_object_member_funcs(log, session.config)
-    log.info("wamp config extra %r" % session.config.extra)
-    '''
 
 @comp.on_leave
-@inlineCallbacks
-def left(session, details):
+async def left(session, details):
     global wamp_session
     log.error("wamp session left, session")
     log.error("wamp session left, session is %r, old session is %r, details %r", session, wamp_session, details)
@@ -138,21 +103,19 @@ def left(session, details):
     # todo - try to reconnect here
     start()
 
+
 @comp.on_disconnect
-@inlineCallbacks
-def on_disconnect(session):
+async def on_disconnect(session):
     global wamp_session
     log.error("wamp session disconnected")
     wamp_session = None
 
 
-def start(status_listner_enabled=False):
+def start():
     try:
-        global start_status_listener
-        start_status_listener = status_listner_enabled
         log.info("connecting wamp to %r", WAMP_CROSSBAR_SERVER)
         #reactor.callFromThread(comp.start)
-        comp.start()
+        run([comp], start_loop=False)
     except Exception as e:
         log.error ("error in wamo start")
         log.error (str(e))

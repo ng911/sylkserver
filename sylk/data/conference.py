@@ -39,10 +39,9 @@ class ConferenceData(object):
 
     def create_conference(self, room_number, direction='in', call_type='sos',
                           status='init', primary_queue_id=None, link_id=None, caller_ani='', caller_uri='', called_uri='', caller_name='',
-                          called_number='', ali_format='', has_audio=True, has_text=False, has_video=False, has_tty=False):
+                          called_number='', ali_format='', has_audio=True, has_text=False, has_video=False, has_tty=False, psap_id=ServerConfig.psap_id):
         try:
             log.info("inside create_conference")
-            psap_id = ServerConfig.psap_id
             log.info("inside create_conference psap_id is %r", psap_id)
             cur_time = datetime.datetime.utcnow()
             conference = Conference()

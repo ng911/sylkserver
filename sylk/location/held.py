@@ -96,7 +96,7 @@ def held_client(options):
                 tag, value = options.device.split(':', 1) if ':' in options.device else ('ip', options.device)
                 xml.children['device'][0].children += simplexml.XML('<%s>%s</%s>' % (tag, value, tag))
             '''
-            data = xml.toxml()
+            data = xml.toxml().encode('utf-8')
             log.info('sending XML\n%s', data)
             log.info("makeing http post to %s", held_url)
             r = http.request('POST', held_url, timeout=options.timeout, headers=headers, body=data)

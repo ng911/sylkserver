@@ -27,6 +27,15 @@ class Query(graphene.ObjectType):
     #def resolve_all_conferences(parent, info, **args):
     #    return resolveCalls(parent, info, **args)
 
+class Subscriptions(graphene.ObjectType):
+    count_seconds = graphene.Float(up_to=graphene.Int())
+
+    async def resolve_count_seconds(root, info, up_to):
+        for i in range(up_to):
+            yield i
+            await asyncio.sleep(1.)
+        yield up_to
+
 
 class Mutations(graphene.ObjectType):
     update_user = UpdateUserMutation.Field()
@@ -34,7 +43,7 @@ class Mutations(graphene.ObjectType):
     update_psap = UpdatePsapMutation.Field()
 
 
-graphql_schema = graphene.Schema(query=Query, mutation=Mutations, types=[])
+graphql_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])
 
 __all__ = [ 'graphql_schema']
 

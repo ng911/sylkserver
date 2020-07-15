@@ -1,5 +1,6 @@
 import os
 import sys
+from six import u
 
 
 MONGODB_HOST = "rdffg.emergent911.com:27017"
@@ -15,15 +16,9 @@ CREATE_DB = True
 FLASK_SERVER_PORT = 7070
 
 
-if (sys.version_info > (3, 0)):
-    WAMP_REALM = "realm1"
-    WAMP_CROSSBAR_SERVER = "ws://rdffg-wamp.emergent911.com/ws"
-    #just temp for now
-    MONGODB_HOST = "mongodb:27017"
-else:
-    WAMP_REALM = u"realm1"
-    WAMP_CROSSBAR_SERVER = u"ws://rdffg-wamp.emergent911.com/ws"
-    #WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
+WAMP_REALM = u("realm1")
+WAMP_CROSSBAR_SERVER = u("ws://rdffg-wamp.emergent911.com/ws")
+#WAMP_CROSSBAR_SERVER = u"ws://crossbar-router:8080/ws"
 
 MONGODB_URI = 'mongodb://%s:%s@%s/%s' % \
               (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST, MONGODB_DB)

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import logging
-from twisted.internet import reactor
 
 log = logging.getLogger('emergent-ng911')
 
@@ -32,9 +31,10 @@ if __name__ == '__main__':
 
     try:
         import sylk.graphql
-
+        import asyncio
+        from sylk.wamp_asyncio import start
+        start()
         sylk.graphql.start_server()
-        reactor.run()
     except Exception as e:
         log.fatal('Failed to start {name}: {exception!s}'.format(name=fullname, exception=e))
         log.exception(str(e))
