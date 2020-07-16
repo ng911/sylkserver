@@ -44,20 +44,20 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=gra
 '''
 
 gqil_view = GraphQLView(
-    schema=schema,
+    schema=graphql_schema,
     executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
     graphiql=True,
     enable_async=True,
 )
 
 gql_view = GraphQLView(
-    schema=schema,
+    schema=graphql_schema,
     executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
     graphiql=False,
     enable_async=True,
 )
 
-subscription_server = AiohttpSubscriptionServer(schema)
+subscription_server = AiohttpSubscriptionServer(graphql_schema)
 
 async def subscriptions(request):
     ws = web.WebSocketResponse(protocols=('graphql-ws',))
