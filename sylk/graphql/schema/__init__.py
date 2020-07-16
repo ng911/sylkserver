@@ -1,4 +1,5 @@
 import graphene
+import asyncio
 from graphene.relay import Node
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
