@@ -8,6 +8,13 @@ from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
 
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
+
 
 class Query(graphene.ObjectType):
     node = Node.Field()
@@ -31,6 +38,7 @@ class Subscriptions(graphene.ObjectType):
     count_seconds = graphene.Float(up_to=graphene.Int())
 
     async def resolve_count_seconds(root, info, up_to):
+        log.info("inside resolve_count_seconds")
         for i in range(up_to):
             yield i
             await asyncio.sleep(1.)
