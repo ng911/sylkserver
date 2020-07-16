@@ -330,9 +330,12 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
             location_db_obj.state = state
             location_db_obj.name = name
             location_db_obj.community = community
-            location_db_obj.latitude = float(latitude)
-            location_db_obj.longitude = float(longitude)
-            location_db_obj.radius = float(radius)
+            if latitude != None and latitude != "":
+                location_db_obj.latitude = float(latitude)
+            if longitude != None and longitude != "":
+                location_db_obj.longitude = float(longitude)
+            if radius != None and radius != "":
+                location_db_obj.radius = float(radius)
             location_db_obj.postal = postal
             location_db_obj.time = location_db_obj.updated_at = datetime.datetime.utcnow()
             location_db_obj.save()

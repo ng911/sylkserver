@@ -16,6 +16,8 @@ from ..config import MONGODB_HOST, MONGODB_DB, MONGODB_USERNAME, MONGODB_PASSWOR
 from ..config import FLASK_SERVER_PORT
 from .schema import graphql_schema
 
+# aiohttp code taken from
+# https://medium.com/@chimamireme/setting-up-a-modern-python-web-application-with-aiohttp-graphql-and-docker-149c52657142
 
 log = logging.getLogger('emergent-ng911')
 
