@@ -60,7 +60,7 @@ gql_view = GraphQLView(
 subscription_server = AiohttpSubscriptionServer(graphql_schema)
 
 async def subscriptions(request):
-    log.inof("inside subscriptions(request)")
+    log.info("inside subscriptions(request)")
     ws = web.WebSocketResponse(protocols=('graphql-ws',))
     await ws.prepare(request)
 
