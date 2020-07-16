@@ -2,6 +2,7 @@ aniso8601==7.0.0
 arrow>=0.15.5
 attrs==19.3.0
 aiohttp
+aiohttp_cors
 aiohttp-graphql
 autobahn==20.6.2
 Automat==20.2.0

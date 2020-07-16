@@ -7,6 +7,10 @@ from pymongo import MongoClient
 from aiohttp_graphql import GraphQLView
 import logging
 from graphql_ws.aiohttp import AiohttpSubscriptionServer
+import aiohttp_cors
+import asyncio
+from graphql.execution.executors.asyncio import AsyncioExecutor
+
 
 from ..config import MONGODB_HOST, MONGODB_DB, MONGODB_USERNAME, MONGODB_PASSWORD
 from ..config import FLASK_SERVER_PORT
@@ -38,11 +42,21 @@ CORS(app)
 
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=graphql_schema, graphiql=True))
 '''
-app = web.Application()
 
-# Optional, for adding batch query support (used in Apollo-Client)
-GraphQLView.attach(app, schema=graphql_schema, route_path='/graphql', graphiql=True, subscriptions='/subscriptions')
-'''
+gqil_view = GraphQLView(
+    schema=schema,
+    executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
+    graphiql=True,
+    enable_async=True,
+)
+
+gql_view = GraphQLView(
+    schema=schema,
+    executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
+    graphiql=False,
+    enable_async=True,
+)
+
 subscription_server = AiohttpSubscriptionServer(schema)
 
 async def subscriptions(request):
@@ -53,8 +67,42 @@ async def subscriptions(request):
     return ws
 
 
-app.router.add_get('/subscriptions', subscriptions)
-'''
+
+def init_routes(app, cors):
+    app.router.add_route('*', '/graphiql', gqil_view, name='graphiql')
+
+    resource = cors.add(app.router.add_resource("/graphql"), {
+        "*": aiohttp_cors.ResourceOptions(
+            expose_headers="*",
+            allow_headers="*",
+            allow_credentials=True,
+            allow_methods=["POST", "PUT", "GET"]),
+    })
+    resource.add_route("POST", gql_view)
+    resource.add_route("PUT", gql_view)
+    resource.add_route("GET", gql_view)
+
+    resource = cors.add(app.router.add_resource("/subscriptions"), {
+        "*": aiohttp_cors.ResourceOptions(
+            expose_headers="*",
+            allow_headers="*",
+            allow_credentials=True,
+            allow_methods=["POST", "PUT", "GET"]),
+    })
+
+    resource.add_route("GET", subscriptions)
+    resource.add_route("PUT", subscriptions)
+    resource.add_route("POST", subscriptions)
+
+
+app = web.Application()
+cors = aiohttp_cors.setup(app)
+init_routes(app, cors)
+
+
+# Optional, for adding batch query support (used in Apollo-Client)
+#GraphQLView.attach(app, schema=graphql_schema, route_path='/graphql', graphiql=True, subscriptions='/subscriptions')
+
 def start_server():
     log.info("start graphql api server")
     '''
