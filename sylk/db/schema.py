@@ -702,7 +702,13 @@ class defining_polygon(Document):
 class adding_map_layer(Document):
     psap_id = ObjectIdField(required = True)
     name = StringField()
-    
+    shpfile_path = StringField(required = True)
+    meta = {
+        'indexes' :[
+            'psap_id',
+            'name'
+        ]
+    }
 
 
 def create_calltaker(username, password, fullname, queue_id, psap_id):
