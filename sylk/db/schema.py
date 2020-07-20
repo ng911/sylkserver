@@ -685,6 +685,25 @@ class Greeting(Document):
         ]
     }
 
+class defining_polygon(Document):
+    psap_id = ObjectIdField(required = True)
+    name = StringField()
+    latitude = FloatField(required = True)
+    longitude = FloatField(required = True)
+    defined_polygon = PolygonField()
+    meta = {
+        'indexes' : [
+            'psap_id',
+            'latitude',
+            'longitude'
+        ]
+    }
+
+class adding_map_layer(Document):
+    psap_id = ObjectIdField(required = True)
+    name = StringField()
+    
+
 
 def create_calltaker(username, password, fullname, queue_id, psap_id):
     utcnow = datetime.datetime.utcnow()
