@@ -92,7 +92,7 @@ class PsapConferenceNode(ObjectType):
     def get_node(cls, info, id):
         return f"PsapConferenceNode{id}"
 
-    def resolve_users(parent, info, **args):
+    def resolve_calls(parent, info, **args):
         params = {}
         update_params_with_args(params, args)
         return ConferenceModel.objects(**params)
