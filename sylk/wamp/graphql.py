@@ -1,9 +1,14 @@
-import logging
 import traceback
 
 from .core import wamp_publish
 
-log = logging.getLogger('emergent-ng911')
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
+
 
 def base64(s):
     from base64 import b64encode as _base64, b64decode as _unbase64
