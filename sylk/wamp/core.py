@@ -75,14 +75,14 @@ def send_one_request(request):
 
 
 def wamp_publish(topic, json_data=None, exclude_me=True):
-    log.debug("inside wamp_publish twisted %s, json %r", topic, json_data)
+    log.info("inside wamp_publish twisted %s, json %r", topic, json_data)
     reactor.callFromThread(_wamp_publish, topic, json_data, exclude_me)
 
 
 def _wamp_publish(topic, json_data=None, exclude_me=True):
     try:
         if wamp_session is not None:
-            log.debug("my_wamp_publish %s, json %r",topic, json_data)
+            log.info("my_wamp_publish %s, json %r",topic, json_data)
             if json_data is None:
                 json_data = {}
             deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True,
