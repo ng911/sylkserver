@@ -82,6 +82,22 @@ class ConferenceNode(MongoengineObjectType):
         params = update_params_with_args(params, args)
         return LocationModel.objects(**params).order_by('-updated_at')
 
+
+class PsapConferenceNode(ObjectType):
+    class Meta:
+        interfaces = (Node,)
+    calls = MongoengineConnectionField(ConferenceNode)
+
+    @classmethod
+    def get_node(cls, info, id):
+        return f"PsapConferenceNode{id}"
+
+    def resolve_users(parent, info, **args):
+        params = {}
+        update_params_with_args(params, args)
+        return ConferenceModel.objects(**params)
+
+
 def resolveActiveCall(parent, info, **args):
     username = args['username']
     # there should only be 1 value in rooms but there is some bug in the code, that is why the logic below
@@ -133,3 +149,11 @@ def resolveCalls(parent, info, **args):
                                  '$lt': formatted_end_time}
     log.info("inside call search filters is %r", filters)
     return ConferenceModel.objects(__raw__=filters).order_by('-start_time')
+
+
+from ..mutations import create_update_mutation, EnhancedClientIDMutation
+
+class UpdateConferenceMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, ConferenceModel, ConferenceNode, 'room_number')

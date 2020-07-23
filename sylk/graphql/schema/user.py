@@ -9,7 +9,6 @@ from ...db.schema import User as UserModel
 from ...db.schema import CalltakerProfile as CalltakerProfileModel
 from ...db.schema import Queue as QueueModel
 from ...db.schema import QueueMember as QueueMemberModel
-from ..mutations import create_update_mutation, EnhancedClientIDMutation
 
 log = logging.getLogger("emergent-ng911")
 
@@ -42,10 +41,31 @@ class UserNode(MongoengineObjectType):
         }
         return CalltakerProfileModel.objects.get(**params)
 
+class PsapUsersNode(graphene.ObjectType):
+    class Meta:
+        interfaces = (Node,)
+    users = MongoengineConnectionField(UserNode)
+
+    @classmethod
+    def get_node(cls, info, id):
+        return f"PsapUsersNode{id}"
+
+    def resolve_users(parent, info, **args):
+        params = {}
+        update_params_with_args(params, args)
+        return UserModel.objects(**params)
+
+
+from ..mutations import create_update_mutation, create_insert_mutation, EnhancedClientIDMutation
+
+class CreateUserMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_insert_mutation(cls, UserModel, UserNode)
 
 class UpdateUserMutation(EnhancedClientIDMutation):
     @classmethod
-    def __create_custom__(cls):
+    def __custom__(cls):
         create_update_mutation(cls, UserModel, UserNode, 'user_id')
 
 

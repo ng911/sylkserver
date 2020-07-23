@@ -21,11 +21,12 @@ Flask-Login>=0.4.1
 Flask-RESTful>=0.3.8
 Flask-Session>=0.3.1
 Flask-WTF>=0.14.2
-graphene==2.1.8
-graphene-mongo==0.2.10
+graphene==2.1.0
+graphene-mongo
 graphql-core==2.3.1
 graphql-ws
-graphql-relay==2.0.1
+#graphql-core-next
+graphql-relay<3.0.0
 graphql-server-core==1.2.0
 hyperlink==19.0.0
 idna==2.9
@@ -44,7 +45,7 @@ pyOpenSSL>=18.0.0
 python-dateutil==2.8.1
 PyYAML==5.3
 requests>=2.22.0
-Rx==1.6.1
+rx==1.6.1
 service-identity>=18.0.0
 singledispatch==3.4.0.3
 six==1.14.0

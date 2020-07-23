@@ -60,7 +60,7 @@ def _mutate_and_get_payload_for_insert(model_class, fields):
         return cls(**params)
     return mutate_and_get_payload
 
-def _mutate_and_get_payload_for_delete(model_class, fields, key):
+def _mutate_and_get_payload_for_delete(model_class):
     def mutate_and_get_payload(cls, root, info, **input):
         id_ = input.get("id")
         try:
@@ -91,7 +91,6 @@ def create_update_mutation(cls, model_class, node_class, key):
 
 def create_delete_mutation(cls, model_class):
     input_class = _create_input_class_delete()
-    prop_name = model_class._get_collection_name()
     setattr(cls, "Input", input_class)
     setattr(cls, "success", graphene.Boolean())
     _create_mutate_method = _mutate_and_get_payload_for_delete(model_class)
@@ -125,14 +124,13 @@ class EnhancedClientIDMutation(graphene.relay.ClientIDMutation):
     def __init_subclass_with_meta__(
         cls, output=None, input_fields=None, arguments=None, name=None, **options
     ):
-        log.info("inside __init_subclass_with_meta__")
-        cls.__create_custom__()
+        cls.__custom__()
         super(EnhancedClientIDMutation, cls).__init_subclass_with_meta__(
             output=output, arguments=arguments, name=name, **options
         )
 
     @classmethod
-    def __create_custom__(cls):
+    def __custom__(cls):
         pass
 
     @classmethod

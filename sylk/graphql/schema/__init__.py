@@ -1,6 +1,6 @@
 import graphene
-import asyncio
 from graphene.relay import Node
+from graphene_mongo import MongoengineConnectionField
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
 from .user import UserNode, UpdateUserMutation
@@ -8,6 +8,11 @@ from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
+from ..decorators import subsribe_for_node, subsribe_for_connection, wait_for_db_change
+from ...db.schema import User as UserModel
+from .user import PsapUsersNode
+from .calls import PsapConferenceNode
+from ...db.schema import Conference as ConferenceModel
 
 try:
     from sylk.applications import ApplicationLogger
@@ -28,22 +33,34 @@ class Query(graphene.ObjectType):
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
     # active call for a calltaker
-    active_call = graphene.Field(ConferenceNode, username=graphene.String(required=True))
+    active_call = graphene.Field(ConferenceNode)
 
     def resolve_active_call(parent, info, **args):
         return resolveActiveCall(parent, info, **args)
-    #def resolve_all_conferences(parent, info, **args):
-    #    return resolveCalls(parent, info, **args)
+
+
 
 class Subscriptions(graphene.ObjectType):
-    count_seconds = graphene.Float(up_to=graphene.Int())
+    user_data = graphene.Field(UserNode, username=graphene.String(required=True))
+    psap_users = graphene.Field(PsapUsersNode)
+    psap_calls = graphene.Field(PsapConferenceNode)
+    call_data = graphene.Field(ConferenceNode, room_number=graphene.String(required=True))
 
-    async def resolve_count_seconds(root, info, up_to):
-        log.info("inside resolve_count_seconds")
-        for i in range(up_to):
-            yield i
-            await asyncio.sleep(1.)
-        yield up_to
+    @subsribe_for_node(PsapUsersNode)
+    async def resolve_user_data(root, info, **args):
+        pass
+
+    @subsribe_for_connection(PsapUsersNode, UserModel)
+    async def resolve_psap_users(root, info, **args):
+        pass
+
+    @subsribe_for_node(ConferenceNode)
+    async def resolve_call_data(root, info, **args):
+        pass
+
+    @subsribe_for_connection(ConferenceNode, ConferenceModel)
+    async def resolve_psap_calls(root, info, **args):
+        pass
 
 
 class Mutations(graphene.ObjectType):

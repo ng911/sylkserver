@@ -60,18 +60,17 @@ def send_one_request(request):
     yield wamp_session.publish(request.topic, json_data, options=PublishOptions(acknowledge=True))
 '''
 
+def get_wamp_session():
+    return wamp_session
 
-async def wamp_publish(topic, json_data=None):
+async def wamp_publish(topic, json_data=None, exclude_me=True):
     try:
         if wamp_session is not None:
             #log.debug("my_wamp_publish %s, json %r",topic, json_data)
-            json_size = 0
-            if json_data is not None:
-                json_obj = json.dumps(json_data)
-                json_size = len(json_obj)
-                await wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
-            else:
-                await wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
+            if json_data is None:
+                json_data = {}
+            await wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True,
+                                                                         exclude_me=exclude_me))
 
             #deferred.addCallback(on_success)
             #deferred.addErrback(on_error)

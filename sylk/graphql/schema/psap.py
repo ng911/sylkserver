@@ -117,3 +117,21 @@ class UpdatePsapMutation(graphene.relay.ClientIDMutation):
             psapObj.domain = domain_prefix
         psapObj.save()
         return UpdatePsapMutation(psap=psapObj)
+
+from ..mutations import create_insert_mutation, create_update_mutation, create_delete_mutation, \
+    EnhancedClientIDMutation
+
+class CreateCallTransferLineMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_insert_mutation(cls, CallTransferLineModel, CallTransferLineNode)
+
+class UpdateCallTransferLineMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, CallTransferLineModel, CallTransferLineNode, 'line_id')
+
+class DeleteCallTransferLineMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_delete_mutation(cls, CallTransferLineModel)

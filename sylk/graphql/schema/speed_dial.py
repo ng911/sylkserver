@@ -33,5 +33,42 @@ class SpeedDialGroupNode(MongoengineObjectType):
     def resolve_speed_dials(parent, info, **args):
         return SpeedDialModel.objects(group_id = parent.group_id)
 
+from ..mutations import create_insert_mutation, create_update_mutation, create_delete_mutation, \
+    EnhancedClientIDMutation
 
+
+class CreteSpeedDialMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_insert_mutation(cls, SpeedDialModel, SpeedDialNode)
+
+
+class UpdateSpeedDialMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, SpeedDialModel, SpeedDialNode, 'speed_dial_id')
+
+
+class DeleteSpeedDialMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_delete_mutation(cls, SpeedDialModel)
+
+
+class CreteSpeedDialGroupMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_insert_mutation(cls, SpeedDialGroupModel, SpeedDialGroupNode)
+
+
+class UpdateSpeedDialGroupMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, SpeedDialGroupModel, SpeedDialGroupNode, 'group_id')
+
+
+class DeleteSpeedDialGroupMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_delete_mutation(cls, SpeedDialGroupModel)
 

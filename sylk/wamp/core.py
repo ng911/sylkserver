@@ -75,27 +75,23 @@ def send_one_request(request):
 '''
 
 
-def wamp_publish(topic, json_data=None):
-    reactor.callFromThread(_wamp_publish, topic, json_data)
+def wamp_publish(topic, json_data=None, exclude_me=False):
+    reactor.callFromThread(_wamp_publish, topic, json_data, exclude_me)
 
 
-def _wamp_publish(topic, json_data=None):
+def _wamp_publish(topic, json_data=None, exclude_me=False):
     try:
         if wamp_session is not None:
             #log.debug("my_wamp_publish %s, json %r",topic, json_data)
-            json_size = 0
             if json_data is not None:
-                json_obj = json.dumps(json_data)
-                json_size = len(json_obj)
-                deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True))
-            else:
-                deferred = wamp_session.publish(topic, {}, options=PublishOptions(acknowledge=True))
-
+                json_data = {}
+            deferred = wamp_session.publish(topic, json_data, options=PublishOptions(acknowledge=True,
+                                                                                     exclude_me=exclude_me))
             deferred.addCallbacks(on_wamp_success, on_wamp_error)
             #deferred.addCallback(on_success)
             #deferred.addErrback(on_error)
         else:
-            log.error("my_wamp_publish for %r, json %r, wamp session is None", topic, json_data)
+            log.error("_wamp_publish for %r, json %r, wamp session is None", topic, json_data)
 
     except Exception as e:
         stackTrace = traceback.format_exc()

@@ -20,4 +20,9 @@ class LocationNode(MongoengineObjectType):
         return get_location_display(parent)
 
 
+from ..mutations import create_update_mutation, EnhancedClientIDMutation
 
+class UpdateLocationMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, LocationModel, LocationNode, 'location_id')

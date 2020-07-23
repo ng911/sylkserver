@@ -51,17 +51,40 @@ else:
 def post_save(sender, document, **kwargs):
     import sys
     if (sys.version_info > (3, 0)):
+        log.info("importing publish_relay_node_update from asyncio")
         from ..wamp_asyncio import publish_relay_node_update, publish_relay_node_add
+        from asyncio import run
+
     else:
+        log.info("importing publish_relay_node_update from twisted")
         from ..wamp import publish_relay_node_update, publish_relay_node_add
-    log.info("inside graphql_node_notifications post_save ")
-    node_name = "%sNode" % document.__class__.__name__
-    log.info("inside graphql_node_notifications post_save %r, id %r", node_name, document.id)
-    log.info("inside graphql_node_notifications kwargs %r", kwargs)
-    if 'created' in kwargs and kwargs['created']:
-        publish_relay_node_add(document.psap_id, document.id, node_name)
-    else:
-        publish_relay_node_update(document.psap_id, document.id, node_name)
+    try:
+        log.info("inside graphql_node_notifications post_save ")
+        #node_name = "%sNode" % document.__class__.__name__
+        schema_name = document._get_collection_name()
+        log.info("inside graphql_node_notifications post_save %r, id %r", schema_name, document.id)
+        log.info("inside graphql_node_notifications kwargs %r, document.psap_id %r", kwargs, document.psap_id)
+        log.info("inside graphql_node_notifications psap_id %r, id %r, node_name %s", document.psap_id, document.id,
+                 schema_name)
+        if 'created' in kwargs and kwargs['created']:
+            log.info("call publish_relay_node_add")
+            publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name)
+            log.info("call publish_relay_node_add done")
+        else:
+            log.info("call publish_relay_node_update")
+            if (sys.version_info > (3, 0)):
+                import asyncio
+                loop = asyncio.get_running_loop()
+                asyncio.ensure_future(publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name),
+                                      loop=loop)
+            else:
+                publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name)
+            log.info("call publish_relay_node_update done")
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.error(stacktrace)
+        log.error(e)
+
 
 def graphql_node_notifications(cls):
     '''

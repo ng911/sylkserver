@@ -69,8 +69,6 @@ async def subscriptions(request):
     await subscription_server.handle(ws)
     return ws
 
-
-
 def init_routes(app, cors):
     app.router.add_route('*', '/graphiql', gqil_view, name='graphiql')
 
