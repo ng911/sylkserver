@@ -50,7 +50,7 @@ else:
 
 def post_save(sender, document, **kwargs):
     import sys
-    if (sys.version_info < (3, 0)):
+    if (sys.version_info > (3, 0)):
         log.info("importing publish_relay_node_update from asyncio")
         from ..wamp_asyncio import publish_relay_node_update, publish_relay_node_add
         from asyncio import run
