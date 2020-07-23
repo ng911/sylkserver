@@ -16,7 +16,7 @@ except:
 
 from ..config import WAMP_CROSSBAR_SERVER
 
-log.info("wamp session start")
+log.info("wamp session start for %r", WAMP_CROSSBAR_SERVER)
 
 comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
