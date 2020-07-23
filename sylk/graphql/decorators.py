@@ -4,8 +4,14 @@ import functools
 
 log = logging.getLogger('emergent-ng911')
 
+from enum import Enum
+class WaitForDbChangeType(Enum):
+    NEW_NODE = 0
+    NODE = 1
+    CONNECTION = 2
 
-async def wait_for_db_change(future_data, node, model, schema_name, arguments_data, for_connection=False):
+
+async def wait_for_db_change(future_data, node, model, schema_name, arguments_data, change_type=WaitForDbChangeType.NODE):
     from ..wamp_asyncio import get_wamp_session
     wamp_session = get_wamp_session()
 
@@ -22,10 +28,19 @@ async def wait_for_db_change(future_data, node, model, schema_name, arguments_da
                 return
             log.info("got json_data")
             #model = root._meta.model
-            if for_connection:
+            if change_type == WaitForDbChangeType.CONNECTION:
                 future = future_data[0]
                 if not future.done():
                     future.set_result(node())
+            elif change_type == WaitForDbChangeType.NEW_NODE:
+                document_json = json_data['document_json']
+                modelObj = model.from_json(document_json)
+                log.info(f"on_changed got document_json {document_json}")
+                log.info("arguments_data is %r", arguments_data)
+                future = future_data[0]
+                if not future.done():
+                    future.set_result(modelObj)
+                log.info("furure result set")
             else:
                 document_json = json_data['document_json']
                 modelObj = model.from_json(document_json)
@@ -48,14 +63,19 @@ async def wait_for_db_change(future_data, node, model, schema_name, arguments_da
             log.error(stacktrace)
             log.error(str(e))
 
-    topic = f"com.emergent911.node.{schema_name}"
+    if change_type == WaitForDbChangeType.NEW_NODE:
+        topic = f"com.emergent911.node.new.{schema_name}"
+    else:
+        topic = f"com.emergent911.node.{schema_name}"
+
     log.info(f"wait_for_changes topic {topic}, wamp_session {wamp_session}")
     try:
         await wamp_session.subscribe(on_changed, topic)
     except:
         log.error("exception in wamp_session.subscribe")
 
-def subsribe_for_node(node):
+
+def subsribe_for_node(node, is_new=False):
     log.info("inside subsribe_for_node")
     def decorator(func):
         log.info("inside decorator")
@@ -68,7 +88,11 @@ def subsribe_for_node(node):
             log.info("inside resolve_user kwargs is %r", kwargs)
             loop = get_event_loop()
             future_data = []
-            loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs))
+            change_type = WaitForDbChangeType.NODE
+
+            if is_new:
+                change_type = WaitForDbChangeType.NEW_NODE
+            loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs, change_type=change_type))
             while True:
                 future_data.clear()
                 future = Future()
@@ -93,7 +117,8 @@ def subsribe_for_connection(node, model):
             log.info("inside wrapped")
             loop = get_event_loop()
             future_data = []
-            loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs, for_connection=True))
+            loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs,
+                                                change_type=WaitForDbChangeType.CONNECTION))
             while True:
                 future_data.clear()
                 future = Future()

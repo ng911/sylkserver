@@ -15,6 +15,22 @@ def get_node_id(mongoId, nodeSchemaName):
     return base64(':'.join([nodeSchemaName, text_type(mongoId)]))
 
 
+async def publish_relay_node_new(document_json, psap_id, id_, node_schema):
+    log.info('inside publish_relay_node_changed')
+    node_id = get_node_id(id_, node_schema)
+    psap_id = str(psap_id)
+    topic = u'com.emergent911.node.new.%s' % node_schema
+    json_publish_data = {
+        'node_id': node_id,
+        'schema_name': node_schema,
+        'psap_id': psap_id,
+        'document_json' : document_json
+    }
+    #log.info('publish_relay_node_changed, topic %s, data %r', topic, json_publish_data)
+    log.info('publish_relay_node_changed, topic %s', topic)
+    await wamp_publish(topic, json_publish_data, exclude_me=False)
+
+
 async def publish_relay_node_changed(document_json, psap_id, id_, node_schema):
     log.info('inside publish_relay_node_changed')
     node_id = get_node_id(id_, node_schema)
@@ -46,6 +62,7 @@ async def publish_relay_node_add(document_json, psap_id, id_, node_schema):
         await wamp_publish(topic, jsonData)
         '''
         await publish_relay_node_changed(document_json, psap_id, id_, node_schema)
+        await publish_relay_node_new(document_json, psap_id, id_, node_schema)
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error(stacktrace)

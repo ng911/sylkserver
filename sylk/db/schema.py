@@ -50,7 +50,8 @@ else:
 
 def post_save(sender, document, **kwargs):
     import sys
-    if (sys.version_info < (3, 0)):
+    if (sys.version_info > (3, 0)):
+        import asyncio
         log.info("importing publish_relay_node_update from asyncio")
         from ..wamp_asyncio import publish_relay_node_update, publish_relay_node_add
         from asyncio import run
@@ -68,12 +69,16 @@ def post_save(sender, document, **kwargs):
                  schema_name)
         if 'created' in kwargs and kwargs['created']:
             log.info("call publish_relay_node_add")
-            publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name)
+            if (sys.version_info > (3, 0)):
+                loop = asyncio.get_running_loop()
+                asyncio.ensure_future(publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name),
+                                      loop=loop)
+            else:
+                publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name)
             log.info("call publish_relay_node_add done")
         else:
             log.info("call publish_relay_node_update")
             if (sys.version_info > (3, 0)):
-                import asyncio
                 loop = asyncio.get_running_loop()
                 asyncio.ensure_future(publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name),
                                       loop=loop)

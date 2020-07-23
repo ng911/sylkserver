@@ -1,6 +1,7 @@
 import arrow
 from graphene import Field, List, String, ObjectType
 from graphene.relay import Node
+from ..fields import OrderedMongoengineConnectionField
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..fields import EnhancedConnection
@@ -86,7 +87,7 @@ class ConferenceNode(MongoengineObjectType):
 class PsapConferenceNode(ObjectType):
     class Meta:
         interfaces = (Node,)
-    calls = MongoengineConnectionField(ConferenceNode)
+    calls = OrderedMongoengineConnectionField(ConferenceNode)
 
     @classmethod
     def get_node(cls, info, id):

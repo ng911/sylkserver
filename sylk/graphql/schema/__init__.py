@@ -8,7 +8,7 @@ from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
-from ..decorators import subsribe_for_node, subsribe_for_connection, wait_for_db_change
+from ..decorators import subsribe_for_node, subsribe_for_connection
 from ...db.schema import User as UserModel
 from .user import PsapUsersNode
 from .calls import PsapConferenceNode
@@ -45,6 +45,7 @@ class Subscriptions(graphene.ObjectType):
     psap_users = graphene.Field(PsapUsersNode)
     psap_calls = graphene.Field(PsapConferenceNode)
     call_data = graphene.Field(ConferenceNode, room_number=graphene.String(required=True))
+    new_call = graphene.Field(ConferenceNode)
 
     @subsribe_for_node(PsapUsersNode)
     async def resolve_user_data(root, info, **args):
@@ -56,6 +57,10 @@ class Subscriptions(graphene.ObjectType):
 
     @subsribe_for_node(ConferenceNode)
     async def resolve_call_data(root, info, **args):
+        pass
+
+    @subsribe_for_node(ConferenceNode, is_new=True)
+    async def resolve_new_call(root, info, **args):
         pass
 
     @subsribe_for_connection(ConferenceNode, ConferenceModel)
