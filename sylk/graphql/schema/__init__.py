@@ -33,7 +33,7 @@ class Query(graphene.ObjectType):
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
     # active call for a calltaker
-    active_call = graphene.Field(ConferenceNode)
+    active_call = graphene.Field(ConferenceNode, username=graphene.String(required=True))
 
     def resolve_active_call(parent, info, **args):
         return resolveActiveCall(parent, info, **args)
