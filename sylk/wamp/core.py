@@ -105,7 +105,7 @@ def _wamp_publish(topic, json_data=None, exclude_me=True):
 @inlineCallbacks
 def joined(session, details):
     global wamp_session
-    log.info("wamp session ready for %r, id %r", WAMP_CROSSBAR_SERVER, session, session._session_id)
+    log.info("wamp session ready for %r, session %r, id %r", WAMP_CROSSBAR_SERVER, session, session._session_id)
     # make sure calltaker is initialized
     #calltaker_data.CalltakerData()
     wamp_session = session
