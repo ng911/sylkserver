@@ -370,6 +370,7 @@ class PSAPApplication(SylkApplication):
         incoming_link = None
         call_type = ''
         admin_user = ''
+        geoloc_ref = None
         log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
             log.info(u'call is sos')
@@ -378,7 +379,6 @@ class PSAPApplication(SylkApplication):
             called_number = local_identity.uri.user
             calling_number = remote_identity.uri.user
             call_type = 'sos'
-            geoloc_ref = None
             if 'Geolocation' in headers:
                 log.info("found Geolocation in header")
                 geo_location = headers.get('Geolocation', None)
