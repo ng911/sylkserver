@@ -34,7 +34,7 @@ wamp_session_client_data = {}
 user_wamp_sessions = {}
 
 def on_wamp_success(result):
-    log.debug("my_wamp_publish deferred on_success %r, %s", result, result)
+    log.info("my_wamp_publish deferred on_success %r, %s", result, result)
 
 
 def on_wamp_error(failure):
@@ -105,7 +105,7 @@ def _wamp_publish(topic, json_data=None, exclude_me=True):
 @inlineCallbacks
 def joined(session, details):
     global wamp_session
-    log.info("wamp session ready %r, id %r", session, session._session_id)
+    log.info("wamp session ready for %r, id %r", WAMP_CROSSBAR_SERVER, session, session._session_id)
     # make sure calltaker is initialized
     #calltaker_data.CalltakerData()
     wamp_session = session
