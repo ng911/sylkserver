@@ -478,10 +478,11 @@ class PSAPApplication(SylkApplication):
                         user_ids = [str(queue_member.user_id) for queue_member in queue_members]
                         acd_strategy = queue_details.acd_strategy
                         calltakers = get_calltakers(acd_strategy, user_ids)
+                        sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                     else:
                         acd_strategy = 'ring_all'
                         calltakers, user_ids = get_available_calltakers(ServerConfig.psap_id)
-                    sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
+                        sip_uris = ["sip:%s@%s" % (calltaker, server) for calltaker in calltakers]
                     [self.set_calltaker_busy(user_id=user_id) for user_id in user_ids]
                     ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
                 else:
