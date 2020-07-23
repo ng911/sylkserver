@@ -471,18 +471,13 @@ class PSAPApplication(SylkApplication):
             if call_type == 'sos':
                 session.is_calltaker = False
                 server = ServerConfig.asterisk_server
-                if incoming_link != None:
-                    if hasattr(incoming_link, "queue_id") and incoming_link.queue_id != None:
-                        queue_details = get_queue_details(incoming_link.queue_id)
-                        queue_members = get_queue_members(incoming_link.queue_id)
-                        user_ids = [str(queue_member.user_id) for queue_member in queue_members]
-                        acd_strategy = queue_details.acd_strategy
-                        calltakers = get_calltakers(acd_strategy, user_ids)
-                        sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
-                    else:
-                        acd_strategy = 'ring_all'
-                        calltakers, user_ids = get_available_calltakers(ServerConfig.psap_id)
-                        sip_uris = ["sip:%s@%s" % (calltaker, server) for calltaker in calltakers]
+                if (incoming_link != None) and hasattr(incoming_link, "queue_id") and (incoming_link.queue_id != None):
+                    queue_details = get_queue_details(incoming_link.queue_id)
+                    queue_members = get_queue_members(incoming_link.queue_id)
+                    user_ids = [str(queue_member.user_id) for queue_member in queue_members]
+                    acd_strategy = queue_details.acd_strategy
+                    calltakers = get_calltakers(acd_strategy, user_ids)
+                    sip_uris = ["sip:%s@%s" % (calltaker.username, server) for calltaker in calltakers.itervalues()]
                     [self.set_calltaker_busy(user_id=user_id) for user_id in user_ids]
                     ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
                 else:
