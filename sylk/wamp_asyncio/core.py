@@ -15,8 +15,7 @@ log.info("wamp session start")
 
 comp = Component(
      #transports=u"ws://127.0.0.1:8080/ws",
-    #transports=WAMP_CROSSBAR_SERVER,
-    transports=u("wss://staging-webservice.supportgenie.io/ws"),
+    transports=WAMP_CROSSBAR_SERVER,
     realm=u("realm1"),
     extra="tarun"
 )
@@ -89,7 +88,7 @@ async def wamp_publish(topic, json_data=None, exclude_me=True):
 async def joined(session, details):
     global wamp_session
     log.info("wamp joined")
-    log.info("wamp session ready %r, id %r", session, session._session_id)
+    log.info("wamp session ready foor %r, %r, id %r", WAMP_CROSSBAR_SERVER, session, session._session_id)
     wamp_session = session
 
 

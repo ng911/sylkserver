@@ -18,6 +18,7 @@ def get_node_id(mongo_id, node_schema_name):
     from six import text_type
     return base64(':'.join([node_schema_name, text_type(mongo_id)]))
 
+
 def publish_relay_node_changed(document_json, psap_id, id_, node_schema):
     node_id = get_node_id(id_, node_schema)
     psap_id = str(psap_id)
