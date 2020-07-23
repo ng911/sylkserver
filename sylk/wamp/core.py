@@ -75,6 +75,7 @@ def send_one_request(request):
 
 
 def wamp_publish(topic, json_data=None, exclude_me=True):
+    log.debug("inside wamp_publish twisted %s, json %r", topic, json_data)
     reactor.callFromThread(_wamp_publish, topic, json_data, exclude_me)
 
 

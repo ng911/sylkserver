@@ -23,8 +23,8 @@ def publish_relay_node_changed(document_json, psap_id, id_, node_schema):
         'psap_id': psap_id,
         'document_json' : document_json
     }
-    log.info('publish_relay_node_changed, topic %s, data %r', topic, json_publish_data)
-    wamp_publish(topic, json_publish_data, exclude_me=False)
+    log.info('publish_relay_node_changed twisted, topic %s, data %r', topic, json_publish_data)
+    wamp_publish(topic, json_publish_data)
 
 
 def publish_relay_node_add(document_json, psap_id, id_, node_schema):
