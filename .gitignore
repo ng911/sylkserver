@@ -8,3 +8,6 @@ notebook/
 design notes/
 .idea/vcs.xml
 testali.log
+
+.vscode/
+env/
