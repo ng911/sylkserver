@@ -130,6 +130,20 @@ class Psap(Document):
         ]
     }
 
+class VoicePrompt(Document):
+    psap_id = ObjectIdField(required=True)
+    description = StringField()
+    file_name = FileField()
+
+class Role(Document):
+    role_id = ObjectIdField(required=True, unique=True)
+    name = StringField()
+    psap_id = ObjectIdField()
+
+class UserGroup(Document):
+    name = StringField()
+    psap_id = ObjectIdField()
+    roles = ListField(ReferenceField(Role))
 
 @graphql_node_notifications
 class User(Document):
