@@ -145,6 +145,23 @@ class UserGroup(Document):
     psap_id = ObjectIdField()
     roles = ListField(ReferenceField(Role))
 
+class IVR(Document):
+    ivr_id = ObjectIdField(required=True,unique=True)
+    psap_id = ObjectIdField()
+    ivr_name = StringField()
+    use_key = IntField()
+    on_key = StringField(choices=('Prompt Only', 'Prompt with Key Press'))
+    play_prompt = ReferenceField(VoicePrompt)
+    ivr_type = StringField(choices=('Prompt Only', 'Prompt with Key Press'))
+    on_ivr_completion = StringField(choices=('Hangup', 'Go to ACD'))
+
+class GeoRouting(Document):
+    georouting_id = ObjectIdField(required=True,unique=True)
+    psap_id = ObjectIdField()
+    description = StringField()
+    file_name = FileField()
+    routing = ReferenceField(IVR)
+
 @graphql_node_notifications
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
@@ -290,6 +307,9 @@ class SpeedDial(Document):
     name = StringField(required=True)
     group_id = ObjectIdField()
     group = LazyReferenceField(document_type=SpeedDialGroup)
+    show_as_button = BooleanField()
+    icon = FileField()
+    files = ListField(FileField())
     meta = {
         'indexes': [
             'psap_id',
