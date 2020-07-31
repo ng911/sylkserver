@@ -58,7 +58,7 @@ def edit_speed_dial_group(group_id, group_name):
     speedDialGroup.save()
 
 
-def add_speed_dial(psap_id, dest, name, group_id=None):
+def add_speed_dial(psap_id, dest, name, group_id=None, show_as_button=None, icon=None, files=None):
     speedDial = SpeedDial()
     if group_id != None:
         speedDial.group_id = group_id
@@ -66,6 +66,12 @@ def add_speed_dial(psap_id, dest, name, group_id=None):
     speedDial.name = name
     speedDial.psap_id = psap_id
     speedDial.dest = dest
+    if files is not None:
+        speedDial.files = files
+    if show_as_button is not None:
+        speedDial.show_as_button = show_as_button
+    if icon is not None:
+        speedDial.icon = icon
     speedDial.save()
     return get_json_from_db_obj(speedDial, ignore_fields=['group'])
 
