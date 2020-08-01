@@ -9,6 +9,7 @@ class WaitForDbChangeType(Enum):
     NEW_NODE = 0
     NODE = 1
     CONNECTION = 2
+    CONNECTION_TEST = 3
 
 
 async def wait_for_db_change(future_data, node, model, schema_name, arguments_data, change_type=WaitForDbChangeType.NODE):
@@ -32,6 +33,10 @@ async def wait_for_db_change(future_data, node, model, schema_name, arguments_da
                 future = future_data[0]
                 if not future.done():
                     future.set_result(node())
+            elif change_type == WaitForDbChangeType.CONNECTION_TEST:
+                future = future_data[0]
+                if not future.done():
+                    future.set_result(model.objects())
             elif change_type == WaitForDbChangeType.NEW_NODE:
                 document_json = json_data['document_json']
                 modelObj = model.from_json(document_json)
@@ -107,7 +112,7 @@ def subsribe_for_node(node, is_new=False):
     return decorator
 
 
-def subsribe_for_connection(node, model):
+def subsribe_for_connection(node, model, experimantal=False):
     log.info("inside subsribe_for_node")
     def decorator(func):
         log.info("inside decorator")
@@ -117,8 +122,12 @@ def subsribe_for_connection(node, model):
             log.info("inside wrapped")
             loop = get_event_loop()
             future_data = []
+            if experimantal:
+                change_type = WaitForDbChangeType.CONNECTION_TEST
+            else:
+                change_type = WaitForDbChangeType.CONNECTION
             loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs,
-                                                change_type=WaitForDbChangeType.CONNECTION))
+                                                change_type=change_type))
             while True:
                 future_data.clear()
                 future = Future()

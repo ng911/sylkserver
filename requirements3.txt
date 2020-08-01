@@ -22,12 +22,16 @@ Flask-RESTful>=0.3.8
 Flask-Session>=0.3.1
 Flask-WTF>=0.14.2
 graphene==2.1.0
+#graphene==3.0.0b4
 graphene-mongo
-graphql-core==2.3.1
+graphql-core==2.3.2
+# graphql-core == 3.0.0
 graphql-ws
 #graphql-core-next
 graphql-relay<3.0.0
+#graphql-relay>=3.0.0
 graphql-server-core==1.2.0
+#graphql-server-core==v3.0.0b1
 hyperlink==19.0.0
 idna==2.9
 incremental==17.5.0
@@ -53,4 +57,5 @@ treq==18.6.0
 twilio==6.19.1
 Twisted==20.3.0
 urllib3==1.22
+#uvicorn
 Werkzeug>=1.0.0

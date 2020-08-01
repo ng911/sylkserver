@@ -14,7 +14,7 @@ from graphql.execution.executors.asyncio import AsyncioExecutor
 
 from ..config import MONGODB_HOST, MONGODB_DB, MONGODB_USERNAME, MONGODB_PASSWORD
 from ..config import FLASK_SERVER_PORT
-from .schema import graphql_schema
+from .schema import graphene_schema
 
 # aiohttp code taken from
 # https://medium.com/@chimamireme/setting-up-a-modern-python-web-application-with-aiohttp-graphql-and-docker-149c52657142
@@ -46,20 +46,21 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=gra
 '''
 
 gqil_view = GraphQLView(
-    schema=graphql_schema,
+    schema=graphene_schema,
     executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
     graphiql=True,
     enable_async=True,
 )
 
 gql_view = GraphQLView(
-    schema=graphql_schema,
+    schema=graphene_schema,
     executor=AsyncioExecutor(loop=asyncio.get_event_loop()),
     graphiql=False,
     enable_async=True,
 )
 
-subscription_server = AiohttpSubscriptionServer(graphql_schema)
+
+subscription_server = AiohttpSubscriptionServer(graphene_schema)
 
 async def subscriptions(request):
     log.info("inside subscriptions(request)")

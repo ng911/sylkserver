@@ -2,7 +2,6 @@ import logging
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 from graphene import String
 import graphene
-from ..db.schema import Company
 from graphene_mongo.registry import get_global_registry
 
 logger = logging.getLogger('emergent-ng911')

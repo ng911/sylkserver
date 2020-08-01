@@ -13,6 +13,8 @@ from ...db.schema import User as UserModel
 from .user import PsapUsersNode
 from .calls import PsapConferenceNode
 from ...db.schema import Conference as ConferenceModel
+from .message import MessageNode, PsapMessageNode
+from ...db.schema import ConferenceMessage as ConferenceMessageModel
 
 try:
     from sylk.applications import ApplicationLogger
@@ -24,6 +26,7 @@ except:
 
 class Query(graphene.ObjectType):
     node = Node.Field()
+    all_messages = OrderedMongoengineConnectionField(MessageNode)
     all_users = OrderedMongoengineConnectionField(UserNode)
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
     all_queues = OrderedMongoengineConnectionField(QueueNode)
@@ -45,7 +48,10 @@ class Subscriptions(graphene.ObjectType):
     psap_users = graphene.Field(PsapUsersNode)
     psap_calls = graphene.Field(PsapConferenceNode)
     call_data = graphene.Field(ConferenceNode, room_number=graphene.String(required=True))
+    message_data = graphene.Field(MessageNode, room_number=graphene.String(required=True))
+    psap_messages = graphene.Field(PsapMessageNode)
     new_call = graphene.Field(ConferenceNode)
+    all_calls = MongoengineConnectionField(ConferenceNode)
 
     @subsribe_for_node(PsapUsersNode)
     async def resolve_user_data(root, info, **args):
@@ -67,6 +73,20 @@ class Subscriptions(graphene.ObjectType):
     async def resolve_psap_calls(root, info, **args):
         pass
 
+    @subsribe_for_connection(ConferenceNode, ConferenceModel, experimantal=True)
+    async def resolve_all_calls(root, info, **args):
+        #return ConferenceModel.objects()
+        pass
+
+    @subsribe_for_node(MessageNode)
+    async def resolve_message_data(root, info, **args):
+        pass
+
+    @subsribe_for_connection(MessageNode, ConferenceMessageModel)
+    async def resolve_psap_messages(root, info, **args):
+        pass
+
+
 
 class Mutations(graphene.ObjectType):
     update_user = UpdateUserMutation.Field()
@@ -74,7 +94,7 @@ class Mutations(graphene.ObjectType):
     update_psap = UpdatePsapMutation.Field()
 
 
-graphql_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])
+graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])
 
-__all__ = [ 'graphql_schema']
+__all__ = [ 'graphene_schema']
 
