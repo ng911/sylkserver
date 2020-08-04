@@ -104,6 +104,12 @@ def graphql_node_notifications(cls):
 
 @graphql_node_notifications
 class Psap(Document):
+    acd_choice = (
+        ('ring_all', 'Ring All'), ('least_idle','Least Idle'), ('random', 'Random')
+    )
+    call_handling_choice = (
+        ('acd','ACD'), ('defined_ivrs', 'Define IVRs'), ('defined_geo_routes','Defined Geo Routes')
+    )
     psap_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     name = StringField()
     time_to_autorebid = IntField(default=30)
@@ -111,12 +117,50 @@ class Psap(Document):
     ip_address = StringField()
     auto_rebid = BooleanField(default=True)
     default_profile_id = ObjectIdField()
+    domain_name_prefix = StringField()
+    cad_listen_port = IntField()
+    auto_rebid_time = IntField()
+    sos_call_handling = StringField(choices=call_handling_choice)
+    sos_acd = StringField(choices=acd_choice)
+    enable_overflow_handling = BooleanField(default=True)
+    max_calls_in_queue = IntField()
     meta = {
         'indexes': [
-            'psap_id'
+            'psap_id', 'name', 'domain'
         ]
     }
 
+class VoicePrompt(Document):
+    psap_id = ObjectIdField(required=True)
+    description = StringField()
+    file_name = FileField()
+
+class Role(Document):
+    role_id = ObjectIdField(required=True, unique=True)
+    name = StringField()
+    psap_id = ObjectIdField()
+
+class UserGroup(Document):
+    name = StringField()
+    psap_id = ObjectIdField()
+    roles = ListField(ReferenceField(Role))
+
+class IVR(Document):
+    ivr_id = ObjectIdField(required=True,unique=True)
+    psap_id = ObjectIdField()
+    ivr_name = StringField()
+    use_key = IntField()
+    on_key = StringField(choices=('Prompt Only', 'Prompt with Key Press'))
+    play_prompt = ReferenceField(VoicePrompt)
+    ivr_type = StringField(choices=('Prompt Only', 'Prompt with Key Press'))
+    on_ivr_completion = StringField(choices=('Hangup', 'Go to ACD'))
+
+class GeoRouting(Document):
+    georouting_id = ObjectIdField(required=True,unique=True)
+    psap_id = ObjectIdField()
+    description = StringField()
+    file_name = FileField()
+    routing = ReferenceField(IVR)
 
 @graphql_node_notifications
 class User(Document):
@@ -263,6 +307,9 @@ class SpeedDial(Document):
     name = StringField(required=True)
     group_id = ObjectIdField()
     group = LazyReferenceField(document_type=SpeedDialGroup)
+    show_as_button = BooleanField()
+    icon = FileField()
+    files = ListField(FileField())
     meta = {
         'indexes': [
             'psap_id',

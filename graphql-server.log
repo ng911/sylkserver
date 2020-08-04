@@ -1,0 +1,62 @@
+2020-07-28 15:44:38,929 - emergent-ng911 - INFO - Starting emergent ng911 graphql server 4.1.0
+2020-07-28 15:44:41,554 - emergent-ng911 - INFO - connect to mongodb
+2020-07-28 15:44:41,565 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-07-28 15:44:41,571 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-07-28 15:44:41,573 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-07-28 15:44:41,575 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-07-28 15:44:41,578 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-07-28 15:44:41,580 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-07-28 15:44:41,581 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-07-28 15:44:41,587 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-07-28 15:44:41,588 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-07-28 15:44:41,619 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-07-28 15:44:41,629 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-07-28 15:44:41,631 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-07-28 15:44:41,632 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-07-28 15:44:41,635 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-07-28 15:44:46,335 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 15:44:46,336 - emergent-ng911 - INFO - inside decorator
+2020-07-28 15:44:46,337 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 15:44:46,338 - emergent-ng911 - INFO - inside decorator
+2020-07-28 15:44:46,350 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 15:44:46,351 - emergent-ng911 - INFO - inside decorator
+2020-07-28 15:44:46,353 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 15:44:46,355 - emergent-ng911 - INFO - inside decorator
+2020-07-28 15:44:46,356 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 15:44:46,357 - emergent-ng911 - INFO - inside decorator
+2020-07-28 15:44:46,709 - emergent-ng911 - INFO - wamp session start
+2020-07-28 15:44:46,754 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-07-28 15:44:46,772 - emergent-ng911 - INFO - start graphql api server
+2020-07-28 15:44:46,773 - emergent-ng911 - INFO - api server listening on port 7070
+2020-07-28 16:03:11,365 - emergent-ng911 - INFO - Starting emergent ng911 graphql server 4.1.0
+2020-07-28 16:03:17,200 - emergent-ng911 - INFO - connect to mongodb
+2020-07-28 16:03:17,207 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-07-28 16:03:17,212 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-07-28 16:03:17,215 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-07-28 16:03:17,216 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-07-28 16:03:17,218 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-07-28 16:03:17,219 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-07-28 16:03:17,220 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-07-28 16:03:17,226 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-07-28 16:03:17,228 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-07-28 16:03:17,249 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-07-28 16:03:17,253 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-07-28 16:03:17,254 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-07-28 16:03:17,256 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-07-28 16:03:17,265 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-07-28 16:03:21,227 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 16:03:21,227 - emergent-ng911 - INFO - inside decorator
+2020-07-28 16:03:21,235 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 16:03:21,238 - emergent-ng911 - INFO - inside decorator
+2020-07-28 16:03:21,238 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 16:03:21,242 - emergent-ng911 - INFO - inside decorator
+2020-07-28 16:03:21,244 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 16:03:21,246 - emergent-ng911 - INFO - inside decorator
+2020-07-28 16:03:21,247 - emergent-ng911 - INFO - inside subsribe_for_node
+2020-07-28 16:03:21,248 - emergent-ng911 - INFO - inside decorator
+2020-07-28 16:03:22,446 - emergent-ng911 - INFO - wamp session start
+2020-07-28 16:03:22,458 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-07-28 16:03:22,489 - emergent-ng911 - INFO - start graphql api server
+2020-07-28 16:03:22,490 - emergent-ng911 - INFO - api server listening on port 7070
+2020-07-28 16:03:24,554 - emergent-ng911 - INFO - wamp joined
+2020-07-28 16:03:24,569 - emergent-ng911 - INFO - wamp session ready foor 'ws://rdffg-wamp.emergent911.com/ws', <autobahn.asyncio.wamp.Session object at 0x000001D9F2164E80>, id 3651844327464270

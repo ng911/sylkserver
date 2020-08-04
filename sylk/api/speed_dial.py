@@ -57,8 +57,11 @@ def api_add_speed_dial():
     parser.add_argument('dest', required=True)
     parser.add_argument('name', required=True)
     parser.add_argument('psap_id', required=True)
+    parser.add_argument('show_as_button', required=False)
+    parser.add_argument('icon', required=False)
+    parser.add_argument('files', required=False)
     payload = parser.parse_args()
-    return add_speed_dial(payload['psap_id'], payload['dest'], payload['name'], payload['group_id'])
+    return add_speed_dial(payload['psap_id'], payload['dest'], payload['name'], payload['group_id'], payload['show_as_button'], payload['icon'], payload['files'])
 
 
 @speed_dial.route('/delete/<speed_dial_id>', methods=['POST', 'PUT'])
