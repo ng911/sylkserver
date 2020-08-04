@@ -133,7 +133,7 @@ class Psap(Document):
 class VoicePrompt(Document):
     psap_id = ObjectIdField(required=True)
     description = StringField()
-    file_name = FileField()
+    file_name = StringField()
 
 class Role(Document):
     role_id = ObjectIdField(required=True, unique=True)
@@ -159,7 +159,7 @@ class GeoRouting(Document):
     georouting_id = ObjectIdField(required=True,unique=True)
     psap_id = ObjectIdField()
     description = StringField()
-    file_name = FileField()
+    file_name = StringField()
     routing = ReferenceField(IVR)
 
 @graphql_node_notifications
@@ -176,7 +176,7 @@ class User(Document):
     is_available = BooleanField(default=False)
     extension = StringField()
     station_id = StringField(required=False)
-    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
+    roles = ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
     layout = DictField(required=False)
     meta = {
         'indexes': [
@@ -309,7 +309,7 @@ class SpeedDial(Document):
     group = LazyReferenceField(document_type=SpeedDialGroup)
     show_as_button = BooleanField()
     icon = FileField()
-    files = ListField(FileField())
+    files = ListField(StringField())
     meta = {
         'indexes': [
             'psap_id',
