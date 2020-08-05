@@ -104,6 +104,15 @@ class UpdatePsapMutation(graphene.relay.ClientIDMutation):
         psap_id = graphene.String(required=True)
         name = graphene.String()
         domain_prefix = graphene.String()
+        name = graphene.String()
+        time_to_autorebid = graphene.Int()
+        auto_rebid = graphene.Boolean()
+        cad_listen_port = graphene.Int()
+        auto_rebid_time = graphene.Int()
+        sos_call_handling = graphene.String()
+        sos_acd = graphene.String()
+        enable_overflow_handling = graphene.Boolean()
+        max_calls_in_queue = graphene.Int()
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
@@ -115,6 +124,39 @@ class UpdatePsapMutation(graphene.relay.ClientIDMutation):
             psapObj.name = name
         if domain_prefix != None:
             psapObj.domain = domain_prefix
+
+        time_to_autorebid = input.get('time_to_autorebid')
+        if time_to_autorebid != None:
+            psapObj.time_to_autorebid = time_to_autorebid
+
+        auto_rebid = input.get('auto_rebid')
+        if auto_rebid != None:
+            psapObj.auto_rebid = auto_rebid
+
+        auto_rebid_time = input.get('auto_rebid_time')
+        if auto_rebid_time != None:
+            psapObj.auto_rebid_time = auto_rebid_time
+
+        cad_listen_port = input.get('cad_listen_port')
+        if cad_listen_port != None:
+            psapObj.cad_listen_port = cad_listen_port
+
+        sos_call_handling = input.get('sos_call_handling')
+        if sos_call_handling != None:
+            psapObj.sos_call_handling = sos_call_handling
+
+        sos_acd = input.get('sos_acd')
+        if sos_acd != None:
+            psapObj.sos_acd = sos_acd
+
+        enable_overflow_handling = input.get('enable_overflow_handling')
+        if enable_overflow_handling != None:
+            psapObj.enable_overflow_handling = enable_overflow_handling
+
+        max_calls_in_queue = input.get('max_calls_in_queue')
+        if max_calls_in_queue != None:
+            psapObj.max_calls_in_queue = max_calls_in_queue
+
         psapObj.save()
         return UpdatePsapMutation(psap=psapObj)
 

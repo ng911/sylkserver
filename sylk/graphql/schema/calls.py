@@ -38,6 +38,19 @@ class ConferenceNode(MongoengineObjectType):
     locations = MongoengineConnectionField(LocationNode)
     event_logs = MongoengineConnectionField(EventLogNode)
 
+    def resolve_duration(parent, info, **args):
+        if parent.status == 'active':
+            cur_time = arrow.utcnow()
+            start_time = arrow.get(parent.answer_time)
+            time_diff = cur_time - start_time
+            return int(time_diff.total_seconds())
+        elif parent.status == 'closed':
+            end_time = arrow.get(parent.end_time)
+            start_time = arrow.get(parent.answer_time)
+            time_diff = end_time - start_time
+            return int(time_diff.total_seconds())
+        return 0
+
     def resolve_participants(parent, info, **args):
         params = {
             "room_number" : parent.room_number
