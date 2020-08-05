@@ -30,6 +30,6 @@ COPY requirements3.txt .
 
 RUN pip3 install -r requirements3.txt
 RUN pip3 install autobahn[asyncio,encryption,serialization,xbr]
-
+#RUN pip3 install git+git://github.com/graphql-python/graphene.git@d085c8852be40552428f74fdf891b20e54674540
 COPY . .
 

@@ -302,14 +302,15 @@ class SpeedDialGroup(Document):
 class SpeedDial(Document):
     speed_dial_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField()
+    user_group_id = ObjectIdField()
     user_id = ObjectIdField()
     dest = StringField(required=True)
     name = StringField(required=True)
     group_id = ObjectIdField()
     group = LazyReferenceField(document_type=SpeedDialGroup)
     show_as_button = BooleanField()
-    icon = FileField()
-    files = ListField(FileField())
+    icon = StringField()
+    files = ListField(StringField())
     meta = {
         'indexes': [
             'psap_id',
