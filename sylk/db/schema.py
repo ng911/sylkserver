@@ -50,7 +50,7 @@ else:
 
 def post_save(sender, document, **kwargs):
     import sys
-    if (sys.version_info < (3, 0)):
+    if (sys.version_info > (3, 0)):
         import asyncio
         log.info("importing publish_relay_node_update from asyncio")
         from ..wamp_asyncio import publish_relay_node_update, publish_relay_node_add
@@ -68,7 +68,7 @@ def post_save(sender, document, **kwargs):
                  schema_name)
         if 'created' in kwargs and kwargs['created']:
             log.info("call publish_relay_node_add")
-            if (sys.version_info < (3, 0)):
+            if (sys.version_info > (3, 0)):
                 loop = asyncio.get_running_loop()
                 asyncio.ensure_future(publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name),
                                       loop=loop)
@@ -77,7 +77,7 @@ def post_save(sender, document, **kwargs):
             log.info("call publish_relay_node_add done")
         else:
             log.info("call publish_relay_node_update")
-            if (sys.version_info < (3, 0)):
+            if (sys.version_info > (3, 0)):
                 loop = asyncio.get_running_loop()
                 asyncio.ensure_future(publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name),
                                       loop=loop)
@@ -215,6 +215,21 @@ class User(Document):
         user.save()
         return  user
 
+    @classmethod
+    def add_user_psap(cls, username, password, psap_id):
+        user = User()
+        user.psap_id = psap_id
+        user.username = username
+        #if isinstance(password, unicode):
+        # py3 compatible replacement below
+        if isinstance(password, six.text_type):
+            password = password.encode('ascii')
+        user.password_hash = User.generate_password_hash(password)
+        user.is_active = True
+        user.roles = ['admin', 'calltaker']
+        log.info("user.password_hash is %r", user.password_hash)
+        user.save()
+        return  user
 
 @graphql_node_notifications
 class CalltakerStation(Document):
@@ -804,54 +819,55 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     #asterisk_port = "5090"
     psap_obj = Psap()
     psap_obj.name = "SF Psap"
-    psap_obj.ip_address = ip_address
+    psap_obj.domain = "sf.psapcloud.com"
     psap_obj.save()
+    sf_psap_id = str(psap_obj.psap_id)
+    print("created SF psap %r", sf_psap_id)
 
-    # create queue
-    queue_obj = Queue()
-    queue_obj.psap_id = psap_obj.psap_id
-    queue_obj.save()
+    psap_obj = Psap()
+    psap_obj.name = "SF Police"
+    psap_obj.domain = "sf-police.psapcloud.com"
+    psap_obj.save()
+    sf_police_psap_id = str(psap_obj.psap_id)
+    print("created SF police psap %r", sf_police_psap_id)
+
+    psap_obj = Psap()
+    psap_obj.name = "SF Fire"
+    psap_obj.domain = "sf-fire.psapcloud.com"
+    psap_obj.save()
+    sf_fire_psap_id = str(psap_obj.psap_id)
+    print("created SF fire psap %r", sf_police_psap_id)
 
     # create call takers and add to queue
-    user_obj = User.add_user("tarun", "tarun")
-    queue_memeber_obj = QueueMember()
-    queue_memeber_obj.psap_id = psap_obj.psap_id
-    queue_memeber_obj.queue_id = queue_obj.queue_id
-    queue_memeber_obj.user_id = user_obj.user_id
-    queue_memeber_obj.save()
+    User.add_user_psap("tarun", "tarun2020", sf_psap_id)
+    User.add_user_psap("tarun", "tarun2020", sf_fire_psap_id)
+    User.add_user_psap("tarun", "tarun2020", sf_police_psap_id)
+    print("added tarun")
 
-    user_obj = User.add_user("mike", "mike")
-    queue_memeber_obj = QueueMember()
-    queue_memeber_obj.psap_id = psap_obj.psap_id
-    queue_memeber_obj.queue_id = queue_obj.queue_id
-    queue_memeber_obj.user_id = user_obj.user_id
-    queue_memeber_obj.save()
+    User.add_user_psap("mike", "mike2020", sf_psap_id)
+    User.add_user_psap("mike", "mike2020", sf_fire_psap_id)
+    User.add_user_psap("mike", "mike2020", sf_police_psap_id)
+    print("added mike")
 
-    user_obj = User.add_user("nate", "nate")
-    queue_memeber_obj = QueueMember()
-    queue_memeber_obj.psap_id = psap_obj.psap_id
-    queue_memeber_obj.queue_id = queue_obj.queue_id
-    queue_memeber_obj.user_id = user_obj.user_id
-    queue_memeber_obj.save()
+    User.add_user_psap("don", "don2020", sf_psap_id)
+    User.add_user_psap("don", "don2020", sf_fire_psap_id)
+    User.add_user_psap("don", "don2020", sf_police_psap_id)
+    print("added don")
 
-    user_obj = User.add_user("matt", "matt")
-    queue_memeber_obj = QueueMember()
-    queue_memeber_obj.psap_id = psap_obj.psap_id
-    queue_memeber_obj.queue_id = queue_obj.queue_id
-    queue_memeber_obj.user_id = user_obj.user_id
-    queue_memeber_obj.save()
+    User.add_user_psap("mark", "mark2020", sf_psap_id)
+    User.add_user_psap("mark", "mark2020", sf_fire_psap_id)
+    User.add_user_psap("mark", "mark2020", sf_police_psap_id)
+    print("added mark")
 
-    # create incoming link
-    incoming_link_obj = IncomingLink()
-    incoming_link_obj.psap_id = psap_obj.psap_id
-    incoming_link_obj.name = "default"
-    incoming_link_obj.orig_type = "sos_wireless"
-    incoming_link_obj.max_channels = 5
-    incoming_link_obj.ip_address = asterisk_ip_address
-    incoming_link_obj.port = asterisk_port
-    incoming_link_obj.called_no = "911"
-    incoming_link_obj.queue_id = queue_obj.queue_id
-    incoming_link_obj.save()
+    User.add_user_psap("nate", "nate2020", sf_psap_id)
+    User.add_user_psap("nate", "nate2020", sf_fire_psap_id)
+    User.add_user_psap("nate", "nate2020", sf_police_psap_id)
+    print("added nate")
+
+    User.add_user_psap("candace", "candace2020", sf_psap_id)
+    User.add_user_psap("candace", "candace2020", sf_fire_psap_id)
+    User.add_user_psap("candace", "candace2020", sf_police_psap_id)
+    print("added candace")
 
 
 def remove_room(room_number):

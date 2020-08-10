@@ -379,6 +379,17 @@ class PSAPApplication(SylkApplication):
             called_number = local_identity.uri.user
             calling_number = remote_identity.uri.user
             call_type = 'sos'
+
+            if 'Route' in headers:
+                log.info("found Route in header")
+                route_header = headers.get('Route', None)
+                if route_header != None:
+                    log.info("route_header is %r", route_header.body)
+                else:
+                    log.info("route_header not there or bad")
+            else:
+                log.info("route_header not there")
+
             if 'Geolocation' in headers:
                 log.info("found Geolocation in header")
                 geo_location = headers.get('Geolocation', None)
