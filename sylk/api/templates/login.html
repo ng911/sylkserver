@@ -9,7 +9,7 @@
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-  <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png">
+  <link rel="shortcut icon" href="static/images/favicon.png" type="image/png">
   <!-- Bootstrap 3.3.6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
   <!-- Font Awesome -->
@@ -17,7 +17,7 @@
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="/static/login.css">
+  <link rel="stylesheet" href="static/login.css">
 
   <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
    <!--<script src="plugins/plupload-2.3.1/js/plupload.full.min.js"></script>-->
@@ -31,7 +31,7 @@
       <div class="container">
           <div class="card card-container">
               <!-- <img class="profile-img-card" src="//lh3.googleusercontent.com/-6V8xOA6M7BA/AAAAAAAAAAI/AAAAAAAAAAA/rzlHcD0KYwo/photo.jpg?sz=120" alt="" /> -->
-              <img id="profile-img" class="profile-img-card" src="/static/emergent-logo.gif" />
+              <img id="profile-img" class="profile-img-card" src="static/nga911-logo.svg" />
               <h3 style="width:100%; text-align: center">PSAP CallTaker Login</h3>
               <p id="profile-name" class="profile-name-card"></p>
                {% for message in form.username.errors %}
@@ -41,7 +41,7 @@
                {% for message in form.password.errors %}
                   <div class="login_error_msg">{{ message }}</div>
                {% endfor %}
-              <form class="form-signin" action = "/auth/login" method = post>
+              <form class="form-signin" action = /auth/login" method = post>
                <fieldset>
                  <span id="reauth-username" class="reauth-username"></span>
                   {{ form.hidden_tag() }}
