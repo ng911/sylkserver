@@ -817,6 +817,7 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     #ip_address = "192.168.1.3"
     #asterisk_ip_address = ip_address
     #asterisk_port = "5090"
+    '''
     psap_obj = Psap()
     psap_obj.name = "SF Psap"
     psap_obj.domain = "sf.psapcloud.com"
@@ -837,36 +838,42 @@ def create_test_data(ip_address="192.168.1.3", asterisk_ip_address="192.168.1.3"
     psap_obj.save()
     sf_fire_psap_id = str(psap_obj.psap_id)
     print("created SF fire psap %r", sf_police_psap_id)
+    '''
+
+    sf_psap_id = "5f3150fa9add3e2616333d6c"
+    sf_police_psap_id = "5f3150fb9add3e2616333d6e"
+    sf_fire_psap_id = "5f3150fb9add3e2616333d70"
+
 
     # create call takers and add to queue
-    User.add_user_psap("tarun", "tarun2020", sf_psap_id)
-    User.add_user_psap("tarun", "tarun2020", sf_fire_psap_id)
-    User.add_user_psap("tarun", "tarun2020", sf_police_psap_id)
+    User.add_user_psap("tarun1", "tarun2020", sf_psap_id)
+    User.add_user_psap("tarun2", "tarun2020", sf_fire_psap_id)
+    User.add_user_psap("tarun3", "tarun2020", sf_police_psap_id)
     print("added tarun")
 
-    User.add_user_psap("mike", "mike2020", sf_psap_id)
-    User.add_user_psap("mike", "mike2020", sf_fire_psap_id)
-    User.add_user_psap("mike", "mike2020", sf_police_psap_id)
+    User.add_user_psap("mike1", "mike2020", sf_psap_id)
+    User.add_user_psap("mike2", "mike2020", sf_fire_psap_id)
+    User.add_user_psap("mike3", "mike2020", sf_police_psap_id)
     print("added mike")
 
-    User.add_user_psap("don", "don2020", sf_psap_id)
-    User.add_user_psap("don", "don2020", sf_fire_psap_id)
-    User.add_user_psap("don", "don2020", sf_police_psap_id)
+    User.add_user_psap("don1", "don2020", sf_psap_id)
+    User.add_user_psap("don2", "don2020", sf_fire_psap_id)
+    User.add_user_psap("don3", "don2020", sf_police_psap_id)
     print("added don")
 
-    User.add_user_psap("mark", "mark2020", sf_psap_id)
-    User.add_user_psap("mark", "mark2020", sf_fire_psap_id)
-    User.add_user_psap("mark", "mark2020", sf_police_psap_id)
+    User.add_user_psap("mark1", "mark2020", sf_psap_id)
+    User.add_user_psap("mark2", "mark2020", sf_fire_psap_id)
+    User.add_user_psap("mark3", "mark2020", sf_police_psap_id)
     print("added mark")
 
-    User.add_user_psap("nate", "nate2020", sf_psap_id)
-    User.add_user_psap("nate", "nate2020", sf_fire_psap_id)
-    User.add_user_psap("nate", "nate2020", sf_police_psap_id)
+    User.add_user_psap("nate1", "nate2020", sf_psap_id)
+    User.add_user_psap("nate2", "nate2020", sf_fire_psap_id)
+    User.add_user_psap("nate3", "nate2020", sf_police_psap_id)
     print("added nate")
 
-    User.add_user_psap("candace", "candace2020", sf_psap_id)
-    User.add_user_psap("candace", "candace2020", sf_fire_psap_id)
-    User.add_user_psap("candace", "candace2020", sf_police_psap_id)
+    User.add_user_psap("candace1", "candace2020", sf_psap_id)
+    User.add_user_psap("candace2", "candace2020", sf_fire_psap_id)
+    User.add_user_psap("candace3", "candace2020", sf_police_psap_id)
     print("added candace")
 
 
