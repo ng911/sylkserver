@@ -41,7 +41,7 @@
                {% for message in form.password.errors %}
                   <div class="login_error_msg">{{ message }}</div>
                {% endfor %}
-              <form class="form-signin" action = /auth/login" method = post>
+              <form class="form-signin" action = "/auth/login" method = "post">
                <fieldset>
                  <span id="reauth-username" class="reauth-username"></span>
                   {{ form.hidden_tag() }}
