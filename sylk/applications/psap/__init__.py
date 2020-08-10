@@ -408,8 +408,10 @@ class PSAPApplication(SylkApplication):
 
             if 'Call-Info' in headers:
                 call_info_header = headers.get('Call-Info', None)
-                if call_info_header != None and call_info_header != "":
-                    incident_id, incident_details = self.get_incident_details(call_info_header)
+                if call_info_header != None:
+                    call_info_data = call_info_header.body
+                    if call_info_data != None and call_info_data != "":
+                        incident_id, incident_details = self.get_incident_details(call_info_data)
 
             if 'Route' in headers:
                 log.info("found Route in header")
