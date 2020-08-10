@@ -53,7 +53,8 @@ class RoomData(object):
     __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'last_tty_0d', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
-                 'ignore_calltakers', 'start_timestamp', 'chat_stream', 'psap_id']
+                 'ignore_calltakers', 'start_timestamp', 'chat_stream', 'psap_id',
+                 'incident_id', 'incident_details']
     def __init__(self):
         self.ignore_calltakers = []
         self.participants = []
@@ -66,6 +67,8 @@ class RoomData(object):
         self.tty_text = ''
         self.last_tty_0d = False
         self.chat_stream = None
+        self.incident_id = None
+        self.incident_details = None
 
     @property
     def incoming(self):
@@ -259,7 +262,8 @@ class PSAPApplication(SylkApplication):
     def get_rooms(self):
         return list(self._rooms.keys())
 
-    def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False, psap_id=ServerConfig.psap_id):
+    def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False,
+                    psap_id=ServerConfig.psap_id, incident_id=None, incident_details=None):
         room_number = uuid4().hex
         room = Room(room_number, text_only)
         room_data = RoomData()
@@ -276,6 +280,8 @@ class PSAPApplication(SylkApplication):
         room_data.hold_timer = None
         room_data.acd_strategy = acd_strategy
         room_data.psap_id = psap_id
+        room_data.incident_id = incident_id
+        room_data.incident_details = incident_details
 
         self._rooms[room_number] = room_data
 
@@ -355,6 +361,24 @@ class PSAPApplication(SylkApplication):
             return {'room_number': room_number, 'debug_info': 'room not active'}
         return {'room_number' : room_number, 'debug_info' : room.get_debug_info()}
 
+    def get_incident_details(self, call_info):
+        incident_id = None
+        incident_details = None
+
+        if call_info != None and call_info != "":
+            infos = call_info.split(';')
+            if len(infos) == 2:
+                details = infos[0]
+                purpose_field = infos[1]
+                purpose_info = purpose_field.split('=')
+                if len(purpose_info) == 2 and purpose_info[0] == "purpose" and purpose_info[1] == "nena-IncidentId":
+                    details = details.strip('<>')
+                    details_parts = details.split(":")
+                    if len(details_parts) == 6 and details.startswith("urn:nena:uid:incidentid"):
+                        incident_id = details_parts[4]
+                        incident_details = details_parts[5]
+        return (incident_id, incident_details)
+
     def incoming_session(self, session, headers):
         log.info(u'New incoming session %s from %s' % (session.call_id, format_identity(session.remote_identity)))
         log.info(u'New incoming request_uri %r' % (session.request_uri))
@@ -371,6 +395,8 @@ class PSAPApplication(SylkApplication):
         call_type = ''
         admin_user = ''
         geoloc_ref = None
+        incident_id = None
+        incident_details = None
         log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
             log.info(u'call is sos')
@@ -379,6 +405,11 @@ class PSAPApplication(SylkApplication):
             called_number = local_identity.uri.user
             calling_number = remote_identity.uri.user
             call_type = 'sos'
+
+            if 'Call-Info' in headers:
+                call_info_header = headers.get('Call-Info', None)
+                if call_info_header != None and call_info_header != "":
+                    incident_id, incident_details = self.get_incident_details(call_info_header)
 
             if 'Route' in headers:
                 log.info("found Route in header")
@@ -546,7 +577,8 @@ class PSAPApplication(SylkApplication):
             psap_id = ServerConfig.psap_id
             (room_number, room_data) = self.create_room(session, call_type, direction=direction,
                                                         acd_strategy=acd_strategy, text_only=has_text,
-                                                        psap_id=psap_id)
+                                                        psap_id=psap_id, incident_id=incident_id,
+                                                        incident_details=incident_details)
             session.room_number = room_number
             if ignore_calltakers is not None:
                 room_data.ignore_calltakers = ignore_calltakers
@@ -600,7 +632,8 @@ class PSAPApplication(SylkApplication):
                                                                     caller_name=caller_name,
                                                                     called_number=called_number,
                                                                     ali_format=ali_format,
-                                                                    has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty))
+                                                                    has_audio=has_audio, has_text=has_text, has_video=has_video, has_tty=has_tty,
+                                                                    incident_id=incident_id, incident_details=incident_details))
 
             if (call_type == 'sos'):
                 if geoloc_ref != None:

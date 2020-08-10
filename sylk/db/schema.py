@@ -542,6 +542,8 @@ class AbandonedCallReport(Document):
 class Conference(Document):
     psap_id = ObjectIdField(required=True)
     room_number = StringField(required=True)
+    incident_id = StringField(required=False)
+    incident_details = StringField(required=False)
     start_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     answer_time = ComplexDateTimeField(required=False)
     end_time = ComplexDateTimeField(required=False)
