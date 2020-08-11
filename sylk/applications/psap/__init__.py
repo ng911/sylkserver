@@ -413,9 +413,9 @@ class PSAPApplication(SylkApplication):
                     if call_info_data != None and call_info_data != "":
                         incident_id, incident_details = self.get_incident_details(call_info_data)
 
-            if 'Route' in headers:
-                log.info("found Route in header")
-                route_header = headers.get('Route', None)
+            if 'X-Route' in headers:
+                log.info("found X-Route in header")
+                route_header = headers.get('X-Route', None)
                 if route_header != None:
                     log.info("route_header is %r", route_header.body)
                 else:
