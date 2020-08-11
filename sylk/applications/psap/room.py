@@ -128,12 +128,13 @@ class Room(object):
     """
     implements(IObserver)
 
-    def __init__(self, room_number=None, text_only=False):
+    def __init__(self, psap_id=ServerConfig.psap_id, room_number=None, text_only=False):
         log.info('Room create room %s', room_number)
         if room_number is None:
             pass
         else:
             self.room_number = room_number
+        self.psap_id = psap_id
         local_ip = SIPConfig.local_ip.normalized
         room_uri = '%s@%s' % (room_number, local_ip)
         self.config = get_room_config(room_uri)
@@ -261,7 +262,7 @@ class Room(object):
         self.duration = 0
 
         def duration_timer_cb():
-            publish_update_call_timer(self.room_number, 'duration', self.duration)
+            publish_update_call_timer(self.psap_id, self.room_number, 'duration', self.duration)
             self.duration = self.duration + 1
         self.duration_timer = task.LoopingCall(duration_timer_cb)
         self.duration_timer.start(1)

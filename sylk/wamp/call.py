@@ -9,17 +9,17 @@ except:
 from .core import wamp_publish
 
 
-def publish_update_calls():
+def publish_update_calls(psap_id):
     try:
         log.info("publish com.emergent.calls")
-        wamp_publish(u'com.emergent.calls')
+        wamp_publish(u'com.emergent.calls.%s' % psap_id)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
         log.error("%s", stackTrace)
 
 
-def publish_create_call(room_number, call_data, participants):
+def publish_create_call(psap_id, room_number, call_data, participants):
     try:
         json_data = {}
         json_data['command'] = 'created'
@@ -27,7 +27,7 @@ def publish_create_call(room_number, call_data, participants):
         json_data['call_data'] = call_data
         json_data['participants'] = participants
         #log.info("publish com.emergent.call with json %r", json_data)
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
@@ -46,12 +46,12 @@ def publish_active_call(calltaker, room_number):
         log.error("%s", stackTrace)
 
 
-def publish_clear_abandoned_call(rooms):
+def publish_clear_abandoned_call(psap_id, rooms):
     try:
         json_data = {}
         json_data['command'] = 'clear_abandoned'
         json_data['rooms'] = rooms
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
@@ -59,21 +59,21 @@ def publish_clear_abandoned_call(rooms):
 
 
 # type should be ringing or duration
-def publish_update_call_timer(room_number, type, val):
+def publish_update_call_timer(psap_id, room_number, type, val):
     try:
         json_data = {}
         json_data['type'] = type
         json_data['val'] = val
         json_data['room_number'] = room_number
         # todo - un remove this timer stuff after load test
-        wamp_publish(u'com.emergent.calltimer', json_data)
+        wamp_publish(u'com.emergent.calltimer.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
         log.error("%s", stackTrace)
 
 
-def publish_update_call(room_number, call_data, participants=None):
+def publish_update_call(psap_id, room_number, call_data, participants=None):
     try:
         json_data = {}
         json_data['command'] = 'updated'
@@ -83,14 +83,14 @@ def publish_update_call(room_number, call_data, participants=None):
             json_data['participants'] = participants
 
         log.info("publish com.emergent.call with call_data %r", call_data)
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
         log.error("%s", stackTrace)
 
 
-def publish_update_call_ringing(room_number, ringing_calltakers):
+def publish_update_call_ringing(psap_id, room_number, ringing_calltakers):
     try:
         log.info("inside publish_update_call_ringing for room %s, calltakers %r", room_number, ringing_calltakers)
         json_data = {}
@@ -98,20 +98,20 @@ def publish_update_call_ringing(room_number, ringing_calltakers):
         json_data['room_number'] = room_number
         json_data['ringing_calltakers'] = ringing_calltakers
         log.info("publish com.emergent.call with json_data %r", json_data)
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
         log.error("%s", stackTrace)
 
-def publish_update_call_events(room_number):
+def publish_update_call_events(psap_id, room_number):
     try:
         log.info("inside publish_update_call_events for room %s", room_number)
         json_data = {}
         json_data['command'] = 'events_updated'
         json_data['room_number'] = room_number
         log.info("publish com.emergent.call with json_data %r", json_data)
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))
@@ -131,7 +131,7 @@ def publish_outgoing_call_status(room_number, calltaker, status):
         log.error("%s", stackTrace)
 
 
-def publish_update_primary(room_number, old_primary_user_name, new_primary_user_name):
+def publish_update_primary(psap_id, room_number, old_primary_user_name, new_primary_user_name):
     try:
         log.info("publish_update_primary room_number %r, old_primary_user_name %r, new_primary_user_name %r", room_number, old_primary_user_name, new_primary_user_name)
         json_data = {}
@@ -141,7 +141,7 @@ def publish_update_primary(room_number, old_primary_user_name, new_primary_user_
         json_data['new_primary'] = new_primary_user_name
 
         #log.info("publish com.emergent.call with json %r", json_data)
-        wamp_publish(u'com.emergent.call', json_data)
+        wamp_publish(u'com.emergent.call.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))

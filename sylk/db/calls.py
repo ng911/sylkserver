@@ -109,7 +109,7 @@ def clear_abandoned_calls(psap_id, callback_number=None, caller_ani=None):
         calls_cleared.append(conf_db_obj.room_number)
         conf_db_obj.save()
 
-    publish_clear_abandoned_call(calls_cleared)
+    publish_clear_abandoned_call(psap_id, calls_cleared)
     return len(calls_cleared)
 
 '''

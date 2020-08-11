@@ -119,6 +119,7 @@ def process_ali_success(result):
 def update_new_location(room_number, location_result, raw_ali_data=None, callback=None):
     location_display = get_location_display(location_result)
     conference_db_obj = Conference.objects.get(room_number=room_number)
+    psap_id = str(conference_db_obj.psap_id)
     conference_db_obj.location_display = location_display
     if callback != None:
         conference_db_obj.callback_number = callback
@@ -131,7 +132,7 @@ def update_new_location(room_number, location_result, raw_ali_data=None, callbac
 
     call_data = get_conference_json(conference_db_obj)
     publish_update_call(room_number, call_data)
-    publish_update_location_success(room_number, location_result, location_display)
+    publish_update_location_success(psap_id, room_number, location_result, location_display)
 
 
 def dump_ali(room_number, ali_data=None, calltaker=None):

@@ -9,11 +9,11 @@ except:
 
 from .core import wamp_publish
 
-def publish_update_location_success(room_number, ali_result, location_display):
+def publish_update_location_success(psap_id, room_number, ali_result, location_display):
     try:
         json_data = {'success' : True, 'room_number': room_number, 'ali_data' : ali_result, 'location_display' : location_display}
         log.info("publish location update for room %s", room_number)
-        wamp_publish(u'com.emergent.location', json_data)
+        wamp_publish(u'com.emergent.location.%s' % psap_id, json_data)
     except Exception as e:
         stackTrace = traceback.format_exc()
         log.error("exception in wamp %s", str(e))

@@ -265,7 +265,7 @@ class PSAPApplication(SylkApplication):
     def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False,
                     psap_id=ServerConfig.psap_id, incident_id=None, incident_details=None):
         room_number = uuid4().hex
-        room = Room(room_number, text_only)
+        room = Room(psap_id, room_number, text_only)
         room_data = RoomData()
         room_data.room = room
         room_data.call_type = call_type
@@ -629,7 +629,7 @@ class PSAPApplication(SylkApplication):
             NotificationCenter().post_notification('ConferenceCreated', self,
                                                    NotificationData(room_number=room_number, direction=direction,
                                                                     call_type=call_type, status=room_data.status,
-                                                                    psap_id=room_data.psap_id,
+                                                                    psap_id=psap_id,
                                                                     primary_queue_id=incoming_link.queue_id if hasattr(incoming_link, 'queue_id') else None,
                                                                     link_id=link_id,
                                                                     caller_ani=caller_ani,
@@ -677,7 +677,7 @@ class PSAPApplication(SylkApplication):
 
                 def ringing_duration_timer_cb(room_number):
                     ringing_duration_timer_cb.duration = ringing_duration_timer_cb.duration + 1
-                    publish_update_call_timer(room_number, 'ringing', ringing_duration_timer_cb.duration)
+                    publish_update_call_timer(psap_id, room_number, 'ringing', ringing_duration_timer_cb.duration)
 
                 ringing_duration_timer_cb.duration = 0
                 ringing_duration_timer = task.LoopingCall(ringing_duration_timer_cb, room_number)
@@ -1027,7 +1027,7 @@ class PSAPApplication(SylkApplication):
         psap_id = room_data.psap_id
         if not room_data.is_call_active:
             # update ringing calltakers
-            publish_update_call_ringing(room_number, room_data.ringing_calltakers)
+            publish_update_call_ringing(psap_id, room_number, room_data.ringing_calltakers)
 
         if room and room.started:
             # get the target name
@@ -1477,7 +1477,7 @@ class PSAPApplication(SylkApplication):
                 if len(room.sessions) <= 2:
                     def hold_timer_cb(room_number):
                         hold_timer_cb.duration = hold_timer_cb.duration + 1
-                        publish_update_call_timer(room_number, 'hold', hold_timer_cb.duration)
+                        publish_update_call_timer(psap_id, room_number, 'hold', hold_timer_cb.duration)
 
                     hold_timer_cb.duration = 0
                     hold_timer = task.LoopingCall(hold_timer_cb, room_number)

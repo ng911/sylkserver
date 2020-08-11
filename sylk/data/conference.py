@@ -104,7 +104,7 @@ class ConferenceData(object):
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
 
-            publish_create_call(room_number, call_data, participants_data)
+            publish_create_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in create_conference %r", e)
@@ -155,7 +155,7 @@ class ConferenceData(object):
 
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
 
             # todo- check, this one doesnt seem to be used by the calltaker. might remove it in future
             for calltaker in calltakers:
@@ -186,7 +186,7 @@ class ConferenceData(object):
                     conference_event.event_details = '{} joined the call'.format(display_name)
 
             conference_event.save()
-            publish_update_call_events(room_number)
+            publish_update_call_events(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_answered %r", e)
@@ -206,7 +206,7 @@ class ConferenceData(object):
                 conference_event.event_details = '{} hung up'.format(display_name)
 
             conference_event.save()
-            publish_update_call_events(room_number)
+            publish_update_call_events(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_leave %r", e)
@@ -222,7 +222,7 @@ class ConferenceData(object):
             conference_event.event_details = 'Call timed out'
 
             conference_event.save()
-            publish_update_call_events(room_number)
+            publish_update_call_events(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in on_conference_timedout %r", e)
@@ -251,6 +251,7 @@ class ConferenceData(object):
     def update_conference_status(self, room_number, status):
         try:
             conference = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference.psap_id)
             conference.status = status
             utcnow = datetime.datetime.utcnow()
             conference.updated_at = utcnow
@@ -289,7 +290,7 @@ class ConferenceData(object):
 
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_conference_status %r", e)
@@ -303,7 +304,7 @@ class ConferenceData(object):
         conference_event.event_details = 'ringing {}'.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
-        publish_update_call_events(room_number)
+        publish_update_call_events(psap_id, room_number)
 
     def add_participant_timedout(self, room_number, display_name, psap_id):
         conference_event = ConferenceEvent()
@@ -313,7 +314,7 @@ class ConferenceData(object):
         conference_event.event_details = 'timed out ringing to {} '.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
-        publish_update_call_events(room_number)
+        publish_update_call_events(psap_id, room_number)
 
     def add_participant_failed(self, room_number, display_name, psap_id):
         conference_event = ConferenceEvent()
@@ -323,7 +324,7 @@ class ConferenceData(object):
         conference_event.event_details = 'call to {} failed'.format(display_name)
         conference_event.room_number = room_number
         conference_event.save()
-        publish_update_call_events(room_number)
+        publish_update_call_events(psap_id, room_number)
 
     def add_participant(self, room_number, display_name, sip_uri, mute_audio, direction, is_caller, is_calltaker, is_primary, psap_id):
         try:
@@ -372,7 +373,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in add_participant %r", e)
@@ -404,9 +405,10 @@ class ConferenceData(object):
             publish_update_call(room_number, json_data)
             '''
             conference = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference.psap_id)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_participant_active_status %r", e)
@@ -449,7 +451,7 @@ class ConferenceData(object):
             json_data['command'] = 'update_participant_status'
             publish_update_call(room_number, json_data)
             '''
-            publish_update_primary(room_number, old_primary_user_name, new_primary_user_name)
+            publish_update_primary(psap_id, room_number, old_primary_user_name, new_primary_user_name)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_participant_active_status %r", e)
@@ -501,7 +503,7 @@ class ConferenceData(object):
                 participant.save()
         '''
         participants_data = calls.get_conference_participants_json(room_number)
-        publish_update_call(room_number, call_data, participants_data)
+        publish_update_call(psap_id, room_number, call_data, participants_data)
 
     def update_call_hold(self, room_number, calltaker, on_hold, psap_id):
         try:
@@ -552,7 +554,7 @@ class ConferenceData(object):
             #        participant.hold = False
             #        participant.save()
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_hold %r", e)
@@ -582,7 +584,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_hold %r", e)
@@ -618,7 +620,7 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             call_data = calls.get_conference_json(conference)
             participants_data = calls.get_conference_participants_json(room_number)
-            publish_update_call(room_number, call_data, participants_data)
+            publish_update_call(psap_id, room_number, call_data, participants_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_hold %r", e)
@@ -637,8 +639,8 @@ class ConferenceData(object):
             conference = Conference.objects.get(room_number=room_number)
             conference.has_tty = True
             conference.save()
-            publish_tty_enabled(room_number)
-            publish_update_call_events(room_number)
+            publish_tty_enabled(psap_id, room_number)
+            publish_update_call_events(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in enable_tty %r", e)
@@ -647,9 +649,10 @@ class ConferenceData(object):
     def update_tty(self, room_number, tty_text):
         try:
             conference = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference.psap_id)
             conference.tty_text = tty_text
             conference.save()
-            publish_tty_updated(room_number)
+            publish_tty_updated(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in update_tty %r", e)
@@ -673,7 +676,7 @@ class ConferenceData(object):
             conference_message.content_type = content_type
             conference_message.save()
             json_data = get_json_from_db_obj(conference_message)
-            publish_msrp_message(json_data)
+            publish_msrp_message(psap_id, json_data)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in msrp_text_sent %r", e)
@@ -688,7 +691,7 @@ class ConferenceData(object):
             conference_event.event_time = datetime.datetime.utcnow()
             conference_event.room_number = room_number
             conference_event.save()
-            publish_update_call_events(room_number)
+            publish_update_call_events(psap_id, room_number)
         except Exception as e:
             stackTrace = traceback.format_exc()
             log.error("exception in hook_flash_transferred %r", e)
