@@ -397,6 +397,7 @@ class PSAPApplication(SylkApplication):
         geoloc_ref = None
         incident_id = None
         incident_details = None
+        psap_id = ServerConfig.psap_id
         log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
             log.info(u'call is sos')
@@ -417,7 +418,11 @@ class PSAPApplication(SylkApplication):
                 log.info("found X-Route in header")
                 route_header = headers.get('X-Route', None)
                 if route_header != None:
-                    log.info("route_header is %r", route_header.body)
+                    from ...db.psap import get_psap_from_domain
+                    domain = route_header.body
+                    log.info("domain is %r", domain)
+                    psap_id = get_psap_from_domain(domain)
+                    log.info("psap_id is %r", psap_id)
                 else:
                     log.info("route_header not there or bad")
             else:
@@ -528,7 +533,7 @@ class PSAPApplication(SylkApplication):
                     ignore_calltakers = [calltaker.username for calltaker in calltakers.itervalues()]
                 else:
                     acd_strategy = 'ring_all'
-                    calltakers, user_ids = get_available_calltakers(ServerConfig.psap_id)
+                    calltakers, user_ids = get_available_calltakers(psap_id)
                     sip_uris = ["sip:%s@%s" % (calltaker, server) for calltaker in calltakers]
                     [self.set_calltaker_busy(user_id=user_id) for user_id in user_ids]
                     ignore_calltakers = [calltaker for calltaker in calltakers]
@@ -576,7 +581,6 @@ class PSAPApplication(SylkApplication):
                 direction = 'in'
                 is_call_from_calltaker = False
 
-            psap_id = ServerConfig.psap_id
             (room_number, room_data) = self.create_room(session, call_type, direction=direction,
                                                         acd_strategy=acd_strategy, text_only=has_text,
                                                         psap_id=psap_id, incident_id=incident_id,
