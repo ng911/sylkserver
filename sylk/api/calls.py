@@ -70,14 +70,14 @@ def recent():
 Note - for now we ignore the psap_id
 returns recent call history
 '''
-@calls.route('/lastMonth', methods=['GET'])
-def lastMonth():
+@calls.route('/lastMonth/<psap_id>', methods=['GET'])
+def lastMonth(psap_id):
     log.info("get current calls")
     calls = []
     arr_cur_time = arrow.utcnow()
     arr_last_month = arr_cur_time.shift(days=-30)
 
-    for conference_db_obj in Conference.objects(start_time__gt=arr_last_month.naive).order_by('-start_time')[0:150]:
+    for conference_db_obj in Conference.objects(psap_id=psap_id, start_time__gt=arr_last_month.naive).order_by('-start_time')[0:150]:
         conference_json = get_conference_json(conference_db_obj)
         calls.append(conference_json)
 
