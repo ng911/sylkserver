@@ -15,7 +15,9 @@ from sipsimple.threading.green import run_in_green_thread
 from sylk.applications import SylkApplication, ApplicationLogger
 from sipsimple.streams import MediaStreamRegistry
 from sipsimple.streams.msrp.chat import ChatStream
+from sipsimple.core import Referral, sip_status_messages
 from sipsimple.core import Engine, SIPCoreError, SIPURI, ToHeader, FromHeader, Header, SubjectHeader
+from sipsimple.core import ContactHeader, ReferToHeader, RouteHeader
 from sipsimple.lookup import DNSLookup
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.configuration.settings import SIPSimpleSettings
@@ -47,10 +49,23 @@ log = ApplicationLogger(__package__)
 def get_num_open_files():
     return len(psutil.Process().open_files())
 
+'''
+class ReferralError(Exception):
+    def __init__(self, error, code=0):
+        self.error = error
+        self.code = code
+
+
+class SIPReferralDidFail(Exception):
+    def __init__(self, data):
+        self.data = data
+'''
+
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text', 'last_tty_0d', 'direction', 'outgoing_calls',
+    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text',
+                 'last_tty_0d', 'direction', 'outgoing_calls',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp', 'chat_stream', 'psap_id',
@@ -1965,6 +1980,17 @@ class PSAPApplication(SylkApplication):
 
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
+    def transfer_caller(self, room_number, transfer_to):
+        try:
+            log.info("transfer_caller to %r", transfer_to)
+            room_data = self.get_room_data(room_number)
+            room_data.incoming_session.transfer(transfer_to)
+            log.info("transfer_caller done")
+        except:
+            stacktrace = traceback.format_exc()
+            log.error("transfer_caller error")
+            log.error(stacktrace)
+
 
 class OldOutgoingCallInitializer(object):
     implements(IObserver)
@@ -2179,6 +2205,87 @@ class OldOutgoingCallInitializer(object):
         else:
             send_notice('SIP session failed: %s' % notification.data.failure_reason)
         '''
+
+'''
+seems like its not needed
+
+class OutgoingReferInitializer(object):
+    implements(IObserver)
+
+    def __init__(self, room_number, room_uri, target_uri, refer_to_uri):
+        self.room_number = room_number
+        self.target_uri = target_uri
+        self.refer_to_uri = refer_to_uri
+        self.room_uri = room_uri
+
+    def start(self):
+        room_number = self.room_number
+        room_data = self.app.get_room_data(room_number)
+        psap_id = room_data.psap_id
+        self.psap_id = psap_id
+        if not self.target_uri.startswith(('sip:', 'sips:')):
+            self.target_uri = 'sip:%s' % self.target_uri
+        try:
+            self.target_uri = SIPURI.parse(self.target_uri)
+        except SIPCoreError:
+            log.info('OutgoingReferInitializer start Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
+            return
+        settings = SIPSimpleSettings()
+        lookup = DNSLookup()
+        notification_center = NotificationCenter()
+        notification_center.add_observer(self, sender=lookup)
+        lookup.lookup_sip_proxy(self.target_uri, settings.sip.transport_list)
+
+    def _NH_DNSLookupDidSucceed(self, notification):
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=notification.sender)
+
+        account = DefaultAccount()
+        # we use tcp for now, can change later
+        transport = 'tcp'
+        parameters = {} if transport == 'udp' else {'transport': transport}
+        contact_uri = SIPURI(user=account.contact.username, host=SIPConfig.local_ip.normalized,
+                             port=getattr(Engine(), '%s_port' % transport), parameters=parameters)
+        refer_to_header = ReferToHeader(str(self.refer_to_uri))
+        refer_to_header.parameters['method'] = 'INVITE'
+        from_header = FromHeader(SIPURI.new(self.room_uri), u'Conference Call')
+        referral = Referral(self.target_uri, from_header,
+                            ToHeader(self.target_uri),
+                            refer_to_header,
+                            ContactHeader(contact_uri),
+                            account.credentials)
+        notification_center.add_observer(self, sender=referral)
+        try:
+            referral.send_refer(timeout=3)
+        except SIPCoreError:
+            notification_center.remove_observer(self, sender=referral)
+            timeout = 5
+            raise ReferralError(error='Internal error')
+        self._referral = referral
+
+    def _NH_SIPReferralDidStart(self, notification):
+        log.info("inside _NH_SIPReferralDidStart %r", notification)
+
+    def _NH_SIPReferralChangedState(self, notification):
+        log.info("inside _NH_SIPReferralChangedState %r", notification)
+
+    def _NH_SIPReferralGotNotify(self, notification):
+        log.info("inside _NH_SIPReferralGotNotify %r", notification)
+
+    def _NH_SIPReferralDidEnd(self, notification):
+        log.info("inside _NH_SIPReferralDidEnd %r", notification)
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=self._referral)
+        self._referral = None
+
+    def _NH_SIPReferralDidFail(self, notification):
+        log.info("inside _NH_SIPReferralDidFail")
+        notification_center = NotificationCenter()
+        notification_center.remove_observer(self, sender=self._referral)
+        self._referral = None
+        if notification.data.code in (403, 405):
+            raise ReferralError(error=sip_status_messages[notification.data.code], code=notification.data.code)
+'''
 
 
 class OutgoingCallInitializer(object):

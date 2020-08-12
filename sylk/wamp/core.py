@@ -34,7 +34,8 @@ wamp_session_client_data = {}
 user_wamp_sessions = {}
 
 def on_wamp_success(result):
-    log.info("my_wamp_publish deferred on_success %r, %s", result, result)
+    pass
+    #log.info("my_wamp_publish deferred on_success %r, %s", result, result)
 
 
 def on_wamp_error(failure):
@@ -75,7 +76,7 @@ def send_one_request(request):
 
 
 def wamp_publish(topic, json_data=None, exclude_me=True):
-    log.info("inside wamp_publish twisted %s, json %r", topic, json_data)
+    #log.info("inside wamp_publish twisted %s, json %r", topic, json_data)
     reactor.callFromThread(_wamp_publish, topic, json_data, exclude_me)
 
 

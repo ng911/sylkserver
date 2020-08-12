@@ -63,10 +63,12 @@ def conference_info(room_number):
 @check_exceptions
 def conference_transfer_caller(room_number):
     #transfer_to = get_argument("transfer_to", "sip:sos@sos-fire_psap.psapcloud.com")
-    transfer_to = get_argument("transfer_to", None)
-    if transfer_to != None:
+    log.info("inside conference_transfer_caller")
+    target = get_argument("target", None)
+    log.info("inside conference_transfer_caller to target %r", target)
+    if target != None:
         psap_application = PSAPApplication()
-        psap_application.transfer_caller(transfer_to)
+        psap_application.transfer_caller(room_number, target)
 
 @conference.route('/participants/<room_number>', methods=['GET'])
 def conference_participants(room_number):
