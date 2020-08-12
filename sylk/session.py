@@ -20,6 +20,7 @@ from sipsimple.streams import MediaStreamRegistry, InvalidStreamError, UnknownSt
 from sipsimple.threading import run_in_twisted_thread
 from sipsimple.threading.green import Command, run_in_green_thread
 from sipsimple.util import ISOTimestamp
+from sipsimple.session import TransferHandler
 from threading import RLock
 from time import time
 from twisted.internet import reactor
@@ -395,6 +396,7 @@ class Session(object):
         self._invitation = None
         self._local_identity = None
         self._remote_identity = None
+        self.transfer_handler = None
         self._lock = RLock()
 
     def debug_info(self):
@@ -471,6 +473,7 @@ class Session(object):
         self.state = 'incoming'
         self.transport = invitation.transport
         self._invitation = invitation
+        self.transfer_handler = TransferHandler(self)
         #self.conference = ConferenceHandler(self)
         if 'isfocus' in invitation.remote_contact_header.parameters:
             self.remote_focus = True
