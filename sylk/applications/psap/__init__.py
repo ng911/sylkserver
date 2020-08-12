@@ -1980,11 +1980,12 @@ class PSAPApplication(SylkApplication):
 
         send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
-    def transfer_caller(self, room_number, transfer_to):
+    def transfer_caller(self, room_number, target):
         try:
-            log.info("transfer_caller to %r", transfer_to)
+            log.info("transfer_caller to %r", target)
             room_data = self.get_room_data(room_number)
-            room_data.incoming_session.transfer(transfer_to)
+            target_uri = SIPURI.parse(target)
+            room_data.incoming_session.transfer(target_uri)
             log.info("transfer_caller done")
         except:
             stacktrace = traceback.format_exc()
