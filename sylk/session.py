@@ -71,6 +71,8 @@ class TerminateSubscription(Exception):
 class IllegalStateError(RuntimeError):
     pass
 
+class IllegalDirectionError(RuntimeError):
+    pass
 
 @decorator
 def transition_state(required_state, new_state):
@@ -97,6 +99,18 @@ def check_state(required_states):
         return wrapper
     return state_checker
 
+@decorator
+def check_transfer_state(direction, state):
+    def state_checker(func):
+        @preserve_signature(func)
+        def wrapper(obj, *args, **kwargs):
+            if obj.transfer_handler.direction != direction:
+                raise IllegalDirectionError('cannot transfer in %s direction' % obj.transfer_handler.direction)
+            if obj.transfer_handler.state != state:
+                raise IllegalStateError('cannot transfer in %s state' % obj.transfer_handler.state)
+            return func(obj, *args, **kwargs)
+        return wrapper
+    return state_checker
 
 class ConferenceHandler(object):
     implements(IObserver)
@@ -1488,6 +1502,17 @@ class Session(object):
             notification_center.remove_observer(self, sender=self._invitation)
             self.greenlet = None
             self.state = 'terminated'
+
+    @check_state(['connected'])
+    @check_transfer_state(None, None)
+    @run_in_twisted_thread
+    def transfer(self, target_uri, replaced_session=None):
+        notification_center = NotificationCenter()
+        notification_center.post_notification('SIPSessionTransferNewOutgoing', self, NotificationData(transfer_destination=target_uri))
+        try:
+            self._invitation.transfer(target_uri, replaced_session._invitation.dialog_id if replaced_session is not None else None)
+        except SIPCoreError as e:
+            notification_center.post_notification('SIPSessionTransferDidFail', sender=self, data=NotificationData(code=500, reason=str(e)))
 
     @property
     def local_identity(self):

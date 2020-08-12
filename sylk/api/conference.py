@@ -19,6 +19,7 @@ from .utils import get_argument
 from bson.objectid import ObjectId
 from mongoengine import Q
 from ..db.calls import get_conference_json, get_conference_participants_json, get_conference_event_log_json
+from .decorators import check_exceptions
 
 conference = Blueprint('conference', __name__,
                         template_folder='templates')
@@ -58,6 +59,14 @@ def conference_info(room_number):
 
     return jsonify(response)
 
+@conference.route('/transfer/caller/<room_number>', methods=['GET'])
+@check_exceptions
+def conference_transfer_caller(room_number):
+    #transfer_to = get_argument("transfer_to", "sip:sos@sos-fire_psap.psapcloud.com")
+    transfer_to = get_argument("transfer_to", None)
+    if transfer_to != None:
+        psap_application = PSAPApplication()
+        psap_application.transfer_caller(transfer_to)
 
 @conference.route('/participants/<room_number>', methods=['GET'])
 def conference_participants(room_number):
@@ -397,6 +406,9 @@ def get_call_transfer_lines(room_number):
                 if type is not None:
                     for call_transfer_line in CallTransferLine.objects(psap_id=psap_id, type=type):
                         transfer_lines.append({'name' : call_transfer_line.name, 'star_code' : call_transfer_line.star_code})
+            else:
+                for call_transfer_line in CallTransferLine.objects(psap_id=psap_id):
+                    transfer_lines.append({'name': call_transfer_line.name, 'target': call_transfer_line.target})
 
         response = {
             'success' : True,
