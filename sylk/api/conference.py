@@ -69,6 +69,7 @@ def conference_transfer_caller(room_number):
     if target != None:
         psap_application = PSAPApplication()
         psap_application.transfer_caller(room_number, target)
+    return {}
 
 @conference.route('/participants/<room_number>', methods=['GET'])
 def conference_participants(room_number):
