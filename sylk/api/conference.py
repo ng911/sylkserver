@@ -59,7 +59,7 @@ def conference_info(room_number):
 
     return jsonify(response)
 
-@conference.route('/transfer/caller/<room_number>', methods=['GET'])
+@conference.route('/transfer/caller/<room_number>', methods=['GET', 'POST'])
 @check_exceptions
 def conference_transfer_caller(room_number):
     #transfer_to = get_argument("transfer_to", "sip:sos@sos-fire_psap.psapcloud.com")
