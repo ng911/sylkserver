@@ -131,7 +131,7 @@ def update_new_location(room_number, location_result, raw_ali_data=None, callbac
             dump_ali(room_number, raw_ali_data)
 
     call_data = get_conference_json(conference_db_obj)
-    publish_update_call(room_number, call_data)
+    publish_update_call(psap_id, room_number, call_data)
     publish_update_location_success(psap_id, room_number, location_result, location_display)
 
 
@@ -185,6 +185,7 @@ def ali_lookup(room_number, psap_id, number, ali_format, station_id=''):
     # setup ali status to pending
     try:
         conf_db_obj = Conference.objects.get(room_number=room_number)
+        psap_id = str(conf_db_obj.psap_id)
         if ali_available:
             conf_db_obj.ali_result = 'pending'
         else:
@@ -192,7 +193,7 @@ def ali_lookup(room_number, psap_id, number, ali_format, station_id=''):
         conf_db_obj.save()
 
         call_data = get_conference_json(conf_db_obj)
-        publish_update_call(room_number, call_data)
+        publish_update_call(psap_id, room_number, call_data)
     except:
         # if the room does not exist we ignore this
         pass
@@ -205,10 +206,11 @@ def ali_lookup(room_number, psap_id, number, ali_format, station_id=''):
         log.info("ali_failed number %r, %r", room_number, number)
         try:
             conference_db_obj = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference_db_obj.psap_id)
             conference_db_obj.ali_result = "failed"
             conference_db_obj.save()
             call_data = get_conference_json(conference_db_obj)
-            publish_update_call(room_number, call_data)
+            publish_update_call(psap_id, room_number, call_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)
@@ -357,10 +359,11 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
     else:
         try:
             conference_db_obj = Conference.objects.get(room_number=room_number)
+            psap_id = str(conference_db_obj.psap_id)
             conference_db_obj.ali_result = "failed"
             conference_db_obj.save()
             call_data = get_conference_json(conference_db_obj)
-            publish_update_call(room_number, call_data)
+            publish_update_call(psap_id, room_number, call_data)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error('%s', stacktrace)
