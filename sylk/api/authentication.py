@@ -78,9 +78,14 @@ class LoginForm(Form):
 
             domain_name = request.host
             log.info("domain_name is %r", domain_name)
-            psap_id = get_psap_from_domain(domain_name)
+            # todo - fix this to handle admin properly
+            try:
+                psap_id = get_psap_from_domain(domain_name)
+                user = User.objects.get(username=self.username.data, psap_id=psap_id)
+            except:
+                psap_id = None
+                user = User.objects.get(username=self.username.data)
 
-            user = User.objects.get(username = self.username.data, psap_id=psap_id)
             if user is None:
                 self.username.errors.append('Unknown username')
                 return False

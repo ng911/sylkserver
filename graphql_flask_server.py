@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
 import logging
+import sylk.config
+sylk.config.USE_ASYNCIO = True
 
 log = logging.getLogger('emergent-ng911')
 

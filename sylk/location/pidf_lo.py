@@ -23,6 +23,8 @@ presenceNS = "urn:ietf:params:xml:ns:pidf"
 gpNS = "urn:ietf:params:xml:ns:pidf:geopriv10"
 civicNS = "urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr"
 gmlNS = "http://www.opengis.net/gml"
+aliNS = "http://www.nena9-1-1.org/schemas/2003/ali"
+
 
 def getCivicElements(parent, elements):
     ret = ()
@@ -30,6 +32,13 @@ def getCivicElements(parent, elements):
         val = getCivicElement(parent, element)
         ret = ret + (val,)
     return ret
+
+def getElementByTag(ns, parent, tagName):
+    element = None
+    node = parent.getElementsByTagNameNS(ns, tagName)
+    if (node != None) and len(node) > 0:
+        element = node[0]
+    return element
 
 def getElementText(ns, parent, elementName):
     nodeVal = None
@@ -46,10 +55,12 @@ def getElementText(ns, parent, elementName):
 def getCivicElement(parent, elementName):
     return getElementText(civicNS, parent, elementName)
 
+def getAliElement(parent, elementName):
+    return getElementText(aliNS, parent, elementName)
+
 def combineAddressElements(elements):
     elements = [element for element in elements if element != None]
     return " ".join(elements)
-
 
 def xml2display(str_xml):
     postal = community = state = latitude = longitude = radius = name = None
@@ -91,6 +102,20 @@ def xml2display(str_xml):
 
     return (postal, community, state, latitude, longitude, radius, name)
 
-
+def parseAliFromXML(str_xml):
+    callback_number = lookup_number = name = class_of_service = service_provider = None
+    xml = parseString(str_xml)
+    location_resp = xml.getElementsByTagName("locationResponse")[0]
+    presence = location_resp.getElementsByTagNameNS(presenceNS, "presence")[0]
+    ali_body = getElementByTag(aliNS, presence, "ALIBody")
+    if ali_body != None:
+        ali_call_info = getElementByTag(aliNS, ali_body, "CallInfo")
+        if ali_call_info != None:
+            callback_number = getAliElement(ali_call_info, "CallbackNum")
+            lookup_number = getAliElement(ali_call_info, "CallingPartyNum")
+            name = getAliElement(ali_call_info, "CustomerName")
+            class_of_service = getAliElement(ali_call_info, "ClassOfService")
+            service_provider = getAliElement(ali_call_info, "SourceOfService")
+    return callback_number, lookup_number, name, class_of_service, service_provider
 
 

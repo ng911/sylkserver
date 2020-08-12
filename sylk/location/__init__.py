@@ -8,7 +8,7 @@ from ..wamp import publish_update_call, publish_update_location_success, publish
 from ..db.calls import get_conference_json
 from .alidump import dump_ali
 from .held import held_client
-from .pidf_lo import xml2display
+from .pidf_lo import xml2display, parseAliFromXML
 
 try:
     from sylk.applications import ApplicationLogger
@@ -318,6 +318,7 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
         self.location.append(pidf)
         '''
         postal, community, state, latitude, longitude, radius, name = xml2display(str_pidf)
+        callback_number, lookup_number, name, class_of_service, service_provider = parseAliFromXML(str_pidf)
         if (name == None) or (len(name) == 0):
             name = callerName
         print("postal, community, state, latitude, longitude, radius, name", postal, community, state, latitude, longitude, radius, name)
@@ -339,6 +340,13 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
                 location_db_obj.radius = float(radius)
             location_db_obj.postal = postal
             location_db_obj.time = location_db_obj.updated_at = datetime.datetime.utcnow()
+
+            location_db_obj.callback = callback_number
+            location_db_obj.phone_number = lookup_number
+            location_db_obj.name = name
+            location_db_obj.class_of_service = class_of_service
+            location_db_obj.service_provider = service_provider
+
             location_db_obj.save()
             location_result = {
                 "community" : community,

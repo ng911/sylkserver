@@ -134,13 +134,18 @@ def test_pidf(geolocation_url):
         pidf = held('presence')[0]
         postal, community, state, latitude, longitude, radius, name = xml2display(pidf)
 
-def test_pidf_file():
-    from .pidf_lo import xml2display
-    filename = "test-pidf-lo.xml"
+def test_pidf_file(filename=None):
+    from .pidf_lo import xml2display, parseAliFromXML
+    if filename == None:
+        filename = "test-pidf-lo.xml"
     file = open(filename, "r")
     pidf = file.read()
     print("pidf length is %d" % len(pidf))
     postal, community, state, latitude, longitude, radius, name = xml2display(pidf)
+    callback_number, lookup_number, name, class_of_service, service_provider = parseAliFromXML(pidf)
     print ("postal %s, community %s, state %s, latitude %r, longitude %r, radius %r, name %r" %
            (postal, community, state, latitude, longitude, radius, name))
+    print ("callback_number %s, lookup_number %s, name %s, class_of_service %s, service_provider %s" %
+           (callback_number, lookup_number, name, class_of_service, service_provider))
+
 

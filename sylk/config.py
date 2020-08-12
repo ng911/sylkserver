@@ -14,7 +14,7 @@ MONGODB_REPLICASET = ""
 CREATE_DB = True
 
 FLASK_SERVER_PORT = 7070
-
+USE_ASYNCIO=False
 
 WAMP_REALM = u("realm1")
 WAMP_CROSSBAR_SERVER = u("ws://rdffg-wamp.emergent911.com/ws")
