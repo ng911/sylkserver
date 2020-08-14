@@ -36,8 +36,8 @@ class Query(graphene.ObjectType):
     all_queues = OrderedMongoengineConnectionField(QueueNode)
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
-    all_admin_lines = OrderedMongoengineConnectionField(AdminLineNode, psap_id=graphene.String(required=True))
-    all_admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode, psap_id=graphene.String(required=True))
+    all_admin_lines = OrderedMongoengineConnectionField(AdminLineNode)
+    all_admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode)
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
