@@ -15,6 +15,10 @@ from .calls import PsapConferenceNode
 from ...db.schema import Conference as ConferenceModel
 from .message import MessageNode, PsapMessageNode
 from ...db.schema import ConferenceMessage as ConferenceMessageModel
+from .admin_line import AdminLineNode, AdminLineGroupNode
+from .admin_line import CreteAdminLineGroupMutation, CreteAdminLineMutation
+from .admin_line import UpdateAdminLineGroupMutation, UpdateAdminLineMutation
+from .admin_line import DeleteAdminLineGroupMutation, DeleteAdminLineMutation
 
 try:
     from sylk.applications import ApplicationLogger
@@ -32,6 +36,8 @@ class Query(graphene.ObjectType):
     all_queues = OrderedMongoengineConnectionField(QueueNode)
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
+    all_admin_lines = OrderedMongoengineConnectionField(AdminLineNode, psap_id=graphene.String(required=True))
+    all_admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode, psap_id=graphene.String(required=True))
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
@@ -87,11 +93,16 @@ class Subscriptions(graphene.ObjectType):
         pass
 
 
-
 class Mutations(graphene.ObjectType):
     update_user = UpdateUserMutation.Field()
     create_psap = CreatePsapMutation.Field()
     update_psap = UpdatePsapMutation.Field()
+    create_adminline_group = CreteAdminLineGroupMutation.Field()
+    create_adminline = CreteAdminLineMutation.Field()
+    update_adminline_group = UpdateAdminLineGroupMutation.Field()
+    update_adminline = UpdateAdminLineMutation.Field()
+    delete_adminline_group = DeleteAdminLineGroupMutation.Field()
+    delete_adminline = DeleteAdminLineMutation.Field()
 
 
 graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])

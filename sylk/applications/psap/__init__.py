@@ -555,6 +555,13 @@ class PSAPApplication(SylkApplication):
 
                 log.info("sip_uris is %r", sip_uris)
                 forward_to_calltaker=True
+
+                # check overflow handling
+                if len(sip_uris) == 0:
+                    log.info("check for overflow handling")
+                    if self.handle_overflow_call(psap_id, session):
+                        return
+
                 # add these calltakers to ignore list so we do not bother them again
             elif call_type == 'admin':
                 if admin_user != '':
@@ -822,6 +829,17 @@ class PSAPApplication(SylkApplication):
             if outgoing_call_initializer.ref_id == ref_id:
                 outgoing_call_initializer.cancel_call()
                 publish_outgoing_call_status(room_number, call_from, 'cancel')
+
+    def handle_overflow_call(self, psap_id, session):
+        from ...db.psap import get_overflow_uri
+        overflow_uri, psap_name = get_overflow_uri(psap_id)
+        if overflow_uri != None:
+            target_uri = SIPURI.parse(overflow_uri)
+            extra_headers = []
+            extra_headers.append(Header('X-Emergent-Reason', "Overflow call from %s" % psap_name))
+            session.transfer(target_uri, extra_headers=extra_headers)
+            return True
+        return False
 
     def _format_number_to_e164(self, phone_number):
         if len(phone_number) == 10:
@@ -1982,10 +2000,14 @@ class PSAPApplication(SylkApplication):
 
     def transfer_caller(self, room_number, target):
         try:
+            from ...db.psap import get_psap_name
             log.info("transfer_caller to %r", target)
             room_data = self.get_room_data(room_number)
             target_uri = SIPURI.parse(target)
-            room_data.incoming_session.transfer(target_uri)
+            psap_name = get_psap_name(room_data.psap_id)
+            extra_headers = []
+            extra_headers.append(Header('X-Emergent-Reason', "Transferred call from %s" % psap_name))
+            room_data.incoming_session.transfer(target_uri, extra_headers=extra_headers)
             log.info("transfer_caller done")
         except:
             stacktrace = traceback.format_exc()

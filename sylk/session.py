@@ -1509,11 +1509,12 @@ class Session(object):
     @check_state(['connected'])
     @check_transfer_state(None, None)
     @run_in_twisted_thread
-    def transfer(self, target_uri, replaced_session=None):
+    def transfer(self, target_uri, replaced_session=None, extra_headers=[]):
         notification_center = NotificationCenter()
         notification_center.post_notification('SIPSessionTransferNewOutgoing', self, NotificationData(transfer_destination=target_uri))
         try:
-            self._invitation.transfer(target_uri, replaced_session._invitation.dialog_id if replaced_session is not None else None)
+            self._invitation.transfer(target_uri, replaced_session._invitation.dialog_id if replaced_session is not None else None, \
+                                      extra_headers=extra_headers)
         except SIPCoreError as e:
             notification_center.post_notification('SIPSessionTransferDidFail', sender=self, data=NotificationData(code=500, reason=str(e)))
 

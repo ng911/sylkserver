@@ -187,9 +187,12 @@ def session_info():
         user_id = session['user_id']
         if (user_id is not None) and (user_id != ''):
             try:
+                from ..db.psap import get_psap_name
                 user_obj = User.objects.get(user_id=user_id)
                 username = user_obj.username
+                fullname = user_obj.fullname
                 psap_id = str(user_obj.psap_id)
+                psap_name = get_psap_name(psap_id)
                 ip_address = request.remote_addr
                 if hasattr(user_obj, 'layout'):
                     layout = user_obj.layout
@@ -202,7 +205,9 @@ def session_info():
                     pass
             except:
                 pass
-    initial_data = {'user_id': user_id, 'username': username, 'psap_id' : psap_id, 'layout' : layout}
+    initial_data = {'user_id': user_id, 'username': username, 'fullname' : fullname,
+                    'psap_id' : psap_id, 'psap_name' : psap_name,
+                    'layout' : layout}
     if 'access_token' in session:
         log.debug("found access_token in session")
         initial_data['access_token'] = session['access_token']
@@ -225,8 +230,12 @@ def logout():
         if 'psap_id' in session:
             psap_id = session['psap_id']
             del session['psap_id']
+        if 'psapname' in session:
+            del session['psapname']
         if 'username' in session:
             del session['username']
+        if 'fullname' in session:
+            del session['fullname']
         if 'access_token' in session:
             del session['access_token']
         if 'refresh_token' in session:
