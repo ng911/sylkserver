@@ -2006,7 +2006,7 @@ class PSAPApplication(SylkApplication):
             target_uri = SIPURI.parse(target)
             psap_name = get_psap_name(room_data.psap_id)
             extra_headers = []
-            extra_headers.append(Header('X-Emergent-Reason', "Transferred call from %s" % psap_name))
+            extra_headers.append(Header('X-Emergent-Reason', str("Transferred call from %s" % psap_name)))
             room_data.incoming_session.transfer(target_uri, extra_headers=extra_headers)
             log.info("transfer_caller done")
         except:
