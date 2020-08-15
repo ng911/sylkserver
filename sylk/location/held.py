@@ -73,6 +73,9 @@ def held_client(options):
         http = urllib3.PoolManager()
         #req = urllib3.Request(options.held_url)
         held_url = options.held_url
+        if held_url == None or held_url == '':
+            log.error("held url missing")
+            return
         headers = {}
         if options.accept:
             headers['Accept'] = options.accept
