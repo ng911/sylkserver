@@ -836,7 +836,7 @@ class PSAPApplication(SylkApplication):
         if overflow_uri != None:
             target_uri = SIPURI.parse(overflow_uri)
             extra_headers = []
-            extra_headers.append(Header('X-Emergent-Reason', "Overflow call from %s" % psap_name))
+            extra_headers.append(Header('X-Emergent-Reason', str("Overflow call from %s" % psap_name)))
             session.transfer(target_uri, extra_headers=extra_headers)
             return True
         return False
