@@ -1976,27 +1976,28 @@ class PSAPApplication(SylkApplication):
     @run_in_green_thread
     def _NH_SIPSessionDidFail(self, notification):
         session = notification.sender
-        room_number = session.room_number
-        room_data = self.get_room_data(room_number)
-        psap_id = room_data.psap_id
-        notification.center.remove_observer(self, sender=session)
-        log.info('PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
-        log.info('notification.data: %r' % (notification.data))
-        room_data = self.get_room_data(session.room_number)
-        self.remove_session_from_room(session.room_number, session)
-        if int(notification.data.code) == 487:
-            # the caller cancelled the call
-            is_calltaker = False
-            if hasattr(session, 'is_calltaker'):
-                is_calltaker = session.is_calltaker
-            NotificationCenter().post_notification('ConferenceLeave', self,
-                                                   NotificationData(room_number=session.room_number,
-                                                                    status=room_data.status,
-                                                                    display_name=str(session.remote_identity.uri.user),
-                                                                    is_calltaker=is_calltaker,
-                                                                    psap_id=psap_id))
+        if hasattr(session, 'room_number') and session.room_number != None:
+            room_number = session.room_number
+            room_data = self.get_room_data(room_number)
+            psap_id = room_data.psap_id
+            notification.center.remove_observer(self, sender=session)
+            log.info('PSAP Session from %s failed: %s' % (session.remote_identity.uri, notification.data.reason))
+            log.info('notification.data: %r' % (notification.data))
+            room_data = self.get_room_data(session.room_number)
+            self.remove_session_from_room(session.room_number, session)
+            if int(notification.data.code) == 487:
+                # the caller cancelled the call
+                is_calltaker = False
+                if hasattr(session, 'is_calltaker'):
+                    is_calltaker = session.is_calltaker
+                NotificationCenter().post_notification('ConferenceLeave', self,
+                                                       NotificationData(room_number=session.room_number,
+                                                                        status=room_data.status,
+                                                                        display_name=str(session.remote_identity.uri.user),
+                                                                        is_calltaker=is_calltaker,
+                                                                        psap_id=psap_id))
 
-        send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
+            send_call_failed_notification(self, session=session, failure_code=notification.data.code, failure_reason=notification.data.reason)
 
     def transfer_caller(self, room_number, target):
         try:

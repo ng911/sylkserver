@@ -13,7 +13,7 @@ def get_overflow_uri(psap_id):
     # todo - add max calls in queue, assume 0 for now
     psapObj = Psap.objects.get(psap_id=psap_id)
     psap_name = psapObj.name
-    if hasattr(psapObj.enable_overflow_handling) and (psapObj.enable_overflow_handling) and \
-       hasattr(psapObj.overflow_uri) and (psapObj.overflow_uri != ""):
+    if hasattr(psapObj, 'enable_overflow_handling') and (psapObj.enable_overflow_handling) and \
+       hasattr(psapObj, 'overflow_uri') and (psapObj.overflow_uri != ""):
         return psapObj.overflow_uri, psap_name
     return None, psap_name
