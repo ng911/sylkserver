@@ -44,10 +44,13 @@ class PsapNode(MongoengineObjectType):
         return UserModel.objects(**params)
 
     def resolve_default_profile(parent, info, **args):
-        params = {
-            "psap_id" : parent.psap_id
-        }
-        return CalltakerProfileModel.objects.get(**params)
+        if parent.default_profile_id != None:
+            params = {
+                "profile_id" : parent.default_profile_id
+            }
+            return CalltakerProfileModel.objects.get(**params)
+        else:
+            return None
 
     def resolve_speed_dials(parent, info, **args):
         params = {
