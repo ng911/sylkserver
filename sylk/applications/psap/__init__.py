@@ -1134,7 +1134,7 @@ class PSAPApplication(SylkApplication):
             incoming_video_streams = [stream for stream in incoming_session.proposed_streams if stream.type == 'video']
             incoming_video_stream = incoming_video_streams[0] if incoming_video_streams else None
 
-            outgoing_video_streams = [stream for stream in session.proposed_streams if stream.type == 'video']
+            outgoing_video_streams = [stream for stream in session.streams if stream.type == 'video']
             outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
 
             log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
