@@ -449,6 +449,7 @@ class Session(object):
         for index, media_stream in enumerate(remote_sdp.media):
             if media_stream.port != 0:
                 for stream_type in MediaStreamRegistry:
+                    log.info("session init_incoming stream_type in MediaStreamRegistry %r", stream_type)
                     try:
                         stream = stream_type.new_from_sdp(self, remote_sdp, index)
                     except UnknownStreamError:
