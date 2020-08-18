@@ -64,7 +64,7 @@ class SIPReferralDidFail(Exception):
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text',
+    __slots__ = ['room', 'incoming_session', 'calltaker_video_stream', 'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
                  'has_audio', 'has_video',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
@@ -87,6 +87,7 @@ class RoomData(object):
         self.has_video = False
         self.incident_id = None
         self.incident_details = None
+        self.calltaker_video_stream = None
 
     @property
     def incoming(self):
@@ -508,6 +509,9 @@ class PSAPApplication(SylkApplication):
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
         video_streams = [stream for stream in session.proposed_streams if stream.type=='video']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
+        log.info('audio_streams len %r, streams %r', len(audio_streams), audio_streams)
+        log.info('video_streams len %r, streams %r', len(video_streams), video_streams)
+
         if not audio_streams and not chat_streams:
             log.info(u'Session %s rejected: invalid media, only RTP audio and MSRP chat are supported' % session.call_id)
             session.reject(488)
@@ -1126,6 +1130,32 @@ class PSAPApplication(SylkApplication):
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
             reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
 
+            incoming_session = room_data.incoming_session
+            incoming_video_streams = [stream for stream in incoming_session.proposed_streams if stream.type == 'video']
+            incoming_video_stream = incoming_video_streams[0] if incoming_video_streams else None
+
+            outgoing_video_streams = [stream for stream in session.proposed_streams if stream.type == 'video']
+            outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
+
+            log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
+                     outgoing_video_stream, incoming_video_stream)
+            # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
+            if outgoing_video_stream != None and outgoing_video_stream._transport != None \
+                and incoming_video_stream != None and incoming_video_stream._transport != None:
+                log.info("look at adding video producers to consumers")
+                calltaker_video_producer = outgoing_video_stream._transport.remote_video
+                calltaker_video_consumer = outgoing_video_stream._transport.local_video
+
+                caller_video_producer = incoming_video_stream._transport.remote_video
+                caller_video_consumer = incoming_video_stream._transport.local_video
+                if calltaker_video_producer != None and caller_video_consumer != None:
+                    log.info("Add producer to caller video")
+                    caller_video_consumer.producer = calltaker_video_producer
+                if calltaker_video_consumer != None and caller_video_producer != None:
+                    calltaker_video_consumer.producer = caller_video_producer
+                    log.info("Add producer to calltaker video")
+
+
             if room_data.ringing_duration_timer is not None:
                 room_data.ringing_duration_timer.stop()
                 room_data.ringing_duration_timer = None
@@ -1225,14 +1255,14 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
-
+            '''
             log.info("check for video producers and consumers")
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
-            if self.calltaker_video_stream != None and self.calltaker_video_stream._transport != None \
+            if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
                 and video_stream != None and video_stream._transport != None:
                 log.info("look at adding video producers to consumers")
-                calltaker_video_producer = self.calltaker_video_stream._transport.remote_video
-                calltaker_video_consumer = self.calltaker_video_stream._transport.local_video
+                calltaker_video_producer = room_data.calltaker_video_stream._transport.remote_video
+                calltaker_video_consumer = room_data.calltaker_video_stream._transport.local_video
 
                 caller_video_producer = video_stream._transport.remote_video
                 caller_video_consumer = video_stream._transport.local_video
@@ -1242,7 +1272,7 @@ class PSAPApplication(SylkApplication):
                 if calltaker_video_consumer != None and caller_video_producer != None:
                     calltaker_video_consumer.producer = caller_video_producer
                     log.info("Add producer to calltaker video")
-
+            '''
 
     def remove_session_from_room(self, room_number, session):
         log.info('remove_session_from_room for session %r, room_number %r', session, room_number)
