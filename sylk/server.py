@@ -249,7 +249,7 @@ class SylkServer(SIPApplication):
         self.stopped_event.set()
 
     def _NH_SIPEngineDidFail(self, notification):
-        log.error('SIP engine failed')
+        log.error('SIP engine failed %r', notification.data)
         self.failed = True
         super(SylkServer, self)._NH_SIPEngineDidFail(notification)
 
