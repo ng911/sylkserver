@@ -66,6 +66,7 @@ class RoomNotFoundError(Exception): pass
 class RoomData(object):
     __slots__ = ['room', 'incoming_session', 'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
+                 'has_audio', 'has_video',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp', 'chat_stream', 'psap_id',
@@ -82,6 +83,8 @@ class RoomData(object):
         self.tty_text = ''
         self.last_tty_0d = False
         self.chat_stream = None
+        self.has_audio = False
+        self.has_video = False
         self.incident_id = None
         self.incident_details = None
 
@@ -278,12 +281,16 @@ class PSAPApplication(SylkApplication):
         return list(self._rooms.keys())
 
     def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False,
-                    psap_id=ServerConfig.psap_id, incident_id=None, incident_details=None):
+                    has_audio=True, has_video=False,
+                    psap_id=ServerConfig.psap_id,
+                    incident_id=None, incident_details=None):
         room_number = uuid4().hex
         room = Room(psap_id, room_number, text_only)
         room_data = RoomData()
         room_data.room = room
         room_data.call_type = call_type
+        room_data.has_audio = has_audio
+        room_data.has_video = has_video
         room_data.incoming_session = incoming_session
         room_data.outgoing_calls = {}
         room_data.participants = {}
@@ -499,14 +506,18 @@ class PSAPApplication(SylkApplication):
         has_video = False
 
         audio_streams = [stream for stream in session.proposed_streams if stream.type=='audio']
+        video_streams = [stream for stream in session.proposed_streams if stream.type=='video']
         chat_streams = [stream for stream in session.proposed_streams if stream.type=='chat']
         if not audio_streams and not chat_streams:
             log.info(u'Session %s rejected: invalid media, only RTP audio and MSRP chat are supported' % session.call_id)
             session.reject(488)
             send_call_update_notification(self, session, 'reject')
             return
-        if audio_streams:
-            has_audio = True
+        if audio_streams or video_streams:
+            if audio_streams:
+                has_audio = True
+            if video_streams:
+                has_video = True
             session.send_ring_indication()
             send_call_update_notification(self, session, 'ringing')
 
@@ -606,6 +617,7 @@ class PSAPApplication(SylkApplication):
 
             (room_number, room_data) = self.create_room(session, call_type, direction=direction,
                                                         acd_strategy=acd_strategy, text_only=has_text,
+                                                        has_audio=has_audio, has_video=has_video,
                                                         psap_id=psap_id, incident_id=incident_id,
                                                         incident_details=incident_details)
             session.room_number = room_number
@@ -727,6 +739,7 @@ class PSAPApplication(SylkApplication):
                 # create an outbound session here for calls to calltakers
                 log.info('creating outgoing_call_initializer is_calltaker %r', forward_to_calltaker)
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
+                                                                    has_audio=has_audio, has_video=has_video,
                                                                     caller_identity=caller_identity, is_calltaker=forward_to_calltaker, add_failed_event=False)
                 ''' old code '''
                 '''
@@ -1181,18 +1194,21 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         if session.state == 'incoming':
             audio_streams = [stream for stream in session.proposed_streams if stream.type == 'audio']
+            video_streams = [stream for stream in session.proposed_streams if stream.type == 'video']
             chat_streams = [stream for stream in session.proposed_streams if stream.type == 'chat']
             log.info("num audio_streams %r ", len(audio_streams))
+            log.info("num video_streams %r ", len(video_streams))
             log.info("num chat_streams %r ", len(chat_streams))
             audio_stream = audio_streams[0] if audio_streams else None
+            video_stream = video_streams[0] if video_streams else None
             chat_stream = chat_streams[0] if chat_streams else None
-            streams = [stream for stream in (audio_stream, chat_stream) if stream]
+            streams = [stream for stream in (audio_stream, chat_stream, video_stream) if stream]
             room_data.chat_stream = chat_stream
             if chat_stream is not None:
                 chat_stream.room_number = room_number
                 notification_center = NotificationCenter()
-                notification_center.add_observer(self, sender=stream)
-                room_data.chat_stream = stream
+                notification_center.add_observer(self, sender=chat_stream)
+                room_data.chat_stream = chat_stream
             '''
             for stream in session.proposed_streams:
                 if stream in streams:
@@ -1209,6 +1225,24 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
+
+            log.info("check for video producers and consumers")
+            # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
+            if self.calltaker_video_stream != None and self.calltaker_video_stream._transport != None \
+                and video_stream != None and video_stream._transport != None:
+                log.info("look at adding video producers to consumers")
+                calltaker_video_producer = self.calltaker_video_stream._transport.remote_video
+                calltaker_video_consumer = self.calltaker_video_stream._transport.local_video
+
+                caller_video_producer = video_stream._transport.remote_video
+                caller_video_consumer = video_stream._transport.local_video
+                if calltaker_video_producer != None and caller_video_consumer != None:
+                    log.info("Add producer to caller video")
+                    caller_video_consumer.producer = calltaker_video_producer
+                if calltaker_video_consumer != None and caller_video_producer != None:
+                    calltaker_video_consumer.producer = caller_video_producer
+                    log.info("Add producer to calltaker video")
+
 
     def remove_session_from_room(self, room_number, session):
         log.info('remove_session_from_room for session %r, room_number %r', session, room_number)
@@ -2334,7 +2368,7 @@ class OutgoingCallInitializer(object):
         self.cancel = False
         self.is_calltaker = is_calltaker
     '''
-    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_chat=False, add_failed_event=True, inviting_calltaker=None):
+    def __init__(self, target_uri, room_uri, caller_identity=None, is_calltaker=False, has_audio=True, has_video=False, has_chat=False, add_failed_event=True, inviting_calltaker=None):
         log.info("OutgoingCallInitializer for target %r, room %r, caller_identity %r, is_calltaker %r", target_uri, room_uri, caller_identity, is_calltaker)
         self.app = PSAPApplication()
         self.caller_identity = caller_identity
@@ -2348,6 +2382,7 @@ class OutgoingCallInitializer(object):
         self.session = None
         self.cancel = False
         self.has_audio = has_audio
+        self.has_video = has_video
         self.has_chat = has_chat
         self.streams = []
         self.is_calltaker = is_calltaker
@@ -2433,6 +2468,8 @@ class OutgoingCallInitializer(object):
         '''
         if self.has_audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
+        if self.has_video:
+            self.streams.append(MediaStreamRegistry.VideoStream())
         if self.has_chat:
             self.streams.append(MediaStreamRegistry.ChatStream())
 
