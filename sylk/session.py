@@ -455,7 +455,7 @@ class Session(object):
                     except UnknownStreamError:
                         continue
                     except InvalidStreamError as e:
-                        log.error("Invalid stream: {}".format(e))
+                        log.error("Invalid stream: {}, stream_type {}, index {}".format(e, stream_type, index))
                         break
                     except Exception as e:
                         log.exception("Exception occurred while setting up stream from SDP: {}".format(e))
