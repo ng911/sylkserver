@@ -7,7 +7,7 @@ import urlparse
 
 from application import log
 from application.system import host
-from sipsimple.configuration.datatypes import AudioCodecList, Hostname, SIPTransport
+from sipsimple.configuration.datatypes import AudioCodecList, VideoCodecList, Hostname, SIPTransport
 
 
 class AudioCodecs(list):
@@ -21,6 +21,16 @@ class AudioCodecs(list):
         else:
             raise TypeError("value must be a string, list or tuple")
 
+class VideoCodecs(list):
+    def __new__(cls, value):
+        if isinstance(value, (tuple, list)):
+            return [str(x) for x in value if x in VideoCodecList.available_values] or None
+        elif isinstance(value, basestring):
+            if value.lower() in ('none', ''):
+                return None
+            return [x for x in re.split(r'\s*,\s*', value) if x in VideoCodecList.available_values] or None
+        else:
+            raise TypeError("value must be a string, list or tuple")
 
 class IPAddress(str):
     """An IP address in quad dotted number notation"""

@@ -74,7 +74,9 @@ class SylkServer(SIPApplication):
 
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
-
+        audio_codecs = list(settings.rtp.audio_codec_list)
+        video_codecs = list(settings.rtp.video_codec_list)
+        codecs = audio_codecs + video_codecs
         # initialize core
         options = dict(# general
                        ip_address=SIPConfig.local_ip,
@@ -92,9 +94,8 @@ class SylkServer(SIPApplication):
                        # rtp
                        rtp_port_range=(settings.rtp.port_range.start, settings.rtp.port_range.end),
                        # audio
-                       codecs=list(settings.rtp.audio_codec_list),
+                       codecs=codecs,
                        # video
-                       video_codecs=list(settings.rtp.video_codec_list),
                        enable_colorbar_device=True,
                        # logging
                        log_level=settings.logs.pjsip_level if settings.logs.trace_pjsip else 0,

@@ -13,7 +13,7 @@ from sipsimple.configuration.settings import AudioSettings, EchoCancellerSetting
 
 from sylk import __version__ as server_version
 from sylk.configuration import ServerConfig, SIPConfig, MSRPConfig, RTPConfig
-from sylk.configuration.datatypes import AudioCodecs, Path, Port, SIPProxyAddress
+from sylk.configuration.datatypes import AudioCodecs, VideoCodecs, Path, Port, SIPProxyAddress
 
 
 __all__ = 'AccountExtension', 'BonjourAccountExtension', 'SylkServerSettingsExtension'
@@ -55,6 +55,7 @@ class AccountSRTPEncryptionSettingsExtension(AccountSRTPEncryptionSettings):
 
 class AccountRTPSettingsExtension(AccountRTPSettings):
     audio_codec_list = Setting(type=AudioCodecs, default=None, nillable=True)
+    video_codec_list = Setting(type=VideoCodecs, default=None, nillable=True)
     encryption = AccountSRTPEncryptionSettingsExtension
 
 
@@ -121,6 +122,7 @@ class LogsSettingsExtension(LogsSettings):
 
 class RTPSettingsExtension(RTPSettings):
     audio_codec_list = Setting(type=AudioCodecs, default=RTPConfig.audio_codecs)
+    video_codec_list = Setting(type=VideoCodecs, default=RTPConfig.video_codecs)
     port_range = Setting(type=PortRange, default=PortRange(RTPConfig.port_range.start, RTPConfig.port_range.end))
     timeout = Setting(type=NonNegativeInteger, default=RTPConfig.timeout)
 
