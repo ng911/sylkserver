@@ -2002,6 +2002,8 @@ class PSAPApplication(SylkApplication):
                 caller_video_consumer = video_stream._transport.local_video
                 if calltaker_video_producer != None and caller_video_consumer != None:
                     log.info("Add producer to caller video")
+                    log.info(dir(caller_video_consumer))
+                    log.info(dir(calltaker_video_producer))
                     caller_video_consumer._set_producer(calltaker_video_producer)
                 #if calltaker_video_consumer != None and caller_video_producer != None:
                 #    calltaker_video_consumer.producer = caller_video_producer
