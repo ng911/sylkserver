@@ -446,7 +446,7 @@ class Session(object):
             invitation.send_response(488)
             return
         self.proposed_streams = []
-        log.info("session init_incoming stream_type remote_sdp %r", remote_sdp)
+        #log.info("session init_incoming stream_type remote_sdp %r", remote_sdp)
         log.info("session init_incoming stream_type remote_sdp.media %r", remote_sdp.media)
         account_preferred_video_codecs = getattr(self.account.rtp, 'video_codec_list')
         log.info("account_preferred_video_codecs %r", account_preferred_video_codecs)
