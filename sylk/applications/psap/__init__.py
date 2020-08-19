@@ -1138,7 +1138,8 @@ class PSAPApplication(SylkApplication):
             if session.streams != None:
                 outgoing_video_streams = [stream for stream in session.streams if stream.type == 'video']
                 outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
-
+                room_data.calltaker_video_stream = outgoing_video_stream
+                '''
                 log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
                          outgoing_video_stream, incoming_video_stream)
                 log.info("check for video producers and consumers transport %r, incoming_video_stream %r",
@@ -1158,6 +1159,7 @@ class PSAPApplication(SylkApplication):
                     if calltaker_video_consumer != None and caller_video_producer != None:
                         calltaker_video_consumer.producer = caller_video_producer
                         log.info("Add producer to calltaker video")
+                '''
             else:
                 log.error("session.streams is None")
 
@@ -1261,8 +1263,8 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
-            '''
             log.info("check for video producers and consumers room_data.calltaker_video_stream %r", room_data.calltaker_video_stream)
+            log.info("check for video transport %r", video_stream._transport)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
                 and video_stream != None and video_stream._transport != None:
@@ -1278,7 +1280,6 @@ class PSAPApplication(SylkApplication):
                 if calltaker_video_consumer != None and caller_video_producer != None:
                     calltaker_video_consumer.producer = caller_video_producer
                     log.info("Add producer to calltaker video")
-            '''
 
 
     def remove_session_from_room(self, room_number, session):
