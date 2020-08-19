@@ -1985,19 +1985,21 @@ class PSAPApplication(SylkApplication):
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
         video_stream = video_streams[0] if video_streams else None
+        calltaker_video_stream = room_data.calltaker_video_stream
 
         log.info("check for video producers and consumers video_stream %r", video_stream)
-        log.info(dir(video_stream))
-        log.info("check for video producers and consumers room_data.calltaker_video_stream %r",
-                 room_data.calltaker_video_stream)
-        if video_stream != None and room_data.calltaker_video_stream != None:
+        log.info("video_stream codec %r", video_stream.codec)
+        log.info("calltaker_video_stream codec %r", calltaker_video_stream.codec)
+        log.info("check for video producers and consumers calltaker_video_stream %r",
+                 calltaker_video_stream)
+        if video_stream != None and calltaker_video_stream != None:
             log.info("check for video transport %r", video_stream._transport)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
-            if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
+            if calltaker_video_stream != None and calltaker_video_stream._transport != None \
                     and video_stream != None and video_stream._transport != None:
                 log.info("look at adding video producers to consumers")
-                calltaker_video_producer = room_data.calltaker_video_stream._transport.remote_video
-                calltaker_video_consumer = room_data.calltaker_video_stream._transport.local_video
+                calltaker_video_producer = calltaker_video_stream._transport.remote_video
+                calltaker_video_consumer = calltaker_video_stream._transport.local_video
 
                 caller_video_producer = video_stream._transport.remote_video
                 caller_video_consumer = video_stream._transport.local_video
