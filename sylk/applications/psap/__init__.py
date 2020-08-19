@@ -1125,7 +1125,7 @@ class PSAPApplication(SylkApplication):
 
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
-        log.info('outgoing_session_did_start session streams %r, proposed_streams', session.streams, session.proposed_streams)
+        log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
@@ -1141,6 +1141,8 @@ class PSAPApplication(SylkApplication):
 
                 log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
                          outgoing_video_stream, incoming_video_stream)
+                log.info("check for video producers and consumers transport %r, incoming_video_stream %r",
+                            outgoing_video_stream._transport, incoming_video_stream._transport)
                 # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
                 if outgoing_video_stream != None and outgoing_video_stream._transport != None \
                     and incoming_video_stream != None and incoming_video_stream._transport != None:
