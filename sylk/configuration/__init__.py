@@ -84,7 +84,7 @@ class RTPConfig(ConfigSection):
     __section__ = 'RTP'
 
     audio_codecs = ConfigSetting(type=AudioCodecs, value=['opus', 'G722', 'speex', 'PCMA', 'PCMU'])
-    video_codecs = ConfigSetting(type=VideoCodecs, value=['H264', 'VP8'])
+    video_codecs = ConfigSetting(type=VideoCodecs, value=['VP8'])
     port_range = ConfigSetting(type=PortRange, value=PortRange('50000:50500'))
     srtp_encryption = ConfigSetting(type=SRTPEncryption, value='opportunistic')
     timeout = ConfigSetting(type=NonNegativeInteger, value=30)

@@ -446,6 +446,7 @@ class Session(object):
             invitation.send_response(488)
             return
         self.proposed_streams = []
+        log.info("session init_incoming stream_type remote_sdp.media %r", remote_sdp.media)
         for index, media_stream in enumerate(remote_sdp.media):
             log.info("session init_incoming stream_type index %r, media_stream %r", index, media_stream)
             if media_stream.port != 0:
