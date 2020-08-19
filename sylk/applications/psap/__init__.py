@@ -1987,6 +1987,7 @@ class PSAPApplication(SylkApplication):
         video_stream = video_streams[0] if video_streams else None
 
         log.info("check for video producers and consumers video_stream %r", video_stream)
+        log.info(dir(video_stream))
         log.info("check for video producers and consumers room_data.calltaker_video_stream %r",
                  room_data.calltaker_video_stream)
         if video_stream != None and room_data.calltaker_video_stream != None:
