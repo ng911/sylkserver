@@ -446,9 +446,13 @@ class Session(object):
             invitation.send_response(488)
             return
         self.proposed_streams = []
+        log.info("session init_incoming stream_type remote_sdp %r", remote_sdp)
         log.info("session init_incoming stream_type remote_sdp.media %r", remote_sdp.media)
+        account_preferred_video_codecs = getattr(self.account.rtp, 'video_codec_list')
+        log.info("account_preferred_video_codecs %r", account_preferred_video_codecs)
         for index, media_stream in enumerate(remote_sdp.media):
             log.info("session init_incoming stream_type index %r, media_stream %r", index, media_stream)
+
             if media_stream.port != 0:
                 for stream_type in MediaStreamRegistry:
                     log.info("session init_incoming stream_type in MediaStreamRegistry %r", stream_type)
@@ -458,7 +462,7 @@ class Session(object):
                         continue
                     except InvalidStreamError as e:
                         log.error("Invalid stream: {}, stream_type {}, index {}".format(e, stream_type, index))
-                        continue
+                        break
                     except Exception as e:
                         log.exception("Exception occurred while setting up stream from SDP: {}".format(e))
                         break
