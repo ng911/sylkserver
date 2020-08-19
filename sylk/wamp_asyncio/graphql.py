@@ -16,7 +16,7 @@ def get_node_id(mongoId, nodeSchemaName):
 
 
 async def publish_relay_node_new(document_json, psap_id, id_, node_schema):
-    log.info('inside publish_relay_node_changed')
+    #log.info('inside publish_relay_node_changed')
     node_id = get_node_id(id_, node_schema)
     psap_id = str(psap_id)
     topic = u'com.emergent911.node.new.%s' % node_schema
@@ -27,12 +27,12 @@ async def publish_relay_node_new(document_json, psap_id, id_, node_schema):
         'document_json' : document_json
     }
     #log.info('publish_relay_node_changed, topic %s, data %r', topic, json_publish_data)
-    log.info('publish_relay_node_changed, topic %s', topic)
+    #log.info('publish_relay_node_changed, topic %s', topic)
     await wamp_publish(topic, json_publish_data, exclude_me=False)
 
 
 async def publish_relay_node_changed(document_json, psap_id, id_, node_schema):
-    log.info('inside publish_relay_node_changed')
+    #log.info('inside publish_relay_node_changed')
     node_id = get_node_id(id_, node_schema)
     psap_id = str(psap_id)
     topic = u'com.emergent911.node.%s' % node_schema
@@ -43,7 +43,7 @@ async def publish_relay_node_changed(document_json, psap_id, id_, node_schema):
         'document_json' : document_json
     }
     #log.info('publish_relay_node_changed, topic %s, data %r', topic, json_publish_data)
-    log.info('publish_relay_node_changed, topic %s', topic)
+    #log.info('publish_relay_node_changed, topic %s', topic)
     await wamp_publish(topic, json_publish_data, exclude_me=False)
 
 

@@ -15,13 +15,13 @@ def post_save(sender, document, **kwargs):
         log.info("importing publish_relay_node_update from twisted")
         from ...wamp import publish_relay_node_update, publish_relay_node_add
     try:
-        log.info("inside graphql_node_notifications post_save ")
+        #log.info("inside graphql_node_notifications post_save ")
         #node_name = "%sNode" % document.__class__.__name__
         schema_name = document._get_collection_name()
-        log.info("inside graphql_node_notifications post_save %r, id %r", schema_name, document.id)
-        log.info("inside graphql_node_notifications kwargs %r, document.psap_id %r", kwargs, document.psap_id)
-        log.info("inside graphql_node_notifications psap_id %r, id %r, node_name %s", document.psap_id, document.id,
-                 schema_name)
+        #log.info("inside graphql_node_notifications post_save %r, id %r", schema_name, document.id)
+        #log.info("inside graphql_node_notifications kwargs %r, document.psap_id %r", kwargs, document.psap_id)
+        #log.info("inside graphql_node_notifications psap_id %r, id %r, node_name %s", document.psap_id, document.id,
+        #         schema_name)
         if 'created' in kwargs and kwargs['created']:
             log.info("call publish_relay_node_add")
             if USE_ASYNCIO:
