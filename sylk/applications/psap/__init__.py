@@ -1263,23 +1263,6 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
-            log.info("check for video producers and consumers room_data.calltaker_video_stream %r", room_data.calltaker_video_stream)
-            log.info("check for video transport %r", video_stream._transport)
-            # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
-            if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
-                and video_stream != None and video_stream._transport != None:
-                log.info("look at adding video producers to consumers")
-                calltaker_video_producer = room_data.calltaker_video_stream._transport.remote_video
-                calltaker_video_consumer = room_data.calltaker_video_stream._transport.local_video
-
-                caller_video_producer = video_stream._transport.remote_video
-                caller_video_consumer = video_stream._transport.local_video
-                if calltaker_video_producer != None and caller_video_consumer != None:
-                    log.info("Add producer to caller video")
-                    caller_video_consumer.producer = calltaker_video_producer
-                if calltaker_video_consumer != None and caller_video_producer != None:
-                    calltaker_video_consumer.producer = caller_video_producer
-                    log.info("Add producer to calltaker video")
 
 
     def remove_session_from_room(self, room_number, session):
@@ -1998,6 +1981,32 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(session.room_number)
         self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
+
+        incoming_session = room_data.incoming_session
+        video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
+        video_stream = video_streams[0] if video_streams else None
+
+        log.info("check for video producers and consumers video_stream %r", video_stream)
+        log.info("check for video producers and consumers room_data.calltaker_video_stream %r",
+                 room_data.calltaker_video_stream)
+        if video_stream != None and room_data.calltaker_video_stream != None:
+            log.info("check for video transport %r", video_stream._transport)
+            # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
+            if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
+                    and video_stream != None and video_stream._transport != None:
+                log.info("look at adding video producers to consumers")
+                calltaker_video_producer = room_data.calltaker_video_stream._transport.remote_video
+                calltaker_video_consumer = room_data.calltaker_video_stream._transport.local_video
+
+                caller_video_producer = video_stream._transport.remote_video
+                caller_video_consumer = video_stream._transport.local_video
+                if calltaker_video_producer != None and caller_video_consumer != None:
+                    log.info("Add producer to caller video")
+                    caller_video_consumer.producer = calltaker_video_producer
+                if calltaker_video_consumer != None and caller_video_producer != None:
+                    calltaker_video_consumer.producer = caller_video_producer
+                    log.info("Add producer to calltaker video")
+
         '''
         room_number = session.room_number
         room = self.get_room(room_number)
