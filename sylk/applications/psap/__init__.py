@@ -1135,26 +1135,29 @@ class PSAPApplication(SylkApplication):
             incoming_video_streams = [stream for stream in incoming_session.proposed_streams if stream.type == 'video']
             incoming_video_stream = incoming_video_streams[0] if incoming_video_streams else None
 
-            outgoing_video_streams = [stream for stream in session.streams if stream.type == 'video']
-            outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
+            if session.streams != None:
+                outgoing_video_streams = [stream for stream in session.streams if stream.type == 'video']
+                outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
 
-            log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
-                     outgoing_video_stream, incoming_video_stream)
-            # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
-            if outgoing_video_stream != None and outgoing_video_stream._transport != None \
-                and incoming_video_stream != None and incoming_video_stream._transport != None:
-                log.info("look at adding video producers to consumers")
-                calltaker_video_producer = outgoing_video_stream._transport.remote_video
-                calltaker_video_consumer = outgoing_video_stream._transport.local_video
+                log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
+                         outgoing_video_stream, incoming_video_stream)
+                # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
+                if outgoing_video_stream != None and outgoing_video_stream._transport != None \
+                    and incoming_video_stream != None and incoming_video_stream._transport != None:
+                    log.info("look at adding video producers to consumers")
+                    calltaker_video_producer = outgoing_video_stream._transport.remote_video
+                    calltaker_video_consumer = outgoing_video_stream._transport.local_video
 
-                caller_video_producer = incoming_video_stream._transport.remote_video
-                caller_video_consumer = incoming_video_stream._transport.local_video
-                if calltaker_video_producer != None and caller_video_consumer != None:
-                    log.info("Add producer to caller video")
-                    caller_video_consumer.producer = calltaker_video_producer
-                if calltaker_video_consumer != None and caller_video_producer != None:
-                    calltaker_video_consumer.producer = caller_video_producer
-                    log.info("Add producer to calltaker video")
+                    caller_video_producer = incoming_video_stream._transport.remote_video
+                    caller_video_consumer = incoming_video_stream._transport.local_video
+                    if calltaker_video_producer != None and caller_video_consumer != None:
+                        log.info("Add producer to caller video")
+                        caller_video_consumer.producer = calltaker_video_producer
+                    if calltaker_video_consumer != None and caller_video_producer != None:
+                        calltaker_video_consumer.producer = caller_video_producer
+                        log.info("Add producer to calltaker video")
+            else:
+                log.error("session.streams is None")
 
 
             if room_data.ringing_duration_timer is not None:
@@ -1256,6 +1259,7 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
+            '''
             log.info("check for video producers and consumers room_data.calltaker_video_stream %r", room_data.calltaker_video_stream)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
@@ -1272,6 +1276,7 @@ class PSAPApplication(SylkApplication):
                 if calltaker_video_consumer != None and caller_video_producer != None:
                     calltaker_video_consumer.producer = caller_video_producer
                     log.info("Add producer to calltaker video")
+            '''
 
 
     def remove_session_from_room(self, room_number, session):
