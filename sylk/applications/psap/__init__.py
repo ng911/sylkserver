@@ -1125,6 +1125,7 @@ class PSAPApplication(SylkApplication):
 
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
+        log.info('outgoing_session_did_start session streams %r, proposed_streams', session.streams, session.proposed_streams)
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
@@ -1255,7 +1256,7 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
-            log.info("check for video producers and consumers")
+            log.info("check for video producers and consumers room_data.calltaker_video_stream %r", room_data.calltaker_video_stream)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
                 and video_stream != None and video_stream._transport != None:
