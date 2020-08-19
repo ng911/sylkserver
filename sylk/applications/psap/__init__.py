@@ -1255,7 +1255,6 @@ class PSAPApplication(SylkApplication):
                 session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
-            '''
             log.info("check for video producers and consumers")
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if room_data.calltaker_video_stream != None and room_data.calltaker_video_stream._transport != None \
@@ -1272,7 +1271,7 @@ class PSAPApplication(SylkApplication):
                 if calltaker_video_consumer != None and caller_video_producer != None:
                     calltaker_video_consumer.producer = caller_video_producer
                     log.info("Add producer to calltaker video")
-            '''
+
 
     def remove_session_from_room(self, room_number, session):
         log.info('remove_session_from_room for session %r, room_number %r', session, room_number)
