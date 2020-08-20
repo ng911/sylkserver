@@ -1984,6 +1984,12 @@ class PSAPApplication(SylkApplication):
 
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
+
+        caller_local = None
+        caller_remote = None
+        calltaker_local = None
+        calltaker_remote = None
+
         log.info("")
         log.info("")
         log.info("=========== incoming_session video streams =============== ")
@@ -2007,6 +2013,8 @@ class PSAPApplication(SylkApplication):
             log.info("local_video.producer is %r ", local_video.producer)
             log.info("local_video.closed is %r ", local_video.closed)
             local_video.producer = None
+            caller_local = local_video
+            caller_remote = remote_video
         log.info("")
         log.info("")
         #video_stream = video_streams[0] if video_streams else None
@@ -2032,8 +2040,19 @@ class PSAPApplication(SylkApplication):
             log.info("local_video.producer is %r ", local_video.producer)
             log.info("local_video.closed is %r ", local_video.closed)
             local_video.producer = None
+            calltaker_local = local_video
+            calltaker_remote = remote_video
         log.info("")
         log.info("")
+        if  caller_local != None and \
+            caller_remote != None and \
+            calltaker_local != None and \
+            calltaker_remote != None:
+            log.info("do connect")
+            calltaker_local.producer = caller_remote
+            log.info("do connect next")
+            caller_local.producer = calltaker_remote
+            log.info("do connect done")
 
         '''
         log.info("check for video producers and consumers video_stream %r", video_stream)
