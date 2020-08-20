@@ -64,7 +64,7 @@ class SIPReferralDidFail(Exception):
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'calltaker_video_stream', 'call_type', 'has_tty', 'tty_text',
+    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams', 'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
                  'has_audio', 'has_video',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
@@ -87,7 +87,7 @@ class RoomData(object):
         self.has_video = False
         self.incident_id = None
         self.incident_details = None
-        self.calltaker_video_stream = None
+        self.calltaker_video_streams = None
 
     @property
     def incoming(self):
@@ -1137,8 +1137,8 @@ class PSAPApplication(SylkApplication):
 
             if session.streams != None:
                 outgoing_video_streams = [stream for stream in session.streams if stream.type == 'video']
-                outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
-                room_data.calltaker_video_stream = outgoing_video_stream
+                #outgoing_video_stream = outgoing_video_streams[0] if outgoing_video_streams else None
+                room_data.calltaker_video_streams = outgoing_video_streams
                 '''
                 log.info("check for video producers and consumers outgoing_video_stream %r, incoming_video_stream %r",
                          outgoing_video_stream, incoming_video_stream)
@@ -1984,20 +1984,51 @@ class PSAPApplication(SylkApplication):
 
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
-        video_stream = video_streams[0] if video_streams else None
-        calltaker_video_stream = room_data.calltaker_video_stream
+        log.info("=========== incoming_session video streams =============== ")
+        for video_stream in video_streams:
+            log.info("video_stream is %r ", video_stream)
+            log.info("video_stream props are %r ", dir(video_stream))
+            log.info("video_stream._trasnport is %r ", video_stream._trasnport)
+            log.info("video_stream._trasnport props are %r ", dir(video_stream._trasnport))
+            remote_video = video_stream._trasnport.remote_video
+            local_video = video_stream._trasnport.local_video
+            log.info("remote_video is %r ", remote_video)
+            log.info("remote_video props are  %r ", dir(remote_video))
+            log.info("local_video is %r ", local_video)
+            log.info("local_video props are  %r ", dir(local_video))
+        log.info("")
+        log.info("")
+        #video_stream = video_streams[0] if video_streams else None
+        calltaker_video_streams = room_data.calltaker_video_streams
+        log.info("=========== calltaker video streams =============== ")
+        for video_stream in calltaker_video_streams:
+            log.info("video_stream is %r ", video_stream)
+            log.info("video_stream props are %r ", dir(video_stream))
+            log.info("video_stream._trasnport is %r ", video_stream._trasnport)
+            log.info("video_stream._trasnport props are %r ", dir(video_stream._trasnport))
+            remote_video = video_stream._trasnport.remote_video
+            local_video = video_stream._trasnport.local_video
+            log.info("remote_video is %r ", remote_video)
+            log.info("remote_video props are  %r ", dir(remote_video))
+            log.info("local_video is %r ", local_video)
+            log.info("local_video props are  %r ", dir(local_video))
+        log.info("")
+        log.info("")
 
+        '''
         log.info("check for video producers and consumers video_stream %r", video_stream)
         log.info("video_stream codec %r", video_stream.codec)
         log.info("calltaker_video_stream codec %r", calltaker_video_stream.codec)
         log.info("check for video producers and consumers calltaker_video_stream %r",
                  calltaker_video_stream)
-        if video_stream != None and calltaker_video_stream != None:
+ '       if video_stream != None and calltaker_video_stream != None:
             log.info("check for video transport %r", video_stream._transport)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if calltaker_video_stream != None and calltaker_video_stream._transport != None \
                     and video_stream != None and video_stream._transport != None:
                 log.info("look at adding video producers to consumers")
+
+                log.info("=========== Calltaker video stream =============== ")
                 calltaker_video_producer = calltaker_video_stream._transport.remote_video
                 calltaker_video_consumer = calltaker_video_stream._transport.local_video
 
@@ -2021,6 +2052,7 @@ class PSAPApplication(SylkApplication):
                 #    calltaker_video_consumer.producer = caller_video_producer
                 #    log.info("Add producer to calltaker video")
 
+        '''
         '''
         room_number = session.room_number
         room = self.get_room(room_number)
