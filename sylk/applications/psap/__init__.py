@@ -2007,7 +2007,7 @@ class PSAPApplication(SylkApplication):
                     log.info("Add producer to caller video")
                     log.info("caller_video_consumer producer %r", caller_video_consumer.producer)
                     log.info("calltaker_video_producer consumers %r", calltaker_video_producer.consumers)
-                    log.info(dir(caller_video_consumer))
+                    log.info(dir(caller_video_consumer.producer))
                     log.info(dir(calltaker_video_producer))
                     #caller_video_consumer.producer = calltaker_video_producer
                 #if calltaker_video_consumer != None and caller_video_producer != None:
