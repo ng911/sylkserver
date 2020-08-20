@@ -1984,18 +1984,28 @@ class PSAPApplication(SylkApplication):
 
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
+        log.info("")
+        log.info("")
         log.info("=========== incoming_session video streams =============== ")
         for video_stream in video_streams:
             log.info("video_stream is %r ", video_stream)
             log.info("video_stream props are %r ", dir(video_stream))
+            log.info("video_stream.producer is %r ", video_stream.producer)
+            log.info("video_stream.producer props are %r ", dir(video_stream.producer))
+            log.info("video_stream.device is %r ", video_stream.device)
+            log.info("video_stream.device props are %r ", dir(video_stream.device))
             log.info("video_stream._transport is %r ", video_stream._transport)
             log.info("video_stream._transport props are %r ", dir(video_stream._transport))
             remote_video = video_stream._transport.remote_video
             local_video = video_stream._transport.local_video
             log.info("remote_video is %r ", remote_video)
             log.info("remote_video props are  %r ", dir(remote_video))
+            log.info("remote_video.consumers is %r ", remote_video.consumers)
+            log.info("remote_video.closed is %r ", remote_video.closed)
             log.info("local_video is %r ", local_video)
             log.info("local_video props are  %r ", dir(local_video))
+            log.info("local_video.consumers is %r ", local_video.consumers)
+            log.info("local_video.closed is %r ", local_video.closed)
         log.info("")
         log.info("")
         #video_stream = video_streams[0] if video_streams else None
@@ -2004,14 +2014,22 @@ class PSAPApplication(SylkApplication):
         for video_stream in calltaker_video_streams:
             log.info("video_stream is %r ", video_stream)
             log.info("video_stream props are %r ", dir(video_stream))
+            log.info("video_stream.producer is %r ", video_stream.producer)
+            log.info("video_stream.producer props are %r ", dir(video_stream.producer))
+            log.info("video_stream.device is %r ", video_stream.device)
+            log.info("video_stream.device props are %r ", dir(video_stream.device))
             log.info("video_stream._transport is %r ", video_stream._transport)
             log.info("video_stream._transport props are %r ", dir(video_stream._transport))
             remote_video = video_stream._transport.remote_video
             local_video = video_stream._transport.local_video
             log.info("remote_video is %r ", remote_video)
             log.info("remote_video props are  %r ", dir(remote_video))
+            log.info("remote_video.consumers is %r ", remote_video.consumers)
+            log.info("remote_video.closed is %r ", remote_video.closed)
             log.info("local_video is %r ", local_video)
             log.info("local_video props are  %r ", dir(local_video))
+            log.info("local_video.consumers is %r ", local_video.consumers)
+            log.info("local_video.closed is %r ", local_video.closed)
         log.info("")
         log.info("")
 
