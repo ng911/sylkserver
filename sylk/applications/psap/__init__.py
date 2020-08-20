@@ -1988,10 +1988,10 @@ class PSAPApplication(SylkApplication):
         for video_stream in video_streams:
             log.info("video_stream is %r ", video_stream)
             log.info("video_stream props are %r ", dir(video_stream))
-            log.info("video_stream._trasnport is %r ", video_stream._trasnport)
-            log.info("video_stream._trasnport props are %r ", dir(video_stream._trasnport))
-            remote_video = video_stream._trasnport.remote_video
-            local_video = video_stream._trasnport.local_video
+            log.info("video_stream._transport is %r ", video_stream._transport)
+            log.info("video_stream._transport props are %r ", dir(video_stream._transport))
+            remote_video = video_stream._transport.remote_video
+            local_video = video_stream._transport.local_video
             log.info("remote_video is %r ", remote_video)
             log.info("remote_video props are  %r ", dir(remote_video))
             log.info("local_video is %r ", local_video)
@@ -2004,10 +2004,10 @@ class PSAPApplication(SylkApplication):
         for video_stream in calltaker_video_streams:
             log.info("video_stream is %r ", video_stream)
             log.info("video_stream props are %r ", dir(video_stream))
-            log.info("video_stream._trasnport is %r ", video_stream._trasnport)
-            log.info("video_stream._trasnport props are %r ", dir(video_stream._trasnport))
-            remote_video = video_stream._trasnport.remote_video
-            local_video = video_stream._trasnport.local_video
+            log.info("video_stream._transport is %r ", video_stream._transport)
+            log.info("video_stream._transport props are %r ", dir(video_stream._transport))
+            remote_video = video_stream._transport.remote_video
+            local_video = video_stream._transport.local_video
             log.info("remote_video is %r ", remote_video)
             log.info("remote_video props are  %r ", dir(remote_video))
             log.info("local_video is %r ", local_video)
