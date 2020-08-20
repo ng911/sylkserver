@@ -2006,6 +2006,7 @@ class PSAPApplication(SylkApplication):
             log.info("local_video props are  %r ", dir(local_video))
             log.info("local_video.producer is %r ", local_video.producer)
             log.info("local_video.closed is %r ", local_video.closed)
+            local_video.producer = None
         log.info("")
         log.info("")
         #video_stream = video_streams[0] if video_streams else None
@@ -2030,6 +2031,7 @@ class PSAPApplication(SylkApplication):
             log.info("local_video props are  %r ", dir(local_video))
             log.info("local_video.producer is %r ", local_video.producer)
             log.info("local_video.closed is %r ", local_video.closed)
+            local_video.producer = None
         log.info("")
         log.info("")
 
