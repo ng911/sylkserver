@@ -19,6 +19,7 @@ from .admin_line import AdminLineNode, AdminLineGroupNode
 from .admin_line import CreteAdminLineGroupMutation, CreteAdminLineMutation
 from .admin_line import UpdateAdminLineGroupMutation, UpdateAdminLineMutation
 from .admin_line import DeleteAdminLineGroupMutation, DeleteAdminLineMutation
+from .admin_line import resolveAdminLineServers
 
 try:
     from sylk.applications import ApplicationLogger
@@ -38,6 +39,7 @@ class Query(graphene.ObjectType):
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
     all_admin_lines = OrderedMongoengineConnectionField(AdminLineNode)
     all_admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode)
+    admin_line_servers = graphene.Field(graphene.List(of_type=graphene.String), psap_id=graphene.String(required=True))
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
@@ -47,6 +49,8 @@ class Query(graphene.ObjectType):
     def resolve_active_call(parent, info, **args):
         return resolveActiveCall(parent, info, **args)
 
+    def resolve_admin_line_servers(parent, info, **args):
+        return resolveAdminLineServers(parent, info, **args)
 
 
 class Subscriptions(graphene.ObjectType):

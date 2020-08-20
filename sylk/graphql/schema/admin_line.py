@@ -1,3 +1,4 @@
+import traceback
 import graphene
 from graphene import Field, String
 from graphene.relay import Node
@@ -7,6 +8,12 @@ from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import AdminLine as AdminLineModel
 from ...db.schema import AdminLineGroup as AdminLineGroupModel
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
 
 
 class AdminLineNode(MongoengineObjectType):
@@ -26,6 +33,19 @@ class AdminLineGroupNode(MongoengineObjectType):
 
     def resolve_admin_lines(parent, info, **args):
         return AdminLineModel.objects(group_id = parent.group_id)
+
+
+def resolveAdminLineServers(parent, info, **args):
+    psap_id = args['psap_id']
+    # there should only be 1 value in rooms but there is some bug in the code, that is why the logic below
+    servers = []
+    for dbObj in AdminLineModel.objects(psap_id=psap_id):
+        if hasattr(dbObj, 'server') and dbObj.server != None and dbObj.server != '':
+            server = dbObj.server.strip()
+            if server != '' and server not in servers:
+                servers.append(server)
+    return servers
+
 
 from ..mutations import create_insert_mutation, create_update_mutation, create_delete_mutation, \
     EnhancedClientIDMutation
