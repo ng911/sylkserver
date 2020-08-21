@@ -2066,9 +2066,9 @@ class PSAPApplication(SylkApplication):
             log.info("do create calltaker_video_tee")
             calltaker_video_tee = VideoTeeProducer(calltaker_local, self.video_device._camera)
             room_data.calltaker_video_tee = calltaker_video_tee
-            calltaker_remote.producer = caller_video_tee
+            caller_video_tee.add_dest(calltaker_remote.producer)
             log.info("do connect next")
-            caller_remote.producer = calltaker_video_tee
+            calltaker_video_tee.add_dest(caller_remote.producer)
             log.info("do connect done")
 
         '''
