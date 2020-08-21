@@ -167,7 +167,7 @@ class SylkServer(SIPApplication):
         # start SylkServer components
         #self.web_server = WebServer()
         #self.web_server.start()
-        self.request_handler = IncomingRequestHandler()
+        self.request_handler = IncomingRequestHandler(self)
         self.request_handler.start()
         if ThorNodeConfig.enabled:
             from sylk.interfaces.sipthor import ConferenceNode

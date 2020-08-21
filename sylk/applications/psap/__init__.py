@@ -222,8 +222,8 @@ class PSAPApplication(SylkApplication):
         call_data.CallData()
         conf_data.ConferenceData()
         self._rooms = {}
-        settings = SIPSimpleSettings()
-        self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
+        #settings = SIPSimpleSettings()
+        #self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
 
 
     def init_observers(self):
@@ -235,8 +235,10 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().add_observer(self, name='HeldLookup')
 
 
-    def start(self):
+    def start(self, main_app):
         log.info(u'PSAPApplication start')
+        self.main_app = main_app
+        self.video_device = main_app.video_device
         self.init_observers()
         # todo - remove this , only for load testing
         #self.startWampTesting()

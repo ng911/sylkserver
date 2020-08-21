@@ -155,7 +155,8 @@ class IncomingRequestHandler(object):
     __metaclass__ = Singleton
     implements(IObserver)
 
-    def __init__(self):
+    def __init__(self, main_app):
+        self.main_app = main_app
         self.application_registry = ApplicationRegistry()
         self.application_registry.load_applications()
         log.info('Loaded applications: {}'.format(', '.join(sorted(app.__appname__ for app in self.application_registry))))
@@ -178,7 +179,7 @@ class IncomingRequestHandler(object):
     def start(self):
         for app in self.application_registry:
             try:
-                app.start()
+                app.start(self.main_app)
             except Exception as e:
                 log.exception('Failed to start {app.__appname__!r} application: {exception!s}'.format(app=app, exception=e))
         self.authorization_handler.start()
