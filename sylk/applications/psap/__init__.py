@@ -1992,6 +1992,7 @@ class PSAPApplication(SylkApplication):
         self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
 
+        '''
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
 
@@ -2070,7 +2071,7 @@ class PSAPApplication(SylkApplication):
             log.info("do connect next")
             calltaker_video_tee.add_dest(caller_remote.producer)
             log.info("do connect done")
-
+        '''
         '''
         log.info("check for video producers and consumers video_stream %r", video_stream)
         log.info("video_stream codec %r", video_stream.codec)
