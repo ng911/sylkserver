@@ -217,10 +217,14 @@ class PSAPApplication(SylkApplication):
     implements(IObserver)
 
     def __init__(self):
+        from sipsimple.video import VideoDevice
         log.info(u'PSAPApplication init')
         call_data.CallData()
         conf_data.ConferenceData()
         self._rooms = {}
+        settings = SIPSimpleSettings()
+        self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
+
 
     def init_observers(self):
         log.info("PSAPApplication init_observers")
@@ -2054,12 +2058,11 @@ class PSAPApplication(SylkApplication):
             calltaker_local != None and \
             calltaker_remote != None:
             log.info("do connect")
-            app = SylkApplication()
             log.info("do create caller_video_tee")
-            caller_video_tee = VideoTeeProducer(caller_remote, app.video_device)
+            caller_video_tee = VideoTeeProducer(caller_remote, self.video_device)
             room_data.caller_video_tee = caller_video_tee
             log.info("do create calltaker_video_tee")
-            calltaker_video_tee = VideoTeeProducer(caller_remote, app.video_device)
+            calltaker_video_tee = VideoTeeProducer(caller_remote, self.video_device)
             room_data.calltaker_video_tee = calltaker_video_tee
             calltaker_local.producer = caller_video_tee
             log.info("do connect next")
