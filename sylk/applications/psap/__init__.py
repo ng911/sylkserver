@@ -753,7 +753,7 @@ class PSAPApplication(SylkApplication):
                 # create an outbound session here for calls to calltakers
                 log.info('creating outgoing_call_initializer is_calltaker %r', forward_to_calltaker)
                 outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
-                                                                    has_audio=has_audio, has_video=has_video, has_chat=has_text,
+                                                                    has_video=has_video, has_chat=has_text,
                                                                     caller_identity=caller_identity, is_calltaker=forward_to_calltaker, add_failed_event=False)
                 ''' old code '''
                 '''
