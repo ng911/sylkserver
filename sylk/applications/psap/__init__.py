@@ -64,7 +64,9 @@ class SIPReferralDidFail(Exception):
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams', 'call_type', 'has_tty', 'tty_text',
+    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams',
+                 'calltaker_video_tee', 'caller_video_tee',
+                 'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
                  'has_audio', 'has_video',
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
@@ -88,6 +90,8 @@ class RoomData(object):
         self.incident_id = None
         self.incident_details = None
         self.calltaker_video_streams = None
+        self.caller_video_tee = None
+        self.calltaker_video_tee = None
 
     @property
     def incoming(self):
@@ -2044,14 +2048,22 @@ class PSAPApplication(SylkApplication):
             calltaker_remote = remote_video
         log.info("")
         log.info("")
+        from sipsimple.core import VideoTeeProducer
         if  caller_local != None and \
             caller_remote != None and \
             calltaker_local != None and \
             calltaker_remote != None:
             log.info("do connect")
-            calltaker_local.producer = caller_remote
+            app = SylkApplication()
+            log.info("do create caller_video_tee")
+            caller_video_tee = VideoTeeProducer(caller_remote, app.video_device)
+            room_data.caller_video_tee = caller_video_tee
+            log.info("do create calltaker_video_tee")
+            calltaker_video_tee = VideoTeeProducer(caller_remote, app.video_device)
+            room_data.calltaker_video_tee = calltaker_video_tee
+            calltaker_local.producer = caller_video_tee
             log.info("do connect next")
-            caller_local.producer = calltaker_remote
+            caller_local.producer = calltaker_video_tee
             log.info("do connect done")
 
         '''
