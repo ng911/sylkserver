@@ -65,7 +65,7 @@ class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
     __slots__ = ['room', 'incoming_session', 'calltaker_video_streams',
-                 'calltaker_video_tee', 'caller_video_tee',
+                 'calltaker_video_connector', 'caller_video_connector',
                  'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
                  'has_audio', 'has_video',
@@ -90,8 +90,8 @@ class RoomData(object):
         self.incident_id = None
         self.incident_details = None
         self.calltaker_video_streams = None
-        self.caller_video_tee = None
-        self.calltaker_video_tee = None
+        self.caller_video_connector = None
+        self.calltaker_video_connector = None
 
     @property
     def incoming(self):
@@ -2059,13 +2059,17 @@ class PSAPApplication(SylkApplication):
             calltaker_local != None and \
             calltaker_remote != None:
             log.info("do connect")
+
             log.info("do create caller_video_tee")
             caller_video_connector = VideoConnector(caller_remote, calltaker_local)
-            room_data.caller_video_tee = caller_video_connector
+            room_data.caller_video_connector = caller_video_connector
+            log.info("do start caller_video_connector")
             caller_video_connector.start()
-            log.info("do create calltaker_video_tee")
+
+            log.info("do create caller_video_connector")
             calltaker_video_connector = VideoConnector(calltaker_remote, caller_local)
-            room_data.calltaker_video_tee = calltaker_video_connector
+            room_data.calltaker_video_connector = calltaker_video_connector
+            log.info("do start calltaker_video_connector")
             calltaker_video_connector.start()
             log.info("do connect done")
 
