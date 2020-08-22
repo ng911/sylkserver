@@ -1991,7 +1991,6 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(session.room_number)
         self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
-        '''
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
 
@@ -2054,21 +2053,20 @@ class PSAPApplication(SylkApplication):
             calltaker_remote = remote_video
         log.info("")
         log.info("")
-        from sipsimple.core import VideoTeeProducer
+        from sipsimple.core import VideoConnector
         if  caller_local != None and \
             caller_remote != None and \
             calltaker_local != None and \
             calltaker_remote != None:
             log.info("do connect")
             log.info("do create caller_video_tee")
-            caller_video_tee = VideoTeeProducer(caller_remote, self.video_device._camera)
-            room_data.caller_video_tee = caller_video_tee
+            caller_video_connector = VideoConnector(caller_remote, calltaker_local)
+            room_data.caller_video_tee = caller_video_connector
+            caller_video_connector.start()
             log.info("do create calltaker_video_tee")
-            calltaker_video_tee = VideoTeeProducer(calltaker_remote, self.video_device._camera)
-            room_data.calltaker_video_tee = calltaker_video_tee
-            caller_video_tee.add_dest(caller_local.consumer_port)
-            log.info("do connect next")
-            calltaker_video_tee.add_dest(calltaker_local.consumer_port)
+            calltaker_video_connector = VideoConnector(calltaker_remote, caller_local)
+            room_data.calltaker_video_tee = calltaker_video_connector
+            calltaker_video_connector.start()
             log.info("do connect done")
         '''
         '''
