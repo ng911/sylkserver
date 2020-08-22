@@ -2061,8 +2061,8 @@ class PSAPApplication(SylkApplication):
             log.info("do connect")
 
             log.info("do create caller_video_connector")
-            log.info("do create caller_video_connector producer port %r", calltaker_local.producer_port)
-            log.info("do create caller_video_connector consumer port %r", caller_remote.consumer_port)
+            log.info("do create caller_video_connector producer port %r", caller_remote.producer_port)
+            log.info("do create caller_video_connector consumer port %r", calltaker_local.consumer_port)
             caller_video_connector = VideoConnector(caller_remote, calltaker_local)
             log.info("caller_video_connector created")
             '''
