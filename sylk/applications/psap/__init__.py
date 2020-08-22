@@ -2060,8 +2060,10 @@ class PSAPApplication(SylkApplication):
             calltaker_remote != None:
             log.info("do connect")
 
-            log.info("do create caller_video_tee")
+            log.info("do create caller_video_connector")
             caller_video_connector = VideoConnector(caller_remote, calltaker_local)
+            log.info("caller_video_connector created")
+            '''
             room_data.caller_video_connector = caller_video_connector
             log.info("do start caller_video_connector")
             caller_video_connector.start()
@@ -2071,6 +2073,7 @@ class PSAPApplication(SylkApplication):
             room_data.calltaker_video_connector = calltaker_video_connector
             log.info("do start calltaker_video_connector")
             calltaker_video_connector.start()
+            '''
             log.info("do connect done")
 
         '''
