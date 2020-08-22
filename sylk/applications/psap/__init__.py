@@ -2068,14 +2068,14 @@ class PSAPApplication(SylkApplication):
             room_data.calltaker_video_tee = calltaker_video_connector
             calltaker_video_connector.start()
             log.info("do connect done")
-        '''
+
         '''
         log.info("check for video producers and consumers video_stream %r", video_stream)
         log.info("video_stream codec %r", video_stream.codec)
         log.info("calltaker_video_stream codec %r", calltaker_video_stream.codec)
         log.info("check for video producers and consumers calltaker_video_stream %r",
                  calltaker_video_stream)
- '       if video_stream != None and calltaker_video_stream != None:
+        if video_stream != None and calltaker_video_stream != None:
             log.info("check for video transport %r", video_stream._transport)
             # todo - use a tee to send the incoming video to all participants in future, for now it only goes to one
             if calltaker_video_stream != None and calltaker_video_stream._transport != None \
