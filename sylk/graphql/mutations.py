@@ -8,6 +8,10 @@ log = logging.getLogger("emergent-ng911")
 def _get_graphene_fied_for_mongoengine(field):
     if isinstance(field, ObjectIdField) or isinstance(field, StringField):
         return graphene.String()
+    if isinstance(field, BooleanField):
+        return graphene.Boolean()
+    if isinstance(field, IntField):
+        return graphene.Int()
 
 
 def _create_input_class(model_class):
