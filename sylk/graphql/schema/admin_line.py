@@ -92,18 +92,15 @@ class DeleteAdminLineGroupMutation(EnhancedClientIDMutation):
         from ..mutations import get_id_from_node_id
         node_id = input.get('id')
         try:
-            log.info("node_id is %r", node_id)
             id_ = get_id_from_node_id(node_id)
-            log.info("id_ is %r", id_)
             groupObj = AdminLineGroupModel.objects.get(pk=id_)
             group_id = groupObj.group_id
-            log.info("group_id is %r", group_id)
             AdminLineModel.objects(group_id=group_id).delete()
             AdminLineGroupModel.objects(group_id=group_id).delete()
+            return DeleteAdminLineGroupMutation(success=True)
         except Exception as e:
             stacktrace = traceback.format_exc()
             log.error(stacktrace)
             log.error(str(e))
-            return False
-        return True
+            return DeleteAdminLineGroupMutation(success=False)
 
