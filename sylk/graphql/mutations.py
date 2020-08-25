@@ -6,6 +6,12 @@ from graphql_relay.node.node import from_global_id
 
 log = logging.getLogger("emergent-ng911")
 
+def get_id_from_node_id(node_id):
+    from base64 import b64decode
+    id_decoded = b64decode(node_id).decode('utf-8')
+    _, _id = id_decoded.split(':', 1)
+    return _id
+
 
 def _get_graphene_fied_for_mongoengine(field):
     if isinstance(field, ObjectIdField) or isinstance(field, StringField):
@@ -71,10 +77,8 @@ def _mutate_and_get_payload_for_delete(model_class):
         try:
             node_id = input.get("id")
             log.info("node_id is %r", node_id)
-            type_, id_ = from_global_id(node_id)
-            log.info("from_global_id called")
+            id_ = get_id_from_node_id(node_id)
             log.info("id_ is %r", id_)
-            log.info("type_ is %r", type_)
             try:
                 db_obj = model_class.objects.get(pk=id_).delete()
                 success = True
