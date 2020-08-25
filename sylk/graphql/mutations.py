@@ -70,7 +70,7 @@ def _mutate_and_get_payload_for_delete(model_class):
         node_id = input.get("id")
         log.info("node_id is %r", node_id)
         type_, id_ = from_global_id(node_id)
-        log.info("id_ is %r, type_ is", id_, type_)
+        log.info("id_ is %r, type_ is %r", id_, type_)
         try:
             db_obj = model_class.objects.get(pk=id_).delete()
             success = True
