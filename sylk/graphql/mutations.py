@@ -1,4 +1,5 @@
 import logging
+import traceback
 import graphene
 from mongoengine import *
 from graphql_relay.node.node import from_global_id
@@ -67,16 +68,25 @@ def _mutate_and_get_payload_for_insert(model_class, fields):
 
 def _mutate_and_get_payload_for_delete(model_class):
     def mutate_and_get_payload(cls, root, info, **input):
-        node_id = input.get("id")
-        log.info("node_id is %r", node_id)
-        type_, id_ = from_global_id(node_id)
-        log.info("id_ is %r, type_ is %r", id_, type_)
         try:
-            db_obj = model_class.objects.get(pk=id_).delete()
-            success = True
-        except DoesNotExist:
-            success = False
-        return cls(success = success)
+            node_id = input.get("id")
+            log.info("node_id is %r", node_id)
+            type_, id_ = from_global_id(node_id)
+            log.info("from_global_id called")
+            log.info("id_ is %r", id_)
+            log.info("type_ is %r", type_)
+            try:
+                db_obj = model_class.objects.get(pk=id_).delete()
+                success = True
+            except DoesNotExist:
+                success = False
+            return cls(success = success)
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error(stacktrace)
+            log.error(str(e))
+            return cls(success = False)
+
     return mutate_and_get_payload
 
 def create_insert_mutation(cls, model_class, node_class):
