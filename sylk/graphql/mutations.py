@@ -1,6 +1,7 @@
 import logging
 import graphene
 from mongoengine import *
+from graphql_relay.node.node import from_global_id
 
 log = logging.getLogger("emergent-ng911")
 
@@ -66,7 +67,8 @@ def _mutate_and_get_payload_for_insert(model_class, fields):
 
 def _mutate_and_get_payload_for_delete(model_class):
     def mutate_and_get_payload(cls, root, info, **input):
-        id_ = input.get("id")
+        node_id = input.get("id")
+        _, id_ = from_global_id(node_id)
         try:
             db_obj = model_class.objects.get(pk=id_).delete()
             success = True
