@@ -85,12 +85,17 @@ class DeleteAdminLineGroupMutation(EnhancedClientIDMutation):
     success = graphene.Boolean()
 
     class Input:
-        group_id = graphene.String(required=True)
+        id = graphene.ID(required=True)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        group_id = input.get('group_id')
+        from ..mutations import get_id_from_node_id
+        node_id = input.get('id')
         try:
+            log.info("node_id is %r", node_id)
+            id_ = get_id_from_node_id(node_id)
+            groupObj = AdminLineGroupModel.objects.get(pk=id_)
+            group_id = groupObj.group_id
             AdminLineModel.objects(group_id=group_id).delete()
             AdminLineGroupModel.objects(group_id=group_id).delete()
         except Exception as e:
