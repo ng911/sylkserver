@@ -4,6 +4,8 @@ class VideoConferenceSession(object):
     def __init__(self, video_mixer, video_stream):
         log.info("inside VideoConferenceSession __init__ %r", video_stream)
         self.video_mixer = video_mixer
+        log.info("remote %r", dir(video_stream._transport.remote_video))
+        log.info("local %r", dir(video_stream._transport.local_video))
         self.producer_port = video_stream._transport.remote_video.producer_port
         log.info("inside VideoConferenceSession self.consumer_port %r", self.consumer_port)
         self.consumer_port = video_stream._transport.local_video.consumer_port
