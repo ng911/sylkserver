@@ -3,7 +3,8 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
-from .user import UserNode, UpdateUserMutation, resolveUserGroups
+from .user import UserNode, UpdateUserMutation, resolveUserGroups, \
+                    CreateUserRoleMutation, UpdateUserRoleMutation, DeleteUserRoleMutation
 from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
@@ -112,6 +113,9 @@ class Mutations(graphene.ObjectType):
     update_adminline = UpdateAdminLineMutation.Field()
     delete_adminline_group = DeleteAdminLineGroupMutation.Field()
     delete_adminline = DeleteAdminLineMutation.Field()
+    create_user_role = CreateUserRoleMutation.Field()
+    update_user_role = UpdateUserRoleMutation.Field()
+    delete_user_role = DeleteUserRoleMutation.Field()
 
 
 graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])

@@ -13,12 +13,26 @@ log = logging.getLogger("emergent-ng911")
 class UserRole(Document):
     name = StringField()
     psap_id = ObjectIdField()
+    meta = {
+        'indexes': [
+            {
+                "fields" : ["psap_id", "name"],
+                "unique" : True
+            }
+        ]
+    }
 
 
 class UserGroup(Document):
     name = StringField()
     psap_id = ObjectIdField()
     permissions = ListField(field=ObjectIdField())
+    meta = {
+        'indexes': [
+            "psap_id",
+            "name"
+        ]
+    }
 
 
 class UserPermission(Document):

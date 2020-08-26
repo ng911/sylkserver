@@ -109,3 +109,42 @@ class UpdateUserMutation(EnhancedClientIDMutation):
         create_update_mutation(cls, UserModel, UserNode, 'user_id')
 
 
+class CreateUserRoleMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_insert_mutation(cls, UserRoleModel, UserRoleNode)
+
+
+class UpdateUserRoleMutation(EnhancedClientIDMutation):
+    @classmethod
+    def __custom__(cls):
+        create_update_mutation(cls, UserRoleModel, UserRoleNode)
+
+
+class DeleteUserRoleMutation(EnhancedClientIDMutation):
+    success = graphene.Field(graphene.Boolean)
+
+    class Input:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        from ..mutations import get_id_from_node_id
+        from bson import ObjectId
+        node_id = input.get('id')
+        psap_id = input.get('psap_id')
+        id_ = get_id_from_node_id(node_id)
+        roleObj = UserRoleModel.objects.get(pk=id_)
+        psap_id = roleObj.psap_id
+        for userObj in UserModel.objects(psap_id=psap_id):
+            bson_id_ = ObjectId(id_)
+            if  bson_id_ in userObj.roles:
+                userObj.roles.remove(bson_id_)
+                userObj.save()
+        roleObj.delete()
+        return DeleteUserRoleMutation(success=True)
+
+
+
+
+

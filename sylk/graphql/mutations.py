@@ -22,9 +22,12 @@ def _get_graphene_fied_for_mongoengine(field):
         return graphene.Int()
 
 
-def _create_input_class(model_class):
+def _create_input_class(model_class, add_id_field=False):
     input_class = type('Input', (object, ), {})
     fields = []
+    if add_id_field:
+        setattr(input_class, "id", graphene.ID)
+        fields.append("id")
     for field, val in model_class._fields.items():
         #print(f"field {field} type {val.__class__.__name__} required {val.required}")
         graphene_field = _get_graphene_fied_for_mongoengine(val)
@@ -37,10 +40,13 @@ def _create_input_class_delete():
     return type('Input', (object, ), {"id" : graphene.ID(required=True)})
 
 
-def _mutate_and_get_payload_for_update(model_class, fields, key):
+def _mutate_and_get_payload_for_update(model_class, fields, key="id"):
     def mutate_and_get_payload(cls, root, info, **input):
+        key_val = input.get(key)
+        if key=="id":
+            key_val = get_id_from_node_id(key_val)
         params = {
-            key: input.get(key)
+            key: key_val
         }
         db_obj = model_class.objects.get(**params)
         for field in fields:
@@ -102,8 +108,8 @@ def create_insert_mutation(cls, model_class, node_class):
     setattr(cls, "mutate_and_get_payload", classmethod(_create_mutate_method))
     return cls
 
-def create_update_mutation(cls, model_class, node_class, key):
-    input_class, fields = _create_input_class(model_class)
+def create_update_mutation(cls, model_class, node_class, key="id"):
+    input_class, fields = _create_input_class(model_class, add_id_field=True)
     prop_name = model_class._get_collection_name()
     setattr(cls, "Input", input_class)
     setattr(cls, prop_name, graphene.Field(node_class))
