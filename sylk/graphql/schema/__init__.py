@@ -54,7 +54,7 @@ class Query(graphene.ObjectType):
     def resolve_admin_line_servers(parent, info, **args):
         return resolveAdminLineServers(parent, info, **args)
 
-    def resolve_user_groups(parent, info, **args):
+    def resolve_psap_user_groups(parent, info, **args):
         return resolveUserGroups(parent, info, **args)
 
 

@@ -38,7 +38,7 @@ def resolveUserGroups(parent, info, **args):
         if group not in groups:
             groups.append(group)
     params = {
-        "psap_id" : parent.psap_id
+        "psap_id" : args["psap_id"]
     }
     for dbObj in UserGroupModel.objects(**params):
         group = dbObj.name
