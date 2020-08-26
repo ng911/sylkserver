@@ -13,6 +13,7 @@ import bson
 
 from sipsimple.threading.green import run_in_green_thread
 from sylk.applications import SylkApplication, ApplicationLogger
+from sipsimple.application import SIPApplication
 from sipsimple.streams import MediaStreamRegistry
 from sipsimple.streams.msrp.chat import ChatStream
 from sipsimple.core import Referral, sip_status_messages
@@ -223,7 +224,7 @@ class PSAPApplication(SylkApplication):
         conf_data.ConferenceData()
         self._rooms = {}
 
-        self.video_conf = VideoConference(self.video_mixer)
+        self.video_conf = VideoConference(SIPApplication.video_mixer)
         #settings = SIPSimpleSettings()
         #self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
 
