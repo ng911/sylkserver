@@ -16,7 +16,7 @@ from .report import CallReport, AbandonedCallReport, AbandonedCallReportDetails,
 from .routing import VoicePrompt, IVR, IncomingLink, OutgoingLink, DialPlan, CallTransferLine
 from .speed_dial import SpeedDialGroup, SpeedDial
 from .texting import ConferenceMessage, Greeting
-from .user import Role, UserGroup, User, CalltakerStation, CalltakerProfile, CalltakerActivity
+from .user import UserRole, UserPermission, UserGroup, User, CalltakerStation, CalltakerProfile, CalltakerActivity
 from .admin_line import AdminLineGroup, AdminLine
 
 log = logging.getLogger("emergent-ng911")
@@ -56,7 +56,8 @@ __all__ = [
     'VoicePrompt', 'IVR', 'IncomingLink', 'OutgoingLink', 'DialPlan', 'CallTransferLine',
     'SpeedDialGroup', 'SpeedDial',
     'ConferenceMessage', 'Greeting',
-    'Role', 'UserGroup', 'User', 'CalltakerStation', 'CalltakerProfile', 'CalltakerActivity',
+    'UserRole', 'UserGroup', 'User', 'UserPermission',
+    'CalltakerStation', 'CalltakerProfile', 'CalltakerActivity',
     'AdminLineGroup', 'AdminLine'
 ]
 

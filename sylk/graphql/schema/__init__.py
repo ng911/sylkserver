@@ -3,14 +3,14 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
-from .user import UserNode, UpdateUserMutation
+from .user import UserNode, UpdateUserMutation, resolveUserGroups
 from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
 from ..decorators import subsribe_for_node, subsribe_for_connection
 from ...db.schema import User as UserModel
-from .user import PsapUsersNode
+from .user import PsapUsersNode, UserPermissionNode, UserRoleNode, UserGroupNode
 from .calls import PsapConferenceNode
 from ...db.schema import Conference as ConferenceModel
 from .message import MessageNode, PsapMessageNode
@@ -33,6 +33,8 @@ class Query(graphene.ObjectType):
     node = Node.Field()
     all_messages = OrderedMongoengineConnectionField(MessageNode)
     all_users = OrderedMongoengineConnectionField(UserNode)
+    psap_user_roles = OrderedMongoengineConnectionField(UserRoleNode)
+    psap_user_groups = graphene.Field(graphene.List(of_type=graphene.String), psap_id=graphene.String(required=True))
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
     all_queues = OrderedMongoengineConnectionField(QueueNode)
     all_speed_dials = OrderedMongoengineConnectionField(SpeedDialNode)
@@ -51,6 +53,9 @@ class Query(graphene.ObjectType):
 
     def resolve_admin_line_servers(parent, info, **args):
         return resolveAdminLineServers(parent, info, **args)
+
+    def resolve_user_groups(parent, info, **args):
+        return resolveUserGroups(parent, info, **args)
 
 
 class Subscriptions(graphene.ObjectType):

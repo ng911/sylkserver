@@ -6,11 +6,51 @@ from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 from ..fields import EnhancedConnection
 from ..utiils import update_params_with_args
 from ...db.schema import User as UserModel
+from ...db.schema import UserGroup as UserGroupModel
+from ...db.schema import UserRole as UserRoleModel
+from ...db.schema import UserPermission as UserPermissionModel
 from ...db.schema import CalltakerProfile as CalltakerProfileModel
 from ...db.schema import Queue as QueueModel
 from ...db.schema import QueueMember as QueueMemberModel
 
 log = logging.getLogger("emergent-ng911")
+
+
+class UserPermissionNode(MongoengineObjectType):
+    class Meta:
+        model = UserPermissionModel
+        interfaces = (Node,)
+
+
+class UserGroupNode(MongoengineObjectType):
+    class Meta:
+        model = UserGroupModel
+        interfaces = (Node,)
+
+
+def resolveUserGroups(parent, info, **args):
+    groups = []
+    params = {
+        "psap_id__exists" : False
+    }
+    for dbObj in UserGroupModel.objects(**params):
+        group = dbObj.name
+        if group not in groups:
+            groups.append(group)
+    params = {
+        "psap_id" : parent.psap_id
+    }
+    for dbObj in UserGroupModel.objects(**params):
+        group = dbObj.name
+        if group not in groups:
+            groups.append(group)
+    return groups
+
+
+class UserRoleNode(MongoengineObjectType):
+    class Meta:
+        model = UserRoleModel
+        interfaces = (Node,)
 
 
 class UserProfileNode(MongoengineObjectType):

@@ -10,15 +10,21 @@ from .core import graphql_node_notifications
 log = logging.getLogger("emergent-ng911")
 
 
-class Role(Document):
-    role_id = ObjectIdField(required=True, unique=True)
+class UserRole(Document):
     name = StringField()
     psap_id = ObjectIdField()
+
 
 class UserGroup(Document):
     name = StringField()
     psap_id = ObjectIdField()
-    roles = ListField(ReferenceField(Role))
+    permissions = ListField(field=ObjectIdField())
+
+
+class UserPermission(Document):
+    name = StringField()
+    psap_id = ObjectIdField()
+
 
 @graphql_node_notifications
 class User(Document):
@@ -34,13 +40,15 @@ class User(Document):
     is_available = BooleanField(default=False)
     extension = StringField()
     station_id = StringField(required=False)
-    roles=ListField(field=StringField(choices=('admin', 'calltaker', 'supervisor')), default=['calltaker'])
+    group_id = ObjectIdField()
+    roles=ListField(field=ObjectIdField())
     layout = DictField(required=False)
     meta = {
         'indexes': [
             'user_id',
             'username',
-            'psap_id'
+            'psap_id',
+            'group_id'
         ]
     }
 
@@ -87,6 +95,7 @@ class User(Document):
         log.info("user.password_hash is %r", user.password_hash)
         user.save()
         return  user
+
 
 @graphql_node_notifications
 class CalltakerStation(Document):
