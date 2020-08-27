@@ -224,7 +224,7 @@ class PSAPApplication(SylkApplication):
         conf_data.ConferenceData()
         self._rooms = {}
 
-        self.video_conf = VideoConference(SIPApplication.video_mixer)
+        #self.video_conf = VideoConference(SIPApplication.video_mixer)
         #settings = SIPSimpleSettings()
         #self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
 
@@ -2082,9 +2082,9 @@ class PSAPApplication(SylkApplication):
             log.info("do connect done")
         video_stream = video_streams[0] if video_streams else None
         calltaker_video_stream = calltaker_video_streams[0] if calltaker_video_streams else None
-        if video_stream != None and calltaker_video_stream != None:
-            self.video_conf.add_to_room(session.room_number, calltaker_video_stream)
-            self.video_conf.add_to_room(session.room_number, video_stream)
+        #if video_stream != None and calltaker_video_stream != None:
+        #    self.video_conf.add_to_room(session.room_number, calltaker_video_stream)
+        #    self.video_conf.add_to_room(session.room_number, video_stream)
         '''
         log.info("check for video producers and consumers video_stream %r", video_stream)
         log.info("video_stream codec %r", video_stream.codec)
