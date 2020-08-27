@@ -143,7 +143,7 @@ class SylkServer(SIPApplication):
         self.voice_audio_device = AudioDevice(voice_mixer)
         self.voice_audio_bridge = RootAudioBridge(voice_mixer)
         self.voice_audio_bridge.add(self.voice_audio_device)
-        self.video_mixer = VideoMixer()
+        #self.video_mixer = VideoMixer()
 
         # initialize video objects
         self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
