@@ -15,6 +15,7 @@ from sipsimple.application import SIPApplication
 from sipsimple.audio import AudioDevice, RootAudioBridge
 from sipsimple.configuration.settings import SIPSimpleSettings
 from sipsimple.core import AudioMixer
+from sipsimple.core import VideoMixer
 from sipsimple.lookup import DNSManager
 from sipsimple.storage import MemoryStorage
 from sipsimple.threading import ThreadManager
@@ -142,6 +143,7 @@ class SylkServer(SIPApplication):
         self.voice_audio_device = AudioDevice(voice_mixer)
         self.voice_audio_bridge = RootAudioBridge(voice_mixer)
         self.voice_audio_bridge.add(self.voice_audio_device)
+        self.video_mixer = VideoMixer()
 
         # initialize video objects
         self.video_device = VideoDevice(u'Colorbar generator', settings.video.resolution, settings.video.framerate)
