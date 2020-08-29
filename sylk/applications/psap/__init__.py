@@ -2079,10 +2079,10 @@ class PSAPApplication(SylkApplication):
             log.info("do start calltaker_video_connector")
             calltaker_video_connector.start()
             '''
-            calltaker_local.producer = caller_remote
-            log.info("do connect 1")
             caller_local.producer = calltaker_remote
             log.info("do connect done")
+            calltaker_local.producer = caller_remote
+            log.info("do connect 1")
         video_stream = video_streams[0] if video_streams else None
         calltaker_video_stream = calltaker_video_streams[0] if calltaker_video_streams else None
         #if video_stream != None and calltaker_video_stream != None:
