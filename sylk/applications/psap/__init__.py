@@ -2153,7 +2153,7 @@ class PSAPApplication(SylkApplication):
 
         if  caller_local != None:
             log.info("do disconnect 1")
-            caller_local.producer = None
+            #caller_local.producer = None
             log.info("do disconnect1 done")
         if calltaker_local != None:
             log.info("do disconnect 2")
