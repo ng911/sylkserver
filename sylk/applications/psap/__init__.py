@@ -534,7 +534,10 @@ class PSAPApplication(SylkApplication):
             if audio_streams:
                 has_audio = True
             if video_streams:
+                from sipsimple.core import VideoMixer
                 has_video = True
+                session.video_mixer = VideoMixer()
+
             session.send_ring_indication()
             send_call_update_notification(self, session, 'ringing')
 
@@ -2079,6 +2082,11 @@ class PSAPApplication(SylkApplication):
             log.info("do start calltaker_video_connector")
             calltaker_video_connector.start()
             '''
+            video_mixer = incoming_session.video_mixer
+            caller_local.video_mixer = video_mixer
+            calltaker_local.video_mixer = video_mixer
+            calltaker_remote.video_mixer = video_mixer
+            caller_remote.video_mixer = video_mixer
             caller_local.producer = calltaker_remote
             log.info("do connect done")
             calltaker_local.producer = caller_remote
