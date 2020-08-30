@@ -2142,6 +2142,26 @@ class PSAPApplication(SylkApplication):
         notification.center.remove_observer(self, sender=session)
 
         room_data = self.get_room_data(session.room_number)
+
+        incoming_session = room_data.incoming_session
+
+        video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
+        caller_local = video_streams[0] if video_streams else None
+
+        calltaker_video_streams = room_data.calltaker_video_streams
+        calltaker_local = calltaker_video_streams[0] if calltaker_video_streams else None
+
+        if  caller_local != None:
+            log.info("do disconnect 1")
+            caller_local.producer = None
+            log.info("do disconnect1 done")
+        if calltaker_local != None:
+            log.info("do disconnect 2")
+            calltaker_local.producer = None
+            log.info("do disconnect 2 done")
+
+
+
         self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
