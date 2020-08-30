@@ -4,8 +4,8 @@ import os
 import signal
 import sys
 import resource
-import faulthandler
-faulthandler.enable()
+#import faulthandler
+#faulthandler.enable()
 
 from application import log
 from application.process import process, ProcessError
