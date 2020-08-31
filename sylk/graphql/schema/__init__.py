@@ -4,14 +4,17 @@ from graphene_mongo import MongoengineConnectionField
 
 from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
 from .user import UserNode, UpdateUserMutation, resolveUserGroups, \
-                    CreateUserRoleMutation, UpdateUserRoleMutation, DeleteUserRoleMutation
+                CreateRoleMutation, UpdateRoleMutation, DeleteRoleMutation, \
+                CreateSkillsetMutation, UpdateSkillsetMutation, DeleteSkillsetMutation, \
+                UpdateUserRolesMutation, UpdateUserSkillsetsMutation
+
 from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
 from ..decorators import subsribe_for_node, subsribe_for_connection
 from ...db.schema import User as UserModel
-from .user import PsapUsersNode, UserPermissionNode, UserRoleNode, UserGroupNode
+from .user import PsapUsersNode, UserPermissionNode, UserGroupNode, RoleNode, SkillsetNode
 from .calls import PsapConferenceNode
 from ...db.schema import Conference as ConferenceModel
 from .message import MessageNode, PsapMessageNode
@@ -34,7 +37,8 @@ class Query(graphene.ObjectType):
     node = Node.Field()
     all_messages = OrderedMongoengineConnectionField(MessageNode)
     all_users = OrderedMongoengineConnectionField(UserNode)
-    psap_user_roles = OrderedMongoengineConnectionField(UserRoleNode)
+    psap_user_roles = OrderedMongoengineConnectionField(RoleNode)
+    psap_skillsets = OrderedMongoengineConnectionField(SkillsetNode)
     psap_user_groups = graphene.Field(graphene.List(of_type=graphene.String), psap_id=graphene.String(required=True))
     all_psaps = OrderedMongoengineConnectionField(PsapNode)
     all_queues = OrderedMongoengineConnectionField(QueueNode)
@@ -113,9 +117,14 @@ class Mutations(graphene.ObjectType):
     update_adminline = UpdateAdminLineMutation.Field()
     delete_adminline_group = DeleteAdminLineGroupMutation.Field()
     delete_adminline = DeleteAdminLineMutation.Field()
-    create_user_role = CreateUserRoleMutation.Field()
-    update_user_role = UpdateUserRoleMutation.Field()
-    delete_user_role = DeleteUserRoleMutation.Field()
+    update_user_roles = UpdateUserRolesMutation.Field()
+    update_user_skillsets = UpdateUserSkillsetsMutation.Field()
+    create_role = CreateRoleMutation.Field()
+    update_role = UpdateRoleMutation.Field()
+    delete_role = DeleteRoleMutation.Field()
+    create_skillset = CreateSkillsetMutation.Field()
+    update_skillset = UpdateSkillsetMutation.Field()
+    delete_skillset = DeleteSkillsetMutation.Field()
 
 
 graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])

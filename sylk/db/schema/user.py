@@ -10,7 +10,7 @@ from .core import graphql_node_notifications
 log = logging.getLogger("emergent-ng911")
 
 
-class UserRole(Document):
+class Role(Document):
     name = StringField()
     psap_id = ObjectIdField()
     meta = {
@@ -29,15 +29,53 @@ class UserGroup(Document):
     permissions = ListField(field=ObjectIdField())
     meta = {
         'indexes': [
-            "psap_id",
-            "name"
+            {
+                "fields" : ["psap_id", "name"],
+                "unique" : True
+            }
+        ]
+    }
+
+
+class Skillset(Document):
+    name = StringField(unique=True)
+    psap_id = ObjectIdField()
+    meta = {
+        'indexes': [
+            {
+                "fields" : ["psap_id", "name"],
+                "unique" : True
+            }
         ]
     }
 
 
 class UserPermission(Document):
-    name = StringField()
+    name = StringField(unique=True)
     psap_id = ObjectIdField()
+
+    @classmethod
+    def create_permissions(cls):
+        permissions = ["Answer 911 calls", "Monitor 911 Calls", "Barge In", \
+                       "Admin Lines", \
+                       "Create PSAPs", "PSAP Admin", \
+                       "Create Users", "PSAP Routing", \
+                       "Access Reports"
+                       ]
+        for permission in permissions:
+            try:
+                userPermission = UserPermission.objects.get(name=permission)
+            except DoesNotExist:
+                userPermission = UserPermission()
+                userPermission.name = permission
+                userPermission.save()
+
+    meta = {
+        'indexes': [
+            "psap_id",
+            "name"
+        ]
+    }
 
 
 @graphql_node_notifications
@@ -56,6 +94,7 @@ class User(Document):
     station_id = StringField(required=False)
     group_id = ObjectIdField()
     roles=ListField(field=ObjectIdField())
+    skillsets=ListField(field=ObjectIdField())
     layout = DictField(required=False)
     meta = {
         'indexes': [

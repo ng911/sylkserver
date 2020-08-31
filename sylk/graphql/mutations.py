@@ -20,6 +20,10 @@ def _get_graphene_fied_for_mongoengine(field):
         return graphene.Boolean()
     if isinstance(field, IntField):
         return graphene.Int()
+    # we only support string/objectid list fields for now
+    if isinstance(field, ListField):
+        return graphene.List(of_type=graphene.String)
+    return None
 
 
 def _create_input_class(model_class, add_id_field=False):
