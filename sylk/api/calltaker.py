@@ -27,10 +27,11 @@ Note - for now we ignore the psap_id
 @calltaker.route('/all/<psap_id>', methods=['GET'])
 @check_exceptions
 def all(psap_id):
+    log.info("inside calltaker all")
     users = []
     for user in User.objects(psap_id=psap_id, is_active=True):
         users.append(
-            get_json_from_db_obj(user)
+            get_json_from_db_obj(user, ignore_fields=["roles", "skillsets"])
         )
     return {
         'users' : users
