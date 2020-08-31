@@ -44,7 +44,7 @@ def online(psap_id):
     users = []
     for user in User.objects(psap_id=psap_id, is_active=True, status__in=['available', 'busy']):
         users.append(
-            get_json_from_db_obj(user)
+            get_json_from_db_obj(user, ignore_fields=["roles", "skillsets"])
         )
     return {
         'users' : users
@@ -58,7 +58,7 @@ def get(user_id):
     status = user_obj.status
     if (status is None) or (status == ''):
         status = 'offline'
-    response = get_json_from_db_obj(user_obj)
+    response = get_json_from_db_obj(user_obj, ignore_fields=["roles", "skillsets"])
     return response
 
 
