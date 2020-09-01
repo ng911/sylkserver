@@ -2134,8 +2134,10 @@ class PSAPApplication(SylkApplication):
         room.add_session(session)
         '''
 
+    def _NH_SIPSessionWillEnd(self, notification):
+        log.info('PSAP got _NH_SIPSessionWillEnd')
 
-    @run_in_green_thread
+    #@run_in_green_thread
     def _NH_SIPSessionDidEnd(self, notification):
         log.info('PSAP got _NH_SIPSessionDidEnd')
         # We could get this notifiction even if we didn't get SIPSessionDidStart
@@ -2154,14 +2156,12 @@ class PSAPApplication(SylkApplication):
 
         if  caller_local != None:
             log.info("do disconnect 1")
-            #caller_local.producer = None
+            caller_local.producer = None
             log.info("do disconnect1 done")
         if calltaker_local != None:
             log.info("do disconnect 2")
-            #calltaker_local.producer = None
+            calltaker_local.producer = None
             log.info("do disconnect 2 done")
-
-
 
         self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
