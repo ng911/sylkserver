@@ -1,6 +1,7 @@
 
 import re
 import traceback
+import threading
 import psutil
 import time
 from application.notification import IObserver, NotificationCenter, NotificationData
@@ -1991,6 +1992,9 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
+        thread_id = threading.get_ident()
+        log.info("thred id is %r", thread_id)
+
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
         self.add_session_to_room(session.room_number, session)
@@ -2136,6 +2140,8 @@ class PSAPApplication(SylkApplication):
 
     def _NH_SIPSessionWillEnd(self, notification):
         log.info('PSAP got _NH_SIPSessionWillEnd')
+        thread_id = threading.get_ident()
+        log.info("thred id is %r", thread_id)
         session = notification.sender
         room_data = self.get_room_data(session.room_number)
         incoming_session = room_data.incoming_session
