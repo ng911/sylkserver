@@ -1992,7 +1992,7 @@ class PSAPApplication(SylkApplication):
     def _NH_SIPSessionDidStart(self, notification):
         session = notification.sender
         log.info("PSAP _NH_SIPSessionDidStart %r, state %s", session, session.state)
-        thread_id = threading.get_ident()
+        thread_id = threading.current_thread().get_ident()
         log.info("thred id is %r", thread_id)
 
         # for msrp chat we do not do this
@@ -2140,7 +2140,7 @@ class PSAPApplication(SylkApplication):
 
     def _NH_SIPSessionWillEnd(self, notification):
         log.info('PSAP got _NH_SIPSessionWillEnd')
-        thread_id = threading.get_ident()
+        thread_id = threading.current_thread().get_ident()
         log.info("thred id is %r", thread_id)
         session = notification.sender
         room_data = self.get_room_data(session.room_number)
