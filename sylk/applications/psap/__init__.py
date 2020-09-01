@@ -2136,16 +2136,8 @@ class PSAPApplication(SylkApplication):
 
     def _NH_SIPSessionWillEnd(self, notification):
         log.info('PSAP got _NH_SIPSessionWillEnd')
-
-    #@run_in_green_thread
-    def _NH_SIPSessionDidEnd(self, notification):
-        log.info('PSAP got _NH_SIPSessionDidEnd')
-        # We could get this notifiction even if we didn't get SIPSessionDidStart
         session = notification.sender
-        notification.center.remove_observer(self, sender=session)
-
         room_data = self.get_room_data(session.room_number)
-
         incoming_session = room_data.incoming_session
 
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
@@ -2162,6 +2154,17 @@ class PSAPApplication(SylkApplication):
             log.info("do disconnect 2")
             calltaker_local.producer = None
             log.info("do disconnect 2 done")
+
+    @run_in_green_thread
+    def _NH_SIPSessionDidEnd(self, notification):
+        log.info('PSAP got _NH_SIPSessionDidEnd')
+        # We could get this notifiction even if we didn't get SIPSessionDidStart
+        session = notification.sender
+        notification.center.remove_observer(self, sender=session)
+
+        room_data = self.get_room_data(session.room_number)
+
+        incoming_session = room_data.incoming_session
 
         self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
