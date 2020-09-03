@@ -2062,13 +2062,10 @@ class PSAPApplication(SylkApplication):
             calltaker_remote = remote_video
         log.info("")
         log.info("")
-        from sipsimple.core import VideoConnector
+
         if  caller_local != None and \
-            caller_remote != None and \
-            calltaker_local != None and \
             calltaker_remote != None:
             log.info("do connect")
-
             log.info("do create caller_video_connector")
             #log.info("do create caller_video_connector producer port %r", caller_remote.producer_port)
             #log.info("do create caller_video_connector consumer port %r", calltaker_local.consumer_port)
@@ -2087,6 +2084,9 @@ class PSAPApplication(SylkApplication):
             '''
             caller_local.producer = calltaker_remote
             log.info("do connect done")
+        if caller_remote != None and \
+            calltaker_local != None:
+            log.info("do connect")
             calltaker_local.producer = caller_remote
             log.info("do connect 1")
         video_stream = video_streams[0] if video_streams else None
