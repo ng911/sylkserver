@@ -448,7 +448,7 @@ class Session(object):
         self.proposed_streams = []
         #log.info("session init_incoming stream_type remote_sdp %r", remote_sdp)
         log.info("session init_incoming stream_type remote_sdp.media %r", remote_sdp.media)
-        self.account.rtp.video_codec_list = ['VP8']
+        self.account.rtp.video_codec_list = ['H264']
         account_preferred_video_codecs = getattr(self.account.rtp, 'video_codec_list')
         log.info("account_preferred_video_codecs %r", account_preferred_video_codecs)
         for index, media_stream in enumerate(remote_sdp.media):
