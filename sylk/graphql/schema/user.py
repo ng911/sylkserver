@@ -104,7 +104,7 @@ class UserNode(MongoengineObjectType):
     def resolve_skillset_nodes(parent, info, **args):
         return SkillsetModel.objects(id__in = parent.skillsets)
 
-    def resolve_role__nodes(parent, info, **args):
+    def resolve_role_nodes(parent, info, **args):
         return RoleModel.objects(id__in = parent.roles)
 
 
