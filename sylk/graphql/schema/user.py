@@ -85,8 +85,8 @@ class UserNode(MongoengineObjectType):
     from .queue import QueueNode
     queues = MongoengineConnectionField(QueueNode)
     group = MongoengineConnectionField(UserGroupNode)
-    #skillsets = MongoengineConnectionField(SkillsetNode)
-    #roles = MongoengineConnectionField(RoleNode)
+    skillset_nodes = MongoengineConnectionField(SkillsetNode)
+    role_nodes = MongoengineConnectionField(RoleNode)
     profile = MongoengineObjectType()
 
     def resolve_queues(parent, info, **args):
@@ -101,11 +101,11 @@ class UserNode(MongoengineObjectType):
         }
         return CalltakerProfileModel.objects.get(**params)
 
-    #def resolve_skillsets(parent, info, **args):
-    #    return SkillsetModel.objects(id__in = parent.skillsets)
+    def resolve_skillset_nodes(parent, info, **args):
+        return SkillsetModel.objects(id__in = parent.skillsets)
 
-    #def resolve_roles(parent, info, **args):
-    #    return RoleModel.objects(id__in = parent.roles)
+    def resolve_role__nodes(parent, info, **args):
+        return RoleModel.objects(id__in = parent.roles)
 
 
 class PsapUsersNode(graphene.ObjectType):
