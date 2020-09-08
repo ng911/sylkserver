@@ -2656,7 +2656,7 @@ class OutgoingCallInitializer(object):
         account = DefaultAccount()
         psap_application = PSAPApplication()
         try:
-            room_data = psap_application.get_room(self.room_number)
+            room_data = psap_application.get_room_data(self.room_number)
         except RoomNotFoundError:
             log.info('_NH_DNSLookupDidSucceed RoomNotFoundError for room %r', self.room_number)
             log.info('_NH_DNSLookupDidSucceed Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
