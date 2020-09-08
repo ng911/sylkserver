@@ -828,7 +828,7 @@ class Session(object):
                 pass
             if is_focus:
                 contact_header.parameters['isfocus'] = None
-            self._invitation.send_response(200, contact_header=contact_header, sdp=sdp_val, extra_headers=extra_headers)
+            self._invitation.send_response_sdp_passthru(200, contact_header=contact_header, sdp=sdp_val, extra_headers=extra_headers)
             notification_center.post_notification('SIPSessionWillStart', sender=self)
             # Local and remote SDPs will be set after the 200 OK is sent
             while True:
