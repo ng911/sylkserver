@@ -1140,11 +1140,15 @@ class PSAPApplication(SylkApplication):
 
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
+        sdp_val = None
+        if session != None and hasattr(session, 'remote_sdp'):
+            sdp_val = session.remote_sdp
+
         log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
-            reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
+            reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number, sdp_val = sdp_val)
 
             incoming_session = room_data.incoming_session
             incoming_video_streams = [stream for stream in incoming_session.proposed_streams if stream.type == 'video']
@@ -1242,7 +1246,7 @@ class PSAPApplication(SylkApplication):
         self.add_participant(session)
     '''
 
-    def accept_session(self, session, room_number):
+    def accept_session(self, session, room_number, sdp_val=None):
         log.info("accept session for room %r", room_number)
         room_data = self.get_room_data(room_number)
         if session.state == 'incoming':
@@ -1275,7 +1279,7 @@ class PSAPApplication(SylkApplication):
 
             try:
                 log.info("accept incoming session %r", session)
-                session.accept(streams, is_focus=True)
+                session.accept(streams, is_focus=True, sdp_val=sdp_val)
             except IllegalStateError:
                 pass
 
@@ -2652,7 +2656,7 @@ class OutgoingCallInitializer(object):
         account = DefaultAccount()
         psap_application = PSAPApplication()
         try:
-            room = psap_application.get_room(self.room_number)
+            room_data = psap_application.get_room(self.room_number)
         except RoomNotFoundError:
             log.info('_NH_DNSLookupDidSucceed RoomNotFoundError for room %r', self.room_number)
             log.info('_NH_DNSLookupDidSucceed Room %s - failed to add %s' % (self.room_uri_str, self.target_uri))
@@ -2666,6 +2670,10 @@ class OutgoingCallInitializer(object):
         for stream_type in active_media:
             self.streams.append(MediaStreamRegistry.get(stream_type)())
         '''
+        incoming_session = room_data.incoming_session
+        sdp_val = None
+        if incoming_session != None and hasattr(incoming_session, 'remote_sdp'):
+            sdp_val = incoming_session.remote_sdp
         if self.has_audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
         if self.has_video:
@@ -2693,7 +2701,8 @@ class OutgoingCallInitializer(object):
         extra_headers.append(Header('X-Originator-From', str(self.caller_identity)))
         extra_headers.append(SubjectHeader(u'Join conference request from %s' % str(self.caller_identity)))
         route = notification.data.result[0]
-        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, extra_headers=extra_headers)
+        self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, \
+                             extra_headers=extra_headers, sdp_val=sdp_val)
 
     def _NH_SIPSessionNewOutgoing(self, notification):
         log.info('OutgoingCallInitializer got _NH_SIPSessionNewOutgoing')
