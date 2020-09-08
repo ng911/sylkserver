@@ -498,6 +498,9 @@ class Session(object):
     def connect(self, from_header, to_header, route, streams, is_focus=False, contact_header=None, extra_headers=None, \
                 sdp_val=None):
         log.info("inside session connect sdp_val is %r", sdp_val)
+        is_sdp_passthrough = False
+        if sdp_val != None:
+            is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
@@ -599,25 +602,26 @@ class Session(object):
                 return
 
             notification_center.post_notification('SIPSessionWillStart', self)
-            stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
-            for index, local_media in enumerate(local_sdp.media):
-                remote_media = remote_sdp.media[index]
-                stream = stream_map[index]
-                if remote_media.port:
-                    stream.start(local_sdp, remote_sdp, index)
-                else:
+            if not is_sdp_passthrough:
+                stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
+                for index, local_media in enumerate(local_sdp.media):
+                    remote_media = remote_sdp.media[index]
+                    stream = stream_map[index]
+                    if remote_media.port:
+                        stream.start(local_sdp, remote_sdp, index)
+                    else:
+                        notification_center.remove_observer(self, sender=stream)
+                        self.proposed_streams.remove(stream)
+                        del stream_map[stream.index]
+                        stream.deactivate()
+                        stream.end()
+                removed_streams = [stream for stream in self.proposed_streams if stream.index >= len(local_sdp.media)]
+                for stream in removed_streams:
                     notification_center.remove_observer(self, sender=stream)
                     self.proposed_streams.remove(stream)
                     del stream_map[stream.index]
                     stream.deactivate()
                     stream.end()
-            removed_streams = [stream for stream in self.proposed_streams if stream.index >= len(local_sdp.media)]
-            for stream in removed_streams:
-                notification_center.remove_observer(self, sender=stream)
-                self.proposed_streams.remove(stream)
-                del stream_map[stream.index]
-                stream.deactivate()
-                stream.end()
             invitation_notifications = []
             with api.timeout(self.media_stream_timeout):
                 wait_count = len(self.proposed_streams)
@@ -762,13 +766,15 @@ class Session(object):
         if {'to', 'from', 'via', 'contact', 'route', 'record-route'}.intersection(header.name.lower() for header in extra_headers):
             raise RuntimeError('invalid header in extra_headers: To, From, Via, Contact, Route and Record-Route headers are not allowed')
 
-        for stream in self.proposed_streams:
-            if stream in streams:
-                notification_center.add_observer(self, sender=stream)
-                stream.initialize(self, direction='incoming')
-        self.proposed_streams = streams
+        wait_count = 0
+        if sdp_val == None:
+            for stream in self.proposed_streams:
+                if stream in streams:
+                    notification_center.add_observer(self, sender=stream)
+                    stream.initialize(self, direction='incoming')
+            self.proposed_streams = streams
 
-        wait_count = len(self.proposed_streams)
+            wait_count = len(self.proposed_streams)
 
         try:
             while wait_count > 0:
