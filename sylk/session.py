@@ -558,6 +558,8 @@ class Session(object):
                         media.connection = connection
                     local_sdp.media.append(media)
                 sdp_val = local_sdp
+            else:
+                sdp_val = SDPSession.new(sdp_val)
             route_header = RouteHeader(self.route.uri)
             if is_focus:
                 contact_header.parameters['isfocus'] = None
@@ -807,6 +809,8 @@ class Session(object):
                         media.bandwidth_info = []
                     local_sdp.media.append(media)
                 sdp_val = local_sdp
+            else:
+                sdp_val = SDPSession.new(sdp_val)
             contact_header = ContactHeader.new(self._invitation.local_contact_header)
             try:
                 local_contact_uri = self.account.contact[self._invitation.transport]
