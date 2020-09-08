@@ -2399,6 +2399,11 @@ class OldOutgoingCallInitializer(object):
         if self.app:
             session = notification.sender
             self.app.outgoing_session_will_start(self.target, session)
+            # if we do sdp passthrough we do not get SIPSessionDidStartEvent
+            #if session != None and hasattr(session, 'remote_sdp'):
+            #    self.app.outgoing_session_did_start(self.target, self.is_calltaker, session)
+            #    #self.app.add_outgoing_session(session)
+            #    send_call_active_notification(self, session)
 
     def _NH_SIPSessionDidStart(self, notification):
         notification_center = NotificationCenter()

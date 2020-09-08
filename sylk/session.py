@@ -754,6 +754,9 @@ class Session(object):
     @run_in_green_thread
     def accept(self, streams, is_focus=False, extra_headers=None, sdp_val=None):
         log.info("inside session accept sdp_val is %r", sdp_val)
+        is_sdp_passthrough = False
+        if sdp_val != None:
+            is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
@@ -851,27 +854,28 @@ class Session(object):
                     elif notification.data.state == 'disconnected':
                         raise InvitationDisconnectedError(notification.sender, notification.data)
             wait_count = 0
-            stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
-            for index, local_media in enumerate(local_sdp.media):
-                remote_media = remote_sdp.media[index]
-                stream = stream_map.get(index, None)
-                if stream is not None:
-                    if remote_media.port:
-                        wait_count += 1
-                        stream.start(local_sdp, remote_sdp, index)
-                    else:
-                        notification_center.remove_observer(self, sender=stream)
-                        self.proposed_streams.remove(stream)
-                        del stream_map[stream.index]
-                        stream.deactivate()
-                        stream.end()
-            removed_streams = [stream for stream in self.proposed_streams if stream.index >= len(local_sdp.media)]
-            for stream in removed_streams:
-                notification_center.remove_observer(self, sender=stream)
-                self.proposed_streams.remove(stream)
-                del stream_map[stream.index]
-                stream.deactivate()
-                stream.end()
+            if not is_sdp_passthrough:
+                stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
+                for index, local_media in enumerate(local_sdp.media):
+                    remote_media = remote_sdp.media[index]
+                    stream = stream_map.get(index, None)
+                    if stream is not None:
+                        if remote_media.port:
+                            wait_count += 1
+                            stream.start(local_sdp, remote_sdp, index)
+                        else:
+                            notification_center.remove_observer(self, sender=stream)
+                            self.proposed_streams.remove(stream)
+                            del stream_map[stream.index]
+                            stream.deactivate()
+                            stream.end()
+                removed_streams = [stream for stream in self.proposed_streams if stream.index >= len(local_sdp.media)]
+                for stream in removed_streams:
+                    notification_center.remove_observer(self, sender=stream)
+                    self.proposed_streams.remove(stream)
+                    del stream_map[stream.index]
+                    stream.deactivate()
+                    stream.end()
             with api.timeout(self.media_stream_timeout):
                 while wait_count > 0 or not connected or self._channel:
                     notification = self._channel.wait()
