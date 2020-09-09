@@ -591,8 +591,13 @@ class Session(object):
                                     notification_center.post_notification('SIPSessionGotRingIndication', self, )
                                 notification_center.post_notification('SIPSessionGotProvisionalResponse', self, NotificationData(code=notification.data.code, reason=notification.data.reason))
                             elif notification.data.state == 'connected':
+                                log.info("got connected event is_sdp_passthrough is %r, connected is %r", \
+                                         is_sdp_passthrough, connected)
                                 if not connected:
                                     connected = True
+                                    if is_sdp_passthrough:
+                                        log.info("is_sdp_passthrough we can move on now we are connected")
+                                        break
                                 else:
                                     unhandled_notifications.append(notification)
                             elif notification.data.state == 'disconnected':
