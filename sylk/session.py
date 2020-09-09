@@ -2007,10 +2007,11 @@ class Session(object):
                             notification.center.post_notification('SIPSessionDidFail', self, NotificationData(originator='local', code=0, reason=None, failure_reason=notification.data.disconnect_reason, redirect_identities=None))
                     else:
                         notification.center.post_notification('SIPSessionWillEnd', self, NotificationData(originator=notification.data.originator))
-                        for stream in self.streams:
-                            notification.center.remove_observer(self, sender=stream)
-                            stream.deactivate()
-                            stream.end()
+                        if self.remote_sdp == None:
+                            for stream in self.streams:
+                                notification.center.remove_observer(self, sender=stream)
+                                stream.deactivate()
+                                stream.end()
                         self.state = 'terminated'
                         self.end_time = ISOTimestamp.now()
                         notification.center.post_notification('SIPSessionDidEnd', self, NotificationData(originator=notification.data.originator, end_reason=notification.data.disconnect_reason))

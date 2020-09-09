@@ -1141,7 +1141,7 @@ class PSAPApplication(SylkApplication):
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
         sdp_val = None
-        if session != None and hasattr(session, 'remote_sdp'):
+        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
             sdp_val = session.remote_sdp
 
         log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
@@ -2145,6 +2145,7 @@ class PSAPApplication(SylkApplication):
         thread = threading.current_thread()
         log.info("thred is %r", thread)
         log.info("thred ident is %r", thread.ident)
+        '''
         session = notification.sender
         if hasattr(session, 'room_number') and session.room_number != None:
             room_data = self.get_room_data(session.room_number)
@@ -2165,6 +2166,7 @@ class PSAPApplication(SylkApplication):
                     log.info("do disconnect 2")
                     calltaker_local.producer = None
                     log.info("do disconnect 2 done")
+        '''
 
     @run_in_green_thread
     def _NH_SIPSessionDidEnd(self, notification):
@@ -2396,11 +2398,6 @@ class OldOutgoingCallInitializer(object):
         if self.app:
             session = notification.sender
             self.app.outgoing_session_will_start(self.target, session)
-            # if we do sdp passthrough we do not get SIPSessionDidStartEvent
-            if session != None and hasattr(session, 'remote_sdp'):
-                self.app.outgoing_session_did_start(self.target, self.is_calltaker, session)
-            #    #self.app.add_outgoing_session(session)
-                send_call_active_notification(self, session)
 
     def _NH_SIPSessionDidStart(self, notification):
         notification_center = NotificationCenter()
@@ -2674,7 +2671,7 @@ class OutgoingCallInitializer(object):
         '''
         incoming_session = room_data.incoming_session
         sdp_val = None
-        if incoming_session != None and hasattr(incoming_session, 'remote_sdp'):
+        if incoming_session != None and hasattr(incoming_session, 'remote_sdp') and incoming_session.remote_sdp != None:
             sdp_val = incoming_session.remote_sdp
         if self.has_audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
