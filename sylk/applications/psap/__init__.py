@@ -1208,8 +1208,10 @@ class PSAPApplication(SylkApplication):
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
-        if session != None and not hasattr(session, 'remote_sdp'):
-            self.add_session_to_room(room_number, session)
+        sdp_passthrough = False
+        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+            sdp_passthrough = True
+        self.add_session_to_room(room_number, session, sdp_passthrough)
         del room_data.outgoing_calls[str(sip_uri)]
         if is_calltaker and room_data.is_emergency:
             dump_ali(room_number, calltaker=str(sip_uri.user))
@@ -1520,7 +1522,7 @@ class PSAPApplication(SylkApplication):
         return display_name
 
 
-    def add_session_to_room(self, room_number, session):
+    def add_session_to_room(self, room_number, session, sdp_passthrough=False):
         # Keep track of the invited participants, we must skip ACL policy
         # for SUBSCRIBE requests
         log.info(u'add_session_to_room for Room %s - session %s' % (room_number, session.remote_identity.uri))
@@ -1532,9 +1534,10 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().add_observer(self, sender=session)
         room = self.get_room(room_number)
         log.info(u'Room %s - call room.start' % (room_number))
-        room.start()
-        log.info(u'Room %s - call room.add_session' % (room_number))
-        room.add_session(session)
+        if not sdp_passthrough:
+            room.start()
+            log.info(u'Room %s - call room.add_session' % (room_number))
+            room.add_session(session)
         log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
         # new code
         room_data = self.get_room_data(room_number)
@@ -2003,8 +2006,10 @@ class PSAPApplication(SylkApplication):
 
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
-        if session != None and not hasattr(session, 'remote_sdp'):
-            self.add_session_to_room(session.room_number, session)
+        sdp_passthrough = False
+        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+            sdp_passthrough = True
+        self.add_session_to_room(session.room_number, session, sdp_passthrough)
         send_call_active_notification(self, session)
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
