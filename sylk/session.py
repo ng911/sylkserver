@@ -605,6 +605,7 @@ class Session(object):
             except api.TimeoutError:
                 self.end()
                 return
+            log.info("wait for notification api.TimeoutError")
 
             notification_center.post_notification('SIPSessionWillStart', self)
             if not is_sdp_passthrough:
@@ -627,18 +628,20 @@ class Session(object):
                     del stream_map[stream.index]
                     stream.deactivate()
                     stream.end()
-            invitation_notifications = []
-            with api.timeout(self.media_stream_timeout):
-                wait_count = len(self.proposed_streams)
-                while wait_count > 0:
-                    notification = self._channel.wait()
-                    if notification.name == 'MediaStreamDidStart':
-                        wait_count -= 1
-                    elif notification.name == 'SIPInvitationChangedState':
-                        invitation_notifications.append(notification)
-            [self._channel.send(notification) for notification in invitation_notifications]
+                invitation_notifications = []
+                with api.timeout(self.media_stream_timeout):
+                    wait_count = len(self.proposed_streams)
+                    while wait_count > 0:
+                        notification = self._channel.wait()
+                        if notification.name == 'MediaStreamDidStart':
+                            wait_count -= 1
+                        elif notification.name == 'SIPInvitationChangedState':
+                            invitation_notifications.append(notification)
+                [self._channel.send(notification) for notification in invitation_notifications]
             while not connected or self._channel:
                 notification = self._channel.wait()
+                log.info("got notification %r, notification.name %r, notification.data %r", notification,
+                         notification.name, notification.data)
                 if notification.name == 'SIPInvitationChangedState':
                     if notification.data.state == 'early':
                         if notification.data.code == 180:
