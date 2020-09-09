@@ -1208,7 +1208,8 @@ class PSAPApplication(SylkApplication):
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
-        self.add_session_to_room(room_number, session)
+        if session != None and not hasattr(session, 'remote_sdp'):
+            self.add_session_to_room(room_number, session)
         del room_data.outgoing_calls[str(sip_uri)]
         if is_calltaker and room_data.is_emergency:
             dump_ali(room_number, calltaker=str(sip_uri.user))
@@ -2002,11 +2003,13 @@ class PSAPApplication(SylkApplication):
 
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
-        self.add_session_to_room(session.room_number, session)
+        if session != None and not hasattr(session, 'remote_sdp'):
+            self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
 
+        '''
         caller_local = None
         caller_remote = None
         calltaker_local = None
@@ -2066,7 +2069,6 @@ class PSAPApplication(SylkApplication):
             calltaker_remote = remote_video
         log.info("")
         log.info("")
-
         if  caller_local != None and \
             calltaker_remote != None:
             log.info("do connect")
@@ -2075,17 +2077,6 @@ class PSAPApplication(SylkApplication):
             #log.info("do create caller_video_connector consumer port %r", calltaker_local.consumer_port)
             #caller_video_connector = VideoConnector(caller_remote, calltaker_local)
             log.info("caller_video_connector created")
-            '''
-            room_data.caller_video_connector = caller_video_connector
-            log.info("do start caller_video_connector")
-            caller_video_connector.start()
-
-            log.info("do create caller_video_connector")
-            calltaker_video_connector = VideoConnector(calltaker_remote, caller_local)
-            room_data.calltaker_video_connector = calltaker_video_connector
-            log.info("do start calltaker_video_connector")
-            calltaker_video_connector.start()
-            '''
             caller_local.producer = calltaker_remote
             log.info("do connect done")
         if caller_remote != None and \
@@ -2095,6 +2086,7 @@ class PSAPApplication(SylkApplication):
             log.info("do connect 1")
         video_stream = video_streams[0] if video_streams else None
         calltaker_video_stream = calltaker_video_streams[0] if calltaker_video_streams else None
+        '''
         #if video_stream != None and calltaker_video_stream != None:
         #    self.video_conf.add_to_room(session.room_number, calltaker_video_stream)
         #    self.video_conf.add_to_room(session.room_number, video_stream)
