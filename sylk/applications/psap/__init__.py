@@ -2178,8 +2178,10 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(session.room_number)
 
         incoming_session = room_data.incoming_session
-
-        self.remove_session_from_room(session.room_number, session)
+        if session != incoming_session and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+            session.end()
+        else:
+            self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
         room_number = session.room_number
