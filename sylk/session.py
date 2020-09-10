@@ -770,6 +770,7 @@ class Session(object):
         log.info("inside session accept sdp_val is %r", sdp_val)
         is_sdp_passthrough = False
         if sdp_val != None:
+            self.is_sdp_passthrough = True
             is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
