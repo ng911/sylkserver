@@ -2184,15 +2184,16 @@ class PSAPApplication(SylkApplication):
         if hasattr(room_data, 'incoming_session'):
             incoming_session = room_data.incoming_session
         if hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
-            session.end()
-            room_data.status = 'closed'
-            if incoming_session != None and session != incoming_session:
-                incoming_session.end()
-            if room_data.calltaker_video_session != None and session != room_data.calltaker_video_session:
-                room_data.calltaker_video_session.end()
-            NotificationCenter().post_notification('ConferenceUpdated', self,
-                                                   NotificationData(room_number=session.room_number,
-                                                                    status='closed'))
+            #session.end()
+            if room_data.status != 'closed':
+                room_data.status = 'closed'
+                if incoming_session != None and session != incoming_session:
+                    incoming_session.end()
+                if room_data.calltaker_video_session != None and session != room_data.calltaker_video_session:
+                    room_data.calltaker_video_session.end()
+                NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                       NotificationData(room_number=session.room_number,
+                                                                        status='closed'))
         else:
             self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
