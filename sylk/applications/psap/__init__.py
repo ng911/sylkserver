@@ -66,7 +66,7 @@ class SIPReferralDidFail(Exception):
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams', 'calltaker_video_session'
+    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams', 'calltaker_video_session',
                  'calltaker_video_connector', 'caller_video_connector',
                  'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
