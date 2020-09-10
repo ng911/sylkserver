@@ -398,6 +398,7 @@ class Session(object):
         self._remote_identity = None
         self.transfer_handler = None
         self.remote_sdp = None
+        self.is_sdp_passthrough = False
         self._lock = RLock()
 
     def debug_info(self):
@@ -472,6 +473,9 @@ class Session(object):
                         break
                     else:
                         log.info("addoing stream: stream_type {}, index {}".format(stream_type, index))
+                        if stream_type == 'video':
+                            # sdp pass through for video
+                            self.is_sdp_passthrough = True
                         stream.index = index
                         self.proposed_streams.append(stream)
                         break
@@ -501,6 +505,7 @@ class Session(object):
         is_sdp_passthrough = False
         if sdp_val != None:
             is_sdp_passthrough = True
+            self.is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
@@ -2007,7 +2012,7 @@ class Session(object):
                             notification.center.post_notification('SIPSessionDidFail', self, NotificationData(originator='local', code=0, reason=None, failure_reason=notification.data.disconnect_reason, redirect_identities=None))
                     else:
                         notification.center.post_notification('SIPSessionWillEnd', self, NotificationData(originator=notification.data.originator))
-                        if self.remote_sdp == None:
+                        if not self.is_sdp_passthrough:
                             for stream in self.streams:
                                 notification.center.remove_observer(self, sender=stream)
                                 stream.deactivate()

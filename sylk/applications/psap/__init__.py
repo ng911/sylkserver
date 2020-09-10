@@ -1141,7 +1141,7 @@ class PSAPApplication(SylkApplication):
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
         sdp_val = None
-        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+        if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             sdp_val = session.remote_sdp
 
         log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
@@ -1209,7 +1209,7 @@ class PSAPApplication(SylkApplication):
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
         sdp_passthrough = False
-        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+        if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             sdp_passthrough = True
         self.add_session_to_room(room_number, session, sdp_passthrough)
         del room_data.outgoing_calls[str(sip_uri)]
@@ -2007,7 +2007,7 @@ class PSAPApplication(SylkApplication):
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
         sdp_passthrough = False
-        if session != None and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+        if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             sdp_passthrough = True
         self.add_session_to_room(session.room_number, session, sdp_passthrough)
         send_call_active_notification(self, session)
@@ -2178,7 +2178,7 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(session.room_number)
 
         incoming_session = room_data.incoming_session
-        if session != incoming_session and hasattr(session, 'remote_sdp') and session.remote_sdp != None:
+        if session != incoming_session and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             session.end()
         else:
             self.remove_session_from_room(session.room_number, session)
@@ -2673,7 +2673,7 @@ class OutgoingCallInitializer(object):
         '''
         incoming_session = room_data.incoming_session
         sdp_val = None
-        if incoming_session != None and hasattr(incoming_session, 'remote_sdp') and incoming_session.remote_sdp != None:
+        if incoming_session != None and hasattr(incoming_session, 'is_sdp_passthrough') and incoming_session.is_sdp_passthrough:
             sdp_val = incoming_session.remote_sdp
         if self.has_audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
