@@ -472,8 +472,9 @@ class Session(object):
                         log.exception("Exception occurred while setting up stream from SDP: {}".format(e))
                         break
                     else:
-                        log.info("addoing stream: stream_type {}, index {}".format(stream_type, index))
-                        if stream_type == 'video':
+                        log.info("addoing stream: ")
+                        log.info("addoing stream: stream_type {}, type {}, index {}".format(stream_type, stream_type.type, index))
+                        if stream_type.type == 'video':
                             # sdp pass through for video
                             self.is_sdp_passthrough = True
                         stream.index = index
