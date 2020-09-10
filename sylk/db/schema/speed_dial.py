@@ -11,6 +11,7 @@ log = logging.getLogger("emergent-ng911")
 class SpeedDialGroup(Document):
     group_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField(required=True)
+    role_id = ObjectIdField()
     user_id = ObjectIdField()
     group_name = StringField(required=True)
     meta = {
@@ -29,6 +30,7 @@ class SpeedDialGroup(Document):
 class SpeedDial(Document):
     speed_dial_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     psap_id = ObjectIdField()
+    role_id = ObjectIdField()
     user_group_id = ObjectIdField()
     user_id = ObjectIdField()
     dest = StringField(required=True)

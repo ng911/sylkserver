@@ -2,15 +2,20 @@ from .schema import SpeedDial, SpeedDialGroup, User
 from ..utils import get_json_from_db_obj
 
 
-def get_speed_dial_groups(psap_id):
+def get_speed_dial_groups(psap_id, role_id=None):
     groups = []
-    for speedDialGroup in SpeedDialGroup.objects(psap_id=psap_id):
+    params = {
+        "psap_id" : psap_id
+    }
+    if role_id != None:
+        params["role_id"] = role_id
+    for speedDialGroup in SpeedDialGroup.objects(**params):
         groups.append(
             get_json_from_db_obj(speedDialGroup)
         )
     return groups
 
-def get_speed_dials(psap_id, group_name=None):
+def get_speed_dials(psap_id, role_id=None, group_name=None):
     speedDials = []
     params = {
         "psap_id" : psap_id
@@ -18,6 +23,8 @@ def get_speed_dials(psap_id, group_name=None):
     if group_name != None and group_name != "":
         group = SpeedDialGroup.objects.get(group_name=group_name)
         params["group_id"] = group.group_id
+    if role_id != None and role_id != "":
+        params["role_id"] = role_id
 
     speedDialGroups = {}
     for dbObj in SpeedDialGroup.objects(psap_id=psap_id):
@@ -31,16 +38,19 @@ def get_speed_dials(psap_id, group_name=None):
 
     return speedDials
 
+
 def get_user_speed_dials(user_id):
     userObj = User.objects.get(user_id = user_id)
     psap_id = str(userObj.psap_id)
     return get_speed_dials(psap_id)
 
-def add_speed_dial_group(psap_id, group_name):
+def add_speed_dial_group(psap_id, role_id, group_name):
     # make sure the group does not exist first
     speedDialGroup = SpeedDialGroup()
     speedDialGroup.psap_id=psap_id
     speedDialGroup.group_name=group_name
+    if role_id != None and role_id != "":
+        speedDialGroup.role_id = role_id
     speedDialGroup.save()
 
     return get_json_from_db_obj(speedDialGroup)
@@ -58,11 +68,13 @@ def edit_speed_dial_group(group_id, group_name):
     speedDialGroup.save()
 
 
-def add_speed_dial(psap_id, dest, name, group_id=None, show_as_button=None, icon=None, files=None):
+def add_speed_dial(psap_id, dest, name, role_id=None, group_id=None, show_as_button=None, icon=None, files=None):
     speedDial = SpeedDial()
     if group_id != None:
         speedDial.group_id = group_id
         speedDial.group = SpeedDialGroup.objects.get(group_id=group_id)
+    if role_id != None:
+        speedDial.role_id = role_id
     speedDial.name = name
     speedDial.psap_id = psap_id
     speedDial.dest = dest

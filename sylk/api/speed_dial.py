@@ -2,9 +2,11 @@ import logging
 from flask import Blueprint, jsonify
 from flask_cors import CORS
 from flask_restful import reqparse
+from .utils import get_argument
 
-from ..db.speed_dial import get_speed_dial_groups, get_speed_dials, add_speed_dial_group, \
-    remove_speed_dial_group, edit_speed_dial_group, add_speed_dial, remove_speed_dial, \
+from ..db.speed_dial import get_speed_dial_groups, get_speed_dials, \
+    add_speed_dial_group, remove_speed_dial_group, edit_speed_dial_group, \
+    add_speed_dial, remove_speed_dial, \
     get_speed_dial, edit_speed_dial, get_user_speed_dials
 from .decorators import check_exceptions
 
@@ -21,10 +23,12 @@ log = logging.getLogger('emergent-ng911')
 def all(psap_id):
     parser = reqparse.RequestParser()
     parser.add_argument('group_name', required=False)
+    parser.add_argument('role_id', required=False)
     payload = parser.parse_args()
     return {
-        "speed_dials" : get_speed_dials(psap_id, payload['group_name'])
+        "speed_dials" : get_speed_dials(psap_id, payload['role_id'], payload['group_name'])
     }
+
 
 @speed_dial.route('/user/<user_id>', methods=['GET'])
 @check_exceptions
@@ -32,6 +36,7 @@ def user_speed_dials(user_id):
     return {
         "speed_dials" : get_user_speed_dials(user_id)
     }
+
 
 @speed_dial.route('/<speed_dial_id>', methods=['GET'])
 @check_exceptions
@@ -54,6 +59,7 @@ def api_edit_speed_dial(speed_dial_id):
 def api_add_speed_dial():
     parser = reqparse.RequestParser()
     parser.add_argument('group_id', required=False)
+    parser.add_argument('role_id', required=False)
     parser.add_argument('dest', required=True)
     parser.add_argument('name', required=True)
     parser.add_argument('psap_id', required=True)
@@ -61,7 +67,8 @@ def api_add_speed_dial():
     parser.add_argument('icon', required=False)
     parser.add_argument('files', required=False)
     payload = parser.parse_args()
-    return add_speed_dial(payload['psap_id'], payload['dest'], payload['name'], payload['group_id'], payload['show_as_button'], payload['icon'], payload['files'])
+    return add_speed_dial(payload['psap_id'], payload['dest'], payload['name'], payload['role_id'], payload['group_id'], \
+                          payload['show_as_button'], payload['icon'], payload['files'])
 
 
 @speed_dial.route('/delete/<speed_dial_id>', methods=['POST', 'PUT'])
@@ -73,8 +80,9 @@ def api_delete_speed_dial(speed_dial_id):
 @speed_dial.route('/groups/<psap_id>', methods=['GET'])
 @check_exceptions
 def api_get_groups(psap_id):
+    role_id = get_argument("role_id")
     return {
-        "groups" : get_speed_dial_groups(psap_id)
+        "groups" : get_speed_dial_groups(psap_id, role_id)
     }
 
 
@@ -93,8 +101,9 @@ def api_add_group():
     parser = reqparse.RequestParser()
     parser.add_argument('group_name', required=True)
     parser.add_argument('psap_id', required=True)
+    parser.add_argument('role_id', required=False)
     payload = parser.parse_args()
-    return add_speed_dial_group(payload["psap_id"], payload["group_name"])
+    return add_speed_dial_group(payload["psap_id"], payload["role_id"], payload["group_name"])
 
 
 @speed_dial.route('/group/delete/<group_id>', methods=['POST', 'PUT'])
