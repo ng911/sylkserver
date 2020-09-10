@@ -66,7 +66,7 @@ class SIPReferralDidFail(Exception):
 class RoomNotFoundError(Exception): pass
 
 class RoomData(object):
-    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams',
+    __slots__ = ['room', 'incoming_session', 'calltaker_video_streams', 'calltaker_video_session'
                  'calltaker_video_connector', 'caller_video_connector',
                  'call_type', 'has_tty', 'tty_text',
                  'last_tty_0d', 'direction', 'outgoing_calls',
@@ -94,6 +94,7 @@ class RoomData(object):
         self.calltaker_video_streams = None
         self.caller_video_connector = None
         self.calltaker_video_connector = None
+        self.calltaker_video_session = None
 
     @property
     def incoming(self):
@@ -1142,7 +1143,9 @@ class PSAPApplication(SylkApplication):
         room_data = self.get_room_data(room_number)
         sdp_val = None
         if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
+            log.info("outgoing_session_did_start set sdp_val to %r", session.remote_sdp)
             sdp_val = session.remote_sdp
+            room_data.calltaker_video_session = session
 
         log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
         if not room.started:
@@ -2180,8 +2183,16 @@ class PSAPApplication(SylkApplication):
         incoming_session = None
         if hasattr(room_data, 'incoming_session'):
             incoming_session = room_data.incoming_session
-        if session != incoming_session and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
+        if hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             session.end()
+            room_data.status = 'closed'
+            if incoming_session != None and session != incoming_session:
+                incoming_session.end()
+            if room_data.calltaker_video_session != None and session != room_data.calltaker_video_session:
+                room_data.calltaker_video_session.end()
+            NotificationCenter().post_notification('ConferenceUpdated', self,
+                                                   NotificationData(room_number=session.room_number,
+                                                                    status='closed'))
         else:
             self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
