@@ -2177,7 +2177,9 @@ class PSAPApplication(SylkApplication):
 
         room_data = self.get_room_data(session.room_number)
 
-        incoming_session = room_data.incoming_session
+        incoming_session = None
+        if hasattr(room_data, 'incoming_session'):
+            incoming_session = room_data.incoming_session
         if session != incoming_session and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             session.end()
         else:
