@@ -4,6 +4,7 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..fields import EnhancedConnection
+from ..types import EnhancedMongoengineObjectType
 from ..utiils import update_params_with_args
 from ...db.schema import Psap as PsapModel
 from ...db.schema import User as UserModel
@@ -23,7 +24,7 @@ class CallTransferLineNode(MongoengineObjectType):
         connection_class = EnhancedConnection
 
 
-class PsapNode(MongoengineObjectType):
+class PsapNode(EnhancedMongoengineObjectType):
     class Meta:
         model = PsapModel
         interfaces = (Node,)

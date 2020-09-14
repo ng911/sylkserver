@@ -4,6 +4,7 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..fields import EnhancedConnection
+from ..types import EnhancedMongoengineObjectType
 from ..utiils import update_params_with_args
 from ..mutations import get_id_from_node_id
 from ...db.schema import User as UserModel
@@ -18,13 +19,13 @@ from ...db.schema import QueueMember as QueueMemberModel
 log = logging.getLogger("emergent-ng911")
 
 
-class UserPermissionNode(MongoengineObjectType):
+class UserPermissionNode(EnhancedMongoengineObjectType):
     class Meta:
         model = UserPermissionModel
         interfaces = (Node,)
 
 
-class UserGroupNode(MongoengineObjectType):
+class UserGroupNode(EnhancedMongoengineObjectType):
     class Meta:
         model = UserGroupModel
         interfaces = (Node,)
@@ -58,25 +59,25 @@ def resolveUserGroups(parent, info, **args):
     return groups
 
 
-class RoleNode(MongoengineObjectType):
+class RoleNode(EnhancedMongoengineObjectType):
     class Meta:
         model = RoleModel
         interfaces = (Node,)
 
 
-class SkillsetNode(MongoengineObjectType):
+class SkillsetNode(EnhancedMongoengineObjectType):
     class Meta:
         model = SkillsetModel
         interfaces = (Node,)
 
 
-class UserProfileNode(MongoengineObjectType):
+class UserProfileNode(EnhancedMongoengineObjectType):
     class Meta:
         model = CalltakerProfileModel
         interfaces = (Node,)
 
 
-class UserNode(MongoengineObjectType):
+class UserNode(EnhancedMongoengineObjectType):
     class Meta:
         model = UserModel
         interfaces = (Node,)

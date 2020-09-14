@@ -10,6 +10,9 @@ logger = logging.getLogger('emergent-ng911')
 def resolve_full_name(parent, info):
     return "Hello World there"
 
+def resolve_obj_id(parent, info):
+    return str(parent.id)
+
 def convert_lazy_foreign_key_field(field_name, model, foreign_attr, registry=None):
     def lazy_resolver(root, *args, **kwargs):
         if getattr(root, field_name):
@@ -59,6 +62,8 @@ class EnhancedMongoengineObjectType(MongoengineObjectType):
         if not registry:
             registry = get_global_registry()
 
+        setattr(cls, "obj_id", String())
+        cls.resolve_obj_id = resolve_obj_id
         #setattr(cls, "full_name", String())
         #cls.resolve_full_name = resolve_full_name
         if foreign_keys is not None:
@@ -86,5 +91,7 @@ class EnhancedMongoengineObjectType(MongoengineObjectType):
             _meta,
             **options
         )
+
+
 
 
