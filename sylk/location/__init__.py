@@ -296,11 +296,6 @@ def aliRebid(self):
     self.rebidPending = False
 '''
 
-import math
-def truncate(number, digits):
-    stepper = 10.0 ** digits
-    return math.trunc(stepper * number) / stepper
-
 def derefLocation(room_number, psap_id, geolocation, callerName):
     class Options(object):
         pass
@@ -344,12 +339,8 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
             if longitude == None or longitude == "":
                 longitude = ali_long
             if latitude != None and latitude != "":
-                latitude = float(latitude)
-                latitude = truncate(latitude, 8)
-                location_db_obj.latitude = latitude
+                location_db_obj.latitude = float(latitude)
             if longitude != None and longitude != "":
-                longitude = float(longitude)
-                longitude = truncate(longitude, 8)
                 location_db_obj.longitude = float(longitude)
             if radius != None and radius != "":
                 location_db_obj.radius = float(radius)
