@@ -320,7 +320,7 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
         self.location.append(pidf)
         '''
         postal, community, state, latitude, longitude, radius, name = xml2display(str_pidf)
-        callback_number, lookup_number, name, class_of_service, service_provider = parseAliFromXML(str_pidf)
+        callback_number, lookup_number, name, class_of_service, service_provider, ali_lat, ali_long = parseAliFromXML(str_pidf)
         if (name == None) or (len(name) == 0):
             name = callerName
         print("postal, community, state, latitude, longitude, radius, name", postal, community, state, latitude, longitude, radius, name)
@@ -334,6 +334,10 @@ def derefLocation(room_number, psap_id, geolocation, callerName):
             location_db_obj.state = state
             location_db_obj.name = name
             location_db_obj.community = community
+            if latitude == None or latitude == "":
+                latitude = ali_lat
+            if longitude == None or longitude == "":
+                longitude = ali_long
             if latitude != None and latitude != "":
                 location_db_obj.latitude = float(latitude)
             if longitude != None and longitude != "":

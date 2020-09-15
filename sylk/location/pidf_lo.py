@@ -104,6 +104,7 @@ def xml2display(str_xml):
 
 def parseAliFromXML(str_xml):
     callback_number = lookup_number = name = class_of_service = service_provider = None
+    ali_lat = ali_long = None
     xml = parseString(str_xml)
     location_resp = xml.getElementsByTagName("locationResponse")[0]
     presence = location_resp.getElementsByTagNameNS(presenceNS, "presence")[0]
@@ -116,6 +117,12 @@ def parseAliFromXML(str_xml):
             name = getAliElement(ali_call_info, "CustomerName")
             class_of_service = getAliElement(ali_call_info, "ClassOfService")
             service_provider = getAliElement(ali_call_info, "SourceOfService")
-    return callback_number, lookup_number, name, class_of_service, service_provider
+        ali_location_info = getElementByTag(aliNS, ali_body, "LocationInfo")
+        if ali_location_info != None:
+            ali_geo_location = getElementByTag(aliNS, ali_location_info, "GeoLocation")
+            if ali_geo_location != None:
+                ali_lat = getAliElement(ali_geo_location, "Latitude")
+                ali_long = getAliElement(ali_geo_location, "Longitude")
+    return callback_number, lookup_number, name, class_of_service, service_provider, ali_lat, ali_long
 
 
