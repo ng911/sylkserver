@@ -803,11 +803,11 @@ class PSAPApplication(SylkApplication):
                 if (display_name is not None) and is_calltaker:
                     publish_outgoing_call_status(room_number, display_name, 'active')
             '''
-            sdp_val = None
-            if hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
-                log.info("sos_room accept set sdp_val to %r", session.remote_sdp)
-                sdp_val = session.remote_sdp
-            reactor.callLater(0, self.accept_session, session, room_number, sdp_val)
+            incoming_sdp_val = None
+            if hasattr(room_data.incoming_session, 'is_sdp_passthrough') and room_data.incoming_session.is_sdp_passthrough:
+                log.info("sos_room accept set sdp_val to %r", room_data.incoming_session.remote_sdp)
+                incoming_sdp_val = room_data.incoming_session.remote_sdp
+            reactor.callLater(0, self.accept_session, session, room_number, incoming_sdp_val)
             if room_data.ringing:
                 # also cancel the ringing timer and end ringing call
                 if room_data.ringing_duration_timer is not None:
@@ -825,7 +825,11 @@ class PSAPApplication(SylkApplication):
                     log.info('target %r', target)
                     log.info('outgoing_call_initializer %r', outgoing_call_initializer)
                     outgoing_call_initializer.cancel_call()
-                reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
+                sdp_val = None
+                if hasattr(session,'is_sdp_passthrough') and session.is_sdp_passthrough:
+                    log.info("sos_room accept set session sdp_val to %r", session.remote_sdp)
+                    sdp_val = session.remote_sdp
+                reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number, sdp_val)
             self.set_calltaker_busy(username=str(remote_identity.uri.user))
             NotificationCenter().post_notification('ConferenceAnswered', self,
                                                    NotificationData(room_number=room_number,
@@ -2021,7 +2025,7 @@ class PSAPApplication(SylkApplication):
 
         '''
         incoming_session = room_data.incoming_session
-        video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
+        #video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
 
         caller_local = None
         caller_remote = None
