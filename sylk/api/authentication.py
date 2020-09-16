@@ -153,7 +153,7 @@ def login():
                 #except Exception as e:
                 #    log.error("error in login redirecting debug %r", e)
                 psap_id = str(form.user.psap_id)
-                userObj = {'email': form.user.username, 'psap_id' : psap_id, 'roles': form.user.roles}
+                userObj = {'email': form.user.username, 'psap_id' : psap_id}
                 access_token = create_access_token(identity=userObj)
                 refresh_token = create_refresh_token(identity=userObj)
                 session['access_token'] = access_token
