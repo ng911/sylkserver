@@ -803,7 +803,11 @@ class PSAPApplication(SylkApplication):
                 if (display_name is not None) and is_calltaker:
                     publish_outgoing_call_status(room_number, display_name, 'active')
             '''
-            reactor.callLater(0, self.accept_session, session, room_number)
+            sdp_val = None
+            if hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
+                log.info("sos_room accept set sdp_val to %r", session.remote_sdp)
+                sdp_val = session.remote_sdp
+            reactor.callLater(0, self.accept_session, session, room_number, sdp_val)
             if room_data.ringing:
                 # also cancel the ringing timer and end ringing call
                 if room_data.ringing_duration_timer is not None:
