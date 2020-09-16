@@ -2018,10 +2018,11 @@ class PSAPApplication(SylkApplication):
             sdp_passthrough = True
         self.add_session_to_room(session.room_number, session, sdp_passthrough)
         send_call_active_notification(self, session)
+
+        '''
         incoming_session = room_data.incoming_session
         video_streams = [stream for stream in incoming_session.streams if stream.type == 'video']
 
-        '''
         caller_local = None
         caller_remote = None
         calltaker_local = None
