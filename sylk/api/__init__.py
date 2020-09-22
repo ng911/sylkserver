@@ -15,7 +15,7 @@ except:
     from werkzeug.middleware.proxy_fix import ProxyFix
 
 #from ..configuration import ServerConfig
-from ..config import MONGODB_DB, MONGODB_URI, FLASK_SERVER_PORT
+from ..config import MONGODB_DB, MONGODB_URI, FLASK_SERVER_PORT, UPLOAD_FOLDER
 from ..db.schema import Grant, Client, Token, User
 from .utils import get_argument
 
@@ -34,6 +34,7 @@ app.config['SESSION_MONGODB'] = mongo_client
 #app.config['SESSION_MONGODB_DB'] = 'ng911'
 app.config['SESSION_MONGODB_DB'] = MONGODB_DB
 app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 Session(app)
 CORS(app)
@@ -351,6 +352,8 @@ def start_rest_api_server():
     from .speed_dial import speed_dial
     from .queue import queue
     from .dashboard import dashboard
+    from .maps import maps
+    from .resource import resource
 
     app.register_blueprint(authentication, url_prefix='/auth')
     app.register_blueprint(calltaker, url_prefix='/calltaker')
@@ -360,6 +363,8 @@ def start_rest_api_server():
     app.register_blueprint(speed_dial, url_prefix='/speed_dial')
     app.register_blueprint(queue, url_prefix='/queue')
     app.register_blueprint(dashboard, url_prefix='/dashboard')
+    app.register_blueprint(maps, url_prefix='/maps')
+    app.register_blueprint(resource, url_prefix='/resource')
 
     log.info("start rest_api_server")
     start_server()

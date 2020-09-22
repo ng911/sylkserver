@@ -2,6 +2,12 @@ import os
 import sys
 from six import u
 
+PSQL_DB_USER = "postgres"
+PSQL_DB_PASS = "80mainnc"
+PSQL_DB_IP = "postgresql"
+PSQL_DB_PORT = 5432
+PSQL_DB_NAME = "ng911_test"
+PSQL_IS_TEST_ENV = True
 
 MONGODB_HOST = "rdffg.emergent911.com:27017"
 MONGODB_DB = "ng911"
@@ -9,9 +15,10 @@ MONGODB_USERNAME = "ws"
 MONGODB_PASSWORD = "emergent94108"
 MONGODB_REPLICASET = ""
 #MONGODB_URI = 'mongodb://localhost:27017/ng911'
-
 #MONGODB_REPLICASET = "emergent911rs"
 CREATE_DB = True
+
+UPLOAD_FOLDER = "/resources"
 
 FLASK_SERVER_PORT = 7070
 USE_ASYNCIO=False

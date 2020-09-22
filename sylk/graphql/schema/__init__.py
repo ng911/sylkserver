@@ -24,6 +24,7 @@ from .admin_line import CreteAdminLineGroupMutation, CreteAdminLineMutation
 from .admin_line import UpdateAdminLineGroupMutation, UpdateAdminLineMutation
 from .admin_line import DeleteAdminLineGroupMutation, DeleteAdminLineMutation
 from .admin_line import resolveAdminLineServers
+from .maps import MapFileNode, DeleteMapFileMutation
 
 try:
     from sylk.applications import ApplicationLogger
@@ -50,6 +51,7 @@ class Query(graphene.ObjectType):
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         calling_number=graphene.String(required=False), \
                                                         location=graphene.String(required=False))
+    all_map_files = OrderedMongoengineConnectionField(MapFileNode)
     # active call for a calltaker
     active_call = graphene.Field(ConferenceNode, username=graphene.String(required=True))
 
@@ -125,6 +127,7 @@ class Mutations(graphene.ObjectType):
     create_skillset = CreateSkillsetMutation.Field()
     update_skillset = UpdateSkillsetMutation.Field()
     delete_skillset = DeleteSkillsetMutation.Field()
+    delete_mapfile = DeleteMapFileMutation.Field()
 
 
 graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])

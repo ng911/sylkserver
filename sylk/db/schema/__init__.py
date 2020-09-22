@@ -19,6 +19,7 @@ from .texting import ConferenceMessage, Greeting
 from .user import Role, UserPermission, UserGroup, User, \
     CalltakerStation, CalltakerProfile, CalltakerActivity, Skillset
 from .admin_line import AdminLineGroup, AdminLine
+from .maps import MapFile
 
 log = logging.getLogger("emergent-ng911")
 
@@ -59,6 +60,7 @@ __all__ = [
     'ConferenceMessage', 'Greeting',
     'Role', 'UserGroup', 'User', 'UserPermission', 'Skillset',
     'CalltakerStation', 'CalltakerProfile', 'CalltakerActivity',
-    'AdminLineGroup', 'AdminLine'
+    'AdminLineGroup', 'AdminLine',
+    'MapFile'
 ]
 
