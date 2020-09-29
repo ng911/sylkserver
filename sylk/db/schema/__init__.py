@@ -20,7 +20,7 @@ from .user import Role, UserPermission, UserGroup, User, \
     CalltakerStation, CalltakerProfile, CalltakerActivity, Skillset
 from .admin_line import AdminLineGroup, AdminLine
 from .maps import MapLayer, MapFile
-
+from .test_scripts import create_superadmin
 log = logging.getLogger("emergent-ng911")
 
 
@@ -44,6 +44,15 @@ else:
 #connect('ng911')
 #db = client.ng911
 #db.authenticate("ws", "Ecomm@911")
+
+if CREATE_DB:
+    '''
+    if (Psap.objects().count() == 0):
+        #create_test_data()
+    '''
+    if (User.objects().count() == 0):
+        create_superadmin()
+
 
 __all__ = [
     'getIsoMaxFormat', 'getIsoFormat',

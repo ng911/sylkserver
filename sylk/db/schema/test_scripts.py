@@ -8,13 +8,29 @@ import six
 from pymongo import ReadPreference
 from mongoengine import *
 from mongoengine import signals
-
+from .psap import Psap
+from .user import User
+from .queue import QueueMember
+from .speed_dial import SpeedDial
+from .routing import CallTransferLine
+from .conference import Call, Conference, ConferenceParticipant, ConferenceEvent
+from .location import Location
 # from werkzeug.security import generate_password_hash, check_password_hash
-from ..config import MONGODB_DB, MONGODB_HOST, MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_REPLICASET, \
+from ...config import MONGODB_DB, MONGODB_HOST, MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_REPLICASET, \
     CREATE_DB
 log = logging.getLogger("emergent-ng911")
 
 
+
+
+def create_superadmin(username="superuser", password="80mainnc"):
+    utcnow = datetime.datetime.utcnow()
+    user = User()
+    user.username = username
+    user.fullname = username
+    user.password_hash = User.generate_password_hash(password)
+    user.created_at = utcnow
+    user.save()
 
 
 def create_calltaker(username, password, fullname, queue_id, psap_id):
@@ -167,10 +183,6 @@ def remove_call(room_number=None, status=None):
         remove_room(room_number)
 
 
-
-if CREATE_DB:
-    if (Psap.objects().count() == 0):
-        create_test_data()
 
 
 
