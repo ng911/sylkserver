@@ -44,7 +44,7 @@ def add_resource():
     """
     resource_id = str(bson.ObjectId())
     log.info("request is %r", request)
-    log.info("request.files is %r", request)
+    log.info("request.files is %r", request.files)
 
     if 'file' not in request.files:
         log.error("add_resource no fille in request")
