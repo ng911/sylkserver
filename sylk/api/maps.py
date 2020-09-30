@@ -1,5 +1,7 @@
 import logging
 import os
+from os import listdir
+from os.path import isfile, join
 import bson
 import errno
 from flask import Blueprint, request, abort, current_app, url_for
@@ -19,16 +21,9 @@ CORS(maps)
 log = logging.getLogger('emergent-ng911')
 maps_subdir = 'maps'
 
-
+'''
 def save_map_file(psap_id, map_layer_id, file):
     filename = secure_filename(file.filename)
-    '''
-    filename_no_ext, file_extension = os.path.splitext(filename)
-    if len(file_extension) > 0:
-        format = file_extension[1:]
-    else:
-        format = ""
-    '''
     subpath = os.path.join(psap_id, maps_subdir)
     subpath = os.path.join(subpath, map_layer_id)
     file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subpath)
@@ -38,6 +33,30 @@ def save_map_file(psap_id, map_layer_id, file):
         if exc.errno != errno.EEXIST:
             abort(400, 'error in creating directory ')
     file.save(os.path.join(file_dir, filename))
+    log.info('file_dir %s, filename %s', file_dir, filename)
+    return subpath, filename
+'''
+def get_filename(server_file_id):
+    tmp_file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], server_file_id)
+    onlyfiles = [f for f in listdir(tmp_file_dir) if isfile(join(tmp_file_dir, f))]
+    filename = onlyfiles[0]
+    filepath = os.path.join(tmp_file_dir, filename)
+    return tmp_file_dir, filepath, filename
+
+
+def save_map_file(psap_id, map_layer_id, server_file_id):
+    tmp_path, tmp_file_with_path, filename = get_filename(server_file_id)
+    subpath = os.path.join(psap_id, maps_subdir)
+    subpath = os.path.join(subpath, map_layer_id)
+    file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subpath)
+    try:
+        os.makedirs(file_dir)
+    except OSError as exc:  # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            abort(400, 'error in creating directory ')
+    dest_file_with_path = os.path.join(file_dir, filename)
+    os.rename(tmp_file_with_path, dest_file_with_path)
+    os.rmdir(tmp_path)
     log.info('file_dir %s, filename %s', file_dir, filename)
     return subpath, filename
 
@@ -100,25 +119,25 @@ def add_map_files():
     """
     # check if the post request has the file part
     log.info("inside add_map_file ")
+    '''
     if 'file' not in request.files:
         log.error("add_resource no fille in request")
         log.error("add_resource request.files is %r, %s, length is %d", request.files, str(request.files), len(request.files))
         for name in request.files:
             log.info("found %r, %s", name, str(name))
         abort(400, 'No file part')
+    '''
+    server_file_ids = get_argument('server_file_ids', [])
     psap_id = get_argument('psap_id')
     map_layer_id = get_argument('map_layer_id')
-    uploaded_files = request.files.getlist("file[]")
+    #uploaded_files = request.files.getlist("file[]")
     log.info("inside add_map_file map_layer_id %r", map_layer_id)
     # file = request.files['file']
-    for file in uploaded_files:
+    for server_file_id in server_file_ids:
         # if user does not select file, browser also
         # submit an empty part without filename
-        if file.filename == '':
-            abort(400, 'No selected file')
-
-        log.info("inside add_map_file got filename %r", file.filename)
-        subpath, filename = save_map_file(psap_id, map_layer_id, file)
+        log.info("inside add_map_file got file id %r", server_file_id)
+        subpath, filename = save_map_file(psap_id, map_layer_id, server_file_id)
         log.info("inside add_map_file subpath %r, filename %r", subpath, filename)
         #url_endpoint = "resource/%s/%s" % (subpath, filename)
         #file_url = url_for(url_endpoint)
