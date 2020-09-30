@@ -43,6 +43,8 @@ def add_resource():
             description: get a resource given psap id and resoure id
     """
     resource_id = str(bson.ObjectId())
+    log.info("request is %r", request)
+    log.info("request.files is %r", request)
 
     if 'file' not in request.files:
         log.error("add_resource no fille in request")
