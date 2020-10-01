@@ -165,6 +165,7 @@ def login():
                 # the client can access it using the session cookie
 
                 # a super user may not have a psap id
+                log.info("psap_id is %r", psap_id)
                 if psap_id != "" and psap_id != None:
                     add_logged_in(str(form.user.user_id), str(form.user.psap_id))
                 return redirect(next or url_for('/'))
