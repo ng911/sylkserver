@@ -219,6 +219,7 @@ def session_info():
     if 'refresh_token' in session:
         log.debug("found refresh_token in session")
         initial_data['refresh_token'] = session['refresh_token']
+    log.info("session-info returning %r", initial_data)
     return render_template('session-info.js', initial_data=initial_data)
 
 
