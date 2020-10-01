@@ -2,6 +2,8 @@
 import sys
 import logging
 import traceback
+from sylk.config import updateConfigFromEnv
+updateConfigFromEnv()
 
 from twisted.internet import reactor
 

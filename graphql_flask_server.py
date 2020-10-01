@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
 import logging
+from sylk.config import updateConfigFromEnv
+updateConfigFromEnv()
 import sylk.config
 sylk.config.USE_ASYNCIO = True
 

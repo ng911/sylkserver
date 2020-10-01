@@ -6,6 +6,8 @@ import sys
 import resource
 #import faulthandler
 #faulthandler.enable()
+from sylk.config import updateConfigFromEnv
+updateConfigFromEnv()
 
 from application import log
 from application.process import process, ProcessError
