@@ -185,42 +185,48 @@ def session_info():
     # client-side form data. For example, WTForms is a library that will
     # handle this for us, and we use a custom LoginForm to validate.
     log.info("session_info")
-    user_id = ''
-    username = ''
-    layout = None
-    if 'user_id' in session:
-        user_id = session['user_id']
-        if (user_id is not None) and (user_id != ''):
-            try:
-                from ..db.psap import get_psap_name
-                user_obj = User.objects.get(user_id=user_id)
-                username = user_obj.username
-                fullname = user_obj.fullname
-                psap_id = str(user_obj.psap_id)
-                psap_name = get_psap_name(psap_id)
-                ip_address = request.remote_addr
-                if hasattr(user_obj, 'layout'):
-                    layout = user_obj.layout
-                log.info("session_info ip_address is %r", ip_address)
+    try:
+        user_id = ''
+        username = ''
+        layout = None
+        if 'user_id' in session:
+            user_id = session['user_id']
+            if (user_id is not None) and (user_id != ''):
                 try:
-                    station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
-                    user_obj.station_id = station_db_obj.station_id
-                    user_obj.save()
+                    from ..db.psap import get_psap_name
+                    user_obj = User.objects.get(user_id=user_id)
+                    username = user_obj.username
+                    fullname = user_obj.fullname
+                    psap_id = str(user_obj.psap_id)
+                    psap_name = get_psap_name(psap_id)
+                    ip_address = request.remote_addr
+                    if hasattr(user_obj, 'layout'):
+                        layout = user_obj.layout
+                    log.info("session_info ip_address is %r", ip_address)
+                    try:
+                        station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
+                        user_obj.station_id = station_db_obj.station_id
+                        user_obj.save()
+                    except:
+                        pass
                 except:
                     pass
-            except:
-                pass
-    initial_data = {'user_id': user_id, 'username': username, 'fullname' : fullname,
-                    'psap_id' : psap_id, 'psap_name' : psap_name,
-                    'layout' : layout}
-    if 'access_token' in session:
-        log.debug("found access_token in session")
-        initial_data['access_token'] = session['access_token']
-    if 'refresh_token' in session:
-        log.debug("found refresh_token in session")
-        initial_data['refresh_token'] = session['refresh_token']
-    log.info("session-info returning %r", initial_data)
-    return render_template('session-info.js', initial_data=initial_data)
+        initial_data = {'user_id': user_id, 'username': username, 'fullname' : fullname,
+                        'psap_id' : psap_id, 'psap_name' : psap_name,
+                        'layout' : layout}
+        if 'access_token' in session:
+            log.debug("found access_token in session")
+            initial_data['access_token'] = session['access_token']
+        if 'refresh_token' in session:
+            log.debug("found refresh_token in session")
+            initial_data['refresh_token'] = session['refresh_token']
+        log.info("session-info returning %r", initial_data)
+        return render_template('session-info.js', initial_data=initial_data)
+    except Exception as e:
+        stacktrace = traceback.format_exc()
+        log.info(stacktrace)
+        log.info(str(e))
+        abort(500)
 
 
 @authentication.route('/logout', methods=['GET', 'POST'])
