@@ -188,6 +188,9 @@ def session_info():
     try:
         user_id = ''
         username = ''
+        fullname = ''
+        psap_id = None
+        psap_name = None
         layout = None
         if 'user_id' in session:
             user_id = session['user_id']
