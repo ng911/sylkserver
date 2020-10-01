@@ -164,7 +164,9 @@ def login():
                 # we create an oauth access tokem and store it in the session to be used by the client
                 # the client can access it using the session cookie
 
-                add_logged_in(str(form.user.user_id), str(form.user.psap_id))
+                # a super user may not have a psap id
+                if psap_id != "" and psap_id != None:
+                    add_logged_in(str(form.user.user_id), str(form.user.psap_id))
                 return redirect(next or url_for('/'))
             except Exception as e:
                 stacktrace = traceback.format_exc()
