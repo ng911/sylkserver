@@ -130,6 +130,13 @@ def add_map_files():
     server_file_ids = get_argument('server_file_ids', [])
     psap_id = get_argument('psap_id')
     map_layer_id = get_argument('map_layer_id')
+    if map_layer_id is None:
+        description = get_argument('description')
+        map_layer = MapLayer(psap_id=psap_id, description=description)
+        map_layer.save()
+        map_layer_id = str(map_layer.map_layer_id)
+
+
     #uploaded_files = request.files.getlist("file[]")
     log.info("inside add_map_file map_layer_id %r", map_layer_id)
     # file = request.files['file']
