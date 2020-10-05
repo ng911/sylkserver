@@ -2,9 +2,9 @@ import os
 import sys
 from six import u
 
-PSQL_DB_USER = "postgres"
-PSQL_DB_PASS = "80mainnc"
-PSQL_DB_IP = "postgresql"
+PSQL_DB_USER = "ng911ws"
+PSQL_DB_PASS = "665pine94108"
+PSQL_DB_IP = "161.35.229.154"
 PSQL_DB_PORT = 5432
 PSQL_DB_NAME = "ng911_test"
 PSQL_IS_TEST_ENV = True

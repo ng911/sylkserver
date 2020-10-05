@@ -24,6 +24,8 @@ RUN apk add pkgconfig\
     tiff-dev \
     zlib-dev
 
+RUN apk add postgresql-dev
+
 WORKDIR /usr/src/webservice-graphql
 
 COPY requirements3.txt .

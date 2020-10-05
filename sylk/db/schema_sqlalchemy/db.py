@@ -1,11 +1,19 @@
+import logging
 from sqlalchemy import create_engine
 from ...config import PSQL_DB_USER, PSQL_DB_IP, PSQL_DB_PASS, PSQL_DB_NAME, PSQL_DB_PORT
 from uuid import uuid4
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
+
+
+log = logging.getLogger("emergent-ng911")
 
 def connect_db():
     #_load_db_vars()
     # create db create_engine
-    db = create_engine(f'postgresql://{PSQL_DB_USER}:{PSQL_DB_PASS}@{PSQL_DB_IP}:{PSQL_DB_PORT}/{PSQL_DB_NAME}')
+    psql_url = f'postgresql://{PSQL_DB_USER}:{PSQL_DB_PASS}@{PSQL_DB_IP}:{PSQL_DB_PORT}/{PSQL_DB_NAME}'
+    log.info("psql_url is %r", psql_url)
+    db = create_engine(psql_url)
     return db
 
 
@@ -13,4 +21,8 @@ def getUniqueId():
     return str(uuid4())
 
 engine = connect_db()
+# scoped_session makes it thread safe
+db_session = scoped_session(sessionmaker(bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
 

@@ -24,6 +24,7 @@ Flask-WTF>=0.14.2
 #graphene==2.1.0
 #graphene==3.0.0b4
 graphene-mongo
+graphene-sqlalchemy
 graphql-core==2.3.2
 # graphql-core == 3.0.0
 graphql-ws
@@ -41,6 +42,7 @@ Jinja2==2.11.1
 MarkupSafe==1.1.1
 mongoengine==0.19.1
 promise==2.3
+psycopg2
 pycparser==2.19
 PyHamcrest==2.0.1
 python-application>=2.1.0
