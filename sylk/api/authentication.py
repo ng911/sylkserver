@@ -193,6 +193,7 @@ def session_info():
         psap_id = None
         psap_name = None
         layout = None
+        layout_v2 = None
         if 'user_id' in session:
             user_id = session['user_id']
             if (user_id is not None) and (user_id != ''):
@@ -206,6 +207,8 @@ def session_info():
                     ip_address = request.remote_addr
                     if hasattr(user_obj, 'layout'):
                         layout = user_obj.layout
+                    if hasattr(user_obj, 'layout_v2'):
+                        layout_v2 = user_obj.layout_v2
                     log.info("session_info ip_address is %r", ip_address)
                     try:
                         station_db_obj = CalltakerStation.objects.get(ip_address=ip_address)
@@ -217,7 +220,7 @@ def session_info():
                     pass
         initial_data = {'user_id': user_id, 'username': username, 'fullname' : fullname,
                         'psap_id' : psap_id, 'psap_name' : psap_name,
-                        'layout' : layout}
+                        'layout' : layout, 'layout_v2' : layout_v2 }
         if 'access_token' in session:
             log.debug("found access_token in session")
             initial_data['access_token'] = session['access_token']
