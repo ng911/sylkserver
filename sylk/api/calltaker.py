@@ -211,6 +211,21 @@ def get_layout(user_id):
         }
     return response
 
+@calltaker.route('/layout/v2/<user_id>', methods=['GET'])
+@check_exceptions
+def get_layout_v2(user_id):
+    userObj = User.objects.get(user_id=user_id)
+    if hasattr(userObj, "layout_v2") and userObj.layout_v2 != None and userObj.layout_v2 != {}:
+        response = {
+            'success': True,
+            'layout' : userObj.layout_v2
+        }
+    else:
+        response = {
+            'success': True,
+            'layout': None
+        }
+    return response
 
 @calltaker.route('/layout/<user_id>', methods=['POST', 'PUT'])
 @check_exceptions
@@ -228,6 +243,23 @@ def update_layout(user_id):
 
     return response
 
+@calltaker.route('/layout/v2/<user_id>', methods=['POST', 'PUT'])
+@check_exceptions
+def update_layout_v2(user_id):
+    log.info('update_layout for %r', user_id)
+    layout = get_argument('layout')
+    userObj = User.objects.get(user_id=user_id)
+    userObj.layout_v2 = layout
+    userObj.save()
+
+    response = {
+        'success' : True,
+        'update_time' : time.time()
+    }
+
+    return response
+
+
 @calltaker.route('/layout/all/<psap_id>', methods=['POST', 'PUT'])
 @check_exceptions
 def update_layout_all(psap_id):
@@ -235,6 +267,22 @@ def update_layout_all(psap_id):
     layout = get_argument('layout')
     for userObj in User.objects(psap_id=psap_id):
         userObj.layout = layout
+        userObj.save()
+
+    response = {
+        'success' : True,
+        'update_time' : time.time()
+    }
+
+    return response
+
+@calltaker.route('/layout/v2/all/<psap_id>', methods=['POST', 'PUT'])
+@check_exceptions
+def update_layout_v2_all(psap_id):
+    log.info('update_layout all for %r', psap_id)
+    layout = get_argument('layout')
+    for userObj in User.objects(psap_id=psap_id):
+        userObj.layout_v2 = layout
         userObj.save()
 
     response = {

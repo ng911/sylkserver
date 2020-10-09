@@ -96,6 +96,7 @@ class User(Document):
     roles=ListField(field=ObjectIdField())
     skillsets=ListField(field=ObjectIdField())
     layout = DictField(required=False)
+    layout_v2 = DictField(required=False)
     meta = {
         'indexes': [
             'user_id',
