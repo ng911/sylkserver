@@ -1,8 +1,9 @@
 from datetime import datetime
 import bcrypt
+import enum
 
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, UniqueConstraint, \
-    Sequence, Float,PrimaryKeyConstraint, ForeignKey
+    Sequence, Float, PrimaryKeyConstraint, ForeignKey, ARRAY, PickleType, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
@@ -10,10 +11,45 @@ from .db import engine, getUniqueId, Base
 from .psap import Psap
 
 
+class Role(Base):
+    name = Column(String)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+
+class UserGroup(Base):
+    name = Column(String)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    permissions = Column(ARRAY())
+
+class SkillSet(Base):
+    name = Column(String, unique=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+
+class UserPermission(Base):
+    name = Column(String, unique=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+
+    @classmethod
+    def create_permissions(cls):
+        permissions = ["Answer 911 calls", "Monitor 911 Calls", "Barge In", \
+                       "Admin Lines", \
+                       "Create PSAPs", "PSAP Admin", \
+                       "Create Users", "PSAP Routing", \
+                       "Access Reports"
+                       ]
+        for permission in permissions:
+            try:
+                userPermission = UserPermission.query.filter(name=permission)
+            except DoesNotExist:
+                userPermission = UserPermission()
+                userPermission.name = permission
+                userPermission.save()
+
+
 class User(Base):
     __tablename__ = "user"
     user_id = Column(String, primary_key=True, default=getUniqueId)
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    secondary_psap_id = Column(String, ForeignKey(Psap.psap_id))
     status = Column(String, nullable=False, default='offline')
     username = Column(String, nullable=False, index=True)
     fullname = Column(String, nullable=True, index=False)
@@ -24,6 +60,9 @@ class User(Base):
     is_available = Column(Boolean, default=False, nullable=False)
     extension = Column(String, nullable=True, index=True)
     station_id = Column(String, nullable=True, index=False)
+    roles = Column(ARRAY(Role))
+    skillsets = Column(ARRAY(SkillSet))
+    layout = Column(PickleType)
 
     def check_password(self, password):
         password = password.encode('utf-8')
@@ -37,6 +76,34 @@ class User(Base):
         password = password.encode('utf-8')
         return bcrypt.hashpw(password, bcrypt.gensalt(10)).decode('utf-8')
 
+    @classmethod
+    def add_user(cls, username, password):
+        user = User()
+        user.username = username
+        #if isinstance(password, unicode):
+        # py3 compatible replacement below
+        if isinstance(password, six.text_type):
+            password = password.encode('ascii')
+        user.password_hash = User.generate_password_hash(password)
+        user.is_active = True
+        user.roles = ['admin', 'calltaker']
+        log.info("user.password_hash is %r", user.password_hash)
+        user.save()
+        return  user
+
+    @classmethod
+    def add_user_psap(cls, username, password, psap_id):
+        user = User()
+        user.psap_id = psap_id
+        user.username = username
+        #if isinstance(password, unicode):
+        # py3 compatible replacement below
+        user.password_hash = User.generate_password_hash(password)
+        user.is_active = True
+        user.roles = ['admin', 'calltaker']
+        log.info("user.password_hash is %r", user.password_hash)
+        user.save()
+        return  user
 '''
 add these later
     group_id = ObjectIdField()
@@ -45,4 +112,54 @@ add these later
     layout = DictField(required=False)
 '''
 
+class CalltakerStation(Base):
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    station_id = Column(String, nullable=False, unique=True)
+    ip_address = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False, unique=True)
+    loud_ring_server = Column(Boolean)
 
+
+class CalltakerProfile(Base):
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    profile_id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=True)
+    incoming_ring = Column(Boolean, default=True)
+    ringing_server_volume = Column(Integer, min_value=0, max_value=100, default=50)
+    incoming_ring_level = Column(Integer, min_value=0, max_value=100, default=50)
+    ring_delay = Column(Integer, min_value=0, default=0)
+    auto_respond = Column(Boolean, default=False)
+    auto_respond_after = Column(Integer, min_value=0, default=10)
+    
+
+    @classmethod
+    def get_default_profile(cls):
+        return {
+            "incoming_ring" : True,
+            "ringing_server_volume" : 50,
+            "incoming_ring_level" : 50,
+            "ring_delay" : 0,
+            "auto_respond" : False,
+            "auto_respond_after" : 10
+        }
+
+
+class Event(enum.Enum):
+    'login' = 'login'
+    'made_busy' = 'made_busy'
+    'dial_out' = 'dial_out'
+    'join_call' = 'join_call'
+    'answer_call' = 'answer_call'
+    'hang_up' = 'hang_up'
+    'logout' = 'logout'
+    'rebid' = 'rebid'
+
+class CalltakerActivity(Document):
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
+    event = Column(Enum(Event), nullable=False)
+    event_details = Column(String)
+    event_num_data = Column(Float)
+    start_time = Column(DateTime, default=datetime.datetime.utcnow)
+    #end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
+    
