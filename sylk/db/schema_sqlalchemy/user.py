@@ -3,7 +3,7 @@ import bcrypt
 import enum
 
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, UniqueConstraint, \
-    Sequence, Float, PrimaryKeyConstraint, ForeignKey, ARRAY, PickleType, Enum
+    Sequence, Float, PrimaryKeyConstraint, ForeignKey, ARRAY, PickleType, Enum, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
@@ -125,12 +125,15 @@ class CalltakerProfile(Base):
     profile_id = Column(String, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.user_id), nullable=True)
     incoming_ring = Column(Boolean, default=True)
-    ringing_server_volume = Column(Integer, min_value=0, max_value=100, default=50)
-    incoming_ring_level = Column(Integer, min_value=0, max_value=100, default=50)
-    ring_delay = Column(Integer, min_value=0, default=0)
+    ringing_server_volume = Column(Integer, default=50)
+    incoming_ring_level = Column(Integer, default=50)
+    ring_delay = Column(Integer, default=0)
     auto_respond = Column(Boolean, default=False)
-    auto_respond_after = Column(Integer, min_value=0, default=10)
-    
+    auto_respond_after = Column(Integer, default=10)
+    __table_args__ = (
+        CheckConstraint(0<=ringing_server_volume<=100), CheckConstraint(0<=incoming_ring_level<=100), 
+        CheckConstraint(ring_delay>=0), CheckConstraint(auto_respond_after>=0)
+        )
 
     @classmethod
     def get_default_profile(cls):
