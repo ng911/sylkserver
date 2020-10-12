@@ -98,7 +98,8 @@ async def resolve_subscription_relay_helper(node, model, arguments_data, change_
     loop = get_event_loop()
     future_data = []
     loop.create_task(
-        wait_for_db_change(future_data, node, model, model._get_collection_name(), arguments_data, change_type=change_type, test_change_lambda=test_change_lambda))
+        wait_for_db_change(future_data, node, model, model._get_collection_name(), arguments_data, \
+                           change_type=change_type, test_change_lambda=test_change_lambda))
     while True:
         future_data.clear()
         future = Future()
@@ -112,14 +113,15 @@ async def resolve_subscription_relay_helper(node, model, arguments_data, change_
 async def resolve_subscription_for_relay_new_node(node, args):
     log.info("inside wrapped")
     model = node._meta.model
-    resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NEW_NODE)
+    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NEW_NODE)
 
 async def resolve_subscription_for_relay_node(node, **args):
     log.info("inside wrapped")
     model = node._meta.model
-    resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NODE)
+    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NODE)
 
 async def resolve_subscription_for_relay_connection(node, model, args, test_change_lambda=None):
+    yield node()
     await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.CONNECTION, test_change_lambda)
 
 def subsribe_for_node(node, is_new=False):
