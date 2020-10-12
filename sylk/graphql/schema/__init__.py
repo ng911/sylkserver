@@ -126,13 +126,13 @@ class Subscriptions(graphene.ObjectType):
 
     async def resolve_psap_admin_line_groups(root, info, **args):
         psap_id = args["psap_id"]
-        resolve_subscription_for_relay_connection(PsapAdminLineGroupsNode, AdminLineGroupModel, args, \
+        await resolve_subscription_for_relay_connection(PsapAdminLineGroupsNode, AdminLineGroupModel, args, \
                                                   lambda fields_json:  \
                                                     "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
 
     async def resolve_psap_admin_lines(root, info, **args):
         psap_id = args["psap_id"]
-        resolve_subscription_for_relay_connection(PsapAdminLinesNode, AdminLineModel, args, \
+        await resolve_subscription_for_relay_connection(PsapAdminLinesNode, AdminLineModel, args, \
                                                   lambda fields_json:  \
                                                     "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
 
