@@ -4,7 +4,7 @@ from graphene import Field, String
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
-from ..fields import EnhancedConnection
+from ..fields import EnhancedConnection, OrderedMongoengineConnectionField
 from ..utiils import update_params_with_args
 from ...db.schema import AdminLine as AdminLineModel
 from ...db.schema import AdminLineGroup as AdminLineGroupModel
@@ -33,6 +33,42 @@ class AdminLineGroupNode(MongoengineObjectType):
 
     def resolve_admin_lines(parent, info, **args):
         return AdminLineModel.objects(group_id = parent.group_id)
+
+
+class PsapAdminLineGroupsNode(MongoengineObjectType):
+    '''
+    Used for subscriptions
+    '''
+    class Meta:
+        interfaces = (Node,)
+    admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode)
+
+    @classmethod
+    def get_node(cls, info, id):
+        return f"PsapAdminLineGroupsNode{id}"
+
+    def resolve_admin_line_groups(parent, info, **args):
+        params = { 'psap_id' : parent.psap_id }
+        update_params_with_args(params, args)
+        return AdminLineGroupModel.objects(**params)
+
+
+class PsapAdminLinesNode(MongoengineObjectType):
+    '''
+    Used for subscriptions
+    '''
+    class Meta:
+        interfaces = (Node,)
+    admin_lines = OrderedMongoengineConnectionField(AdminLineNode)
+
+    @classmethod
+    def get_node(cls, info, id):
+        return f"PsapAdminLinesNode{id}"
+
+    def resolve_admin_lines(parent, info, **args):
+        params = { 'psap_id' : parent.psap_id }
+        update_params_with_args(params, args)
+        return AdminLineModel.objects(**params)
 
 
 def resolveAdminLineServers(parent, info, **args):

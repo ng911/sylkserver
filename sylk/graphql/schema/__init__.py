@@ -12,14 +12,16 @@ from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
-from ..decorators import subsribe_for_node, subsribe_for_connection
+from ..decorators import subsribe_for_node, subsribe_for_connection, resolve_subscription_for_relay_connection
 from ...db.schema import User as UserModel
 from .user import PsapUsersNode, UserPermissionNode, UserGroupNode, RoleNode, SkillsetNode
 from .calls import PsapConferenceNode
 from ...db.schema import Conference as ConferenceModel
 from .message import MessageNode, PsapMessageNode
 from ...db.schema import ConferenceMessage as ConferenceMessageModel
-from .admin_line import AdminLineNode, AdminLineGroupNode
+from ...db.schema import AdminLineGroup as AdminLineGroupModel
+from ...db.schema import AdminLine as AdminLineModel
+from .admin_line import AdminLineNode, AdminLineGroupNode, PsapAdminLineGroupsNode, PsapAdminLinesNode
 from .admin_line import CreteAdminLineGroupMutation, CreteAdminLineMutation
 from .admin_line import UpdateAdminLineGroupMutation, UpdateAdminLineMutation
 from .admin_line import DeleteAdminLineGroupMutation, DeleteAdminLineMutation
@@ -74,7 +76,17 @@ class Subscriptions(graphene.ObjectType):
     message_data = graphene.Field(MessageNode, room_number=graphene.String(required=True))
     psap_messages = graphene.Field(PsapMessageNode)
     new_call = graphene.Field(ConferenceNode)
-    all_calls = MongoengineConnectionField(ConferenceNode)
+    #all_calls = MongoengineConnectionField(ConferenceNode)
+    psap_admin_line_groups = graphene.Field(PsapAdminLineGroupsNode, psap_id=graphene.String(required=True))
+    psap_admin_lines = graphene.Field(PsapAdminLinesNode, psap_id=graphene.String(required=True))
+    '''
+    add one by one
+    psap_admin_lines = MongoengineConnectionField(PsapAdminLineNode)
+    psap_active_911_calls = MongoengineConnectionField(PsapActive911Call)
+    psap_active_admin_calls = MongoengineConnectionField(PsapActiveAdminCalls)
+    psap_recent_calls = MongoengineConnectionField(PsapRecentCalls)
+    user_recent_calls = MongoengineConnectionField(UserRecentCalls)
+    '''
 
     @subsribe_for_node(PsapUsersNode)
     async def resolve_user_data(root, info, **args):
@@ -96,10 +108,13 @@ class Subscriptions(graphene.ObjectType):
     async def resolve_psap_calls(root, info, **args):
         pass
 
+    '''
+    enable later 
     @subsribe_for_connection(ConferenceNode, ConferenceModel, experimantal=True)
     async def resolve_all_calls(root, info, **args):
         #return ConferenceModel.objects()
         pass
+    '''
 
     @subsribe_for_node(MessageNode)
     async def resolve_message_data(root, info, **args):
@@ -108,6 +123,18 @@ class Subscriptions(graphene.ObjectType):
     @subsribe_for_connection(MessageNode, ConferenceMessageModel)
     async def resolve_psap_messages(root, info, **args):
         pass
+
+    async def resolve_psap_admin_line_groups(root, info, **args):
+        psap_id = args["psap_id"]
+        resolve_subscription_for_relay_connection(PsapAdminLineGroupsNode, AdminLineGroupModel, args, \
+                                                  lambda fields_json:  \
+                                                    "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
+
+    async def resolve_psap_admin_lines(root, info, **args):
+        psap_id = args["psap_id"]
+        resolve_subscription_for_relay_connection(PsapAdminLinesNode, AdminLineModel, args, \
+                                                  lambda fields_json:  \
+                                                    "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
 
 
 class Mutations(graphene.ObjectType):
