@@ -98,6 +98,7 @@ class User(Document):
     layout = DictField(required=False)
     layout_v2 = DictField(required=False)
     meta = {
+        'strict': False,
         'indexes': [
             'user_id',
             'username',

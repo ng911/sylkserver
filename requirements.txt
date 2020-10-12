@@ -5,6 +5,7 @@ autobahn==18.3.1
 Automat==0.6.0
 backports.functools-lru-cache==1.5
 bcrypt==3.1.4
+blinker==1.4
 bson>=0.5.2
 certifi==2018.1.18
 cffi==1.11.5
@@ -49,6 +50,7 @@ requests==2.18.4
 requests-oauthlib==0.8.0
 service-identity==17.0.0
 six==1.11.0
+treq
 Twisted==17.9.0
 txaio==2.9.0
 urllib3==1.22
