@@ -35,7 +35,7 @@ class AdminLineGroupNode(MongoengineObjectType):
         return AdminLineModel.objects(group_id = parent.group_id)
 
 
-class PsapAdminLineGroupsNode(MongoengineObjectType):
+class PsapAdminLineGroupsNode(graphene.ObjectType):
     '''
     Used for subscriptions
     '''
@@ -53,7 +53,7 @@ class PsapAdminLineGroupsNode(MongoengineObjectType):
         return AdminLineGroupModel.objects(**params)
 
 
-class PsapAdminLinesNode(MongoengineObjectType):
+class PsapAdminLinesNode(graphene.ObjectType):
     '''
     Used for subscriptions
     '''
