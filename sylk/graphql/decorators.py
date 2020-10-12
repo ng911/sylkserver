@@ -120,7 +120,7 @@ async def resolve_subscription_for_relay_node(node, **args):
     resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NODE)
 
 async def resolve_subscription_for_relay_connection(node, model, args, test_change_lambda=None):
-    resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.CONNECTION, test_change_lambda)
+    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.CONNECTION, test_change_lambda)
 
 def subsribe_for_node(node, is_new=False):
     log.info("inside subsribe_for_node")
