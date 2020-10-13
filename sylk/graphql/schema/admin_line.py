@@ -5,7 +5,7 @@ from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 
 from ..fields import EnhancedConnection, OrderedMongoengineConnectionField
-from ..utiils import update_params_with_args
+from ..utiils import update_params_with_args, update_params_for_subscriptions
 from ...db.schema import AdminLine as AdminLineModel
 from ...db.schema import AdminLineGroup as AdminLineGroupModel
 try:
@@ -48,7 +48,8 @@ class PsapAdminLineGroupsNode(graphene.ObjectType):
         return f"PsapAdminLineGroupsNode{id}"
 
     def resolve_admin_line_groups(parent, info, **args):
-        params = { 'psap_id' : parent.psap_id }
+        params = {}
+        update_params_for_subscriptions(params, parent)
         update_params_with_args(params, args)
         return AdminLineGroupModel.objects(**params)
 
@@ -66,7 +67,8 @@ class PsapAdminLinesNode(graphene.ObjectType):
         return f"PsapAdminLinesNode{id}"
 
     def resolve_admin_lines(parent, info, **args):
-        params = { 'psap_id' : parent.psap_id }
+        params = {}
+        update_params_for_subscriptions(params, parent)
         update_params_with_args(params, args)
         return AdminLineModel.objects(**params)
 

@@ -12,7 +12,7 @@ from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
 from .speed_dial import SpeedDialNode, SpeedDialGroupNode
 from .calls import ConferenceNode, resolveCalls, resolveActiveCall
-from ..decorators import subsribe_for_node, subsribe_for_connection, resolve_subscription_for_relay_connection
+from ..decorators import subsribe_for_node, subsribe_for_connection
 from ...db.schema import User as UserModel
 from .user import PsapUsersNode, UserPermissionNode, UserGroupNode, RoleNode, SkillsetNode
 from .calls import PsapConferenceNode
@@ -124,18 +124,20 @@ class Subscriptions(graphene.ObjectType):
     async def resolve_psap_messages(root, info, **args):
         pass
 
+    @subsribe_for_connection(PsapAdminLineGroupsNode, AdminLineGroupModel)
     async def resolve_psap_admin_line_groups(root, info, **args):
-        psap_id = args["psap_id"]
-        await resolve_subscription_for_relay_connection(PsapAdminLineGroupsNode, AdminLineGroupModel, args, \
-                                                  lambda fields_json:  \
-                                                    "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
+        pass
 
+    @subsribe_for_connection(PsapAdminLinesNode, AdminLineModel)
     async def resolve_psap_admin_lines(root, info, **args):
-        psap_id = args["psap_id"]
-        await resolve_subscription_for_relay_connection(PsapAdminLinesNode, AdminLineModel, args, \
-                                                  lambda fields_json:  \
-                                                    "psap_id" in fields_json and fields_json["psap_id"] == psap_id)
+        pass
 
+
+def test_resolve():
+    log.info("inside test_resolve")
+    #up_to = 10
+    #for i in range(up_to):
+    #    yield PsapAdminLinesNode()
 
 class Mutations(graphene.ObjectType):
     update_user = UpdateUserMutation.Field()

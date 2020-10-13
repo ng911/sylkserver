@@ -13,7 +13,7 @@ class WaitForDbChangeType(Enum):
 
 
 async def wait_for_db_change(future_data, node, model, schema_name, arguments_data, \
-                             change_type=WaitForDbChangeType.NODE, test_change_lambda=None):
+                             change_type=WaitForDbChangeType.NODE):
     from ..wamp_asyncio import get_wamp_session
     wamp_session = get_wamp_session()
 
@@ -31,18 +31,19 @@ async def wait_for_db_change(future_data, node, model, schema_name, arguments_da
             log.info("got json_data")
             #model = root._meta.model
             if change_type == WaitForDbChangeType.CONNECTION:
-                do_notify = False
-                if test_change_lambda != None:
+                send_notification = True
+                if arguments_data != None:
                     document_json = json_data['document_json']
                     modelObj = model.from_json(document_json)
-                    if test_change_lambda(modelObj):
-                        do_notify = True
-                else:
-                    do_notify = True
-                if do_notify:
+                    for arg, val in arguments_data.items():
+                        if getattr(modelObj, arg) != val:
+                            send_notification = False
+                if send_notification:
                     future = future_data[0]
                     if not future.done():
-                        future.set_result(node())
+                        node_obj = node(kwargs)
+                        node_obj.arguments = kwargs
+                        future.set_result(node_obj)
             elif change_type == WaitForDbChangeType.CONNECTION_TEST:
                 future = future_data[0]
                 if not future.done():
@@ -90,51 +91,12 @@ async def wait_for_db_change(future_data, node, model, schema_name, arguments_da
         log.error("exception in wamp_session.subscribe")
 
 
-from asyncio import get_event_loop, Future
-
-async def resolve_subscription_relay_helper(node, model, arguments_data, change_type, test_change_lambda=None):
-    log.info("inside wrapped model is %r", model)
-    log.info("inside resolve_user kwargs is %r", arguments_data)
-    loop = get_event_loop()
-    future_data = []
-    loop.create_task(
-        wait_for_db_change(future_data, node, model, model._get_collection_name(), arguments_data, \
-                           change_type=change_type, test_change_lambda=test_change_lambda))
-    while True:
-        future_data.clear()
-        future = Future()
-        future_data.append(future)
-        await future
-        log.info("await future done")
-        result = future.result()
-        log.info("got result %r", result)
-        yield result
-
-async def resolve_subscription_for_relay_new_node(node, args):
-    log.info("inside wrapped")
-    model = node._meta.model
-    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NEW_NODE)
-
-async def resolve_subscription_for_relay_node(node, **args):
-    log.info("inside wrapped")
-    model = node._meta.model
-    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.NODE)
-
-async def resolve_subscription_for_relay_connection(node, model, args, test_change_lambda=None):
-    yield node()
-    await resolve_subscription_relay_helper(node, model, args, WaitForDbChangeType.CONNECTION, test_change_lambda)
-
 def subsribe_for_node(node, is_new=False):
-    log.info("inside subsribe_for_node")
     def decorator(func):
-        log.info("inside decorator")
         @functools.wraps(func)
         async def wrapped(*args, **kwargs):
             from asyncio import get_event_loop, Future
-            log.info("inside wrapped")
             model = node._meta.model
-            log.info("inside wrapped model is %r", model)
-            log.info("inside resolve_user kwargs is %r", kwargs)
             loop = get_event_loop()
             future_data = []
             change_type = WaitForDbChangeType.NODE
@@ -147,7 +109,6 @@ def subsribe_for_node(node, is_new=False):
                 future = Future()
                 future_data.append(future)
                 await future
-                log.info("await future done")
                 result = future.result()
                 log.info("got result %r", result)
                 yield result
@@ -163,7 +124,6 @@ def subsribe_for_connection(node, model, experimantal=False):
         @functools.wraps(func)
         async def wrapped(*args, **kwargs):
             from asyncio import get_event_loop, Future
-            log.info("inside wrapped")
             loop = get_event_loop()
             future_data = []
             if experimantal:
@@ -173,6 +133,9 @@ def subsribe_for_connection(node, model, experimantal=False):
             loop.create_task(wait_for_db_change(future_data, node, model, model._get_collection_name(), kwargs,
                                                 change_type=change_type))
             while True:
+                node_obj = node(kwargs)
+                node_obj.arguments = kwargs
+                yield node_obj
                 future_data.clear()
                 future = Future()
                 future_data.append(future)

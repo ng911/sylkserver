@@ -7,4 +7,10 @@ def update_params_with_args(params, args):
     return params
 
 
+def update_params_for_subscriptions(params, parent):
+    if hasattr(parent, 'arguments'):
+        arguments = parent.arguments
+        for name, value in arguments.items():
+            params[name] = value
+
 
