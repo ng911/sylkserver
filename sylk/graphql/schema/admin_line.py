@@ -53,6 +53,27 @@ class PsapAdminLineGroupsNode(graphene.ObjectType):
         update_params_with_args(params, args)
         return AdminLineGroupModel.objects(**params)
 
+from ...db.schema import Conference as ConferenceModel
+from .calls import ConferenceNode
+
+class PsapActiveAdminLinesNode(graphene.ObjectType):
+    '''
+    Used for subscriptions
+    '''
+    class Meta:
+        interfaces = (Node,)
+    active_admin_lines = OrderedMongoengineConnectionField(ConferenceNode)
+
+    @classmethod
+    def get_node(cls, info, id):
+        return f"PsapActiveAdminLinesNode{id}"
+
+    def resolve_active_admin_lines(parent, info, **args):
+        params = {"call_type__in" : ["admin"]}
+        update_params_for_subscriptions(params, parent)
+        update_params_with_args(params, args)
+        return ConferenceModel.objects(**params)
+
 
 class PsapAdminLinesNode(graphene.ObjectType):
     '''

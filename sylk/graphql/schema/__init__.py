@@ -67,6 +67,7 @@ class Query(graphene.ObjectType):
     def resolve_psap_user_groups(parent, info, **args):
         return resolveUserGroups(parent, info, **args)
 
+from .admin_line import PsapActiveAdminLinesNode
 
 class Subscriptions(graphene.ObjectType):
     user_data = graphene.Field(UserNode, username=graphene.String(required=True))
@@ -78,7 +79,9 @@ class Subscriptions(graphene.ObjectType):
     new_call = graphene.Field(ConferenceNode)
     #all_calls = MongoengineConnectionField(ConferenceNode)
     psap_admin_line_groups = graphene.Field(PsapAdminLineGroupsNode, psap_id=graphene.String(required=True))
-    psap_admin_lines = graphene.Field(PsapAdminLinesNode, psap_id=graphene.String(required=True))
+    psap_admin_lines = graphene.Field(PsapAdminLinesNode, psap_id=graphene.String(required=True), \
+                                      group_id=graphene.String(required=False))
+    psap_active_admin_lines = graphene.Field(PsapActiveAdminLinesNode, psap_id=graphene.String(required=True))
     '''
     add one by one
     psap_admin_lines = MongoengineConnectionField(PsapAdminLineNode)
@@ -108,6 +111,9 @@ class Subscriptions(graphene.ObjectType):
     async def resolve_psap_calls(root, info, **args):
         pass
 
+    @subsribe_for_connection(PsapActiveAdminLinesNode, ConferenceModel)
+    async def resolve_psap_active_admin_lines(root, info, **args):
+        pass
     '''
     enable later 
     @subsribe_for_connection(ConferenceNode, ConferenceModel, experimantal=True)
