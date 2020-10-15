@@ -34,66 +34,6 @@ class AdminLineGroupNode(MongoengineObjectType):
     def resolve_admin_lines(parent, info, **args):
         return AdminLineModel.objects(group_id = parent.group_id)
 
-
-class PsapAdminLineGroupsNode(graphene.ObjectType):
-    '''
-    Used for subscriptions
-    '''
-    class Meta:
-        interfaces = (Node,)
-    admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode)
-
-    @classmethod
-    def get_node(cls, info, id):
-        return f"PsapAdminLineGroupsNode{id}"
-
-    def resolve_admin_line_groups(parent, info, **args):
-        params = {}
-        update_params_for_subscriptions(params, parent)
-        update_params_with_args(params, args)
-        return AdminLineGroupModel.objects(**params)
-
-from ...db.schema import Conference as ConferenceModel
-from .calls import ConferenceNode
-
-class PsapActiveAdminLinesNode(graphene.ObjectType):
-    '''
-    Used for subscriptions
-    '''
-    class Meta:
-        interfaces = (Node,)
-    active_admin_lines = OrderedMongoengineConnectionField(ConferenceNode)
-
-    @classmethod
-    def get_node(cls, info, id):
-        return f"PsapActiveAdminLinesNode{id}"
-
-    def resolve_active_admin_lines(parent, info, **args):
-        params = {"call_type__in" : ["admin"]}
-        update_params_for_subscriptions(params, parent)
-        update_params_with_args(params, args)
-        return ConferenceModel.objects(**params)
-
-
-class PsapAdminLinesNode(graphene.ObjectType):
-    '''
-    Used for subscriptions
-    '''
-    class Meta:
-        interfaces = (Node,)
-    admin_lines = OrderedMongoengineConnectionField(AdminLineNode)
-
-    @classmethod
-    def get_node(cls, info, id):
-        return f"PsapAdminLinesNode{id}"
-
-    def resolve_admin_lines(parent, info, **args):
-        params = {}
-        update_params_for_subscriptions(params, parent)
-        update_params_with_args(params, args)
-        return AdminLineModel.objects(**params)
-
-
 def resolveAdminLineServers(parent, info, **args):
     psap_id = args['psap_id']
     # there should only be 1 value in rooms but there is some bug in the code, that is why the logic below
@@ -162,4 +102,5 @@ class DeleteAdminLineGroupMutation(EnhancedClientIDMutation):
             log.error(stacktrace)
             log.error(str(e))
             return DeleteAdminLineGroupMutation(success=False)
+
 

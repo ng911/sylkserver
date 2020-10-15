@@ -24,6 +24,16 @@ class ConferenceParticipantNode(MongoengineObjectType):
         model = ConferenceParticipantModel
         interfaces = (Node,)
 
+    from .admin_line import AdminLineNode
+    admin_line = Field(AdminLineNode)
+
+    def resolve_admin_line(parent, info, **args):
+        from ...db.schema import AdminLine as AdminLineModel
+        if hasattr(parent, "admin_line_id") and parent.admin_line_id != None:
+            return AdminLineModel.objects.get(admin_line_id=parent.admin_line_id)
+        else:
+            return None
+
 
 class ConferenceNode(MongoengineObjectType):
     class Meta:
@@ -35,8 +45,8 @@ class ConferenceNode(MongoengineObjectType):
     caller = Field(String)
     calltakers = List(String)
     latest_location = Field(LocationNode)
-    locations = MongoengineConnectionField(LocationNode)
-    event_logs = MongoengineConnectionField(EventLogNode)
+    locations = OrderedMongoengineConnectionField(LocationNode)
+    event_logs = OrderedMongoengineConnectionField(EventLogNode)
 
     def resolve_duration(parent, info, **args):
         if parent.status == 'active':
@@ -94,6 +104,7 @@ class ConferenceNode(MongoengineObjectType):
             "room_number": parent.room_number
         }
         params = update_params_with_args(params, args)
+        parent.count =  LocationModel.objects(**params).count()
         return LocationModel.objects(**params).order_by('-updated_at')
 
 

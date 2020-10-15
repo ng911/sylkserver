@@ -21,7 +21,8 @@ from .message import MessageNode, PsapMessageNode
 from ...db.schema import ConferenceMessage as ConferenceMessageModel
 from ...db.schema import AdminLineGroup as AdminLineGroupModel
 from ...db.schema import AdminLine as AdminLineModel
-from .admin_line import AdminLineNode, AdminLineGroupNode, PsapAdminLineGroupsNode, PsapAdminLinesNode
+from .admin_line import AdminLineNode, AdminLineGroupNode
+from .admin_line_subscription import PsapAdminLineGroupsNode, PsapAdminLinesNode
 from .admin_line import CreteAdminLineGroupMutation, CreteAdminLineMutation
 from .admin_line import UpdateAdminLineGroupMutation, UpdateAdminLineMutation
 from .admin_line import DeleteAdminLineGroupMutation, DeleteAdminLineMutation
@@ -67,7 +68,7 @@ class Query(graphene.ObjectType):
     def resolve_psap_user_groups(parent, info, **args):
         return resolveUserGroups(parent, info, **args)
 
-from .admin_line import PsapActiveAdminLinesNode
+from .admin_line_subscription import PsapActiveAdminLinesNode
 
 class Subscriptions(graphene.ObjectType):
     user_data = graphene.Field(UserNode, username=graphene.String(required=True))

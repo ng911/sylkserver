@@ -96,6 +96,7 @@ class Conference(Document):
 class ConferenceParticipant(Document):
     psap_id = ObjectIdField()
     room_number = StringField(required=True)
+    admin_line_id = ObjectIdField(required=False)
     sip_uri = StringField()
     name = StringField()
     is_caller = BooleanField(default=False)
