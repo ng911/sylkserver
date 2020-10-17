@@ -2,6 +2,8 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from .db import engine, getUniqueId
 from .psap import Psap
 from .user import User
+from .kamailio import add_psap_domain, add_kamailio_user
+
 
 def create_sample_entries():
     Session = sessionmaker(bind=engine)
@@ -29,6 +31,7 @@ def create_sample_entries():
 
         session.commit()
 
+
 Psap.__table__.create(bind=engine, checkfirst=True)
 User.__table__.create(bind=engine, checkfirst=True)
 
@@ -38,7 +41,8 @@ if PSQL_IS_TEST_ENV:
     create_sample_entries()
 
 __all__ = [
-    'Psap', 'User'
+    'Psap', 'User',
+    'add_psap_domain', 'add_kamailio_user'
 ]
 
 

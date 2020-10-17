@@ -11,7 +11,9 @@ except:
 
 
 def add_update_calltaker(payload, user_id):
+    create_kamailio_user = False
     if user_id == None:
+        create_kamailio_user = True
         userObj = User()
         psap_id = payload['psap_id']
         userObj.psap_id = psap_id
@@ -33,6 +35,7 @@ def add_update_calltaker(payload, user_id):
         userObj.roles = [payload['role']]
     log.info("userObj.roles is %r", userObj.roles)
     userObj.save()
+    username = userObj.username
     if user_id == None:
         user_id = str(userObj.user_id)
     try:
@@ -87,6 +90,10 @@ def add_update_calltaker(payload, user_id):
                 queueMember = QueueMember(user_id=user_id, queue_id= queue_id, psap_id=psap_id)
                 queueMember.save()
 
+    if create_kamailio_user:
+        from .schema_sqlalchemy import add_kamailio_user
+        sip_reg_domain = f"reg.{domain_name}"
+        add_kamailio_user(username, sip_reg_domain)
     log.info("got queues done user_id is %r", user_id)
     return {
         'user_id' : user_id

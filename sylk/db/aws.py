@@ -1,0 +1,92 @@
+import logging
+import json
+import boto3
+try:
+    from sylk.applications import ApplicationLogger
+    log = ApplicationLogger(__package__)
+except:
+    import logging
+    log = logging.getLogger('emergent-ng911')
+
+client = boto3.client('route53')
+
+
+
+def get_hosted_zone_id(zone_name):
+    json_response = client.list_hosted_zones()
+    hosted_zones = json_response["HostedZones"]
+    for zone in hosted_zones:
+        name = zone["Name"]
+        if name == zone_name:
+            zone_id = zone["Id"]
+            return zone_id
+    return None
+
+
+def add_dns_a_record(sub_domain, domain, ip_address):
+    zone_id = get_hosted_zone_id(domain)
+    if zone_id == None:
+        log.error("domain does not exist in Route 53")
+        return False
+
+    response = client.change_resource_record_sets(
+        HostedZoneId=zone_id,
+        ChangeBatch={
+            'Comment': 'string',
+            'Changes': [
+                {
+                    'Action': 'CREATE',
+                    'ResourceRecordSet': {
+                        'Name': sub_domain,
+                        'Type': 'A',
+                        'TTL': 300,
+                        'ResourceRecords': [
+                            {
+                                'Value': ip_address
+                            },
+                        ]
+                    }
+                },
+            ]
+        }
+    )
+
+    resp_meta_data = response["ResponseMetadata"]
+    log.debug(response)
+    return resp_meta_data["HTTPStatusCode"] == 200
+
+
+def add_dns_cname_record(sub_domain, domain, value):
+    zone_id = get_hosted_zone_id(domain)
+    if zone_id == None:
+        log.error("domain does not exist in Route 53")
+        return False
+
+    response = client.change_resource_record_sets(
+        HostedZoneId=zone_id,
+        ChangeBatch={
+            'Comment': 'string',
+            'Changes': [
+                {
+                    'Action': 'CREATE',
+                    'ResourceRecordSet': {
+                        'Name': sub_domain,
+                        'Type': 'CNAME',
+                        'TTL': 300,
+                        'ResourceRecords': [
+                            {
+                                'Value': value
+                            },
+                        ]
+                    }
+                },
+            ]
+        }
+    )
+
+    resp_meta_data = response["ResponseMetadata"]
+    log.debug(response)
+    return resp_meta_data["HTTPStatusCode"] == 200
+
+
+

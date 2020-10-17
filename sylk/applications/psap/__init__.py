@@ -74,6 +74,7 @@ class RoomData(object):
                  'invitation_timer', 'ringing_duration_timer', 'duration_timer',
                  'participants', 'status', 'hold_timer', 'acd_strategy',
                  'ignore_calltakers', 'start_timestamp', 'chat_stream', 'psap_id',
+                 'calltaker_server',
                  'incident_id', 'incident_details']
     def __init__(self):
         self.ignore_calltakers = []
@@ -89,6 +90,7 @@ class RoomData(object):
         self.chat_stream = None
         self.has_audio = False
         self.has_video = False
+        self.calltaker_server = ServerConfig.asterisk_server
         self.incident_id = None
         self.incident_details = None
         self.calltaker_video_streams = None
@@ -299,6 +301,7 @@ class PSAPApplication(SylkApplication):
     def create_room(self, incoming_session, call_type, direction, acd_strategy=None, text_only=False,
                     has_audio=True, has_video=False,
                     psap_id=ServerConfig.psap_id,
+                    calltaker_server=ServerConfig.asterisk_server,
                     incident_id=None, incident_details=None):
         room_number = uuid4().hex
         room = Room(psap_id, room_number, text_only)
@@ -318,6 +321,7 @@ class PSAPApplication(SylkApplication):
         room_data.hold_timer = None
         room_data.acd_strategy = acd_strategy
         room_data.psap_id = psap_id
+        room_data.calltaker_server = calltaker_server
         room_data.incident_id = incident_id
         room_data.incident_details = incident_details
 
@@ -437,6 +441,7 @@ class PSAPApplication(SylkApplication):
         incident_id = None
         incident_details = None
         psap_id = ServerConfig.psap_id
+        calltaker_server = ServerConfig.asterisk_server
         log.info(u'session.request_uri.user is %s' % (session.request_uri.user))
         if session.request_uri.user == "sos":
             log.info(u'call is sos')
@@ -457,11 +462,12 @@ class PSAPApplication(SylkApplication):
                 log.info("found X-Route in header")
                 route_header = headers.get('X-Route', None)
                 if route_header != None:
-                    from ...db.psap import get_psap_from_domain
+                    from ...db.psap import get_psap_from_domain, get_calltaker_server
                     domain = route_header.body
                     log.info("domain is %r", domain)
                     psap_id = get_psap_from_domain(domain)
-                    log.info("psap_id is %r", psap_id)
+                    calltaker_server = get_calltaker_server(domain)
+                    log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
                 else:
                     log.info("route_header not there or bad")
             else:
@@ -568,7 +574,7 @@ class PSAPApplication(SylkApplication):
 
             if call_type == 'sos':
                 session.is_calltaker = False
-                server = ServerConfig.asterisk_server
+                server = calltaker_server
                 if (incoming_link != None) and hasattr(incoming_link, "queue_id") and (incoming_link.queue_id != None):
                     queue_details = get_queue_details(incoming_link.queue_id)
                     queue_members = get_queue_members(incoming_link.queue_id)
@@ -597,7 +603,7 @@ class PSAPApplication(SylkApplication):
                 # add these calltakers to ignore list so we do not bother them again
             elif call_type == 'admin':
                 if admin_user != '':
-                    server = ServerConfig.asterisk_server
+                    server = calltaker_server
                     sip_uris = ["sip:%s@%s" % (admin_user, server)]
                     user_id = get_user_id(admin_user)
                     log.info("sip_uris is %r", sip_uris)
@@ -624,7 +630,7 @@ class PSAPApplication(SylkApplication):
                     session.is_calltaker = True
                     session.calltaker_name = remote_identity.uri.user
                     forward_to_calltaker=True
-                    server = ServerConfig.asterisk_server
+                    server = calltaker_server
                     sip_uri = 'sip:{}@{}'.format(called_number, server)
                     sip_uris = [sip_uri]
 
@@ -638,8 +644,8 @@ class PSAPApplication(SylkApplication):
             (room_number, room_data) = self.create_room(session, call_type, direction=direction,
                                                         acd_strategy=acd_strategy, text_only=has_text,
                                                         has_audio=has_audio, has_video=has_video,
-                                                        psap_id=psap_id, incident_id=incident_id,
-                                                        incident_details=incident_details)
+                                                        psap_id=psap_id, calltaker_server=calltaker_server,
+                                                        incident_id=incident_id, incident_details=incident_details)
             session.room_number = room_number
             if ignore_calltakers is not None:
                 room_data.ignore_calltakers = ignore_calltakers
@@ -843,11 +849,12 @@ class PSAPApplication(SylkApplication):
             self.hook_flash_transfer(room_number, phone_number)
             return
 
+        room_data = self.get_room_data(room_number)
         is_calltaker = False
         calltaker_user = get_calltaker_user(phone_number)
         if calltaker_user != None:
             is_calltaker = True
-            server = ServerConfig.asterisk_server
+            server = room_data.calltaker_server
             sip_uri = "sip:%s@%s" % (phone_number, server)
             self.set_calltaker_busy(user_id=str(calltaker_user.user_id))
         else:
@@ -856,7 +863,6 @@ class PSAPApplication(SylkApplication):
             sip_uri = 'sip:{}@{}'.format(e164_number, outgoing_gateway)
         log.info("sip_uri is %s", sip_uri)
 
-        room_data = self.get_room_data(room_number)
         publish_outgoing_call_status(room_number, call_from, 'ringing')
         outgoing_call_initializer = OutgoingCallInitializer(target_uri=sip_uri, room_uri=self.get_room_uri(room_number),
                                                             caller_identity=room_data.incoming_session.remote_identity,
@@ -1920,14 +1926,14 @@ class PSAPApplication(SylkApplication):
         if (status == 'available') and not janus_busy:
             # check if there are any queued calls
             # mark calls as queued calls
-            server = ServerConfig.asterisk_server
-            sip_uri = "sip:%s@%s" % (username, server)
             (room_number, room_data) = self.get_oldest_call_with_status('ringing_queued', username)
             if room_number is None:
                 (room_number, room_data) = self.get_oldest_call_with_status('ringing', username)
                 if room_number is None:
                     return
 
+            server = room_data.calltaker_server
+            sip_uri = "sip:%s@%s" % (username, server)
             old_status = room_data.status
             if room_data.status != 'ringing':
                 room_data.status = 'ringing'

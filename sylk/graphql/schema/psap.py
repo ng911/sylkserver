@@ -94,10 +94,10 @@ class CreatePsapMutation(graphene.relay.ClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
+        from ...db.psap import create_psap
         name = input.get('name')
         domain_prefix = input.get('domain_prefix')
-        psapObj = PsapModel(name=name, domain=domain_prefix)
-        psapObj.save()
+        psapObj = create_psap(name, domain_prefix)
         return CreatePsapMutation(psap=psapObj)
 
 
