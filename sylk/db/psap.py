@@ -6,7 +6,7 @@ def get_psap_from_domain(domain_name):
     return str(psapObj.psap_id)
 
 def get_calltaker_server(domain_name):
-    sip_reg_domain = f"reg.{domain_name}"
+    sip_reg_domain = "reg.%s" % domain_name
     return sip_reg_domain
 
 def get_psap_name(psap_id):
@@ -34,13 +34,13 @@ def create_psap_domains(domain_name, base_domain="emergentpsap.com", aws_region=
     :param aws_region:
     :return:
     '''
-    admin_domain = f"admin.{domain_name}"
-    sip_reg_domain = f"reg.{domain_name}"
-    sip_proxy_domain = f"proxy.{domain_name}"
+    admin_domain = "admin.%s" % domain_name
+    sip_reg_domain = "reg.%s" % domain_name
+    sip_proxy_domain = "proxy.%s" % domain_name
     website_domain = domain_name
-    base_reg_domain = f"ws.registration.kamailio.{aws_region}.{base_domain}"
-    base_proxy_domain = f"proxy.kamailio.az1.{aws_region}.{base_domain}"
-    base_website_domain = f"web.{aws_region}.{base_domain}"
+    base_reg_domain = "ws.registration.kamailio.%s.%s" % (aws_region, base_domain)
+    base_proxy_domain = "proxy.kamailio.az1.%s.%s" % (aws_region, base_domain)
+    base_website_domain = "web.%s.%s" (aws_region, base_domain)
 
     # create admin site
     add_dns_cname_record(admin_domain, base_domain, base_website_domain)
@@ -52,8 +52,8 @@ def create_psap_domains(domain_name, base_domain="emergentpsap.com", aws_region=
 def create_psap(name, domain_name, base_domain="emergentpsap.com", aws_region="us-west-2"):
     from .schema_sqlalchemy import add_psap_domain
     from .schema import Psap
-    sip_reg_domain = f"reg.{domain_name}"
-    sip_proxy_domain = f"proxy.{domain_name}"
+    sip_reg_domain = "reg.%s" % domain_name
+    sip_proxy_domain = "proxy.%s" % domain_name
     add_psap_domain(sip_proxy_domain)
     add_psap_domain(sip_reg_domain)
     create_psap_domains(domain_name, base_domain, aws_region)
