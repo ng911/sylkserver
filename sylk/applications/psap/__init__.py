@@ -462,12 +462,18 @@ class PSAPApplication(SylkApplication):
                 log.info("found X-Route in header")
                 route_header = headers.get('X-Route', None)
                 if route_header != None:
-                    from ...db.psap import get_psap_from_domain, get_calltaker_server
-                    domain = route_header.body
-                    log.info("domain is %r", domain)
-                    psap_id = get_psap_from_domain(domain)
-                    calltaker_server = get_calltaker_server(domain)
-                    log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
+                    from ...db.psap import get_psap_from_domain, get_calltaker_server, get_domain_from_proxy_domain
+                    proxy_domain = route_header.body
+                    log.info("proxy_domain is %r", proxy_domain)
+                    domain = get_domain_from_proxy_domain(proxy_domain)
+                    if domain != None:
+                        log.info("domain is %r", domain)
+                        psap_id = get_psap_from_domain(domain)
+                        calltaker_server = get_calltaker_server(domain)
+                        log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
+                    else:
+                        log.error("error invalid proxy domain %r", proxy_domain)
+                        psap_id = get_psap_from_domain(proxy_domain)
                 else:
                     log.info("route_header not there or bad")
             else:

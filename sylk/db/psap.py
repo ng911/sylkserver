@@ -5,6 +5,14 @@ def get_psap_from_domain(domain_name):
     psapObj = Psap.objects.get(domain=domain_name)
     return str(psapObj.psap_id)
 
+proxy_prefix = "proxy."
+
+def get_domain_from_proxy_domain(proxy_domain):
+    if proxy_domain.startswith(proxy_prefix):
+        domain = proxy_domain[len(proxy_prefix):]
+        return domain
+    return None
+
 def get_calltaker_server(domain_name):
     sip_reg_domain = "reg.%s" % domain_name
     return sip_reg_domain
