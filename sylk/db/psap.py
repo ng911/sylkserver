@@ -22,6 +22,10 @@ def get_psap_name(psap_id):
     psap_name = psapObj.name
     return psap_name
 
+def get_psap_domain(psap_id):
+    psapObj = Psap.objects.get(psap_id=psap_id)
+    psap_domain = psapObj.domain
+    return psap_domain
 
 def get_overflow_uri(psap_id):
     # todo - add max calls in queue, assume 0 for now

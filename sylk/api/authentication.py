@@ -192,18 +192,22 @@ def session_info():
         fullname = ''
         psap_id = None
         psap_name = None
+        domain = None
+        sip_server = None
         layout = None
         layout_v2 = None
         if 'user_id' in session:
             user_id = session['user_id']
             if (user_id is not None) and (user_id != ''):
                 try:
-                    from ..db.psap import get_psap_name
+                    from ..db.psap import get_psap_name, get_calltaker_server, get_psap_domain
                     user_obj = User.objects.get(user_id=user_id)
                     username = user_obj.username
                     fullname = user_obj.fullname
                     psap_id = str(user_obj.psap_id)
                     psap_name = get_psap_name(psap_id)
+                    domain = get_psap_domain(psap_id)
+                    sip_server = get_calltaker_server(domain)
                     ip_address = request.remote_addr
                     if hasattr(user_obj, 'layout'):
                         layout = user_obj.layout
@@ -220,7 +224,8 @@ def session_info():
                     pass
         initial_data = {'user_id': user_id, 'username': username, 'fullname' : fullname,
                         'psap_id' : psap_id, 'psap_name' : psap_name,
-                        'layout' : layout, 'layout_v2' : layout_v2 }
+                        'layout' : layout, 'layout_v2' : layout_v2,
+                        "sip_server" : sip_server, "domain" : domain }
         if 'access_token' in session:
             log.debug("found access_token in session")
             initial_data['access_token'] = session['access_token']
