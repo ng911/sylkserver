@@ -8,6 +8,7 @@ autobahn==20.6.2
 Automat==20.2.0
 bcrypt==3.1.7
 blinker==1.4
+boto3
 cffi==1.14.0
 Click==7.0
 constantly==15.1.0
