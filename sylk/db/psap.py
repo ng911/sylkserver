@@ -52,7 +52,7 @@ def create_psap_domains(domain_name, base_domain="emergentpsap.com", aws_region=
     website_domain = domain_name
     base_reg_domain = "ws.registration.kamailio.%s.%s" % (aws_region, base_domain)
     base_proxy_domain = "proxy.kamailio.az1.%s.%s" % (aws_region, base_domain)
-    base_website_domain = "web.%s.%s" (aws_region, base_domain)
+    base_website_domain = "web.%s.%s" % (aws_region, base_domain)
 
     # create admin site
     add_dns_cname_record(admin_domain, base_domain, base_website_domain)
