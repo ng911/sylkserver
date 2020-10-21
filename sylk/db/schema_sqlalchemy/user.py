@@ -12,21 +12,23 @@ from .psap import Psap
 
 
 class Role(Base):
-    name = Column(String)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    name = Column(String, index=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
 
 class UserGroup(Base):
-    name = Column(String)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    permissions = Column(ARRAY())
+    name = Column(String, index=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
+    permissions = Column(PickleType)
 
 class SkillSet(Base):
-    name = Column(String, unique=True)
+    name = Column(String)
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    __table_args__ = (UniqueConstraint('name'))
 
 class UserPermission(Base):
-    name = Column(String, unique=True)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    name = Column(String, index=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
+    __table_args__ = (UniqueConstraint('name'))
 
     @classmethod
     def create_permissions(cls):
@@ -47,8 +49,8 @@ class UserPermission(Base):
 
 class User(Base):
     __tablename__ = "user"
-    user_id = Column(String, primary_key=True, default=getUniqueId)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    user_id = Column(String, primary_key=True, default=getUniqueId(), index=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
     secondary_psap_id = Column(String, ForeignKey(Psap.psap_id))
     status = Column(String, nullable=False, default='offline')
     username = Column(String, nullable=False, index=True)
@@ -63,6 +65,7 @@ class User(Base):
     roles = Column(ARRAY(Role))
     skillsets = Column(ARRAY(SkillSet))
     layout = Column(PickleType)
+    __table_args__ = (UniqueConstraint('user_id', 'username', 'password_hash'))
 
     def check_password(self, password):
         password = password.encode('utf-8')
@@ -114,25 +117,27 @@ add these later
 
 class CalltakerStation(Base):
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    station_id = Column(String, nullable=False, unique=True)
-    ip_address = Column(String, nullable=False, unique=True)
-    name = Column(String, nullable=False, unique=True)
+    station_id = Column(String, nullable=False, index=True)
+    ip_address = Column(String, nullable=False)
+    name = Column(String, nullable=False, index=True)
     loud_ring_server = Column(Boolean)
+    __table_args__ = (UniqueConstraint('name', 'station_id', 'ip_address'))
 
 
 class CalltakerProfile(Base):
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    profile_id = Column(String, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.user_id), nullable=True)
+    profile_id = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=True, index=True)
     incoming_ring = Column(Boolean, default=True)
     ringing_server_volume = Column(Integer, default=50)
     incoming_ring_level = Column(Integer, default=50)
     ring_delay = Column(Integer, default=0)
     auto_respond = Column(Boolean, default=False)
     auto_respond_after = Column(Integer, default=10)
-    __table_args__ = (
-        CheckConstraint(0<=ringing_server_volume<=100), CheckConstraint(0<=incoming_ring_level<=100), 
-        CheckConstraint(ring_delay>=0), CheckConstraint(auto_respond_after>=0)
+    __table_args__ = (CheckConstraint (
+            '0<=ringing_server_volume', 'ringing_server_volume<=100', 
+            '0<=incoming_ring_level', 'incoming_ring_level<=100', 'ring_delay>=0', 'auto_respond_after>=0'
+            )
         )
 
     @classmethod
@@ -159,10 +164,10 @@ class Event(enum.Enum):
 
 class CalltakerActivity(Document):
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False)
-    event = Column(Enum(Event), nullable=False)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False, index=True)
+    event = Column(Enum(Event), nullable=False, index=True)
     event_details = Column(String)
     event_num_data = Column(Float)
-    start_time = Column(DateTime, default=datetime.datetime.utcnow)
+    start_time = Column(DateTime, default=datetime.datetime.utcnow(), index=True)
     #end_time = ComplexDateTimeField(default=datetime.datetime.utcnow)
     

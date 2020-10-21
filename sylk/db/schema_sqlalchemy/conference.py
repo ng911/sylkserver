@@ -1,4 +1,4 @@
-from .db import Base
+from .db import Base, getUniqueId
 from .psap import Psap
 from sqlalchemy import String, Column, ForeignKey, PickleType, DateTime, Enum, Boolean, Integer
 import enum
@@ -21,8 +21,8 @@ class CallStatus(enum.Enum):
     'cancel' = 'cancel'
 
 class Call(Base):
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    call_id = Column(String, primary_key=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
+    call_id = Column(String, primary_key=True, default=getUniqueId(), index=True)
     sip_call_id = Column(String)
     from_uri = Column(String)
     to_uri = Column(String)
@@ -57,11 +57,11 @@ class CallType(enum.Enum):
     'outgoing_calltaker' = 'outgoing_calltaker' 
 
 class Conference(Base):
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    room_number = Column(String, nullable=False)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
+    room_number = Column(String, nullable=False, index=True)
     incident_id = Column(String, nullable=True)
     incident_details = Column(String, nullable=True)
-    start_time = Column(DateTime, default=datetime.datetime.utcnow())
+    start_time = Column(DateTime, default=datetime.datetime.utcnow(), index=True)
     answer_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow())
@@ -75,12 +75,12 @@ class Conference(Base):
     type1 = Column(String)   # not sure what this is, copied from old schema
     type2 = Column(String)   # not sure what this is, copied from old schema
     pictures = Column(PickleType)
-    call_type = Column(Enum(CallType), nullable=False)
+    call_type = Column(Enum(CallType), nullable=False, index=True)
     partial_mute = Column(Boolean, default=False)
     hold = Column(Boolean, default=False)
     full_mute = Column(Boolean, default=False)
     # timed_out is for outgoing calls and abandoned is for incoming
-    status = Column(Enum(CallStatus), nullable=False)
+    status = Column(Enum(CallStatus), nullable=False, index=True)
     callback = Column(Boolean, default=False)
     callback_time = Column(DateTime, default=datetime.datetime.utcnow())
     callback_number = Column(String)
@@ -108,9 +108,9 @@ class Conference(Base):
 
 class ConferenceParticipant(Base):
     psap_id = Column(String, ForeignKey(Psap.psap_id))
-    room_number = Column(String, nullable=False)
-    sip_uri = Column(String)
-    name = Column(String)
+    room_number = Column(String, nullable=False, index=True)
+    sip_uri = Column(String, index=True)
+    name = Column(String, index=True)
     is_caller = Column(Boolean, default=False)
     is_calltaker = Column(Boolean, default=False)
     is_primary = Column(Boolean, default=False)
@@ -151,8 +151,7 @@ class ConfEvent(enum.Enum):
 
 class ConferenceEvent(Base):
     psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    room_number = Column(String, nullable=False)
-    event = Column(Enum(ConfEvent), nullable=False)
+    room_number = Column(String, nullable=False, index=True)
+    event = Column(Enum(ConfEvent), nullable=False, index=True)
     event_details = Column(String)
     event_time = Column(DateTime,default=datetime.datetime.utcnow())
-    

@@ -16,15 +16,15 @@ class Call_Handling_Choice(enum.Enum):
 
 class Psap(Base):
     __tablename__ = "psap"
-    psap_id = Column(String, primary_key=True, default=getUniqueId)
+    psap_id = Column(String, primary_key=True, default=getUniqueId())
     psap_name = Column(String, nullable=False, index=True)
     domain_name = Column(String, nullable=False, index=True)
     time_to_autorebid = Column(Integer, default=30)
     auto_rebid = Column(Boolean, default=True)
     max_calls_in_queue = Column(Integer, default=4)
     default_user_profile_id = Column(String)
-    time_created = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    time_created = Column(DateTime, default=datetime.utcnow())
+    updated_at = Column(DateTime, default=datetime.utcnow())
     ip_address = Column(String)
     domain_name_prefix = Column(String)
     cad_listen_port = Column(Integer)

@@ -1,6 +1,6 @@
-from .db import Base
+from .db import Base, getUniqueId
 from .psap import Psap
-from sqlalchemy import String, Column, ForeignKey, PickleType, DateTime, Integer, Boolean, Enum, CheckConstraint
+from sqlalchemy import String, Column, ForeignKey, PickleType, DateTime, Integer, Boolean, Enum, CheckConstraint, UniqueConstraint
 import enum
 from sqlalchemy.orm import relationship
 from .queue import Queue
@@ -28,7 +28,7 @@ class IVR(Base):
     play_prompt = relationship('VoicePrompt')
     ivr_type = Column(Enum(IVRChoice))
     on_ivr_completion = Column(Enum(IVRCompletion))
-
+    __table_args__ = (UniqueConstraint('ivr_id'))
 
 class OrigType(enum.Enum):
     'sos_wireless' = 'sos_wireless'
@@ -38,8 +38,8 @@ class OrigType(enum.Enum):
     'calltaker_gateway' = 'calltaker_gateway'
 
 class IncomingLink(Base):
-    link_id = Column(String, primary_key=True)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
+    link_id = Column(String, primary_key=True, index=True,default=getUniqueId())
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
     name = Column(String)
     orig_type = Column(Enum(OrigType), nullable=False)
     max_channels = Column(Integer)
@@ -56,7 +56,7 @@ class IncomingLink(Base):
     strip_from_prefix = Column(Integer, default=0, nullable=True)
     strip_from_suffix = Column(Integer, default=0, nullable=True)
     __table_args__ = (
-        CheckConstraint(max_channels>=0), CheckConstraint(port>=0)
+        CheckConstraint('max_channels>=0', 'port>=0'), UniqueConstraint('link_id')
     )
     
     def is_origination_calltaker(self):
@@ -82,13 +82,11 @@ def add_calltaker_gateway(ip_addr, psap_id):
 
 
 class OutgoingLink(Base):
-    link_id = Column(String, primary_key=True)
-    ip_address = Column(String, nullable=False)
+    link_id = Column(String, primary_key=True, index=True)
+    ip_address = Column(String, nullable=False, index=True)
     port = Column(Integer)
     from_value = Column(String)
-    __table_args__ = (
-        CheckConstraint(port >= 0)
-    )
+    __table_args__ = (CheckConstraint('port >= 0'))
    
 
 # add this later
@@ -100,10 +98,9 @@ class CallType(enum.Enum):
     'wireline' = 'wireline'
 
 class CallTransferLine(Base):
-    line_id = Column(String, primary_key=True)
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=True)
-    type = Column(Enum(CallType), nullable=True)
+    line_id = Column(String, primary_key=True, default=getUniqueId(), index=True)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=True, index=True)
+    type = Column(Enum(CallType), nullable=True, index=True)
     name = Column(String, nullable=False)
     star_code = Column(String, nullable=True)
     target = Column(String, nullable=True)
-    

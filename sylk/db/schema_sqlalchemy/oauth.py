@@ -1,6 +1,6 @@
 from .db import Base
 from .psap import Psap
-from sqlalchemy import String, Column, PickleType, DateTime, Boolean
+from sqlalchemy import String, Column, PickleType, DateTime, Boolean, UniqueConstraint
 
 class Client(Base):
     # human readable name, not nullable
@@ -9,17 +9,19 @@ class Client(Base):
     description = Column(String)
 
     # creator of the client, not nullable
-    user_id = Column(String, nullable=True, unique=False)
+    user_id = Column(String, nullable=True)
 
-    client_id = Column(String, nullable=False, unique=True)
-    client_secret = Column(String, nullable=False, unique=True)
+    client_id = Column(String, nullable=False, index=True)
+    client_secret = Column(String, nullable=False, index=True)
 
     # public or confidential
-    is_confidential = Column(Boolean, nullable=False, unique=False, default=True)
+    is_confidential = Column(Boolean, nullable=False, default=True)
 
     _redirect_uris = Column(PickleType)
     _default_scopes = Column(PickleType)
-    
+
+    __table_args__ = (UniqueConstraint('client_id', 'client_secret'))
+
     @property
     def client_type(self):
         if self.is_confidential:
@@ -75,9 +77,9 @@ def create_new_client(name, userid):
 
 
 class Grant(Base):
-    user_id = Column(String, nullable=True)
-    client_id = Column(String, nullable=False)
-    code = Column(String, nullable=False)
+    user_id = Column(String, nullable=True, index=True)
+    client_id = Column(String, nullable=False, index=True)
+    code = Column(String, nullable=False, index=True)
     redirect_uri = Column(String, nullable=True)
     expires = Column(DateTime ,nullable=True)
     _scopes = Column(PickleType)
@@ -94,19 +96,20 @@ class Grant(Base):
 
 
 class Token(Base):
-    token_id = ObjectIdField(unique=True)
-    client_id = Column(String, nullable=False)
+    token_id = Column(String, primary_key=True, index=True)
+    client_id = Column(String, nullable=False, index=True)
 
-    user_id = Column(String, nullable=True)
+    user_id = Column(String, nullable=True, index=True)
 
     # currently only bearer is supported
     token_type = Column(String)
 
     access_token = Column(String, nullable=False, unique=True)
-    refresh_token = Column(String, nullable=True, unique=False)
+    refresh_token = Column(String, nullable=True)
     expires = Column(DateTime ,nullable=True)
     _scopes = Column(PickleType)
     
+    __table_args__ = (UniqueConstraint('token_id'))
 
     @property
     def scopes(self):
@@ -128,4 +131,3 @@ class Token(Base):
             expires = self.expires,
             user = User.objects.get(calltaker_id=self.user_id))
         return tokenData
-

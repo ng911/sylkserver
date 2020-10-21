@@ -1,13 +1,13 @@
 from .psap import Psap
 from sqlalchemy import Column, String, Integer, ForeignKey, Enum, CheckConstraint, DateTime, Float, Boolean, PickleType
-from .db import Base
+from .db import Base, getUniqueId
 import enum
 from datetime import datetime
 
 class Location(Base):
     psap_id = Column(String, ForeignKey(Psap.psap_id))
-    room_number = Column(String, nullable=False)
-    location_id = Column(String, nullable=False)
+    room_number = Column(String, nullable=False, index=True)
+    location_id = Column(String, nullable=False, default=getUniqueId(), index=True)
     time = Column(DateTime, default=datetime.utcnow())
     updated_at = Column(DateTime, default=datetime.utcnow())
     ali_format = Column(String)
@@ -46,14 +46,12 @@ class ServerType(enum.Enum):
     'wireline' = 'wireline'
 
 class AliServer(Base):
-    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False)
-    type = Column(Enum(ServerType))
-    format = Column(String)
+    psap_id = Column(String, ForeignKey(Psap.psap_id), nullable=False, index=True)
+    type = Column(Enum(ServerType), index=True)
+    format = Column(String, index=True)
     ip1 = Column(String)
     port1 = Column(Integer)
     ip2 = Column(String)
     port2 = Column(Integer)
     name = Column(String)
-    __table_args__ = (
-        CheckConstraint(port1 >= 0), CheckConstraint(port2 >= 0)
-    )
+    __table_args__ = (CheckConstraint('port1 >= 0', 'port2>=0'))
