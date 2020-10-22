@@ -470,8 +470,8 @@ class PSAPApplication(SylkApplication):
                         log.info("domain is %r", domain)
                         psap_id = get_psap_from_domain(domain)
                         # todo - this is just for temp testing, remove later
-                        #calltaker_server = get_calltaker_server(domain)
-                        calltaker_server = "kamailio-reg.supportgenie.io"
+                        calltaker_server = get_calltaker_server(domain)
+                        #calltaker_server = "kamailio-reg.supportgenie.io"
                         log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
                     else:
                         log.error("error invalid proxy domain %r", proxy_domain)
