@@ -47,6 +47,7 @@ WORKDIR /usr/src/py-psap
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
+CMD python sylk-server
 
 
 
