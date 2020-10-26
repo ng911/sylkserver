@@ -15,13 +15,7 @@ from .speed_dial import SpeedDialNode
 from .calls import ConferenceNode
 from ...db.schema import Conference as ConferenceModel
 from ...db.schema import CallTransferLine as CallTransferLineModel
-
-
-class CallTransferLineNode(MongoengineObjectType):
-    class Meta:
-        model = CallTransferLineModel
-        interfaces = (Node,)
-        connection_class = EnhancedConnection
+from .routing import CallTransferLineNode
 
 
 class PsapNode(EnhancedMongoengineObjectType):

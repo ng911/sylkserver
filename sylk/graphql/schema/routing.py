@@ -10,10 +10,11 @@ from ..mutations import get_id_from_node_id
 from ...db.schema import CallTransferLine as CallTransferLineModel
 
 
-class CallTransferLineNode(EnhancedMongoengineObjectType):
+class CallTransferLineNode(MongoengineObjectType):
     class Meta:
         model = CallTransferLineModel
         interfaces = (Node,)
+        connection_class = EnhancedConnection
 
 
 from ..mutations import create_update_mutation, create_insert_mutation, create_delete_mutation, EnhancedClientIDMutation
