@@ -33,16 +33,16 @@ jobs:
     - name: build & push rest
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: admin-ui
+        ECR_REPOSITORY: rest-api-server
       run: |
         dt=$(date +%d%m%y)
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$dt -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f  Dockerfile_py3 .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$dt && docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest 
         
-    - name: build & push rest
+    - name: build & push psap
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: admin-ui
+        ECR_REPOSITORY: psap
       run: |
         dt=$(date +%d%m%y)
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$dt -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f  Dockerfile .
