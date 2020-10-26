@@ -4,7 +4,7 @@ on:
   push:
     branches: [master, cal]
 jobs:
-  build & push to ecr:
+  build_push_to_ecr:
     runs-on: ubuntu-latest
     steps:
     
