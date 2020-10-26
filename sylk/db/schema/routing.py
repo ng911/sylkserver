@@ -97,10 +97,12 @@ class DialPlan(Document):
 class CallTransferLine(Document):
     line_id = ObjectIdField(required=True, default=bson.ObjectId)
     psap_id = ObjectIdField(required=True)
-    type = StringField(required=False, choices=('wireless', 'wireline'))
+    type = StringField(required=False, choices=('wireless', 'wireline', 'all'))
     name = StringField(required=True)
     star_code = StringField(required=False)
     target = StringField(required=False)
+    flash_transfer = BooleanField(required=False, default=False)
+
     meta = {
         'indexes': [
             'psap_id',
