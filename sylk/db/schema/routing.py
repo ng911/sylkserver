@@ -97,6 +97,7 @@ class DialPlan(Document):
 class CallTransferLine(Document):
     line_id = ObjectIdField(required=True, default=bson.ObjectId)
     psap_id = ObjectIdField(required=True)
+    role_id = ObjectIdField()
     type = StringField(required=False, choices=('wireless', 'wireline', 'all'))
     name = StringField(required=True)
     star_code = StringField(required=False)

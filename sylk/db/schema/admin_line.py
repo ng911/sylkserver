@@ -9,6 +9,7 @@ log = logging.getLogger("emergent-ng911")
 
 class AdminLineGroup(Document):
     psap_id = ObjectIdField(required=True)
+    role_id = ObjectIdField()
     group_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     display_name = StringField(required=True)
     order = IntField()
@@ -16,6 +17,7 @@ class AdminLineGroup(Document):
 
 class AdminLine(Document):
     psap_id = ObjectIdField(required=True)
+    role_id = ObjectIdField()
     admin_line_id = ObjectIdField(required=True, default=bson.ObjectId, unique=True)
     server_id = ObjectIdField(required=False)
     icon_file = StringField()
