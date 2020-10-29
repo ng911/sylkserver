@@ -77,6 +77,13 @@ def get_map_layer(map_layer_id):
     return {'layer': map_layer}
 
 
+@maps.route('/layer/get_by_psap/<psap_id>', methods=['GET'])
+@check_exceptions
+def get_map_layer_by_psap(psap_id):
+    map_layers = MapLayer.objects.filter(psap_id=psap_id)
+    return {'layers': [layer.as_dict() for layer in map_layers]}
+
+
 
 @maps.route('/layer/add', methods=['POST'])
 @check_exceptions
