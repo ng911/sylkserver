@@ -61,6 +61,23 @@ def save_map_file(psap_id, map_layer_id, server_file_id):
     return subpath, filename
 
 
+
+@maps.route('/layer/get', methods=['GET'])
+@check_exceptions
+def get_map_layers():
+    map_layers = [layer.as_dict() for layer in MapLayer.objects.all()]
+    return {'layers': map_layers}
+
+
+
+@maps.route('/layer/get/<map_layer_id>', methods=['GET'])
+@check_exceptions
+def get_map_layer(map_layer_id):
+    map_layer = MapLayer.objects.get(map_layer_id=map_layer_id).as_dict()
+    return {'layer': map_layer}
+
+
+
 @maps.route('/layer/add', methods=['POST'])
 @check_exceptions
 def add_map_layer():

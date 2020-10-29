@@ -1,0 +1,568 @@
+2020-10-29 18:16:35,874 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:16:44,898 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:16:44,914 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:16:44,924 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:16:44,925 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:16:44,974 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:16:45,030 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:16:45,033 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:16:45,036 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:16:45,040 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:16:45,252 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:16:45,395 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:16:45,519 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:16:45,616 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:16:45,628 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:16:45,691 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:16:45,731 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:16:45,746 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:16:56,675 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:16:56,799 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:17:00,756 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:17:00,849 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:17:00,871 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:20:45,665 - emergent-ng911 - ERROR - Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\base\fields.py", line 516, in to_mongo
+    return ObjectId(six.text_type(value))
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\bson\objectid.py", line 110, in __init__
+    self.__validate(oid)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\bson\objectid.py", line 213, in __validate
+    _raise_invalid_id(oid)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\bson\objectid.py", line 38, in _raise_invalid_id
+    raise InvalidId(
+bson.errors.InvalidId: '3' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\decorators.py", line 19, in wrapper
+    json_response = func(*args, **kwargs)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\maps.py", line 67, in get_map_layer
+    return {
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\base.py", line 259, in get
+    result = six.next(queryset)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\base.py", line 1574, in __next__
+    raw_doc = six.next(self._cursor)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\base.py", line 1650, in _cursor
+    self._cursor_obj = self._collection.find(self._query, **self._cursor_args)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\base.py", line 1699, in _query
+    self._mongo_query = self._query_obj.to_query(self._document)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\visitor.py", line 90, in to_query
+    query = query.accept(QueryCompilerVisitor(document))
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\visitor.py", line 189, in accept
+    return visitor.visit_query(self)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\visitor.py", line 79, in visit_query
+    return transform.query(self.document, **query.query)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\queryset\transform.py", line 122, in query
+    value = field.prepare_query_value(op, value)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\base\fields.py", line 523, in prepare_query_value
+    return self.to_mongo(value)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\base\fields.py", line 519, in to_mongo
+    self.error(six.text_type(e))
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\mongoengine\base\fields.py", line 180, in error
+    raise ValidationError(message, errors=errors, field_name=field_name)
+mongoengine.errors.ValidationError: '3' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string
+
+2020-10-29 18:20:46,049 - emergent-ng911 - ERROR - '3' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string
+2020-10-29 18:24:26,622 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:24:30,950 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:24:30,981 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:24:31,021 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:24:31,064 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:24:31,222 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:24:31,268 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:24:31,284 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:24:31,299 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:24:31,335 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:24:31,400 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:24:31,478 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:24:31,537 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:24:31,562 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:24:31,645 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:24:31,695 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:24:31,885 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:24:31,974 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:24:40,089 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:24:40,166 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:24:41,162 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:24:41,213 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:24:41,215 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:25:33,336 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:25:34,434 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:25:34,442 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:25:34,450 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:25:34,453 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:25:34,501 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:25:34,553 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:25:34,564 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:25:34,573 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:25:34,583 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:25:34,617 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:25:34,666 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:25:34,697 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:25:34,707 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:25:34,709 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:25:34,742 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:25:34,745 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:25:34,773 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:25:41,718 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:25:41,769 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:25:42,137 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:25:42,155 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:25:42,162 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:30:55,933 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:30:57,906 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:30:57,916 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:30:57,919 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:30:57,921 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:30:57,936 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:30:57,949 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:30:57,951 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:30:57,952 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:30:57,957 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:30:57,972 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:30:58,010 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:30:58,038 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:30:58,052 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:30:58,074 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:30:58,088 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:30:58,115 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:30:58,118 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:31:03,389 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:31:03,439 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:31:03,809 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:31:03,827 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:31:03,833 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:31:42,217 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:31:43,634 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:31:43,644 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:31:43,663 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:31:43,687 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:31:43,705 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:31:43,729 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:31:43,750 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:31:43,752 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:31:43,754 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:31:43,762 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:31:43,787 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:31:43,789 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:31:43,798 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:31:43,819 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:31:43,825 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:31:43,829 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:31:43,853 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:31:49,183 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:31:49,245 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:31:49,670 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:31:49,693 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:31:49,701 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:34:13,277 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:34:14,469 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:34:14,481 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:34:14,483 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:34:14,484 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:34:14,506 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:34:14,523 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:34:14,525 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:34:14,528 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:34:14,535 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:34:14,550 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:34:14,597 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:34:14,624 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:34:14,666 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:34:14,680 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:34:14,691 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:34:14,714 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:34:14,717 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:34:20,099 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:34:20,161 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:34:20,558 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:34:20,576 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:34:20,583 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:35:49,694 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:35:51,608 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:35:51,629 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:35:51,633 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:35:51,635 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:35:51,661 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:35:51,671 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:35:51,679 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:35:51,681 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:35:51,682 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:35:51,688 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:35:51,693 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:35:51,736 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:35:51,749 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:35:51,766 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:35:51,772 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:35:51,775 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:35:51,794 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:35:57,431 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:35:57,502 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:35:57,916 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:35:57,933 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:35:57,939 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:42:25,221 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:42:28,678 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:42:28,704 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:42:28,708 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:42:28,711 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:42:28,746 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:42:28,780 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:42:28,783 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:42:28,787 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:42:28,792 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:42:28,840 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:42:28,880 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:42:28,882 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:42:28,913 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:42:28,928 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:42:28,942 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:42:28,976 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:42:28,989 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:42:36,671 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:42:36,744 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:42:37,675 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:42:37,716 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:42:37,718 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:43:17,802 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:43:20,401 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:43:20,408 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:43:20,411 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:43:20,413 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:43:20,426 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:43:20,437 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:43:20,440 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:43:20,442 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:43:20,449 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:43:20,461 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:43:20,492 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:43:20,513 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:43:20,527 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:43:20,551 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:43:20,562 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:43:20,581 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:43:20,584 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:43:26,071 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:43:26,121 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:43:26,768 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:43:26,801 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:43:26,802 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:44:24,863 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:44:25,958 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:44:25,966 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:44:25,968 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:44:25,971 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:44:25,985 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:44:25,996 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:44:25,999 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:44:26,001 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:44:26,009 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:44:26,019 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:44:26,054 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:44:26,097 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:44:26,123 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:44:26,137 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:44:26,142 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:44:26,144 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:44:26,148 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:44:31,377 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:44:31,427 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:44:31,778 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:44:31,794 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:44:31,797 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:44:38,543 - emergent-ng911 - ERROR - Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\decorators.py", line 19, in wrapper
+    json_response = func(*args, **kwargs)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\maps.py", line 71, in get_all
+    return loads(layers_dict[0])
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\bson\json_util.py", line 410, in loads
+    return json.loads(s, *args, **kwargs)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\__init__.py", line 370, in loads
+    return cls(**kw).decode(s)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 2 (char 1)
+
+2020-10-29 18:44:38,583 - emergent-ng911 - ERROR - Expecting value: line 1 column 2 (char 1)
+2020-10-29 18:48:46,705 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:48:48,008 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:48:48,020 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:48:48,022 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:48:48,024 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:48:48,042 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:48:48,053 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:48:48,055 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:48:48,056 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:48:48,067 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:48:48,119 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:48:48,145 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:48:48,147 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:48:48,192 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:48:48,194 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:48:48,202 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:48:48,222 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:48:48,291 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:48:53,496 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:48:53,565 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:48:53,992 - emergent-ng911 - CRITICAL - Failed to start emergent ng911 rest api server: invalid syntax (maps.py, line 76)
+2020-10-29 18:48:53,993 - emergent-ng911 - ERROR - Traceback (most recent call last):
+  File ".\rest_flask_server.py", line 42, in <module>
+    start_rest_api_server()
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\__init__.py", line 355, in start_rest_api_server
+    from .maps import maps
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\maps.py", line 76
+    map_layer = MapLayer.objects.get(map_layer_id=map_layer_id).
+                                                               ^
+SyntaxError: invalid syntax
+
+2020-10-29 18:49:03,256 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:49:04,645 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:49:04,652 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:49:04,654 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:49:04,656 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:49:04,668 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:49:04,678 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:49:04,679 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:49:04,681 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:49:04,685 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:49:04,695 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:49:04,720 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:49:04,721 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:49:04,735 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:49:04,752 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:49:04,759 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:49:04,779 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:49:04,782 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:49:10,025 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:49:10,095 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:49:10,472 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:49:10,489 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:49:10,495 - emergent-ng911 - INFO - start flask server done
+2020-10-29 18:49:18,606 - emergent-ng911 - ERROR - Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\decorators.py", line 19, in wrapper
+    json_response = func(*args, **kwargs)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\maps.py", line 70, in get_all
+    return jsonify(layers)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\json\__init__.py", line 370, in jsonify
+    dumps(data, indent=indent, separators=separators) + "\n",
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\json\__init__.py", line 211, in dumps
+    rv = _json.dumps(obj, **kwargs)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\__init__.py", line 234, in dumps
+    return cls(
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\json\__init__.py", line 100, in default
+    return _json.JSONEncoder.default(self, o)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python38\lib\json\encoder.py", line 179, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type MapLayer is not JSON serializable
+
+2020-10-29 18:49:18,658 - emergent-ng911 - ERROR - Object of type MapLayer is not JSON serializable
+2020-10-29 18:57:14,304 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 18:57:15,664 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 18:57:15,671 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 18:57:15,672 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 18:57:15,674 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 18:57:15,696 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 18:57:15,703 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 18:57:15,705 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 18:57:15,707 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 18:57:15,712 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 18:57:15,731 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 18:57:15,765 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 18:57:15,789 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 18:57:15,799 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 18:57:15,813 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 18:57:15,821 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 18:57:15,823 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 18:57:15,845 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 18:57:20,950 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:57:21,000 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 18:57:21,473 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 18:57:21,494 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 18:57:21,497 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:00:40,645 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:00:42,096 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:00:42,103 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:00:42,104 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:00:42,106 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:00:42,121 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:00:42,132 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:00:42,134 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:00:42,135 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:00:42,139 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:00:42,146 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:00:42,150 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:00:42,175 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:00:42,196 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:00:42,216 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:00:42,222 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:00:42,223 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:00:42,226 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:00:47,513 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:00:47,563 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:00:47,962 - emergent-ng911 - CRITICAL - Failed to start emergent ng911 rest api server: View function mapping is overwriting an existing endpoint function: maps.get_map_layer
+2020-10-29 19:00:47,963 - emergent-ng911 - ERROR - Traceback (most recent call last):
+  File ".\rest_flask_server.py", line 42, in <module>
+    start_rest_api_server()
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\sylk\api\__init__.py", line 366, in start_rest_api_server
+    app.register_blueprint(maps, url_prefix='/maps')
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\app.py", line 98, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\app.py", line 1168, in register_blueprint
+    blueprint.register(self, options, first_registration)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\blueprints.py", line 256, in register
+    deferred(state)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\blueprints.py", line 294, in <lambda>
+    self.record(lambda s: s.add_url_rule(rule, endpoint, view_func, **options))
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\blueprints.py", line 81, in add_url_rule
+    self.app.add_url_rule(
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\app.py", line 98, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "C:\Users\HP\Desktop\Support Genie Projects\sylkserver\env\lib\site-packages\flask\app.py", line 1282, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: maps.get_map_layer
+
+2020-10-29 19:01:01,847 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:01:03,413 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:01:03,422 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:01:03,426 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:01:03,428 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:01:03,448 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:01:03,462 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:01:03,466 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:01:03,486 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:01:03,497 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:01:03,521 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:01:03,545 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:01:03,548 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:01:03,592 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:01:03,616 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:01:03,656 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:01:03,682 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:01:03,685 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:01:09,172 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:01:09,220 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:01:09,596 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:01:09,639 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:01:09,644 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:05:02,342 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:05:03,655 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:05:03,661 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:05:03,664 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:05:03,665 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:05:03,684 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:05:03,697 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:05:03,698 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:05:03,699 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:05:03,704 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:05:03,716 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:05:03,723 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:05:03,752 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:05:03,783 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:05:03,786 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:05:03,810 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:05:03,811 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:05:03,814 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:05:10,633 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:05:10,713 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:05:11,191 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:05:11,207 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:05:11,212 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:07:59,231 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:08:00,409 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:08:00,417 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:08:00,420 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:08:00,422 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:08:00,434 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:08:00,443 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:08:00,447 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:08:00,448 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:08:00,450 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:08:00,457 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:08:00,484 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:08:00,495 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:08:00,545 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:08:00,564 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:08:00,593 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:08:00,605 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:08:00,634 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:08:06,437 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:08:06,484 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:08:06,855 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:08:06,876 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:08:06,882 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:09:20,858 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:09:22,246 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:09:22,256 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:09:22,263 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:09:22,265 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:09:22,293 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:09:22,301 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:09:22,304 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:09:22,306 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:09:22,318 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:09:22,327 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:09:22,349 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:09:22,351 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:09:22,366 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:09:22,386 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:09:22,394 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:09:22,411 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:09:22,413 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:09:27,972 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:09:28,033 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:09:28,696 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:09:28,733 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:09:28,735 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:10:47,486 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:10:48,695 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:10:48,704 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:10:48,708 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:10:48,710 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:10:48,725 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:10:48,739 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:10:48,745 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:10:48,746 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:10:48,748 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:10:48,758 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:10:48,777 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:10:48,778 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:10:48,789 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:10:48,810 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:10:48,823 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:10:48,841 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:10:48,844 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:10:56,604 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:10:56,653 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:10:57,063 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:10:57,081 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:10:57,089 - emergent-ng911 - INFO - start flask server done
+2020-10-29 19:12:31,772 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-29 19:12:33,225 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-29 19:12:33,234 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-29 19:12:33,238 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-29 19:12:33,241 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-29 19:12:33,259 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-29 19:12:33,276 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-29 19:12:33,277 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-29 19:12:33,283 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-29 19:12:33,293 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-29 19:12:33,304 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-29 19:12:33,317 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-29 19:12:33,337 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-29 19:12:33,351 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-29 19:12:33,374 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-29 19:12:33,382 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-29 19:12:33,395 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-29 19:12:33,418 - emergent-ng911 - INFO - connect to mongodb
+2020-10-29 19:12:41,670 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:12:41,725 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-29 19:12:42,086 - emergent-ng911 - INFO - start rest_api_server
+2020-10-29 19:12:42,103 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-29 19:12:42,109 - emergent-ng911 - INFO - start flask server done
