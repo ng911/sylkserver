@@ -70,6 +70,7 @@ __all__ = [
     'Role', 'UserGroup', 'User', 'UserPermission', 'Skillset',
     'CalltakerStation', 'CalltakerProfile', 'CalltakerActivity',
     'AdminLineGroup', 'AdminLine',
-    'MapLayer', 'MapFile'
+    'MapLayer', 'MapFile',
+    'VoicePrompt'
 ]
 

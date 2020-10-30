@@ -30,6 +30,9 @@ from .admin_line import resolveAdminLineServers
 from .maps import MapLayerNode, MapFileNode
 from .routing import CallTransferLineNode
 from .routing import CreateCallTransferLineMutation, UpdateCallTransferLineMutation, DeleteCallTransferLineMutation
+from .prompt import VoicePromptNode
+from .prompt import CreateVoicePromptMutation, UpdateVoicePromptMutation, DeleteVoicePromptMutation
+
 
 try:
     from sylk.applications import ApplicationLogger
@@ -59,6 +62,7 @@ class Query(graphene.ObjectType):
     all_map_files = OrderedMongoengineConnectionField(MapFileNode)
     all_map_layers = OrderedMongoengineConnectionField(MapLayerNode)
     all_call_transfer_lines = OrderedMongoengineConnectionField(CallTransferLineNode)
+    all_voice_prompts = OrderedMongoengineConnectionField(VoicePromptNode)
     # active call for a calltaker
     active_call = graphene.Field(ConferenceNode, username=graphene.String(required=True))
 
@@ -170,6 +174,9 @@ class Mutations(graphene.ObjectType):
     create_call_transfer_line = CreateCallTransferLineMutation.Field()
     update_call_transfer_line = UpdateCallTransferLineMutation.Field()
     delete_call_transfer_line = DeleteCallTransferLineMutation.Field()
+    create_voice_prompt = CreateVoicePromptMutation.Field()
+    update_voice_prompt = UpdateVoicePromptMutation.Field()
+    delete_voice_prompt = DeleteVoicePromptMutation.Field()
 
 
 graphene_schema = graphene.Schema(query=Query, mutation=Mutations, subscription=Subscriptions, types=[])
