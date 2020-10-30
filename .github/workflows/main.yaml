@@ -6,8 +6,7 @@ on:
 jobs:
   build_push_to_ecr:
     runs-on: ubuntu-latest
-    steps:
-    
+    steps: 
     - name: Checkout
       uses: actions/checkout@v2.3.3
     
@@ -28,28 +27,59 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
     
-    - name: build & push
+    - name: build & push psap
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: psap
+        TAG: ${{ GITHUB_SHA }}
       run: |
-        dt=$(date +%d%m%y)
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$dt -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$dt && docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest 
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG && docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    
+    - name: build & push rest
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: rest-api-server
+        TAG: ${{ GITHUB_SHA }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f Dockerfile_py3 .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG && docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    
+    - name: build & push graphql
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: graphql-api-server
+        TAG: ${{ GITHUB_SHA }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f Dockerfile_py3 .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG && docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         
-    - name: deploy to cluster
+    - name: deploy psap to cluster
       uses: kodermax/kubectl-aws-eks@master
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: psap
-        IMAGE_TAG: latest
+        IMAGE_TAG: ${{ GITHUB_SHA }}
       with:
         args: set image deployment/$ECR_REPOSITORY $ECR_REPOSITORY=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --record
-  
-    - name: verify deployment
+    
+    - name: deploy grapqhl to cluster
       uses: kodermax/kubectl-aws-eks@master
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: graphql-api-server
+        IMAGE_TAG: ${{ GITHUB_SHA }}
       with:
-        args: rollout status deployment/admin-ui
+        args: set image deployment/$ECR_REPOSITORY $ECR_REPOSITORY=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --record  
+    
+    - name: deploy rest to cluster
+      uses: kodermax/kubectl-aws-eks@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: rest-api-server
+        IMAGE_TAG: ${{ GITHUB_SHA }}
+      with:
+        args: set image deployment/$ECR_REPOSITORY $ECR_REPOSITORY=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --record
