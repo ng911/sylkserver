@@ -5,7 +5,7 @@ on:
     branches: [master, cal]
 jobs:
   build_push_to_ecr:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     
     - name: Checkout
