@@ -51,7 +51,7 @@ def add_kamailio_user(username, domain, password="emergent"):
         con.execute(statement, **data)
 
 
-def add_psap_domain(domain):
+def add_kamailio_domain(domain):
     with engine.connect() as con:
         data = {"domain": domain}
         statement = text("""

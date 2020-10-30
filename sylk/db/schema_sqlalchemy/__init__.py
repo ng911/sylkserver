@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from .db import engine, getUniqueId
 from .psap import Psap
 from .user import User
-from .kamailio import add_psap_domain, add_kamailio_user
+from .kamailio import add_kamailio_domain, add_kamailio_user
 
 
 def create_sample_entries():
@@ -42,7 +42,7 @@ if PSQL_IS_TEST_ENV:
 
 __all__ = [
     'Psap', 'User',
-    'add_psap_domain', 'add_kamailio_user'
+    'add_kamailio_domain', 'add_kamailio_user'
 ]
 
 

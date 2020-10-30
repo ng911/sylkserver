@@ -37,7 +37,7 @@ SOP_DIR = "sop"
 ALIDUMP_PORT = 12010
 ALIDUMP_CLIENT_HOST = ""
 ALIDUMP_CLIENT_PORT = ""
-
+PSAP_BASE_DOMAIN = "test.emergentpsap.com"
 
 def updateConfigFromEnv():
     tmp = globals().copy()

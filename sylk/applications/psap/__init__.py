@@ -462,15 +462,15 @@ class PSAPApplication(SylkApplication):
                 log.info("found X-Route in header")
                 route_header = headers.get('X-Route', None)
                 if route_header != None:
-                    from ...db.psap import get_psap_from_domain, get_calltaker_server, get_domain_from_proxy_domain
+                    from ...db.psap import get_psap_from_domain, get_psap_from_domain_prefix, get_domain_prefix_from_proxy_domain, get_calltaker_reg_server, get_domain_from_proxy_domain
                     proxy_domain = route_header.body
                     log.info("proxy_domain is %r", proxy_domain)
-                    domain = get_domain_from_proxy_domain(proxy_domain)
-                    if domain != None:
-                        log.info("domain is %r", domain)
-                        psap_id = get_psap_from_domain(domain)
+                    domain_prefix = get_domain_prefix_from_proxy_domain(proxy_domain)
+                    if domain_prefix != None:
+                        log.info("domain_prefix is %r", domain_prefix)
+                        psap_id = get_psap_from_domain_prefix(domain_prefix)
                         # todo - this is just for temp testing, remove later
-                        calltaker_server = get_calltaker_server(domain)
+                        calltaker_server = get_calltaker_reg_server(domain_prefix)
                         #calltaker_server = "kamailio-reg.supportgenie.io"
                         log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
                     else:

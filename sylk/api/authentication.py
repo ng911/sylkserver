@@ -11,7 +11,7 @@ from flask_cors import CORS
 from .utils import get_argument, is_safe_url
 from .decorators import check_exceptions
 from ..db.schema import Grant, Client, Token, User, CalltakerStation
-from ..db.psap import get_psap_from_domain
+from ..db.psap import get_psap_from_website_domain
 
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, create_refresh_token, jwt_refresh_token_required,
@@ -79,13 +79,21 @@ class LoginForm(Form):
             domain_name = request.host
             log.info("domain_name is %r", domain_name)
             # todo - fix this to handle admin properly
-            try:
-                psap_id = get_psap_from_domain(domain_name)
-                user = User.objects.get(username=self.username.data, psap_id=psap_id)
-            except:
+            from ..config import PSAP_BASE_DOMAIN
+            base_admin_domain = "admin.%s" % PSAP_BASE_DOMAIN
+            if domain_name == base_admin_domain:
                 psap_id = None
                 user = User.objects.get(username=self.username.data)
-
+                # todo - add proper permissions checking here
+                if user.psap_id != None:
+                    user = None
+            else:
+                try:
+                    psap_id = get_psap_from_website_domain(domain_name)
+                    # todo - add proper permissions checking here
+                    user = User.objects.get(username=self.username.data, psap_id=psap_id)
+                except:
+                    user = None
             if user is None:
                 self.username.errors.append('Unknown username')
                 return False
@@ -200,14 +208,14 @@ def session_info():
             user_id = session['user_id']
             if (user_id is not None) and (user_id != ''):
                 try:
-                    from ..db.psap import get_psap_name, get_calltaker_server, get_psap_domain
+                    from ..db.psap import get_psap_name, get_calltaker_reg_server, get_psap_domain_prefix
                     user_obj = User.objects.get(user_id=user_id)
                     username = user_obj.username
                     fullname = user_obj.fullname
                     psap_id = str(user_obj.psap_id)
                     psap_name = get_psap_name(psap_id)
-                    domain = get_psap_domain(psap_id)
-                    sip_server = get_calltaker_server(domain)
+                    domain_prefix = get_psap_domain_prefix(psap_id)
+                    sip_server = get_calltaker_reg_server(domain_prefix)
                     ip_address = request.remote_addr
                     if hasattr(user_obj, 'layout'):
                         layout = user_obj.layout
