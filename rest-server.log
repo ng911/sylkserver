@@ -631,3 +631,26 @@ AssertionError: View function mapping is overwriting an existing endpoint functi
 2020-10-29 19:22:57,286 - emergent-ng911 - INFO - start rest_api_server
 2020-10-29 19:22:57,307 - emergent-ng911 - INFO - start flask server on port 7070
 2020-10-29 19:22:57,315 - emergent-ng911 - INFO - start flask server done
+2020-10-30 12:08:21,032 - emergent-ng911 - INFO - Starting emergent ng911 rest api server 4.1.0
+2020-10-30 12:08:27,129 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceMessage'
+2020-10-30 12:08:27,139 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Conference'
+2020-10-30 12:08:27,141 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceParticipant'
+2020-10-30 12:08:27,143 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'ConferenceEvent'
+2020-10-30 12:08:27,179 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Location'
+2020-10-30 12:08:27,210 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'User'
+2020-10-30 12:08:27,212 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerStation'
+2020-10-30 12:08:27,214 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerProfile'
+2020-10-30 12:08:27,227 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'CalltakerActivity'
+2020-10-30 12:08:27,246 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Psap'
+2020-10-30 12:08:27,283 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'Queue'
+2020-10-30 12:08:27,285 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'QueueMember'
+2020-10-30 12:08:27,309 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDialGroup'
+2020-10-30 12:08:27,340 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'SpeedDial'
+2020-10-30 12:08:27,390 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapLayer'
+2020-10-30 12:08:27,414 - emergent-ng911 - INFO - inside graphql_node_notifications add signals 'MapFile'
+2020-10-30 12:08:27,440 - emergent-ng911 - INFO - connect to mongodb
+2020-10-30 12:08:45,049 - emergent-ng911 - INFO - wamp session start for 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-30 12:08:45,198 - emergent-ng911 - INFO - connecting wamp to 'ws://rdffg-wamp.emergent911.com/ws'
+2020-10-30 12:08:48,792 - emergent-ng911 - INFO - start rest_api_server
+2020-10-30 12:08:48,845 - emergent-ng911 - INFO - start flask server on port 7070
+2020-10-30 12:08:48,863 - emergent-ng911 - INFO - start flask server done

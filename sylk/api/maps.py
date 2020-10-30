@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 from ..db.schema import MapFile, MapLayer
 from .decorators import check_exceptions
 from .utils import get_argument
+from ..utils import get_json_from_db_obj
 
 maps = Blueprint('maps', __name__,
                         template_folder='templates')
@@ -65,7 +66,7 @@ def save_map_file(psap_id, map_layer_id, server_file_id):
 @maps.route('/layer/get', methods=['GET'])
 @check_exceptions
 def get_map_layers():
-    map_layers = [layer.as_dict() for layer in MapLayer.objects.all()]
+    map_layers = [get_json_from_db_obj(layer) for layer in MapLayer.objects()]
     return {'layers': map_layers}
 
 
@@ -73,15 +74,16 @@ def get_map_layers():
 @maps.route('/layer/get/<map_layer_id>', methods=['GET'])
 @check_exceptions
 def get_map_layer(map_layer_id):
-    map_layer = MapLayer.objects.get(map_layer_id=map_layer_id).as_dict()
+    map_layer = get_json_from_db_obj(MapLayer.objects.get(map_layer_id=map_layer_id))
     return {'layer': map_layer}
+
 
 
 @maps.route('/layer/get_by_psap/<psap_id>', methods=['GET'])
 @check_exceptions
 def get_map_layer_by_psap(psap_id):
     map_layers = MapLayer.objects.filter(psap_id=psap_id)
-    return {'layers': [layer.as_dict() for layer in map_layers]}
+    return {'layers': [get_json_from_db_obj(layer) for layer in map_layers]}
 
 
 

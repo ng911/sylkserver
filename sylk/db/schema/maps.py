@@ -20,13 +20,6 @@ class MapLayer(Document):
         ]
     }
 
-    def as_dict(self):
-        return {
-            'map_layer_id': str(self.map_layer_id),
-            'psap_id': str(self.psap_id),
-            'description': self.description
-        }
-
 
 @graphql_node_notifications
 class MapFile(Document):
