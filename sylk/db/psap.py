@@ -99,7 +99,6 @@ def create_psap_domains_dns(domain_name_prefix):
     add_dns_cname_record(sip_reg_domain, PSAP_BASE_DOMAIN, base_reg_domain)
     add_dns_cname_record(sip_proxy_domain, PSAP_BASE_DOMAIN, base_proxy_domain)
 
-
 def create_psap(name, domain_name_prefix):
     from .schema_sqlalchemy import add_kamailio_domain
     from .schema import Psap

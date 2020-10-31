@@ -25,6 +25,7 @@ def get_hosted_zone_id(zone_name):
 
 
 def add_dns_a_record(sub_domain, domain, ip_address):
+    log.info("add dns cname for sub_domain %r, domain %r, value %r", sub_domain, domain, ip_address)
     zone_id = get_hosted_zone_id(domain)
     if zone_id == None:
         log.error("domain does not exist in Route 53")
@@ -58,6 +59,7 @@ def add_dns_a_record(sub_domain, domain, ip_address):
 
 
 def add_dns_cname_record(sub_domain, domain, value):
+    log.info("add dns cname for sub_domain %r, domain %r, value %r", sub_domain, domain, value)
     zone_id = get_hosted_zone_id(domain)
     if zone_id == None:
         log.error("domain does not exist in Route 53")
