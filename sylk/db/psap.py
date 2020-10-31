@@ -1,6 +1,9 @@
+import logging
 from .schema import Psap
 from .aws import add_dns_a_record, add_dns_cname_record
 from ..config import PSAP_BASE_DOMAIN
+
+log = logging.getLogger('emergent-ng911')
 
 
 def get_psap_from_domain(domain_name):
@@ -9,16 +12,19 @@ def get_psap_from_domain(domain_name):
 
 
 def get_psap_from_website_domain(domain_name):
-    admin_base_domain = ".admin.%s" % PSAP_BASE_DOMAIN
-    calltaker_base_domain = ".calltaker.%s" % PSAP_BASE_DOMAIN
+    log.info('inside get_psap_from_website_domain for %r', domain_name)
+    admin_base_domain = ".admin.%s" % PSAP_BASE_DOMAIN.rstrip('.')
+    calltaker_base_domain = ".calltaker.%s" % PSAP_BASE_DOMAIN.rstrip('.')
     domain_name_prefix = None
     if domain_name.endswith(admin_base_domain):
         domain_name_prefix = domain_name[:len(domain_name)-len(admin_base_domain)]
     elif domain_name.endswith(calltaker_base_domain):
         domain_name_prefix = domain_name[:len(domain_name)-len(calltaker_base_domain)]
+    log.info('inside get_psap_from_website_domain domain_name_prefix %r', domain_name_prefix)
     if domain_name_prefix != None:
         try:
             psapObj = Psap.objects.get(domain_name_prefix=domain_name_prefix)
+            log.info('inside get_psap_from_website_domain psap_id %r', str(psapObj.psap_id))
             return str(psapObj.psap_id)
         except:
             pass

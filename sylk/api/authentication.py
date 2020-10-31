@@ -80,14 +80,18 @@ class LoginForm(Form):
             log.info("domain_name is %r", domain_name)
             # todo - fix this to handle admin properly
             from ..config import PSAP_BASE_DOMAIN
-            base_admin_domain = "admin.%s" % PSAP_BASE_DOMAIN
+
+            # PSAP_BASE_DOMAIN can comtain a terminating ., while hostname in url does not have
+            base_admin_domain = "admin.%s" % PSAP_BASE_DOMAIN.rstrip('.')
+            base_calltaker_domain = "calltaker.%s" % PSAP_BASE_DOMAIN.rstrip('.')
+            log.info("base_calltaker_domain is %r", base_calltaker_domain)
             if domain_name == base_admin_domain:
                 psap_id = None
                 user = User.objects.get(username=self.username.data)
                 # todo - add proper permissions checking here
                 if user.psap_id != None:
                     user = None
-            else:
+            elif domain_name.endswith(base_calltaker_domain):
                 try:
                     psap_id = get_psap_from_website_domain(domain_name)
                     # todo - add proper permissions checking here
