@@ -98,6 +98,12 @@ class LoginForm(Form):
                     user = User.objects.get(username=self.username.data, psap_id=psap_id)
                 except:
                     user = None
+            else:
+                try:
+                    # todo - add proper permissions checking here
+                    user = User.objects.get(username=self.username.data)
+                except:
+                    user = None
             if user is None:
                 self.username.errors.append('Unknown username')
                 return False
