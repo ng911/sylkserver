@@ -20,7 +20,7 @@ def get_ha1(username, domain, password):
     return get_md5("%s:%s:%s" % (username, domain, password))
 
 
-def get_ha1b(username, domain, password):
+def get_ha1b(username, domain, realm, password):
     return get_md5("%s@%s:%s:%s" % (username, domain, realm, password))
 
 

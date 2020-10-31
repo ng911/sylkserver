@@ -8,9 +8,10 @@ except:
     import logging
     log = logging.getLogger('emergent-ng911')
 
-client = boto3.client('route53')
+from ..config import AWS_ACCESS_KEY, AWS_SECRET_KEY
 
-
+client = boto3.client('route53', aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY)
 
 def get_hosted_zone_id(zone_name):
     json_response = client.list_hosted_zones()

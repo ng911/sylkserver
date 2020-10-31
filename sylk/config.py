@@ -39,6 +39,9 @@ ALIDUMP_CLIENT_HOST = ""
 ALIDUMP_CLIENT_PORT = ""
 PSAP_BASE_DOMAIN = "test.emergentpsap.com"
 
+AWS_ACCESS_KEY=""
+AWS_SECRET_KEY=""
+
 def updateConfigFromEnv():
     tmp = globals().copy()
     gdefs = [k for k, v in tmp.items() if
