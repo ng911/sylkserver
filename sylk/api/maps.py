@@ -61,6 +61,36 @@ def save_map_file(psap_id, map_layer_id, server_file_id):
     return subpath, filename
 
 
+@maps.route('/layers/<psap_id>', methods=['GET'])
+@check_exceptions
+def get_layers(psap_id):
+    map_layers = []
+    for mapLayer in MapLayer.objects(psap_id=psap_id):
+        layer_files = []
+        map_layer_id = str(mapLayer.map_layer_id)
+        for mapLayerFile in MapFile.objects(map_layer_id=map_layer_id):
+            log.info("relative path for layer_id %r is %r", map_layer_id, mapLayerFile.relative_path)
+            #endpoint = "maps/%s/%s" % (mapLayerFile.relative_path, mapLayerFile.filename)
+            #endpoint = "resource.get/5e91a0e25637212e8c3104f4/maps/5f856238cf992fee09f91924/ROADS.db"
+            layer_file_url = "%sresource/%s/%s" % (request.url_root, mapLayerFile.relative_path, mapLayerFile.filename)
+            log.info("layer_file_url is %r", layer_file_url)
+            layer_files.append(layer_file_url)
+        map_layer = {
+            'map_layer_id' : map_layer_id,
+            'description' : mapLayer.description,
+            'files' : layer_files
+        }
+        map_layers.append(map_layer)
+    return {
+        'map_layers' : map_layers
+    }
+
+
+@maps.route('/layer/files/<layer_id>', methods=['GET'])
+@check_exceptions
+def get_layer_files(layer_id):
+    pass
+
 @maps.route('/layer/add', methods=['POST'])
 @check_exceptions
 def add_map_layer():

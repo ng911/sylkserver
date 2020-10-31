@@ -20,10 +20,40 @@ CORS(resource)
 
 log = logging.getLogger('emergent-ng911')
 
+'''
+@resource.route('/<resource_id>/<file_name>', methods=['GET'])
+@check_exceptions
+def get_file_from_resource_id(resource_id, file_name):
+    """ GET a resource from resource_id and file name
+        ---
+        get:
+            summary: get a resource.
+            description: get a resource given psap id and resoure id
+    """
+    file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], resource_id)
+    return  send_from_directory(file_dir, file_name)
+'''
+
+
+@resource.route('/<psap_id>/maps/<resource_id>/<file_name>', methods=['GET'])
+@check_exceptions
+def get_resource_psap_maps(psap_id, resource_id, file_name):
+    """ GET a resource
+        ---
+        get:
+            summary: get a resource.
+            description: get a resource given psap id and resoure id
+    """
+    subpath = os.path.join(psap_id, 'maps')
+    subpath = os.path.join(subpath, resource_id)
+    subpath = os.path.join(subpath, file_name)
+    file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subpath)
+    return  send_from_directory(file_dir, file_name)
+
 
 @resource.route('/<psap_id>/<sub_folder>/<file_name>', methods=['GET'])
 @check_exceptions
-def get_resource(psap_id, sub_folder, file_name):
+def get_resource_psap(psap_id, sub_folder, file_name):
     """ GET a resource
         ---
         get:
@@ -33,6 +63,7 @@ def get_resource(psap_id, sub_folder, file_name):
     subpath = os.path.join(psap_id, sub_folder)
     file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subpath)
     return  send_from_directory(file_dir, file_name)
+
 
 @resource.route('/process', methods=['POST'])
 def add_resource():
