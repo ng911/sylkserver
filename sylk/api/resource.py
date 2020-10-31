@@ -48,6 +48,8 @@ def get_resource_psap_maps(psap_id, resource_id, file_name):
     subpath = os.path.join(subpath, resource_id)
     subpath = os.path.join(subpath, file_name)
     file_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subpath)
+    log.info("file_dir is %r", file_dir)
+    log.info("file_name is %r", file_name)
     return  send_from_directory(file_dir, file_name)
 
 
