@@ -6,7 +6,7 @@ from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
 from .user import UserNode, UpdateUserMutation, resolveUserGroups, \
                 CreateRoleMutation, UpdateRoleMutation, DeleteRoleMutation, \
                 CreateSkillsetMutation, UpdateSkillsetMutation, DeleteSkillsetMutation, \
-                UpdateUserRolesMutation, UpdateUserSkillsetsMutation
+                CreateUserMutation, UpdateUserRolesMutation, UpdateUserSkillsetsMutation
 
 from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
@@ -154,6 +154,7 @@ def test_resolve():
     #    yield PsapAdminLinesNode()
 
 class Mutations(graphene.ObjectType):
+    create_user = CreateUserMutation.Field()
     update_user = UpdateUserMutation.Field()
     create_psap = CreatePsapMutation.Field()
     update_psap = UpdatePsapMutation.Field()
