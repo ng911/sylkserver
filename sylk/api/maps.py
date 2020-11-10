@@ -109,12 +109,14 @@ def add_map_layer():
 @maps.route('/layer/edit/<map_layer_id>', methods=['POST'])
 @check_exceptions
 def edit_map_layer(map_layer_id):
+    log.info("inside edit_map_layer for map_layer_id %r", map_layer_id)
     description = get_argument('description')
     map_layer = MapLayer.objects.get(map_layer_id=map_layer_id)
     map_layer.description = description
     map_layer.save()
     server_file_ids = get_argument('server_file_ids', [])
     psap_id = get_argument('psap_id')
+    log.info("inside edit_map_layer for psap_id %r, server_file_ids %r", psap_id, server_file_ids)
 
     result = { "success" : True }
     if len(server_file_ids) > 0:
