@@ -113,9 +113,14 @@ def edit_map_layer(map_layer_id):
     map_layer = MapLayer.objects.get(map_layer_id=map_layer_id)
     map_layer.description = description
     map_layer.save()
-    return {
-        "success" : True,
-    }
+    server_file_ids = get_argument('server_file_ids', [])
+    psap_id = get_argument('psap_id')
+
+    result = { "success" : True }
+    if len(server_file_ids) > 0:
+        result = add_layer_files(psap_id, map_layer_id, server_file_ids)
+
+    return result
 
 
 @maps.route('/layer/delete/<map_layer_id>', methods=['POST'])
@@ -166,8 +171,11 @@ def add_map_files():
         map_layer.save()
         map_layer_id = str(map_layer.map_layer_id)
 
+    return add_layer_files(psap_id, map_layer_id, server_file_ids)
 
-    #uploaded_files = request.files.getlist("file[]")
+
+def add_layer_files(psap_id, map_layer_id, server_file_ids):
+    # uploaded_files = request.files.getlist("file[]")
     log.info("inside add_map_file map_layer_id %r", map_layer_id)
     # file = request.files['file']
     for server_file_id in server_file_ids:
@@ -176,13 +184,14 @@ def add_map_files():
         log.info("inside add_map_file got file id %r", server_file_id)
         subpath, filename = save_map_file(psap_id, map_layer_id, server_file_id)
         log.info("inside add_map_file subpath %r, filename %r", subpath, filename)
-        #url_endpoint = "resource/%s/%s" % (subpath, filename)
-        #file_url = url_for(url_endpoint)
-        map_file = MapFile(map_layer_id=map_layer_id, psap_id = psap_id, filename = filename, relative_path = subpath)
+        # url_endpoint = "resource/%s/%s" % (subpath, filename)
+        # file_url = url_for(url_endpoint)
+        map_file = MapFile(map_layer_id=map_layer_id, psap_id=psap_id, filename=filename, relative_path=subpath)
         map_file.save()
     return {
-        'success' : True
+        'success': True
     }
+
 
 def delete_map_file(relative_path, filename):
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], relative_path)
