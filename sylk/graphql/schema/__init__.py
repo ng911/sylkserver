@@ -55,6 +55,7 @@ class Query(graphene.ObjectType):
     all_speed_dial_groups = OrderedMongoengineConnectionField(SpeedDialGroupNode)
     all_admin_lines = OrderedMongoengineConnectionField(AdminLineNode)
     all_admin_line_groups = OrderedMongoengineConnectionField(AdminLineGroupNode)
+    all_user_groups = OrderedMongoengineConnectionField(UserGroupNode)
     admin_line_servers = graphene.Field(graphene.List(of_type=graphene.String), psap_id=graphene.String(required=True))
     all_conferences = OrderedMongoengineConnectionField(ConferenceNode, \
                                                         calling_number=graphene.String(required=False), \
