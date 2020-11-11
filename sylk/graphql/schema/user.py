@@ -142,7 +142,10 @@ def add_update_user(input, user_id=None):
     payload['password_hash'] = User.generate_password_hash(password)
     payload['psap_id'] = input.get('psap_id')
     payload['extension'] = input.get('extension')
-    payload['group_id'] = input.get('group_id')
+    group_ID = input.get('group_id')
+    if group_ID != None:
+        group_id = get_id_from_node_id(group_ID)
+    payload['group_id'] = group_id
     role_IDs = graphene.List(of_type=graphene.ID)
     roles = []
     if role_IDs != None:

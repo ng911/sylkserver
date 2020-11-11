@@ -38,6 +38,8 @@ def add_update_calltaker(payload, user_id=None):
         userObj.password_hash = User.generate_password_hash(password)
     if payload['extension'] != None:
         userObj.extension = payload['extension']
+    if payload['group_id'] != None:
+        userObj.group_id = payload['group_id']
     if ( hasattr(payload, 'roles') and payload['roles'] != None):
         log.info("userObj.roles setting to %r", payload['role'])
         userObj.roles = payload['roles']
