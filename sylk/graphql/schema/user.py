@@ -125,16 +125,82 @@ class PsapUsersNode(graphene.ObjectType):
 
 
 from ..mutations import create_update_mutation, create_insert_mutation, EnhancedClientIDMutation
-
+'''
 class CreateUserMutation(EnhancedClientIDMutation):
     @classmethod
     def __custom__(cls):
         create_insert_mutation(cls, UserModel, UserNode)
+'''
 
+def add_update_user(input, user_id=None):
+    from ...db.calltaker import add_update_calltaker
+    from ...db.schema import User
+    payload = {}
+    payload['username'] = input.get('username')
+    payload['fullname'] = input.get('fullname')
+    password = input.get('password')
+    payload['password_hash'] = User.generate_password_hash(password)
+    payload['psap_id'] = input.get('psap_id')
+    payload['extension'] = input.get('extension')
+    payload['group_id'] = input.get('group_id')
+    role_IDs = graphene.List(of_type=graphene.ID)
+    roles = []
+    if role_IDs != None:
+        for role_ID in role_IDs:
+            role_id = get_id_from_node_id(role_ID)
+            roles.append(role_id)
+        payload['roles'] = roles
+
+    skillset_IDs = graphene.List(of_type=graphene.ID)
+    skillsets = []
+    if skillset_IDs != None:
+        for skillset_ID in skillset_IDs:
+            skillset_id = get_id_from_node_id(skillset_ID)
+            skillsets.append(skillset_id)
+        payload['skillsets'] = skillsets
+
+    psapObj = add_update_calltaker(payload, user_id)
+    return psapObj
+
+
+class CreateUserMutation(EnhancedClientIDMutation):
+    user = graphene.Field(UserNode)
+
+    class Input:
+        username = graphene.String(required=True)
+        fullname = graphene.String(required=False)
+        password = graphene.String(required=True)
+        psap_id = graphene.String(required=True)
+        extension = graphene.String(required=False)
+        group_id = graphene.String(required=True)
+        roles=graphene.List(of_type=graphene.ID)
+        skillsets=graphene.List(of_type=graphene.ID)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        add_update_user(input)
+
+'''
 class UpdateUserMutation(EnhancedClientIDMutation):
     @classmethod
     def __custom__(cls):
         create_update_mutation(cls, UserModel, UserNode, 'user_id')
+'''
+class UpdateUserMutation(EnhancedClientIDMutation):
+    class Input:
+        user_id = graphene.String(required=True)
+        username = graphene.String(required=False)
+        fullname = graphene.String(required=False)
+        password = graphene.String(required=False)
+        extension = graphene.String(required=False)
+        group_id = graphene.String(required=False)
+        roles=graphene.List(of_type=graphene.ID)
+        skillsets=graphene.List(of_type=graphene.ID)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        user_id = input.get('user_id')
+        add_update_user(input, user_id)
 
 
 class CreateRoleMutation(EnhancedClientIDMutation):

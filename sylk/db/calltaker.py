@@ -10,7 +10,7 @@ except:
     log = logging.getLogger("emergent-ng911")
 
 
-def add_update_calltaker(payload, user_id):
+def add_update_calltaker(payload, user_id=None):
     if user_id == None:
         userObj = User()
         psap_id = payload['psap_id']
@@ -28,12 +28,13 @@ def add_update_calltaker(payload, user_id):
         userObj.password_hash = User.generate_password_hash(password)
     if payload['extension'] != None:
         userObj.extension = payload['extension']
-    if (payload['role'] != None) and (payload['role'] != ""):
+    if ( hasattr(payload, 'roles') and payload['roles'] != None):
         log.info("userObj.roles setting to %r", payload['role'])
-        userObj.roles = [payload['role']]
-    log.info("userObj.roles is %r", userObj.roles)
+        userObj.roles = payload['roles']
+    if hasattr(payload, 'skillsets') and (payload['skillsets'] != None):
+        log.info("userObj.skillsets setting to %r", payload['role'])
+        userObj.skillsets = payload['skillsets']
     userObj.save()
-    username = userObj.username
     if user_id == None:
         user_id = str(userObj.user_id)
     try:
