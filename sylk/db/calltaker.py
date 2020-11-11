@@ -11,7 +11,17 @@ except:
 
 
 def add_update_calltaker(payload, user_id=None):
+    log.info("inside add_update_calltaker for payload %r", payload)
     if user_id == None:
+        '''
+        from .schema_sqlalchemy.kamailio import add_kamailio_user
+        try:
+            add_kamailio_user(payload['username'])
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            log.error(stacktrace)
+            log.error("add_kamailio_user failed %r", str(e))
+        '''
         userObj = User()
         psap_id = payload['psap_id']
         userObj.psap_id = psap_id

@@ -159,8 +159,11 @@ def add_update_user(input, user_id=None):
             skillsets.append(skillset_id)
         payload['skillsets'] = skillsets
 
-    psapObj = add_update_calltaker(payload, user_id)
-    return psapObj
+    result = add_update_calltaker(payload, user_id)
+    if user_id is None:
+        user_id = result["user_id"]
+    userObj = UserModel.objects.get(user_id=user_id)
+    return userObj
 
 
 class CreateUserMutation(EnhancedClientIDMutation):
