@@ -146,7 +146,7 @@ def add_update_user(input, user_id=None):
     if group_ID != None:
         group_id = get_id_from_node_id(group_ID)
     payload['group_id'] = group_id
-    role_IDs = graphene.List(of_type=graphene.ID)
+    role_IDs = input.get('roles')
     roles = []
     if role_IDs != None:
         for role_ID in role_IDs:
@@ -154,7 +154,7 @@ def add_update_user(input, user_id=None):
             roles.append(role_id)
         payload['roles'] = roles
 
-    skillset_IDs = graphene.List(of_type=graphene.ID)
+    skillset_IDs = input.get('skillsets')
     skillsets = []
     if skillset_IDs != None:
         for skillset_ID in skillset_IDs:
