@@ -40,10 +40,10 @@ def add_update_calltaker(payload, user_id=None):
         userObj.extension = payload['extension']
     if payload['group_id'] != None:
         userObj.group_id = payload['group_id']
-    if ( hasattr(payload, 'roles') and payload['roles'] != None):
+    if  'roles' in payload and payload['roles'] != None:
         log.info("userObj.roles setting to %r", payload['role'])
         userObj.roles = payload['roles']
-    if hasattr(payload, 'skillsets') and (payload['skillsets'] != None):
+    if 'skillsets' in payload and payload['skillsets'] != None:
         log.info("userObj.skillsets setting to %r", payload['role'])
         userObj.skillsets = payload['skillsets']
     userObj.save()
@@ -51,7 +51,7 @@ def add_update_calltaker(payload, user_id=None):
         user_id = str(userObj.user_id)
     try:
         userProfile = CalltakerProfile.objects.get(user_id=user_id)
-        if (payload['auto_respond'] != None) or (payload['auto_respond_after'] != None):
+        if ('auto_respond' in payload) and ((payload['auto_respond'] != None) or (payload['auto_respond_after'] != None)):
             if payload['auto_respond'] != None:
                 userObj.auto_respond = payload['auto_respond']
             if payload['auto_respond_after'] != None:
@@ -78,10 +78,10 @@ def add_update_calltaker(payload, user_id=None):
             userProfile.auto_respond_after = defaultProfile.auto_respond_after
 
         log.info("got psapObj got defaultProfile 1")
-        if payload['auto_respond'] != None:
+        if 'auto_respond' in payload and payload['auto_respond'] != None:
             userObj.auto_respond = payload['auto_respond']
 
-        if payload['auto_respond_after'] != None:
+        if 'auto_respond_after' in payload and payload['auto_respond_after'] != None:
             userObj.auto_respond_after = payload['auto_respond_after']
 
         log.info("got psapObj got defaultProfile 2")
