@@ -183,7 +183,7 @@ class CreateUserMutation(EnhancedClientIDMutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
-        add_update_user(input)
+        return add_update_user(input)
 
 '''
 class UpdateUserMutation(EnhancedClientIDMutation):
@@ -205,7 +205,7 @@ class UpdateUserMutation(EnhancedClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         user_id = input.get('user_id')
-        add_update_user(input, user_id)
+        return add_update_user(input, user_id)
 
 
 class CreateRoleMutation(EnhancedClientIDMutation):
