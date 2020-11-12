@@ -41,10 +41,10 @@ def add_update_calltaker(payload, user_id=None):
     if payload['group_id'] != None:
         userObj.group_id = payload['group_id']
     if  'roles' in payload and payload['roles'] != None:
-        log.info("userObj.roles setting to %r", payload['role'])
+        log.info("userObj.roles setting to %r", payload['roles'])
         userObj.roles = payload['roles']
     if 'skillsets' in payload and payload['skillsets'] != None:
-        log.info("userObj.skillsets setting to %r", payload['role'])
+        log.info("userObj.skillsets setting to %r", payload['skillsets'])
         userObj.skillsets = payload['skillsets']
     userObj.save()
     if user_id == None:
