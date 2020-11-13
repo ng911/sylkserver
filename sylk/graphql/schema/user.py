@@ -85,7 +85,7 @@ class UserNode(EnhancedMongoengineObjectType):
 
     from .queue import QueueNode
     queues = MongoengineConnectionField(QueueNode)
-    group = MongoengineConnectionField(UserGroupNode)
+    group = graphene.Field(UserGroupNode)
     skillset_nodes = MongoengineConnectionField(SkillsetNode)
     role_nodes = MongoengineConnectionField(RoleNode)
     profile = MongoengineObjectType()
@@ -101,6 +101,14 @@ class UserNode(EnhancedMongoengineObjectType):
             "user_id" : parent.user_id
         }
         return CalltakerProfileModel.objects.get(**params)
+
+    def resolve_group(parent, info, **args):
+        if parent.group_id == None:
+            return None
+        params = {
+            "group_id" : parent.group_id
+        }
+        return UserGroupModel.objects.get(**params)
 
     def resolve_skillset_nodes(parent, info, **args):
         return SkillsetModel.objects(id__in = parent.skillsets)
