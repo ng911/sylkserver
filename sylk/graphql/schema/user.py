@@ -106,7 +106,7 @@ class UserNode(EnhancedMongoengineObjectType):
         if not hasattr(parent, "group_id") or parent.group_id == None:
             return None
         params = {
-            "group_id" : parent.group_id
+            "id" : parent.group_id
         }
         return UserGroupModel.objects.get(**params)
 
