@@ -103,7 +103,7 @@ class UserNode(EnhancedMongoengineObjectType):
         return CalltakerProfileModel.objects.get(**params)
 
     def resolve_group(parent, info, **args):
-        if parent.group_id == None:
+        if not hasattr(parent, "group_id") or parent.group_id == None:
             return None
         params = {
             "group_id" : parent.group_id
