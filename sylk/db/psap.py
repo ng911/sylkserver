@@ -109,13 +109,17 @@ def create_psap(name, domain_name_prefix):
     from .schema_sqlalchemy import add_kamailio_domain
     from .schema import Psap
     from ..config import USE_KAMAILIO, USE_AWS_ROUTE_53
+
+    sip_reg_domain = "%s.reg.%s" % (domain_name_prefix, PSAP_BASE_DOMAIN)
+    sip_proxy_domain = "%s.proxy.%s" % (domain_name_prefix, PSAP_BASE_DOMAIN)
+
     if USE_KAMAILIO:
-        sip_reg_domain = "%s.reg.%s" % (domain_name_prefix, PSAP_BASE_DOMAIN)
-        sip_proxy_domain = "%s.proxy.%s" % (domain_name_prefix, PSAP_BASE_DOMAIN)
         add_kamailio_domain(sip_proxy_domain)
         add_kamailio_domain(sip_reg_domain)
+
     if USE_AWS_ROUTE_53:
         create_psap_domains_dns(domain_name_prefix)
+
     psapObj = Psap(name=name, domain_name_prefix=domain_name_prefix)
     psapObj.domain = sip_proxy_domain
     psapObj.save()
