@@ -82,7 +82,7 @@ class UserPermission(Document):
 class User(Document):
     user_id = ObjectIdField(required=True, unique=True, default=bson.ObjectId)
     status = StringField(required=True, default='offline')
-    username = StringField(required=True, unique=True)
+    username = StringField(required=True, unique=False)
     fullname = StringField(required=False)
     password_hash = StringField(required=True, unique=True)
     created_at = ComplexDateTimeField(required=True, default=datetime.datetime.utcnow)
@@ -100,8 +100,11 @@ class User(Document):
     meta = {
         'strict': False,
         'indexes': [
+            {
+                "fields" : ["username", "psap_id"],
+                "unique": True
+            },
             'user_id',
-            'username',
             'psap_id',
             'group_id'
         ]
