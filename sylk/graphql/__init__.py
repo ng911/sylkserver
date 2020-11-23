@@ -1,9 +1,4 @@
 from aiohttp import web
-from flask import Flask, send_from_directory
-from flask_session import Session
-from flask_cors import CORS
-from werkzeug.middleware.proxy_fix import ProxyFix
-from pymongo import MongoClient
 from aiohttp_graphql import GraphQLView
 import logging
 from graphql_ws.aiohttp import AiohttpSubscriptionServer
@@ -12,7 +7,6 @@ import asyncio
 from graphql.execution.executors.asyncio import AsyncioExecutor
 
 
-from ..config import MONGODB_HOST, MONGODB_DB, MONGODB_USERNAME, MONGODB_PASSWORD
 from ..config import FLASK_SERVER_PORT
 from .schema import graphene_schema
 
@@ -21,6 +15,13 @@ from .schema import graphene_schema
 
 log = logging.getLogger('emergent-ng911')
 
+'''
+from flask import Flask, send_from_directory
+from flask_session import Session
+from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
+from pymongo import MongoClient
+from ..config import MONGODB_HOST, MONGODB_DB, MONGODB_USERNAME, MONGODB_PASSWORD
 
 def create_app():
     app = Flask(__name__)
@@ -36,7 +37,7 @@ def create_app():
     app.config['SESSION_MONGODB_DB'] = MONGODB_DB
     app.config['SESSION_MONGODB_COLLECT'] = 'web_sessions'
     return app
-'''
+
 app = create_app()
 Session(app)
 

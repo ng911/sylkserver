@@ -6,7 +6,8 @@ from ..fields import OrderedMongoengineConnectionField, MongoengineObjectType
 from .user import UserNode, UpdateUserMutation, resolveUserGroups, \
                 CreateRoleMutation, UpdateRoleMutation, DeleteRoleMutation, \
                 CreateSkillsetMutation, UpdateSkillsetMutation, DeleteSkillsetMutation, \
-                CreateUserMutation, UpdateUserRolesMutation, UpdateUserSkillsetsMutation
+                CreateUserMutation, UpdateUserRolesMutation, UpdateUserSkillsetsMutation, \
+                CreateUserGroupMutation, UpdateUserGroupMutation
 
 from .psap import PsapNode, CreatePsapMutation, UpdatePsapMutation
 from .queue import QueueNode
@@ -157,6 +158,8 @@ def test_resolve():
 class Mutations(graphene.ObjectType):
     create_user = CreateUserMutation.Field()
     update_user = UpdateUserMutation.Field()
+    create_user_group = CreateUserGroupMutation.Field()
+    update_user_group = UpdateUserGroupMutation.Field()
     create_psap = CreatePsapMutation.Field()
     update_psap = UpdatePsapMutation.Field()
     create_adminline_group = CreteAdminLineGroupMutation.Field()

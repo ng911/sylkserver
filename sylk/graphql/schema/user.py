@@ -140,6 +140,56 @@ class CreateUserMutation(EnhancedClientIDMutation):
         create_insert_mutation(cls, UserModel, UserNode)
 '''
 
+def add_update_user_group(input, group_ID=None):
+    from ...db.schema import UserGroup
+    log.info("inside add_update_user_group, group_ID %r", group_ID)
+    if group_ID != None:
+        group_id = get_id_from_node_id(group_ID)
+        userGroupObj = UserGroup.objects.get(id=group_id)
+    else:
+        psap_id = input.get('psap_id')
+        log.info("inside add_update_user_group, psap_id %r", psap_id)
+        userGroupObj = UserGroup(psap_id=psap_id)
+
+    name = input.get('name')
+    if name != None:
+        userGroupObj.name = name
+    permission_IDs = input.get('permissions')
+    permissions = []
+    if permission_IDs != None:
+        for permission_ID in permission_IDs:
+            permission_id = get_id_from_node_id(permission_ID)
+            permissions.append(permission_id)
+        userGroupObj.permissions = permissions
+    userGroupObj.save()
+    log.info("inside add_update_user_group, return %r", userGroupObj)
+    return userGroupObj
+
+
+class CreateUserGroupMutation(EnhancedClientIDMutation):
+    user_group = graphene.Field(UserGroupNode)
+
+    class Input:
+        name = graphene.String(required=True)
+        psap_id = graphene.String(required=True)
+        permissions = graphene.List(of_type=graphene.ID)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        return add_update_user_group(input)
+
+class UpdateUserGroupMutation(EnhancedClientIDMutation):
+    class Input:
+        group_id = graphene.ID(required=True)
+        name = graphene.String(required=False)
+        permissions = graphene.List(of_type=graphene.ID)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **input):
+        group_ID = input.get('group_id')
+        return add_update_user_group(input, group_ID)
+
+
 def add_update_user(input, user_id=None):
     from ...db.calltaker import add_update_calltaker
     from ...db.schema import User
