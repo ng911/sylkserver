@@ -32,7 +32,7 @@ def get_psap_from_website_domain(domain_name):
 
 
 def get_psap_from_domain_prefix(domain_prefix):
-    psapObj = Psap.objects.get(domain_name_prefix=domain_prefix)
+    psapObj = Psap.objects.get(domain=domain_prefix)
     return str(psapObj.psap_id)
 
 def get_proxy_domain_suffix():
