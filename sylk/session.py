@@ -208,7 +208,6 @@ class ConferenceHandler(object):
             lookup = DNSLookup()
             try:
                 routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
-                routes = lookup.lookup_sip_proxy(uri, settings.sip.transport_list).wait()
             except DNSLookupError as e:
                 timeout = random.uniform(15, 30)
                 raise SubscriptionError(error='DNS lookup failed: %s' % e, timeout=timeout)
@@ -398,7 +397,7 @@ class Session(object):
         self._remote_identity = None
         self.transfer_handler = None
         self.remote_sdp = None
-        self.is_sdp_passthrough = False
+        #self.is_sdp_passthrough = False
         self._lock = RLock()
 
     def debug_info(self):
@@ -474,9 +473,9 @@ class Session(object):
                     else:
                         log.info("addoing stream: ")
                         log.info("addoing stream: stream_type {}, type {}, index {}".format(stream_type, stream_type.type, index))
-                        if stream_type.type == 'video':
+                        #if stream_type.type == 'video':
                             # sdp pass through for video
-                            self.is_sdp_passthrough = True
+                        #    self.is_sdp_passthrough = True
                         stream.index = index
                         self.proposed_streams.append(stream)
                         break
@@ -503,10 +502,10 @@ class Session(object):
     def connect(self, from_header, to_header, route, streams, is_focus=False, contact_header=None, extra_headers=None, \
                 sdp_val=None):
         log.info("inside session connect sdp_val is %r", sdp_val)
-        is_sdp_passthrough = False
-        if sdp_val != None:
-            is_sdp_passthrough = True
-            self.is_sdp_passthrough = True
+        #is_sdp_passthrough = False
+        #if sdp_val != None:
+        #    is_sdp_passthrough = True
+        #    self.is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
@@ -597,13 +596,13 @@ class Session(object):
                                     notification_center.post_notification('SIPSessionGotRingIndication', self, )
                                 notification_center.post_notification('SIPSessionGotProvisionalResponse', self, NotificationData(code=notification.data.code, reason=notification.data.reason))
                             elif notification.data.state == 'connected':
-                                log.info("got connected event is_sdp_passthrough is %r, connected is %r", \
-                                         is_sdp_passthrough, connected)
+                                #log.info("got connected event is_sdp_passthrough is %r, connected is %r", \
+                                #         is_sdp_passthrough, connected)
                                 if not connected:
                                     connected = True
-                                    if is_sdp_passthrough:
-                                        log.info("is_sdp_passthrough we can move on now we are connected")
-                                        break
+                                    #if is_sdp_passthrough:
+                                    #    log.info("is_sdp_passthrough we can move on now we are connected")
+                                    #    break
                                 else:
                                     unhandled_notifications.append(notification)
                             elif notification.data.state == 'disconnected':
@@ -614,7 +613,9 @@ class Session(object):
             log.info("wait for notification api.TimeoutError")
 
             notification_center.post_notification('SIPSessionWillStart', self)
-            if not is_sdp_passthrough:
+            #if not is_sdp_passthrough:
+            # this is just temp
+            if True:
                 stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
                 for index, local_media in enumerate(local_sdp.media):
                     remote_media = remote_sdp.media[index]
@@ -768,10 +769,10 @@ class Session(object):
     @run_in_green_thread
     def accept(self, streams, is_focus=False, extra_headers=None, sdp_val=None):
         log.info("inside session accept sdp_val is %r", sdp_val)
-        is_sdp_passthrough = False
-        if sdp_val != None:
-            self.is_sdp_passthrough = True
-            is_sdp_passthrough = True
+        #is_sdp_passthrough = False
+        #if sdp_val != None:
+        #    self.is_sdp_passthrough = True
+        #    is_sdp_passthrough = True
         self.greenlet = api.getcurrent()
         notification_center = NotificationCenter()
         settings = SIPSimpleSettings()
@@ -870,7 +871,9 @@ class Session(object):
                     elif notification.data.state == 'disconnected':
                         raise InvitationDisconnectedError(notification.sender, notification.data)
             wait_count = 0
-            if not is_sdp_passthrough:
+            #if not is_sdp_passthrough:
+            # this is just temp
+            if True:
                 stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
                 for index, local_media in enumerate(local_sdp.media):
                     remote_media = remote_sdp.media[index]
@@ -2014,7 +2017,9 @@ class Session(object):
                             notification.center.post_notification('SIPSessionDidFail', self, NotificationData(originator='local', code=0, reason=None, failure_reason=notification.data.disconnect_reason, redirect_identities=None))
                     else:
                         notification.center.post_notification('SIPSessionWillEnd', self, NotificationData(originator=notification.data.originator))
-                        if not self.is_sdp_passthrough:
+                        #if not self.is_sdp_passthrough:
+                        # this is just temp
+                        if True:
                             for stream in self.streams:
                                 notification.center.remove_observer(self, sender=stream)
                                 stream.deactivate()

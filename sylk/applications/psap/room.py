@@ -32,6 +32,7 @@ from sipsimple.streams.msrp.filetransfer import FileSelector
 from sipsimple.threading import run_in_thread, run_in_twisted_thread
 from sipsimple.threading.green import run_in_green_thread
 from sipsimple.util import ISOTimestamp
+from sipsimple.video import VideoBridge
 from twisted.internet import reactor
 from zope.interface import implements
 
@@ -148,6 +149,7 @@ class Room(object):
         #self.incoming_message_queue = coros.queue()
         #self.message_dispatcher = None
         self.audio_conference = None
+        self.video_conference = None
         self.moh_player = None
         self.conference_info_payload = None
         self.conference_info_version = count(1)
@@ -252,6 +254,9 @@ class Room(object):
         #self.message_dispatcher = proc.spawn(self._message_dispatcher)
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
+
+        self.video_conference = VideoBridge(SIPApplication.video_mixer)
+
         #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         #self.recorder.start()
         #self.audio_conference.bridge.add(self.recorder)
@@ -482,6 +487,24 @@ class Room(object):
                 else:
                     log.info(u'Room %s - %s audio stream did not enable encryption' % (self.uri,
                                                                                       format_identity(session.remote_identity)))
+        try:
+            video_stream = next(stream for stream in session.streams if stream.type == 'video')
+        except StopIteration:
+            pass
+        else:
+            notification_center.add_observer(self, sender=video_stream)
+            log.info(u'Room %s - video stream %s/%sHz, end-points: %s:%d <-> %s:%d' % (self.uri, video_stream.codec, video_stream.sample_rate,
+                                                                                      video_stream.local_rtp_address, video_stream.local_rtp_port,
+                                                                                      video_stream.remote_rtp_address, video_stream.remote_rtp_port))
+            if video_stream.encryption.type != 'ZRTP':
+                # We don't listen for stream notifications early enough
+                if video_stream.encryption.active:
+                    log.info(u'Room %s - %s video stream enabled %s encryption' % (self.uri,
+                                                                                  format_identity(session.remote_identity),
+                                                                                  video_stream.encryption.type))
+                else:
+                    log.info(u'Room %s - %s video stream did not enable encryption' % (self.uri,
+                                                                                      format_identity(session.remote_identity)))
         '''
         try:
             transfer_stream = next(stream for stream in session.streams if stream.type == 'file-transfer')
@@ -510,6 +533,9 @@ class Room(object):
             if stream.type == 'audio':
                 self.audio_conference.add(stream)
                 self.audio_conference.unhold()
+            elif stream.type == 'video':
+                self.video_conference.add(stream)
+                #self.video_conference.unhold()
 
         #self.dispatch_conference_info()
 
@@ -611,6 +637,18 @@ class Room(object):
                 pass
                 # todo -- commented temp for load testing. this might be causing the failures
                 #self.moh_player.play()
+        try:
+            video_stream = next(stream for stream in session.streams or [] if stream.type == 'video')
+        except StopIteration:
+            pass
+        else:
+            notification_center.remove_observer(self, sender=video_stream)
+            try:
+                self.video_conference.remove(video_stream)
+            except ValueError:
+                # User may hangup before getting bridged into the conference
+                pass
+
         try:
             next(stream for stream in session.streams if stream.type == 'file-transfer')
         except StopIteration:

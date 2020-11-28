@@ -462,7 +462,7 @@ class PSAPApplication(SylkApplication):
                 log.info("found X-Route in header")
                 route_header = headers.get('X-Route', None)
                 if route_header != None:
-                    from ...db.psap import get_psap_from_domain, get_psap_from_domain_prefix, get_domain_prefix_from_proxy_domain, get_calltaker_reg_server, get_domain_from_proxy_domain
+                    from ...db.psap import get_psap_from_domain, get_psap_from_domain_prefix, get_domain_prefix_from_proxy_domain, get_calltaker_reg_server
                     proxy_domain = route_header.body
                     log.info("proxy_domain is %r", proxy_domain)
                     domain_prefix = get_domain_prefix_from_proxy_domain(proxy_domain)
