@@ -465,7 +465,8 @@ class PSAPApplication(SylkApplication):
                     from ...db.psap import get_psap_from_domain, get_psap_from_domain_prefix, get_domain_prefix_from_proxy_domain, get_calltaker_reg_server
                     proxy_domain = route_header.body
                     log.info("proxy_domain is %r", proxy_domain)
-                    domain_prefix = get_domain_prefix_from_proxy_domain(proxy_domain)
+                    #domain_prefix = get_domain_prefix_from_proxy_domain(proxy_domain)
+                    domain_prefix = 'la'
                     if domain_prefix != None:
                         log.info("domain_prefix is %r", domain_prefix)
                         psap_id = get_psap_from_domain_prefix(domain_prefix)
