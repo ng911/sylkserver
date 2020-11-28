@@ -818,12 +818,13 @@ class PSAPApplication(SylkApplication):
                 (display_name, uri, is_calltaker) = self.get_room_caller(room_number)
                 if (display_name is not None) and is_calltaker:
                     publish_outgoing_call_status(room_number, display_name, 'active')
-            '''
             incoming_sdp_val = None
             if hasattr(room_data.incoming_session, 'is_sdp_passthrough') and room_data.incoming_session.is_sdp_passthrough:
                 log.info("sos_room accept set sdp_val to %r", room_data.incoming_session.remote_sdp)
                 incoming_sdp_val = room_data.incoming_session.remote_sdp
             reactor.callLater(0, self.accept_session, session, room_number, incoming_sdp_val)
+            '''
+            reactor.callLater(0, self.accept_session, session, room_number)
             if room_data.ringing:
                 # also cancel the ringing timer and end ringing call
                 if room_data.ringing_duration_timer is not None:
@@ -841,11 +842,14 @@ class PSAPApplication(SylkApplication):
                     log.info('target %r', target)
                     log.info('outgoing_call_initializer %r', outgoing_call_initializer)
                     outgoing_call_initializer.cancel_call()
+                '''
                 sdp_val = None
                 if hasattr(session,'is_sdp_passthrough') and session.is_sdp_passthrough:
                     log.info("sos_room accept set session sdp_val to %r", session.remote_sdp)
                     sdp_val = session.remote_sdp
                 reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number, sdp_val)
+                '''
+                reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
             self.set_calltaker_busy(username=str(remote_identity.uri.user))
             NotificationCenter().post_notification('ConferenceAnswered', self,
                                                    NotificationData(room_number=room_number,
@@ -1165,17 +1169,20 @@ class PSAPApplication(SylkApplication):
 
         room = self.get_room(room_number)
         room_data = self.get_room_data(room_number)
+        '''
         sdp_val = None
         if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             log.info("outgoing_session_did_start set sdp_val to %r", session.remote_sdp)
             sdp_val = session.remote_sdp
             room_data.calltaker_video_session = session
+        '''
 
         log.info('outgoing_session_did_start session streams %r, proposed_streams %r', session.streams, session.proposed_streams)
         if not room.started:
             # streams = [stream for stream in (audio_stream, chat_stream, transfer_stream) if stream]
             # reactor.callLater(4 if audio_stream is not None else 0, self.accept_session, session, streams)
-            reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number, sdp_val = sdp_val)
+            # reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number, sdp_val = sdp_val)
+            reactor.callLater(0, self.accept_session, room_data.incoming_session, room_number)
 
             incoming_session = room_data.incoming_session
             incoming_video_streams = [stream for stream in incoming_session.proposed_streams if stream.type == 'video']
@@ -1235,10 +1242,13 @@ class PSAPApplication(SylkApplication):
         #todo - add proper value of is_calltaker
         #self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=True, is_primary=session.is_primary)
         self.add_outgoing_participant(display_name=sip_uri.user, sip_uri=str(sip_uri), session=session, is_calltaker=is_calltaker)
+        '''
         sdp_passthrough = False
         if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             sdp_passthrough = True
         self.add_session_to_room(room_number, session, sdp_passthrough)
+        '''
+        self.add_session_to_room(room_number, session)
         del room_data.outgoing_calls[str(sip_uri)]
         if is_calltaker and room_data.is_emergency:
             dump_ali(room_number, calltaker=str(sip_uri.user))
@@ -1276,7 +1286,8 @@ class PSAPApplication(SylkApplication):
         self.add_participant(session)
     '''
 
-    def accept_session(self, session, room_number, sdp_val=None):
+#    def accept_session(self, session, room_number, sdp_val=None):
+    def accept_session(self, session, room_number):
         log.info("accept session for room %r", room_number)
         room_data = self.get_room_data(room_number)
         if session.state == 'incoming':
@@ -1309,7 +1320,8 @@ class PSAPApplication(SylkApplication):
 
             try:
                 log.info("accept incoming session %r", session)
-                session.accept(streams, is_focus=True, sdp_val=sdp_val)
+                #session.accept(streams, is_focus=True, sdp_val=sdp_val)
+                session.accept(streams, is_focus=True)
             except IllegalStateError:
                 pass
 
@@ -1549,7 +1561,8 @@ class PSAPApplication(SylkApplication):
         return display_name
 
 
-    def add_session_to_room(self, room_number, session, sdp_passthrough=False):
+    #def add_session_to_room(self, room_number, session, sdp_passthrough=False):
+    def add_session_to_room(self, room_number, session):
         # Keep track of the invited participants, we must skip ACL policy
         # for SUBSCRIBE requests
         log.info(u'add_session_to_room for Room %s - session %s' % (room_number, session.remote_identity.uri))
@@ -1561,10 +1574,15 @@ class PSAPApplication(SylkApplication):
         NotificationCenter().add_observer(self, sender=session)
         room = self.get_room(room_number)
         log.info(u'Room %s - call room.start' % (room_number))
+        '''
         if not sdp_passthrough:
             room.start()
             log.info(u'Room %s - call room.add_session' % (room_number))
             room.add_session(session)
+        '''
+        room.start()
+        log.info(u'Room %s - call room.add_session' % (room_number))
+        room.add_session(session)
         log.info(u'Room %s - outgoing session to %s returning' % (room_number, session.remote_identity.uri))
         # new code
         room_data = self.get_room_data(room_number)
@@ -2033,10 +2051,13 @@ class PSAPApplication(SylkApplication):
 
         # for msrp chat we do not do this
         room_data = self.get_room_data(session.room_number)
+        '''
         sdp_passthrough = False
         if session != None and hasattr(session, 'is_sdp_passthrough') and session.is_sdp_passthrough:
             sdp_passthrough = True
         self.add_session_to_room(session.room_number, session, sdp_passthrough)
+        '''
+        self.add_session_to_room(session.room_number, session)
         send_call_active_notification(self, session)
 
         '''
@@ -2203,6 +2224,7 @@ class PSAPApplication(SylkApplication):
         session = notification.sender
         notification.center.remove_observer(self, sender=session)
 
+        '''
         room_data = self.get_room_data(session.room_number)
 
         incoming_session = None
@@ -2221,6 +2243,8 @@ class PSAPApplication(SylkApplication):
                                                                         status='closed'))
         else:
             self.remove_session_from_room(session.room_number, session)
+        '''
+        self.remove_session_from_room(session.room_number, session)
         send_call_update_notification(self, session, 'closed')
         '''
         room_number = session.room_number
@@ -2710,10 +2734,12 @@ class OutgoingCallInitializer(object):
         for stream_type in active_media:
             self.streams.append(MediaStreamRegistry.get(stream_type)())
         '''
-        incoming_session = room_data.incoming_session
+        '''
+        incomi'ng_session = room_data.incoming_session
         sdp_val = None
         if incoming_session != None and hasattr(incoming_session, 'is_sdp_passthrough') and incoming_session.is_sdp_passthrough:
             sdp_val = incoming_session.remote_sdp
+        '''
         if self.has_audio:
             self.streams.append(MediaStreamRegistry.AudioStream())
         if self.has_video:
@@ -2741,8 +2767,10 @@ class OutgoingCallInitializer(object):
         extra_headers.append(Header('X-Originator-From', str(self.caller_identity)))
         extra_headers.append(SubjectHeader(u'Join conference request from %s' % str(self.caller_identity)))
         route = notification.data.result[0]
+        #self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, \
+        #                     extra_headers=extra_headers, sdp_val=sdp_val)
         self.session.connect(from_header, to_header, route=route, streams=self.streams, is_focus=True, \
-                             extra_headers=extra_headers, sdp_val=sdp_val)
+                             extra_headers=extra_headers)
 
     def _NH_SIPSessionNewOutgoing(self, notification):
         log.info('OutgoingCallInitializer got _NH_SIPSessionNewOutgoing')

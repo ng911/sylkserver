@@ -497,11 +497,11 @@ class Session(object):
         notification_center.add_observer(self, sender=invitation)
         notification_center.post_notification('SIPSessionNewIncoming', self, NotificationData(streams=self.proposed_streams, headers=data.headers))
 
+    #def connect(self, from_header, to_header, route, streams, is_focus=False, contact_header=None, extra_headers=None, \
+    #            sdp_val=None):
     @transition_state(None, 'connecting')
     @run_in_green_thread
-    def connect(self, from_header, to_header, route, streams, is_focus=False, contact_header=None, extra_headers=None, \
-                sdp_val=None):
-        log.info("inside session connect sdp_val is %r", sdp_val)
+    def connect(self, from_header, to_header, route, streams, is_focus=False, contact_header=None, extra_headers=None):
         #is_sdp_passthrough = False
         #if sdp_val != None:
         #    is_sdp_passthrough = True
@@ -557,6 +557,7 @@ class Session(object):
             else:
                 local_ip = contact_header.uri.host
             connection = SDPConnection(local_ip)
+            '''
             if sdp_val == None:
                 local_sdp = SDPSession(local_ip, name=settings.user_agent)
                 for index, stream in enumerate(self.proposed_streams):
@@ -568,6 +569,16 @@ class Session(object):
                 sdp_val = local_sdp
             else:
                 sdp_val = SDPSession.new(sdp_val)
+            '''
+            local_sdp = SDPSession(local_ip, name=settings.user_agent)
+            for index, stream in enumerate(self.proposed_streams):
+                stream.index = index
+                media = stream.get_local_media(remote_sdp=None, index=index)
+                if media.connection is None or (
+                        media.connection is not None and not media.has_ice_attributes and not media.has_ice_candidates):
+                    media.connection = connection
+                local_sdp.media.append(media)
+            sdp_val = local_sdp
             route_header = RouteHeader(self.route.uri)
             if is_focus:
                 contact_header.parameters['isfocus'] = None
@@ -765,10 +776,11 @@ class Session(object):
         except SIPCoreInvalidStateError:
             pass  # The INVITE session might have already been cancelled; ignore the error
 
+    #def accept(self, streams, is_focus=False, extra_headers=None, sdp_val=None):
+
     @transition_state('incoming', 'accepting')
     @run_in_green_thread
-    def accept(self, streams, is_focus=False, extra_headers=None, sdp_val=None):
-        log.info("inside session accept sdp_val is %r", sdp_val)
+    def accept(self, streams, is_focus=False, extra_headers=None):
         #is_sdp_passthrough = False
         #if sdp_val != None:
         #    self.is_sdp_passthrough = True
@@ -786,6 +798,7 @@ class Session(object):
             raise RuntimeError('invalid header in extra_headers: To, From, Via, Contact, Route and Record-Route headers are not allowed')
 
         wait_count = 0
+        '''
         if sdp_val == None:
             for stream in self.proposed_streams:
                 if stream in streams:
@@ -794,6 +807,14 @@ class Session(object):
             self.proposed_streams = streams
 
             wait_count = len(self.proposed_streams)
+        '''
+        for stream in self.proposed_streams:
+            if stream in streams:
+                notification_center.add_observer(self, sender=stream)
+                stream.initialize(self, direction='incoming')
+        self.proposed_streams = streams
+
+        wait_count = len(self.proposed_streams)
 
         try:
             while wait_count > 0:
@@ -817,6 +838,7 @@ class Session(object):
                 self._fail(originator='local', code=500, reason=sip_status_messages[500], error='could not get local IP address')
                 return
             connection = SDPConnection(local_ip)
+            '''
             if sdp_val == None:
                 local_sdp = SDPSession(local_ip, name=settings.user_agent)
                 stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
@@ -836,6 +858,23 @@ class Session(object):
                 sdp_val = local_sdp
             else:
                 sdp_val = SDPSession.new(sdp_val)
+            '''
+            local_sdp = SDPSession(local_ip, name=settings.user_agent)
+            stream_map = dict((stream.index, stream) for stream in self.proposed_streams)
+            for index, media in enumerate(remote_sdp.media):
+                stream = stream_map.get(index, None)
+                if stream is not None:
+                    media = stream.get_local_media(remote_sdp=remote_sdp, index=index)
+                    if not media.has_ice_attributes and not media.has_ice_candidates:
+                        media.connection = connection
+                else:
+                    media = SDPMediaStream.new(media)
+                    media.connection = connection
+                    media.port = 0
+                    media.attributes = []
+                    media.bandwidth_info = []
+                local_sdp.media.append(media)
+            sdp_val = local_sdp
             contact_header = ContactHeader.new(self._invitation.local_contact_header)
             try:
                 local_contact_uri = self.account.contact[self._invitation.transport]
