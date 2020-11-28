@@ -466,12 +466,13 @@ class PSAPApplication(SylkApplication):
                     proxy_domain = route_header.body
                     log.info("proxy_domain is %r", proxy_domain)
                     #domain_prefix = get_domain_prefix_from_proxy_domain(proxy_domain)
-                    domain_prefix = 'la'
+                    domain_prefix = 'la.emergentpsap.com'
                     if domain_prefix != None:
                         log.info("domain_prefix is %r", domain_prefix)
                         psap_id = get_psap_from_domain_prefix(domain_prefix)
                         # todo - this is just for temp testing, remove later
-                        calltaker_server = get_calltaker_reg_server(domain_prefix)
+                        #calltaker_server = get_calltaker_reg_server(domain_prefix)
+                        calltaker_server = "reg.la.emergentpsap.com"
                         #calltaker_server = "kamailio-reg.supportgenie.io"
                         log.info("psap_id is %r, calltaker_server is %r", psap_id, calltaker_server)
                     else:
