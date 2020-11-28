@@ -255,7 +255,7 @@ class Room(object):
         self.audio_conference = AudioConference()
         self.audio_conference.hold()
 
-        self.video_conference = VideoBridge(SIPApplication.video_mixer)
+        #self.video_conference = VideoBridge(SIPApplication.video_mixer)
 
         #self.recorder = WaveRecorder(SIPApplication.voice_audio_mixer, "recordings/%s.wav" % self.room_number)
         #self.recorder.start()
