@@ -2747,6 +2747,10 @@ class OutgoingCallInitializer(object):
         if self.has_chat:
             self.streams.append(MediaStreamRegistry.ChatStream())
 
+        for stream in self.streams:
+            if hasattr(stream, "local_media_label"):
+                log.info("found local_media_label %r for stream %r", stream.local_media_label, stream)
+
         self.session = Session(account)
         self.session.room_number = self.room_number
         self.session.is_primary = False
