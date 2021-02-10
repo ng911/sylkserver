@@ -12,7 +12,7 @@ def post_save(sender, document, **kwargs):
         log.info("importing publish_relay_node_update from asyncio")
         from ...wamp_asyncio import publish_relay_node_update, publish_relay_node_add
     else:
-        log.info("importing publish_relay_node_update from twisted")
+        #log.info("importing publish_relay_node_update from twisted")
         from ...wamp import publish_relay_node_update, publish_relay_node_add
     try:
         #log.info("inside graphql_node_notifications post_save ")
@@ -23,23 +23,23 @@ def post_save(sender, document, **kwargs):
         #log.info("inside graphql_node_notifications psap_id %r, id %r, node_name %s", document.psap_id, document.id,
         #         schema_name)
         if 'created' in kwargs and kwargs['created']:
-            log.info("call publish_relay_node_add")
+            #log.info("call publish_relay_node_add")
             if USE_ASYNCIO:
                 loop = asyncio.get_running_loop()
                 asyncio.ensure_future(publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name),
                                       loop=loop)
             else:
                 publish_relay_node_add(document.to_json(), document.psap_id, document.id, schema_name)
-            log.info("call publish_relay_node_add done")
+            #log.info("call publish_relay_node_add done")
         else:
-            log.info("call publish_relay_node_update")
+            #log.info("call publish_relay_node_update")
             if USE_ASYNCIO:
                 loop = asyncio.get_running_loop()
                 asyncio.ensure_future(publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name),
                                       loop=loop)
             else:
                 publish_relay_node_update(document.to_json(), document.psap_id, document.id, schema_name)
-            log.info("call publish_relay_node_update done")
+            #log.info("call publish_relay_node_update done")
     except Exception as e:
         stacktrace = traceback.format_exc()
         log.error(stacktrace)
